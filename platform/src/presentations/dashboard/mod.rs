@@ -45,7 +45,7 @@ pub struct DashboardListTypeProps {
 
 #[component]
 pub fn DashboardPage(props: DashboardPageProps) -> Element {
-    let mut ctrl = controller::Controller::init();
+    let mut ctrl = controller::Controller::init(props.lang);
     let translates = i18n::translate(props.lang.clone());
 
     rsx! {
@@ -90,16 +90,14 @@ pub fn DashboardPage(props: DashboardPageProps) -> Element {
                         }
                     }
                 }
-                Link {
-                    to: Route::WriteTitlePage {
-                        lang: props.lang.clone(),
+                div {
+                    class: "flex flex-row w-[200px] h-[50px] justify-end items-end bg-[#2168c3] rounded-[8px]",
+                    onclick: move |_| async move {
+                        ctrl.clicked_create_survey(props.lang.clone()).await;
                     },
                     div {
-                        class: "flex flex-row w-[200px] h-[50px] justify-end items-end bg-[#2168c3] rounded-[8px]",
-                        div {
-                            class: "flex flex-row w-full h-full justify-center items-center text-[21px] font-semibold text-white",
-                            "{translates.create_survey}"
-                        }
+                        class: "flex flex-row w-full h-full justify-center items-center text-[21px] font-semibold text-white",
+                        "{translates.create_survey}"
                     }
                 }
             }

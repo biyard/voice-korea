@@ -1,7 +1,10 @@
 #![allow(non_snake_case)]
 use dioxus::prelude::*;
 
-use crate::api::v1::users::login::{login_user, LoginUserRequest};
+use crate::{
+    api::v1::users::login::{login_user, LoginUserRequest},
+    service::login_service::use_login_service,
+};
 
 use super::{Language, Route};
 
@@ -67,6 +70,7 @@ impl Controller {
 
         match res {
             Ok(_) => {
+                use_login_service().setup(self.get_email());
                 navigator.push(Route::DashboardPage { lang });
             }
             Err(e) => match e {

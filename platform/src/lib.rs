@@ -23,6 +23,10 @@ pub mod presentations {
     pub mod write_title;
 }
 
+pub mod service {
+    pub mod login_service;
+}
+
 pub mod models {
     pub mod question;
     pub mod survey;

@@ -87,6 +87,7 @@ pub fn QuestionList(props: QuestionProps) -> Element {
                 Link {
                     to: Route::WriteTitlePage {
                         lang: props.lang.clone(),
+                        id: "test".to_string(), //FIXME: fix to real id
                     },
                     div {
                         class: "flex flex-row justify-center items-center w-[115px] h-[50px] rounded-[10px] bg-[#434343] text-white font-medium text-[20px] mr-[20px]",

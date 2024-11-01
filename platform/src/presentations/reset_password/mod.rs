@@ -35,6 +35,7 @@ pub struct EmailAuthenticationi18nProps {
 
     incollect_email_form: String,
     not_matched_authentication: String,
+    not_exists_email: String,
 }
 
 #[derive(PartialEq, Props, Clone)]
@@ -109,6 +110,7 @@ pub fn ResetPasswordPage(props: ResetPasswordPageProps) -> Element {
 
                         incollect_email_form: translates.incollect_email_form,
                         not_matched_authentication: translates.not_matched_authentication,
+                        not_exists_email: "이메일이 존재하지 않습니다.".to_string(),
                     }
                 }
             }
@@ -318,7 +320,7 @@ pub fn EmailAuthentication(props: EmailAuthenticationProps) -> Element {
                     Row {
                         enable_bottom_border: false,
                         label: props.i18n.email_address_label,
-                        height: if ctrl.get_email_address_error() {
+                        height: if ctrl.get_email_address_error() || ctrl.get_not_exists_email_error() {
                             100 as u64
                         } else {
                             70 as u64
@@ -333,7 +335,7 @@ pub fn EmailAuthentication(props: EmailAuthenticationProps) -> Element {
                                         onchange: move |e| {
                                             ctrl.set_email(e);
                                         },
-                                        border: if ctrl.get_email_address_error() {
+                                        border: if ctrl.get_email_address_error() || ctrl.get_not_exists_email_error() {
                                             "border-[#ff0000]"
                                         } else {
                                             "border-[#E0E0E0]"
@@ -343,6 +345,11 @@ pub fn EmailAuthentication(props: EmailAuthenticationProps) -> Element {
                                         div {
                                             class: "mt-[10px] font-normal text-[#ff0000] text-[12px]",
                                             {props.i18n.incollect_email_form},
+                                        }
+                                    } else if ctrl.get_not_exists_email_error() {
+                                        div {
+                                            class: "mt-[10px] font-normal text-[#ff0000] text-[12px]",
+                                            {props.i18n.not_exists_email},
                                         }
                                     }
                                 },

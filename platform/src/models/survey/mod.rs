@@ -4,6 +4,11 @@ use dioxus::prelude::*;
 
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct SurveySequenceModel {
+    pub id: String,
+    pub sequence: i64,
+}
 #[derive(Debug, Clone, PartialEq, Props, Serialize, Deserialize, Default)]
 pub struct Survey {
     pub title: String,
@@ -32,6 +37,30 @@ pub enum SurveyQuestionType {
     Subjective,
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+pub enum QuestionSequence {
+    #[default]
+    #[serde(rename = "title")]
+    Title,
+    #[serde(rename = "add_question")]
+    AddQuestion,
+    #[serde(rename = "select_response")]
+    SelectResponse,
+    #[serde(rename = "summary")]
+    Summary,
+}
+
+impl fmt::Display for QuestionSequence {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            QuestionSequence::Title => write!(f, "title"),
+            QuestionSequence::AddQuestion => write!(f, "add_question"),
+            QuestionSequence::SelectResponse => write!(f, "select_response"),
+            QuestionSequence::Summary => write!(f, "summary"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Props, Serialize, Deserialize)]
 pub struct TotalSurveySummaries {
     pub surveys: Vec<SurveySummary>,
@@ -43,18 +72,15 @@ pub struct SurveySummary {
     pub status: SurveyStatus,
     pub title: String,
     pub updated_at: u64,
+    pub created_at: u64,
     pub questions: u64,
     pub responses: Option<u64>,
     pub expected_responses: Option<u64>,
     pub quotas: Option<Vec<Quota>>,
-    #[serde(skip)]
     pub r#type: String,
-
     // list surveys by account
-    #[serde(skip)]
     pub gsi1: String,
     // list surveys by status
-    #[serde(skip)]
     pub gsi2: String,
 }
 

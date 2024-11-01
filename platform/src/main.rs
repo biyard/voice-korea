@@ -4,7 +4,9 @@ use dioxus_logger::tracing::{self, Level};
 
 use dioxus::prelude::*;
 
-use platform::{routes::Route, utils::context::use_iitp_context_provider};
+use platform::{
+    routes::Route, service::login_service::LoginService, utils::context::use_iitp_context_provider,
+};
 
 fn main() {
     dioxus_logger::init(match option_env!("LOG_LEVEL") {
@@ -45,6 +47,7 @@ fn main() {
 
 fn App() -> Element {
     use_iitp_context_provider();
+    LoginService::init();
 
     rsx! {
         head {

@@ -20,8 +20,8 @@ pub enum Route {
         #[layout(RootLayout)]
             #[route("/dashboard")]
             DashboardPage { lang: Language },
-            #[route("/write-title")]
-            WriteTitlePage { lang: Language },
+            #[route("/id/:id/write-title")]
+            WriteTitlePage { lang: Language, id: String },
             #[route("/:title/write-question")]
             WriteQuestionPage { lang: Language, title: String },
             #[route("/:title/select-response")]

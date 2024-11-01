@@ -14,11 +14,17 @@ pub struct HeaderProps {
 #[component]
 pub fn Header(props: HeaderProps) -> Element {
     let logo_path = "/images/logo.png";
+    let navigator = use_navigator();
     rsx! {
         div {
             class: "flex flex-row justify-between items-center w-full min-h-[70px] max-h-[70px]",
             div {
                 class: "flex min-h-[70px] justify-center items-center w-[250px]",
+                onclick: move |_| {
+                    navigator.push(Route::DashboardPage {
+                        lang: props.lang,
+                    });
+                },
                 div { class: "mr-[7px]",
                     img {
                         src: "{logo_path}",

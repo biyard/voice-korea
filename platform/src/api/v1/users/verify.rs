@@ -9,7 +9,7 @@ use dioxus::{
 use dioxus_logger::tracing;
 use serde::{Deserialize, Serialize};
 
-use crate::api::common::TypeField;
+use crate::{api::common::TypeField, models::user::User};
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct VerifyEmailRequest {
@@ -28,6 +28,15 @@ pub async fn verify_email(req: VerifyEmailRequest) -> Result<(), ServerFnError> 
 
     let log = crate::utils::logger::new_api("POST", &format!("/v1/users/signup"));
     let cli = crate::utils::db::get(&log);
+
+    let user_model: Option<User> = cli.get(req.email.as_str()).await?;
+
+    match user_model {
+        Some(_user) => {}
+        None => {
+            return Err(ServerFnError::ServerError(format!("Email is not exists")));
+        }
+    };
 
     let auth_key_model: Result<(Option<Vec<AuthKeyModel>>, Option<String>), DynamoException> = cli
         .find(

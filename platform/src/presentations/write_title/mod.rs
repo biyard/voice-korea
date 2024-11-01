@@ -8,6 +8,7 @@ mod i18n;
 #[derive(PartialEq, Props, Clone)]
 pub struct WriteTitleProps {
     lang: Language,
+    id: String,
 }
 
 #[component]

@@ -21,6 +21,7 @@ pub struct Controller {
     new_password_check: Signal<String>,
 
     email_address_error: Signal<bool>,
+    not_exists_email_error: Signal<bool>,
     invalid_authkey_error: Signal<bool>,
     unknown_error: Signal<bool>,
     password_error: Signal<bool>,
@@ -40,6 +41,7 @@ impl Controller {
             new_password: use_signal(|| "".to_string()),
             new_password_check: use_signal(|| "".to_string()),
             email_address_error: use_signal(|| false),
+            not_exists_email_error: use_signal(|| false),
             invalid_authkey_error: use_signal(|| false),
             unknown_error: use_signal(|| false),
             password_error: use_signal(|| false),
@@ -109,6 +111,10 @@ impl Controller {
         (self.password_unknown_error)()
     }
 
+    pub fn get_not_exists_email_error(&self) -> bool {
+        (self.not_exists_email_error)()
+    }
+
     pub fn set_step(&mut self, step: u64) {
         self.step.set(step);
     }
@@ -165,6 +171,8 @@ impl Controller {
                 ServerFnError::ServerError(v) => {
                     if v == "Auth key is not exists" {
                         self.invalid_authkey_error.set(true);
+                    } else if v == "Email is not exists" {
+                        self.not_exists_email_error.set(true);
                     } else {
                         self.unknown_error.set(true);
                     }
