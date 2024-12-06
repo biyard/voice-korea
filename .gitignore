@@ -75,3 +75,10 @@ dist/
 /benchmark/2-testnet-rps/results.jtl
 *.txt
 *.jtl
+
+# platwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
