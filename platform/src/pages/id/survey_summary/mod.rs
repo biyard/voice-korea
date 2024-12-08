@@ -8,7 +8,6 @@ use dioxus_logger::tracing;
 pub struct SurveySummaryProps {
     lang: Language,
     survey_id: String,
-    is_draft: bool,
 }
 
 pub struct QuestionModel {
@@ -26,19 +25,21 @@ use wasm_bindgen::prelude::*;
 #[component]
 pub fn SurveySummaryPage(props: SurveySummaryProps) -> Element {
     let navigator = use_navigator();
-    let mut ctrl =
-        controller::Controller::init(props.lang, props.survey_id.clone(), props.is_draft);
+    let mut ctrl = controller::Controller::init(props.lang, props.survey_id.clone());
     let translates = i18n::translate(props.lang.clone());
-    let survey_status = ctrl.get_survey_status();
-
     let survey_id_copy = props.survey_id.clone();
-
+    let survey = match (ctrl.survey.value())() {
+        Some(v) => v,
+        None => {
+            return rsx! {};
+        }
+    };
     rsx! {
         div {
             class: "flex flex-col w-full h-full justify-start items-center",
             div {
                 class: "flex flex-col max-w-[1200px] min-w-[600px] w-full justify-end items-end mt-[15px] px-[50px]",
-                match survey_status {
+                match survey.status {
                     models::prelude::SurveyStatus::Draft => {
                         rsx! {
                             div {
@@ -78,7 +79,7 @@ pub fn SurveySummaryPage(props: SurveySummaryProps) -> Element {
                     },
                 }
             }
-            if let models::prelude::SurveyStatus::Draft = survey_status {
+            if let models::prelude::SurveyStatus::Draft = survey.status {
                 div {
                     class: "flex flex-col max-w-[1200px] min-w-[600px] w-full justify-start items-start mt-[15px] px-[50px]",
                     div {
@@ -137,7 +138,7 @@ pub fn SurveySummaryPage(props: SurveySummaryProps) -> Element {
                 num_of_detail: translates.num_of_detail,
                 num_of: translates.num_of,
             }
-            if let models::prelude::SurveyStatus::InProgress = survey_status {
+            if let models::prelude::SurveyStatus::InProgress = survey.status {
                 div {
                     class: "flex flex-col max-w-[1200px] min-w-[600px] w-full justify-start items-start mt-[15px] px-[50px]",
                     div {
@@ -155,7 +156,7 @@ pub fn SurveySummaryPage(props: SurveySummaryProps) -> Element {
                         }
                     }
                 }
-            } else if let models::prelude::SurveyStatus::Finished = survey_status {
+            } else if let models::prelude::SurveyStatus::Finished = survey.status {
                 div {
                     class: "flex flex-col max-w-[1200px] min-w-[600px] w-full justify-start items-start mt-[15px] px-[50px]",
                     div {
@@ -193,6 +194,7 @@ pub fn SurveySummaryPage(props: SurveySummaryProps) -> Element {
                                         navigator.push(Route::ResponseReportPage {
                                             lang: props.lang.clone(),
                                             survey_id: survey_id_copy.clone(),
+
                                         });
                                     },
                                     {translates.check_response_report}
@@ -212,7 +214,7 @@ pub fn SurveySummaryPage(props: SurveySummaryProps) -> Element {
                             ctrl.back_button_clicked().await;
                             navigator.push(Route::SelectResponsePage {
                                 lang: props.lang.clone(),
-                                survey_id,
+                                survey_id : survey_id.clone(),
                             });
                         }
                     },

@@ -43,6 +43,7 @@ pub mod utils {
     pub mod hash;
     #[cfg(feature = "server")]
     pub mod logger;
+    pub mod time;
 }
 
 pub mod layouts {

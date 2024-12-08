@@ -45,5 +45,5 @@ pub async fn handler(
         return Err(ApiError::InvalidCredentials(email));
     }
 
-    generate_jwt(&email).map_err(|e| ApiError::JWTGenerationFail(e.to_string()))
+    generate_jwt(&user.id, &user.email).map_err(|e| ApiError::JWTGenerationFail(e.to_string()))
 }

@@ -4,26 +4,30 @@ use std::time::{Duration, UNIX_EPOCH};
 use chrono::{self, DateTime, Local};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
-use models::prelude::{SurveyDraftStatus, UpsertSurveyDraftRequest};
+use models::prelude::{ListSurveyResponse, SurveyDraftStatus, UpsertSurveyDraftRequest};
 
 use crate::api::v2::survey::{list_surveys, upsert_survey_draft};
 
+use models::prelude::Survey;
+
 use super::{Language, Route};
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct Survey {
-    pub survey_id: String,
-    pub draft_id: String,
-    pub survey_sequence: Option<SurveyDraftStatus>,
-    pub survey_type: String,
-    pub title: String,
-    pub update_date: String,
-    pub response_count: u64,
-    pub total_response_count: u64,
-}
+// #[derive(Debug, Clone, PartialEq)]
+// pub struct Survey {
+
+//     pub survey_id: String,
+//     pub draft_id: String,
+//     pub survey_sequence: Option<SurveyDraftStatus>,
+//     pub survey_type: String,
+//     pub title: String,
+//     pub update_at: String,
+//     pub response_count: u64,
+//     pub total_response_count: u64,
+// }
 
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Controller {
+    pub current_bookmark: Signal<Option<String>>,
     pub surveys: Signal<Vec<Survey>>,
     pub clicked_type: Signal<u64>, //0: type-1, 1: type-2
     pub is_error: Signal<bool>,
@@ -32,41 +36,27 @@ pub struct Controller {
 impl Controller {
     pub fn init() -> Self {
         let mut ctrl = Self {
+            current_bookmark: use_signal(|| None),
             surveys: use_signal(|| vec![]),
             clicked_type: use_signal(|| 0),
             is_error: use_signal(|| false),
         };
-
-        let _ = use_effect(move || {
-            spawn(async move {
-                match list_surveys().await {
-                    Ok(res) => {
-                        let surveys = res;
-
-                        let total_surveys: Vec<Survey> = surveys
-                            .into_iter()
-                            .map(|survey| {
-                                let updated_at = survey.updated_at as u64;
-                                Survey {
-                                    survey_id: survey.id.to_string(),
-                                    draft_id: survey.draft_id.unwrap_or("".to_string()),
-                                    survey_sequence: survey.draft_status,
-                                    survey_type: survey.status.to_string(),
-                                    title: survey.title,
-                                    update_date: Self::format_date(updated_at / 1000),
-                                    response_count: 1,        //FIXME: fix to api
-                                    total_response_count: 50, //FIXME: fix to api
-                                }
-                            })
-                            .collect();
-                        ctrl.surveys.set(total_surveys);
-                    }
-                    Err(e) => {
-                        tracing::error!("Error: {:?}", e);
-                    }
-                }
-            });
+        let res = use_resource(|| async move {
+            match list_surveys(Some(100), None).await {
+                Ok(res) => res,
+                _ => ListSurveyResponse {
+                    survey: vec![],
+                    bookmark: None,
+                },
+            }
         });
+        match res.value()() {
+            Some(v) => {
+                ctrl.surveys.set(v.survey.clone());
+                ctrl.current_bookmark.set(v.bookmark);
+            }
+            _ => {}
+        }
 
         ctrl
     }
@@ -101,6 +91,8 @@ impl Controller {
             title: Some("".to_string()),
             quotas: None,
             questions: None,
+            started_at: None,
+            ended_at: None,
         })
         .await;
 

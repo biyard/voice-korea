@@ -7,10 +7,11 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Claims {
-    sub: String, //user id
-    exp: usize,
+    pub id: String, //user id
+    pub email: String,
+    pub exp: usize,
 }
 
 #[allow(dead_code)]
@@ -29,7 +30,7 @@ pub fn validate_jwt(token: &str) -> Result<Claims, JwtError> {
     Ok(token_data.claims)
 }
 
-pub fn generate_jwt(user_id: &str) -> Result<String, JwtError> {
+pub fn generate_jwt(user_id: &str, email: &str) -> Result<String, JwtError> {
     let secret = match option_env!("JWT_SECRET") {
         Some(v) => v,
         _ => {
@@ -46,7 +47,8 @@ pub fn generate_jwt(user_id: &str) -> Result<String, JwtError> {
         + 60 * 60) as usize;
 
     let claims = Claims {
-        sub: user_id.to_string(),
+        id: user_id.to_string(),
+        email: email.to_string(),
         exp: expiration,
     };
 

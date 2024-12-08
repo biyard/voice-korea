@@ -20,6 +20,9 @@ pub enum ApiError {
     #[error("DynamoDB Query Failed. Reason({0})")]
     DynamoQueryException(String),
 
+    #[error("DynamoDB Update Failed. Reason({0})")]
+    DynamoUpdateException(String),
+
     #[error("Wrong User Login info ({0})")]
     InvalidCredentials(String),
 
@@ -44,8 +47,14 @@ pub enum ApiError {
     #[error("JSON serialize Failed")]
     JSONSerdeError(String),
 
-    #[error("Survey Draft ({0}) Not Found ")]
+    #[error("Survey Draft ({0}) Not Found")]
     SurveyNotFound(String),
+
+    #[error("Only draft survey can modified")]
+    SurveyInProgress,
+
+    #[error("survey draft is not completed")]
+    InCompleteDraft,
 }
 
 impl IntoResponse for ApiError {
@@ -55,6 +64,7 @@ impl IntoResponse for ApiError {
             ApiError::ValidationError(_) => StatusCode::BAD_REQUEST,
             ApiError::DynamoCreateException(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::DynamoQueryException(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::DynamoUpdateException(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::InvalidCredentials(_) => StatusCode::UNAUTHORIZED,
             ApiError::JWTGenerationFail(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::SESServiceError(_) => StatusCode::INTERNAL_SERVER_ERROR,
@@ -64,6 +74,8 @@ impl IntoResponse for ApiError {
             ApiError::ReqwestFailed(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::JSONSerdeError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::SurveyNotFound(_) => StatusCode::NOT_FOUND,
+            ApiError::SurveyInProgress => StatusCode::UNPROCESSABLE_ENTITY,
+            ApiError::InCompleteDraft => StatusCode::UNPROCESSABLE_ENTITY,
         };
 
         let error_id = uuid::Uuid::new_v4();

@@ -176,7 +176,6 @@ pub fn SelectResponsePage(props: SelectResponseProps) -> Element {
                                 navigator.push(Route::SurveySummaryPage {
                                     lang: props.lang.clone(),
                                     survey_id: survey_id.clone(),
-                                    is_draft: true,
                                 });
                             }
                         },

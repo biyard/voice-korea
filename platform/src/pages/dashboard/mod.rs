@@ -1,10 +1,9 @@
 #![allow(non_snake_case)]
 use crate::prelude::*;
-use controller::Survey;
 use dashboard_card::DashboardCard;
 use dashboard_row::DashboardRow;
 use dioxus::prelude::*;
-use dioxus_logger::tracing;
+use models::prelude::{Survey, SurveyStatus};
 
 pub mod controller;
 pub mod dashboard_card;
@@ -139,7 +138,7 @@ pub fn DashboardPage(props: DashboardPageProps) -> Element {
 
 #[component]
 pub fn StatusButton(
-    survey_type: String,
+    survey_status: SurveyStatus,
     draft_label: String,
     in_progress_label: String,
     complete_label: String,
@@ -148,12 +147,11 @@ pub fn StatusButton(
     let label_bg_color: String;
     let label_text_color: String;
 
-    tracing::debug!("survey type: {}", survey_type);
-    if survey_type == "draft" {
+    if survey_status == SurveyStatus::Draft {
         survey_type_label = draft_label;
         label_bg_color = "bg-[#e5e5e5]".to_string();
         label_text_color = "text-black".to_string();
-    } else if survey_type == "finished" {
+    } else if survey_status == SurveyStatus::Finished {
         survey_type_label = complete_label;
         label_bg_color = "bg-[#2168c3]".to_string();
         label_text_color = "text-white".to_string();
@@ -179,14 +177,13 @@ pub fn DashboardCardTypes(props: DashboardCardTypeProps) -> Element {
             for survey in surveys.iter() {
                 DashboardCard {
                     lang: props.lang,
-                    draft_id: survey.draft_id.clone(),
-                    survey_id: survey.survey_id.clone(),
-                    survey_sequence: survey.survey_sequence.clone().unwrap_or_default().clone(),
-                    survey_type: survey.survey_type.clone(),
+                    survey_id: survey.id.clone(),
+                    survey_status: survey.status.clone(),
+                    survey_draft_status: survey.draft_status.clone(),
                     title: survey.title.clone(),
-                    update_date: survey.update_date.clone(),
-                    response_count: survey.response_count,
-                    total_response_count: survey.total_response_count,
+                    updated_at: survey.updated_at.clone(),
+                    response_count: survey.response_count.unwrap_or_default(),
+                    total_response_count: survey.total_response_count.unwrap_or_default(),
                     draft_label: props.draft.clone(),
                     in_progress_label: props.in_progress.clone(),
                     complete_label: props.complete.clone(),
@@ -236,14 +233,13 @@ pub fn DashboardListTypes(props: DashboardListTypeProps) -> Element {
                 for survey in surveys.iter() {
                     DashboardRow {
                         lang: props.lang,
-                        survey_id: survey.survey_id.clone(),
-                        draft_id: survey.draft_id.clone(),
-                        survey_sequence: survey.survey_sequence.clone().unwrap_or_default().clone(),
-                        survey_type: survey.survey_type.clone(),
+                        survey_id: survey.id.clone(),
+                        survey_status: survey.status.clone(),
+                        survey_draft_status: survey.draft_status.clone(),
                         title: survey.title.clone(),
-                        update_date: survey.update_date.clone(),
-                        response_count: survey.response_count,
-                        total_response_count: survey.total_response_count,
+                        updated_at: survey.updated_at,
+                        response_count: survey.response_count.unwrap_or_default(),
+                        total_response_count: survey.total_response_count.unwrap_or_default(),
                         draft_label: props.draft.clone(),
                         in_progress_label: props.in_progress.clone(),
                         complete_label: props.complete.clone(),

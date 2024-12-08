@@ -4,7 +4,7 @@ use dioxus_logger::tracing;
 use models::prelude::{Survey, SurveyDraftStatus, UpsertSurveyDraftRequest};
 
 use crate::{
-    api::v2::survey::{get_survey_draft, upsert_survey_draft},
+    api::v2::survey::{get_survey, upsert_survey_draft},
     models::survey::StatusType,
 };
 
@@ -29,7 +29,7 @@ impl Controller {
             let id_value = id.clone();
             spawn(async move {
                 let _ = async move {
-                    match get_survey_draft(id_value).await {
+                    match get_survey(id_value).await {
                         Ok(res) => {
                             tracing::debug!("survey title: {}", res.clone().title.clone());
 
@@ -72,6 +72,8 @@ impl Controller {
                 title: Some(title.clone()),
                 quotas: None,
                 questions: None,
+                started_at: None,
+                ended_at: None,
             })
             .await;
         } else {
@@ -81,6 +83,8 @@ impl Controller {
                 title: Some(title.clone()),
                 quotas: None,
                 questions: None,
+                started_at: None,
+                ended_at: None,
             })
             .await;
         }

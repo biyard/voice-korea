@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-use crate::api::v2::survey::{get_survey_draft, upsert_survey_draft};
+use crate::api::v2::survey::{get_survey, upsert_survey_draft};
 use std::collections::HashMap;
 
 use dioxus::prelude::*;
@@ -78,7 +78,7 @@ impl Controller {
         let survey_response: Resource<models::prelude::Survey> = use_resource(move || {
             let id_value = id.clone();
             async move {
-                let survey = get_survey_draft(id_value).await;
+                let survey = get_survey(id_value).await;
                 survey.unwrap_or_default()
             }
         });
@@ -606,6 +606,8 @@ impl Controller {
             title: None,
             quotas: Some(quotas),
             questions: None,
+            started_at: None,
+            ended_at: None,
         })
         .await;
 

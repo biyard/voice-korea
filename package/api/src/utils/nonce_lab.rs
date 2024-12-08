@@ -30,7 +30,7 @@ impl NonceLabClient {
         })
     }
 
-    pub fn get(&self, endpoint: &str) -> RequestBuilder {
+    pub fn _get(&self, endpoint: &str) -> RequestBuilder {
         self.client
             .get(format!("{}{}", self.base_url.clone(), endpoint))
     }
