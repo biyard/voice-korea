@@ -1,6 +1,6 @@
 [package]
 name = "platform"
-version = "0.1.10"
+version = "0.1.11"
 authors = ["victor138128 <yepp0517@naver.com>"]
 edition = "2021"
 

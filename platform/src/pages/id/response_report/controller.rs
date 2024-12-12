@@ -65,6 +65,34 @@ pub struct Response {
     pub attribute: Vec<String>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct Region {
+    pub label: String,
+    pub value: i32,
+    pub percent: f64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Payload {
+    pub label: String,
+    pub value: i32,
+    pub percent: f64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Age {
+    pub label: String,
+    pub value: i32,
+    pub percent: f64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Gender {
+    pub label: String,
+    pub value: i32,
+    pub percent: f64,
+}
+
 impl Controller {
     #[allow(unused_variables)]
     pub fn init(lang: Language, survey_id: String) -> Self {
@@ -117,6 +145,16 @@ impl Controller {
 
         use_context_provider(|| ctrl);
         ctrl
+    }
+
+    pub fn get_total_response(&self) -> u64 {
+        let survey = self.get_survey_response().clone();
+
+        if survey.is_none() {
+            return 0;
+        }
+
+        survey.unwrap().actual_responses
     }
 
     pub fn get_survey_response(&self) -> Option<SurveyResultDocument> {
@@ -200,8 +238,10 @@ impl Controller {
         }
 
         let questions = survey.clone().unwrap().questions;
+        let mut sorted_questions: Vec<_> = questions.iter().collect();
+        sorted_questions.sort_by(|a, b| a.0.cmp(b.0));
 
-        for (key, value) in questions {
+        for (key, value) in sorted_questions {
             let s = survey.clone().unwrap().clone();
             let survey_response_by_question = s.survey_responses_by_question.get(&key);
             let mut values = vec![];
@@ -227,25 +267,41 @@ impl Controller {
                     }
                 }
 
+                let question_keys = survey_response_by_question
+                    .map(|map| map.keys().cloned().collect::<Vec<_>>())
+                    .unwrap_or_else(Vec::new);
+
                 if total_response == 0 {
-                    values.clear();
-                    value_percent.clear();
+                    let survey_response = survey_response_by_question.unwrap();
+                    for (i, key) in question_keys.clone().iter().enumerate() {
+                        let v = survey_response.get(key).unwrap().clone();
+                        total_response += v;
+
+                        if values.len() > i {
+                            values[i] = v;
+                        } else {
+                            values.push(v);
+                            value_percent.push(0.0);
+                        }
+                    }
                 }
 
-                for (i, value) in values.iter().enumerate() {
+                for (i, v) in values.iter().enumerate() {
                     if total_response == 0 {
-                        value_percent[i] = 0.0;
-                    } else {
-                        value_percent[i] = (*value as f32) / (total_response as f32) * 100.0;
+                        continue;
                     }
 
-                    let ind = i % 5;
-                    let color = default_colors[ind].clone();
-                    colors.push(color);
+                    value_percent[i] = (*v as f32) / (total_response as f32) * 100.0;
+
+                    if !value.options.clone().is_none() {
+                        let ind = i % 5;
+                        let color = default_colors[ind].clone();
+                        colors.push(color);
+                    }
                 }
 
                 surveys.push(Surveys {
-                    title: value.title,
+                    title: value.title.clone(),
                     answer: if survey_response_by_question.is_some() {
                         if total_response == 0 {
                             survey_response_by_question.unwrap().keys().len() as u64
@@ -257,11 +313,9 @@ impl Controller {
                     },
                     skipped_answer: 0,
                     labels: if !value.options.clone().is_none() {
-                        value.options.unwrap()
+                        value.options.clone().unwrap()
                     } else {
-                        survey_response_by_question
-                            .map(|map| map.keys().cloned().collect::<Vec<_>>()) // Some인 경우 키를 벡터로 수집
-                            .unwrap_or_else(Vec::new)
+                        question_keys
                     },
                     value_percents: value_percent,
                     colors,
@@ -269,11 +323,11 @@ impl Controller {
                 });
             } else {
                 surveys.push(Surveys {
-                    title: value.title,
+                    title: value.title.clone(),
                     answer: 0,
                     skipped_answer: 0,
                     labels: if !value.options.clone().is_none() {
-                        value.options.unwrap()
+                        value.options.clone().unwrap()
                     } else {
                         vec![]
                     },
@@ -288,93 +342,243 @@ impl Controller {
     }
 
     pub fn get_attributes_chart(&self) -> Vec<Attributes> {
-        vec![
-            Attributes {
+        let mut salary_to_index_map = HashMap::new();
+        let mut salary_index = 0;
+        let mut total_payload = 0;
+        let mut payload_data = vec![];
+
+        let mut age_to_index_map = HashMap::new();
+        let mut age_index = 0;
+        let mut total_age = 0;
+        let mut age_data = vec![];
+
+        let mut region_to_index_map = HashMap::new();
+        let mut region_index = 0;
+        let mut total_region = 0;
+        let mut region_data = vec![];
+
+        let mut gender_to_index_map = HashMap::new();
+        let mut gender_index = 0;
+        let mut total_gender = 0;
+        let mut gender_data = vec![];
+
+        let colors = vec![
+            "#4285f4", "#db4437", "#f4b400", "#0F9D58", "#AB47BC", "#E67E22", "#27AE60", "#3498DB",
+            "#8E44AD", "#F39C12", "#2ECC71", "#1ABC9C", "#C0392B", "#2980B9", "#D35400", "#16A085",
+            "#34495E",
+        ];
+
+        let survey = self.get_survey_response().clone();
+
+        if survey.is_none() {
+            return vec![];
+        }
+
+        let answers = survey.clone().unwrap().answers;
+        let quotas = survey.unwrap().quotas;
+
+        for answer in answers {
+            let quote_id = answer.quota_id;
+            let quota: models::prelude::Quota = quotas
+                .get(&quote_id)
+                .unwrap_or(&models::prelude::Quota {
+                    attribute: None,
+                    panel: None,
+                    quota: 0,
+                })
+                .clone();
+            let attribute = quota.attribute;
+
+            match attribute {
+                Some(attr) => {
+                    let sal = self.get_salary(attr.salary_tier);
+
+                    if sal != "-" {
+                        if salary_to_index_map.get(&sal).is_none() {
+                            salary_to_index_map.insert(sal.clone(), salary_index);
+                            salary_index += 1;
+                        }
+
+                        let ind = salary_to_index_map.get(&sal).unwrap();
+
+                        if *ind >= payload_data.len() {
+                            payload_data.push(Payload {
+                                label: sal.clone(),
+                                value: 0,
+                                percent: 0.0,
+                            });
+                        }
+
+                        let payload = payload_data.get(*ind as usize).unwrap();
+                        let payload_value = payload.value + 1;
+                        payload_data[*ind as usize] = Payload {
+                            value: payload_value,
+                            ..payload.clone()
+                        };
+                        total_payload += 1;
+                    }
+
+                    let age = self.get_age(attr.age);
+
+                    if age != "-" {
+                        if age_to_index_map.get(&age).is_none() {
+                            age_to_index_map.insert(age.clone(), age_index);
+                            age_index += 1;
+                        }
+
+                        let ind = age_to_index_map.get(&age).unwrap();
+
+                        if *ind >= age_data.len() {
+                            age_data.push(Age {
+                                label: age.clone(),
+                                value: 0,
+                                percent: 0.0,
+                            });
+                        }
+
+                        let age = age_data.get(*ind as usize).unwrap();
+                        let age_value = age.value + 1;
+                        age_data[*ind as usize] = Age {
+                            value: age_value,
+                            ..age.clone()
+                        };
+                        total_age += 1;
+                    }
+
+                    let region = self.get_region(attr.region_code);
+
+                    if region != "-" {
+                        if region_to_index_map.get(&region).is_none() {
+                            region_to_index_map.insert(region.clone(), region_index);
+                            region_index += 1;
+                        }
+
+                        let ind = region_to_index_map.get(&region).unwrap();
+
+                        if *ind >= region_data.len() {
+                            region_data.push(Region {
+                                label: region.clone(),
+                                value: 0,
+                                percent: 0.0,
+                            });
+                        }
+
+                        let region = region_data.get(*ind as usize).unwrap();
+                        let region_value = region.value + 1;
+                        region_data[*ind as usize] = Region {
+                            value: region_value,
+                            ..region.clone()
+                        };
+                        total_region += 1;
+                    }
+
+                    let gender = self.get_gender(attr.gender);
+
+                    if gender != "-" {
+                        if gender_to_index_map.get(&gender).is_none() {
+                            gender_to_index_map.insert(gender.clone(), gender_index);
+                            gender_index += 1;
+                        }
+
+                        let ind = gender_to_index_map.get(&gender).unwrap();
+
+                        if *ind >= gender_data.len() {
+                            gender_data.push(Gender {
+                                label: gender.clone(),
+                                value: 0,
+                                percent: 0.0,
+                            });
+                        }
+
+                        let gender = gender_data.get(*ind as usize).unwrap();
+                        let gender_value = gender.value + 1;
+                        gender_data[*ind as usize] = Gender {
+                            value: gender_value,
+                            ..gender.clone()
+                        };
+                        total_gender += 1;
+                    }
+                }
+                None => {}
+            }
+        }
+
+        let mut payload_pi_chart = vec![];
+        let mut age_pi_chart = vec![];
+        let mut region_pi_chart = vec![];
+        let mut gender_pi_chart = vec![];
+
+        if total_payload != 0 {
+            for (i, payload) in payload_data.iter().enumerate() {
+                payload_pi_chart.push(PiChart {
+                    label: payload.label.clone(),
+                    percentage: ((payload.value as f64) / (total_payload as f64)),
+                    color: colors.get(i).unwrap(),
+                });
+            }
+        }
+
+        if total_age != 0 {
+            for (i, age) in age_data.iter().enumerate() {
+                age_pi_chart.push(PiChart {
+                    label: age.label.clone(),
+                    percentage: ((age.value as f64) / (total_age as f64)),
+                    color: colors.get(i).unwrap(),
+                });
+            }
+        }
+
+        if total_region != 0 {
+            for (i, region) in region_data.iter().enumerate() {
+                region_pi_chart.push(PiChart {
+                    label: region.label.clone(),
+                    percentage: ((region.value as f64) / (total_region as f64)),
+                    color: colors.get(i).unwrap(),
+                });
+            }
+        }
+
+        if total_gender != 0 {
+            for (i, gender) in gender_data.iter().enumerate() {
+                gender_pi_chart.push(PiChart {
+                    label: gender.label.clone(),
+                    percentage: ((gender.value as f64) / (total_gender as f64)),
+                    color: colors.get(i).unwrap(),
+                });
+            }
+        }
+
+        let mut attributes = vec![];
+
+        if total_payload != 0 {
+            attributes.push(Attributes {
                 label: "연봉".to_string(),
-                chart_datas: vec![
-                    PiChart {
-                        label: "2400만원 이하",
-                        percentage: 0.4,
-                        color: "#5778a3",
-                    },
-                    PiChart {
-                        label: "2400만원~5000만원",
-                        percentage: 0.2,
-                        color: "#a8c9e5",
-                    },
-                    PiChart {
-                        label: "5000만원~8000만원",
-                        percentage: 0.1,
-                        color: "#e49343",
-                    },
-                    PiChart {
-                        label: "8000만원~10000만원",
-                        percentage: 0.1,
-                        color: "#f5c086",
-                    },
-                    PiChart {
-                        label: "10000만원 이상",
-                        percentage: 0.2,
-                        color: "#6b9f59",
-                    },
-                ],
-            },
-            Attributes {
+                chart_datas: payload_pi_chart,
+            });
+        }
+
+        if total_gender != 0 {
+            attributes.push(Attributes {
                 label: "성별".to_string(),
-                chart_datas: vec![
-                    PiChart {
-                        label: "남성",
-                        percentage: 0.8,
-                        color: "#5778a3",
-                    },
-                    PiChart {
-                        label: "여성",
-                        percentage: 0.2,
-                        color: "#a8c9e5",
-                    },
-                ],
-            },
-            Attributes {
+                chart_datas: gender_pi_chart,
+            });
+        }
+
+        if total_region != 0 {
+            attributes.push(Attributes {
                 label: "지역".to_string(),
-                chart_datas: vec![
-                    PiChart {
-                        label: "서울",
-                        percentage: 0.6,
-                        color: "#5778a3",
-                    },
-                    PiChart {
-                        label: "부산",
-                        percentage: 0.2,
-                        color: "#a8c9e5",
-                    },
-                    PiChart {
-                        label: "대구",
-                        percentage: 0.2,
-                        color: "#e49343",
-                    },
-                ],
-            },
-            Attributes {
+                chart_datas: region_pi_chart,
+            });
+        }
+
+        if total_age != 0 {
+            attributes.push(Attributes {
                 label: "연령".to_string(),
-                chart_datas: vec![
-                    PiChart {
-                        label: "18~29세",
-                        percentage: 0.6,
-                        color: "#5778a3",
-                    },
-                    PiChart {
-                        label: "30대",
-                        percentage: 0.1,
-                        color: "#a8c9e5",
-                    },
-                    PiChart {
-                        label: "40대",
-                        percentage: 0.3,
-                        color: "#e49343",
-                    },
-                ],
-            },
-        ]
+                chart_datas: age_pi_chart,
+            })
+        }
+
+        attributes
     }
 
     pub fn get_attributes(&self) -> Vec<Attributes> {

@@ -52,8 +52,7 @@ pub fn ResponseSummary(props: ResponseSummaryProps) -> Element {
                     class: "flex flex-wrap gap-5 justify-start items-start px-[10px]",
                     SummaryInfo {
                         label: props.total_number_of_responses,
-                        //FIXME: fix to real api logic
-                        value: "10".to_string()
+                        value: ctrl.get_total_response()
                     }
                     SummaryInfo {
                         label: props.completion_rate,
@@ -63,7 +62,7 @@ pub fn ResponseSummary(props: ResponseSummaryProps) -> Element {
                     SummaryInfo {
                         label: props.normal_time_required,
                         //FIXME: fix to real api logic
-                        value: "11s".to_string()
+                        value: "-".to_string()
                     }
                     SummaryInfo {
                         label: props.most_skipped_questions,
@@ -156,7 +155,7 @@ pub fn ResponseSummary(props: ResponseSummaryProps) -> Element {
                                         div {
                                             class: "flex flex-row w-full h-[40px] justify-start items-center bg-white border border-b-[#e2e3e4] border-t-transparent border-r-transparent border-l-transparent",
                                             div {
-                                                class: "flex flex-row w-[350px] h-full justify-start items-center px-[10px]",
+                                                class: "flex flex-row w-[350px] h-full justify-start items-center px-[10px] overflow-hidden truncate",
                                                 {label.clone()}
                                             }
                                             div {
@@ -172,18 +171,28 @@ pub fn ResponseSummary(props: ResponseSummaryProps) -> Element {
                                     }
                                 } else {
                                     div {
-                                        class: "flex flex-row w-full h-[40px] justify-start items-center bg-[#edeeee] px-[10px]",
+                                        class: "flex flex-row w-full h-[40px] justify-start items-center bg-[#edeeee]",
                                         div {
-                                            class: "flex flex-row w-[700px] h-full justify-start items-center",
+                                            class: "flex flex-row w-[350px] h-full justify-start items-center border border-white px-[10px]",
                                             "{props.reply}"
                                         }
+                                        div {
+                                            class: "flex flex-row w-[350px] h-full justify-start items-center border border-white px-[10px]",
+                                            "갯수"
+                                        }
                                     }
-                                    for label in survey.labels.clone() {
+                                    for (i, label) in survey.labels.iter().enumerate() {
                                         div {
                                             class: "flex flex-row w-full h-[40px] justify-start items-center bg-white border border-b-[#e2e3e4] border-t-transparent border-r-transparent border-l-transparent",
                                             div {
-                                                class: "flex flex-row w-[700px] h-full justify-start items-center px-[10px] overflow-hidden truncate",
-                                                "{label}"
+                                                class: "flex flex-row w-[350px] h-full justify-start items-center px-[10px] overflow-hidden truncate",
+                                                {label.clone()}
+                                            }
+                                            div {
+                                                class: "flex flex-row w-[350px] h-full justify-between items-center px-[10px]",
+                                                div {
+                                                    "{survey.value_counts[i]}"
+                                                }
                                             }
                                         }
                                     }

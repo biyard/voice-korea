@@ -11,7 +11,8 @@ pub struct BarGraphProps {
 pub fn BarGraph(props: BarGraphProps) -> Element {
     let bar_height = 30.0;
     let gap = 15.0;
-
+    let colors = props.colors.clone();
+    let height = (bar_height as usize) * colors.len() + (gap as usize) * (colors.len() - 1);
     rsx! {
         div {
             class: "bar-graph-container",
@@ -19,14 +20,14 @@ pub fn BarGraph(props: BarGraphProps) -> Element {
             svg {
                 xmlns: "http://www.w3.org/2000/svg",
                 width: "700",
-                height: "400",
-                view_box: "-100 0 700 300",
+                height: "{height + 50}",
+                view_box: "-100 0 700 {height + 50}",
                 g {
                     line {
                         x1: "0",
-                        y1: "220",
+                        y1: "{height}",
                         x2: "500",
-                        y2: "220",
+                        y2: "{height}",
                         stroke: "#d8d8d8",
                         stroke_width: "2",
                     }
@@ -34,7 +35,7 @@ pub fn BarGraph(props: BarGraphProps) -> Element {
                         x1: "0",
                         y1: "0",
                         x2: "0",
-                        y2: "220",
+                        y2: "{height}",
                         stroke: "#d8d8d8",
                         stroke_width: "2",
                     }
@@ -44,13 +45,13 @@ pub fn BarGraph(props: BarGraphProps) -> Element {
                             x1: "{i as f32 * 50.0}",
                             y1: "0",
                             x2: "{i as f32 * 50.0}",
-                            y2: "220",
+                            y2: "{height}",
                             stroke: "#d8d8d8",
                             stroke_width: "1",
                         }
                         text {
                             x: "{i as f32 * 50.0}",
-                            y: "250",
+                            y: "{height + 30}",
                             text_anchor: "middle",
                             font_size: "12",
                             fill: "black",
