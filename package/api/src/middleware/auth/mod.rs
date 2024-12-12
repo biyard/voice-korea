@@ -50,3 +50,18 @@ pub async fn authorization_middleware(
     req.extensions_mut().insert(token_data);
     Ok(next.run(req).await)
 }
+
+pub async fn admin_authorization_middleware(
+    req: Request,
+    next: Next,
+) -> Result<Response<Body>, ApiError> {
+    let server_key = req.headers().get("SERVER-KEY");
+
+    if let Some(api_key) = server_key {
+        if api_key == &option_env!("INTERNAL_SERVER_KEY").unwrap_or("server-key") {
+            return Ok(next.run(req).await);
+        }
+    }
+
+    Err(ApiError::ForbiddenAccessError)
+}

@@ -5,8 +5,11 @@ use reqwest::{
 };
 
 use crate::utils::error::ApiError;
+pub mod models;
 
-use super::local_models::{
+use models as nonce_lab_models;
+
+use nonce_lab_models::{
     NonceLabCreateSurveyRequest, NonceLabCreateSurveyResponse, NonceLabGetSurveyDto,
     NonceLabSurveyResultResponse,
 };

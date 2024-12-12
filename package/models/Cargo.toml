@@ -6,5 +6,5 @@ description.workspace = true
 edition.workspace = true
 
 [dependencies]
-chrono = "0.4.38"
-serde = "1.0.215"
+chrono.workspace = true
+serde = { workspace = true, features = ["derive"] }

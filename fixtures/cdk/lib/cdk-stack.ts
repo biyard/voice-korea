@@ -48,6 +48,7 @@ export class CdkStack extends cdk.Stack {
     ];
     let enableDyanmo = process.env.ENABLE_DYNAMO === "true";
     let enableS3 = process.env.ENABLE_S3 === "true";
+    let enableCron = process.env.ENABLE_CRON === "true";
 
     const certificate = acm.Certificate.fromCertificateArn(
       this,
@@ -112,7 +113,13 @@ export class CdkStack extends cdk.Stack {
       domainNames: [domain],
       certificate,
     };
+    if (enableCron) {
+      const rule = new events.Rule(this, "VoiceKoreaWatcherRule", {
+        schedule: events.Schedule.expression("cron(0 15 * * ? *)"), //KST 00:00
+      });
 
+      rule.addTarget(new event_targets.LambdaFunction(func));
+    }
     if (enableS3) {
       const assetsBucket = new s3.Bucket(this, "Bucket", {
         bucketName: domain,

@@ -1,5 +1,5 @@
 [workspace]
-members = ["package/models", "package/api", "platform"]
+members = ["package/models", "package/api", "platform", "package/watcher"]
 resolver = "2"
 
 [workspace.package]
@@ -10,3 +10,9 @@ edition = "2021"
 
 [workspace.dependencies]
 models = { version = "1.0.0", path = "package/models" }
+easy-dynamodb = "0.1.6"
+slog = "2.7.0"
+by-axum = { version = "0.1.7" }
+chrono = "0.4.38"
+serde = "1.0.215"
+reqwest = "0.12.9"

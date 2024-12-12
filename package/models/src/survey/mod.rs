@@ -7,6 +7,7 @@ pub struct Survey {
     pub id: String,
     pub r#type: String,
     pub gsi1: String,
+    pub gsi2: String,
     pub creator: String,
     pub created_at: i64,
     pub updated_at: i64,
@@ -28,6 +29,7 @@ impl Survey {
         let mut survey = Survey::default();
         let now = chrono::Utc::now().timestamp_millis();
         survey.gsi1 = Survey::get_gsi1(&user_id);
+        survey.gsi2 = Survey::get_gsi2("".to_string());
         survey.id = id;
         survey.creator = user_id;
         survey.r#type = Survey::get_type();
@@ -38,6 +40,10 @@ impl Survey {
     }
     pub fn get_gsi1(user_id: &str) -> String {
         format!("{}#{}", Self::get_type(), user_id)
+    }
+    pub fn get_gsi2(ended_at: String) -> String {
+        // e.g. 2024-12-31
+        format!("{}#endedAt#{}", Self::get_type(), ended_at)
     }
     pub fn get_type() -> String {
         "survey".to_string()
@@ -294,7 +300,18 @@ pub enum SurveyResultAnswerType {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SurveyResultAnswer {
     pub responded_at: i64,
-    pub quota_id: QuotaId,       // 특성
-    pub question_id: QuestionId, // 질문
-    pub answer_type: SurveyResultAnswerType,
+    pub quota_id: QuotaId, // 속성 ID
+    pub responses: Vec<SurveyResultAnswerType>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AdminSurveyCompleteRequest {
+    pub ended_at: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AdminSurveyCompleteResponse {
+    pub total: u32,
+    pub succeed: u32,
+    pub failed: u32,
 }

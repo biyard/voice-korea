@@ -1,38 +1,32 @@
 [package]
 name = "api"
-version = "0.1.7"
+version = "0.1.8"
 authors.workspace = true
 description.workspace = true
 edition.workspace = true
 
 [dependencies]
 tokio = { version = "1.41.1", features = ["full"] }
-
 listenfd = { version = "1.0.1", optional = true }
-
-serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.133"
-
-easy-dynamodb = "0.1.6"
-slog = "2.7.0"
-tracing = "0.1.40"
-
 thiserror = "2.0.3"
-
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
-
-models.workspace = true
-by-axum = { version = "0.1.6" }
 jsonwebtoken = "9.3.0"
 sha3 = "0.10.8"
 uuid = { version = "1.11.0", features = ["v4"] }
 aws-sdk-sesv2 = "1.54.0"
 aws-config = "1.5.10"
 rand = "0.8.5"
-chrono = { version = "0.4.38", features = ["now"] }
 lazy_static = "1.5.0"
-reqwest = { version = "0.12.9", features = ["json"] }
 
+serde = { workspace = true, features = ["derive"] }
+chrono = { workspace = true, features = ["now"] }
+reqwest = { workspace = true, features = ["json"] }
+
+easy-dynamodb.workspace = true
+slog.workspace = true
+models.workspace = true
+by-axum.workspace = true
+futures = "0.3.31"
 
 [features]
 default = []

@@ -1,31 +1,30 @@
 use crate::{
     middleware::auth::authorization_middleware,
-    utils::{error::ApiError, jwt::Claims, time::convert_rfc3339_to_timestamp_millis},
+    utils::{error::ApiError, jwt::Claims, nonce_lab, time::convert_utc_timestamp_to_datetime},
 };
 
-mod nonce_lab;
-use by_axum::axum::{
-    extract::{Path, Query, State},
-    middleware,
-    routing::{get, post},
-    Extension, Json, Router,
+use by_axum::{
+    axum::{
+        extract::{Path, Query, State},
+        middleware,
+        routing::get,
+        Extension, Json, Router,
+    },
+    log::root,
 };
-use nonce_lab::NonceLabClient;
-mod local_models;
 
 use easy_dynamodb::Client;
-use local_models::{NonceLabCreateSurveyRequest, NonceLabQuota, NonceLabSurveyQuestion};
+use nonce_lab::models::{NonceLabCreateSurveyRequest, NonceLabQuota, NonceLabSurveyQuestion};
+use nonce_lab::NonceLabClient;
 
 use models::prelude::{
-    CompleteSurveyResponse, ListSurveyResponse, ProgressSurveyResponse, QuestionId, Quota, QuotaId,
-    Survey, SurveyDraftStatus, SurveyQuestion, SurveyResultAnswer, SurveyResultAnswerType,
-    SurveyResultDocument, SurveyStatus, UpsertSurveyDraftRequest,
+    ListSurveyResponse, ProgressSurveyResponse, Survey, SurveyDraftStatus, SurveyResultDocument,
+    SurveyStatus, UpsertSurveyDraftRequest,
 };
 use serde::Deserialize;
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 #[derive(Clone)]
-
 pub struct AxumState {
     db: Arc<Client>,
     nonce_lab_client: Arc<NonceLabClient>,
@@ -37,7 +36,6 @@ pub fn router(db: Arc<Client>) -> Router {
         .route("/", get(list_survey).patch(upsert_survey_draft))
         .route("/:id", get(get_survey).post(progress_survey))
         .route("/:id/result", get(get_survey_result))
-        .route("/:id/complete", post(complete_survey))
         .with_state(AxumState {
             db,
             nonce_lab_client,
@@ -89,7 +87,7 @@ async fn list_survey(
                         &survey.id,
                         vec![
                             ("updated_at", UpdateField::I64(now)),
-                            ("response_count", UpdateField::N(current_responses)),
+                            ("response_count", UpdateField::OU64(current_responses)),
                         ],
                     )
                     .await;
@@ -137,7 +135,7 @@ async fn get_survey(
                 &survey.id,
                 vec![
                     ("updated_at", UpdateField::I64(now)),
-                    ("response_count", UpdateField::N(current_responses)),
+                    ("response_count", UpdateField::OU64(current_responses)),
                 ],
             )
             .await;
@@ -152,6 +150,7 @@ async fn upsert_survey_draft(
     State(state): State<AxumState>,
     Json(req): Json<UpsertSurveyDraftRequest>,
 ) -> Result<Json<String>, ApiError> {
+    slog::debug!(root(), "CLAIM: {}", claims.id.clone());
     let mut survey = if let Some(id) = req.id {
         let result: Result<Option<Survey>, easy_dynamodb::error::DynamoException> =
             state.db.get(&id).await;
@@ -171,7 +170,6 @@ async fn upsert_survey_draft(
     } else {
         Survey::new(uuid::Uuid::new_v4().to_string(), claims.id)
     };
-
     let draft_id = survey.id.clone();
     if let Some(title) = req.title {
         survey.title = title;
@@ -193,24 +191,27 @@ async fn upsert_survey_draft(
     }
 
     survey.updated_at = chrono::Utc::now().timestamp_millis();
-    let _ = state.db.upsert(survey).await;
+    state.db.upsert(survey).await.map_err(|e| {
+        slog::error!(root(), "UPSERT ERROR: {:?}", e);
+        ApiError::DynamoCreateException(e.to_string())
+    })?;
     Ok(Json(draft_id))
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 enum UpdateField {
     #[serde(untagged)]
-    Id(u32),
+    U32(u32),
     #[serde(untagged)]
-    S(SurveyStatus),
+    Status(SurveyStatus),
     #[serde(untagged)]
     Null(Option<bool>),
     #[serde(untagged)]
-    N(Option<u64>),
+    OU64(Option<u64>),
     #[serde(untagged)]
     I64(i64),
     #[serde(untagged)]
-    Str(String),
+    S(String),
 }
 
 //Update Survey Status from Draft to in_progress
@@ -259,21 +260,23 @@ async fn progress_survey(
         expected_responses,
     };
     let now = chrono::Utc::now().timestamp_millis();
-
+    let end_date = convert_utc_timestamp_to_datetime(survey.ended_at.unwrap(), Some(1))
+        .unwrap_or("INVALID_END_DATE".to_string());
     let nonce_lab_id = state.nonce_lab_client.create_survey(survey_dto).await?;
     match state
         .db
         .update(
             &survey.id,
             vec![
-                ("nonce_lab_id", UpdateField::Id(nonce_lab_id)),
-                ("status", UpdateField::S(SurveyStatus::InProgress)),
+                ("gsi2", UpdateField::S(Survey::get_gsi2(end_date))),
+                ("nonce_lab_id", UpdateField::U32(nonce_lab_id)),
+                ("status", UpdateField::Status(SurveyStatus::InProgress)),
                 ("draft_status", UpdateField::Null(None)),
                 ("updated_at", UpdateField::I64(now)),
-                ("response_count", UpdateField::N(Some(0))),
+                ("response_count", UpdateField::OU64(Some(0))),
                 (
                     "total_response_count",
-                    UpdateField::N(Some(expected_responses)),
+                    UpdateField::OU64(Some(expected_responses)),
                 ),
             ],
         )
@@ -282,128 +285,6 @@ async fn progress_survey(
         Ok(_) => Ok(Json(ProgressSurveyResponse {
             id: uuid::Uuid::new_v4().to_string(),
             nonce_lab_id,
-        })),
-        Err(e) => Err(ApiError::DynamoUpdateException(e.to_string())),
-    }
-}
-
-async fn complete_survey(
-    Extension(claims): Extension<Claims>,
-    State(state): State<AxumState>,
-    Path(id): Path<String>,
-) -> Result<Json<CompleteSurveyResponse>, ApiError> {
-    // Get survey from DB
-    let result: Result<Option<Survey>, easy_dynamodb::error::DynamoException> =
-        state.db.get(&id).await;
-    let survey = match result {
-        Ok(Some(v)) => {
-            if v.creator != claims.id {
-                return Err(ApiError::InvalidCredentials("Not Owner".to_string()));
-            }
-            if v.status != SurveyStatus::InProgress {
-                return Err(ApiError::NotInProgressSurvey);
-            }
-            v
-        }
-        Ok(None) => return Err(ApiError::SurveyNotFound(id)),
-        Err(e) => return Err(ApiError::DynamoQueryException(e.to_string())),
-    };
-    let now = chrono::Utc::now().timestamp_millis();
-    // Create Survey Result Docuemnt
-    let nonce_lab_id = survey.nonce_lab_id.unwrap();
-    let response_count_map = state
-        .nonce_lab_client
-        .get_survey(nonce_lab_id)
-        .await?
-        .response_count_map
-        .unwrap_or_default();
-    let survey_answers = state
-        .nonce_lab_client
-        .get_survey_result(nonce_lab_id)
-        .await?;
-    let mut answers: Vec<SurveyResultAnswer> = vec![];
-    let mut quotas: HashMap<QuotaId, Quota> = HashMap::new();
-    let mut questions: HashMap<QuestionId, SurveyQuestion> = HashMap::new();
-
-    let mut survey_responses_by_question: HashMap<QuestionId, HashMap<String, u64>> =
-        HashMap::new();
-    for (i, question) in survey.questions.into_iter().enumerate() {
-        questions.insert(i as QuestionId, question);
-    }
-    for quota in survey_answers.quotas.into_iter() {
-        let quota_id = quota.id.unwrap_or_default();
-        quotas.insert(quota_id as QuotaId, quota.into());
-    }
-    for item in survey_answers.response_array.into_iter() {
-        let quota_id = item.quota_id;
-        let responded_at =
-            convert_rfc3339_to_timestamp_millis(&item.responded_at).unwrap_or_default();
-        for (question_id, answer) in item.answers.into_iter().enumerate() {
-            let answer_type = if let Some(v) = answer.text_answer {
-                SurveyResultAnswerType::Text(v)
-            } else if let Some(v) = answer.choice_answer {
-                SurveyResultAnswerType::Select(v)
-            } else {
-                SurveyResultAnswerType::NotResponded
-            };
-            let text_list = match answer_type.clone() {
-                SurveyResultAnswerType::Text(v) => vec![v],
-                SurveyResultAnswerType::Select(v) => v,
-                _ => vec![],
-            };
-            for text in text_list {
-                survey_responses_by_question
-                    .entry(question_id as QuestionId)
-                    .or_insert_with(HashMap::new)
-                    .entry(text)
-                    .and_modify(|count| *count += 1)
-                    .or_insert(1);
-            }
-            let result_answer = SurveyResultAnswer {
-                responded_at,
-                quota_id,
-                question_id: question_id as QuestionId,
-                answer_type,
-            };
-
-            answers.push(result_answer);
-        }
-    }
-    let doc_id = uuid::Uuid::new_v4().to_string();
-    let _ = state
-        .db
-        .create(SurveyResultDocument {
-            gsi1: SurveyResultDocument::get_gsi1(&claims.id, &survey.id),
-            id: doc_id.clone(),
-            user_id: claims.id.clone(),
-            survey_id: survey.id.clone(),
-            r#type: SurveyResultDocument::get_type(),
-            created_at: chrono::Utc::now().timestamp_millis(),
-            expected_responses: survey.total_response_count.unwrap_or_default(),
-            actual_responses: survey.response_count.unwrap_or_default(),
-            answers,
-            quotas,
-            questions,
-            survey_responses_by_quota: response_count_map,
-            survey_responses_by_question,
-        })
-        .await;
-
-    // Update Survey State
-    match state
-        .db
-        .update(
-            &survey.id,
-            vec![
-                ("status", UpdateField::S(SurveyStatus::Finished)),
-                ("updated_at", UpdateField::I64(now)),
-                ("result_id", UpdateField::Str(doc_id)),
-            ],
-        )
-        .await
-    {
-        Ok(_) => Ok(Json(CompleteSurveyResponse {
-            id: uuid::Uuid::new_v4().to_string(),
         })),
         Err(e) => Err(ApiError::DynamoUpdateException(e.to_string())),
     }
