@@ -15,11 +15,23 @@ pub struct MemberDetailTranslate {
     pub remove_team_member: String,
 
     pub participation_record: String,
+    pub search_info: String,
     pub item: String,
     pub project: String,
     pub panel: String,
     pub period: String,
     pub status: String,
+
+    pub remove_team_member_title: String,
+    pub remove_project_title: String,
+
+    pub remove_project_info: String,
+    pub remove_project_warning: String,
+    pub remove: String,
+    pub cancel: String,
+
+    pub remove_member_info: String,
+    pub remove_member_warning: String,
 }
 
 pub fn translate(lang: Language) -> MemberDetailTranslate {
@@ -39,11 +51,27 @@ pub fn translate(lang: Language) -> MemberDetailTranslate {
             remove_team_member: "Remove Team Member".to_string(),
 
             participation_record: "Participation Record".to_string(),
+            search_info: "Please search the project name.".to_string(),
             item: "Item".to_string(),
             project: "Project".to_string(),
             panel: "Panel".to_string(),
             period: "Period".to_string(),
             status: "Status".to_string(),
+
+            remove_team_member_title: "Remove Team Member".to_string(),
+            remove_project_title: "Remove Project".to_string(),
+
+            remove_project_info: "Are you sure you want to delete it?".to_string(),
+            remove_project_warning:
+                "Deleted projects cannot be restored. Please check again before deleting."
+                    .to_string(),
+            remove: "Remove".to_string(),
+            cancel: "Cancel".to_string(),
+
+            remove_member_info: "Are you sure you want to delete it?".to_string(),
+            remove_member_warning:
+                "Deleted team members cannot be restored. Please check again before deleting."
+                    .to_string(),
         },
         Language::Ko => MemberDetailTranslate {
             organization_management: "조직 관리".to_string(),
@@ -60,11 +88,26 @@ pub fn translate(lang: Language) -> MemberDetailTranslate {
             remove_team_member: "팀원 삭제하기".to_string(),
 
             participation_record: "참여 기록".to_string(),
+            search_info: "프로젝트명을 검색해주세요.".to_string(),
             item: "항목".to_string(),
             project: "프로젝트".to_string(),
             panel: "패널".to_string(),
             period: "기간".to_string(),
             status: "상태".to_string(),
+
+            remove_team_member_title: "팀원 삭제".to_string(),
+            remove_project_title: "프로젝트 삭제".to_string(),
+
+            remove_project_info: "정말 삭제하시겠습니까?".to_string(),
+            remove_project_warning:
+                "삭제된 프로젝트는 복원할 수 없습니다. 삭제 전에 다시 한번 확인해주세요."
+                    .to_string(),
+            remove: "삭제하기".to_string(),
+            cancel: "취소하기".to_string(),
+
+            remove_member_info: "정말 삭제하시겠습니까?".to_string(),
+            remove_member_warning:
+                "삭제된 팀원은 복원할 수 없습니다. 삭제 전에 다시 한번 확인해주세요.".to_string(),
         },
     }
 }

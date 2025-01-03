@@ -57,7 +57,7 @@ impl Controller {
                     profile_name: Some("보이스".to_string()),
                     email: "email@email.com".to_string(),
                     group: "보이스코리아".to_string(),
-                    role: "중개자".to_string(),
+                    role: "중계자".to_string(),
                     projects: vec!["공론주제".to_string(), "조사주제".to_string()],
                 },
                 Member {

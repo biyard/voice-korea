@@ -147,24 +147,30 @@ pub fn ArrowRight(
 pub fn Expand(width: String, height: String) -> Element {
     rsx! {
         svg {
-            height,
-            width,
-            view_box: "0 0 19 18",
+            "viewBox": "0 0 24 24",
             fill: "none",
             xmlns: "http://www.w3.org/2000/svg",
-            path {
-                "stroke-linecap": "round",
-                "stroke-linejoin": "round",
-                "stroke-width": "1.5",
-                stroke: "#2A60D3",
-                d: "M11 7.5L14.75 3.75M14.75 3.75L14.75 7.5M14.75 3.75L11 3.75",
+            height,
+            width,
+            rect {
+                width: "24",
+                rx: "4",
+                fill: "#7C8292",
+                height: "24",
             }
             path {
-                stroke: "#2A60D3",
-                d: "M8 10.5L4.25 14.25M4.25 14.25V10.5M4.25 14.25H8",
+                d: "M13.5 10.5L17.25 6.75M17.25 6.75L17.25 10.5M17.25 6.75L13.5 6.75",
                 "stroke-width": "1.5",
+                stroke: "white",
                 "stroke-linecap": "round",
                 "stroke-linejoin": "round",
+            }
+            path {
+                "stroke-linecap": "round",
+                d: "M10.5 13.5L6.75 17.25M6.75 17.25V13.5M6.75 17.25H10.5",
+                "stroke-width": "1.5",
+                "stroke-linejoin": "round",
+                stroke: "white",
             }
         }
     }
@@ -244,7 +250,7 @@ pub fn ColOption(width: String, height: String) -> Element {
             fill: "none",
             width,
             rect {
-                fill: "white",
+                fill: "transparent",
                 width: "40",
                 rx: "4",
                 height: "40",

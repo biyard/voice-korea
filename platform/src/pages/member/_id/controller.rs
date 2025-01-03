@@ -30,6 +30,7 @@ pub struct MemberDetail {
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct ProjectHistory {
+    pub history_id: String,
     pub project_type: ProjectType,
     pub project_subject: String,
     pub role: String,
@@ -77,6 +78,7 @@ impl Controller {
             register_date: "2024년 8월 12일".to_string(),
             project_history: vec![
                 ProjectHistory {
+                    history_id: "1".to_string(),
                     project_type: ProjectType::Investigation,
                     project_subject: "조사주제".to_string(),
                     role: "관리자".to_string(),
@@ -89,6 +91,7 @@ impl Controller {
                     project_status: ProjectStatus::Finished,
                 },
                 ProjectHistory {
+                    history_id: "2".to_string(),
                     project_type: ProjectType::Investigation,
                     project_subject: "조사주제".to_string(),
                     role: "관리자".to_string(),
@@ -101,6 +104,7 @@ impl Controller {
                     project_status: ProjectStatus::InProgress,
                 },
                 ProjectHistory {
+                    history_id: "3".to_string(),
                     project_type: ProjectType::PublicOpinion,
                     project_subject: "공론주제".to_string(),
                     role: "관리자".to_string(),
@@ -113,6 +117,7 @@ impl Controller {
                     project_status: ProjectStatus::InProgress,
                 },
                 ProjectHistory {
+                    history_id: "4".to_string(),
                     project_type: ProjectType::PublicOpinion,
                     project_subject: "공론주제".to_string(),
                     role: "관리자".to_string(),
@@ -125,6 +130,7 @@ impl Controller {
                     project_status: ProjectStatus::InProgress,
                 },
                 ProjectHistory {
+                    history_id: "5".to_string(),
                     project_type: ProjectType::PublicOpinion,
                     project_subject: "공론주제".to_string(),
                     role: "관리자".to_string(),
@@ -137,6 +143,7 @@ impl Controller {
                     project_status: ProjectStatus::Ready,
                 },
                 ProjectHistory {
+                    history_id: "6".to_string(),
                     project_type: ProjectType::PublicOpinion,
                     project_subject: "공론주제".to_string(),
                     role: "관리자".to_string(),
@@ -149,6 +156,7 @@ impl Controller {
                     project_status: ProjectStatus::Ready,
                 },
                 ProjectHistory {
+                    history_id: "7".to_string(),
                     project_type: ProjectType::PublicOpinion,
                     project_subject: "공론주제".to_string(),
                     role: "관리자".to_string(),
@@ -161,6 +169,7 @@ impl Controller {
                     project_status: ProjectStatus::Ready,
                 },
                 ProjectHistory {
+                    history_id: "8".to_string(),
                     project_type: ProjectType::PublicOpinion,
                     project_subject: "공론주제".to_string(),
                     role: "관리자".to_string(),
@@ -173,6 +182,7 @@ impl Controller {
                     project_status: ProjectStatus::Ready,
                 },
                 ProjectHistory {
+                    history_id: "9".to_string(),
                     project_type: ProjectType::PublicOpinion,
                     project_subject: "공론주제".to_string(),
                     role: "관리자".to_string(),
