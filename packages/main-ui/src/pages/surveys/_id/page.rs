@@ -110,6 +110,7 @@ pub fn SurveyPanelReport() -> Element {
             }
             HorizontalBar {
                 width: "500px",
+                width: "500px",
                 height: "23px",
                 value: 300,
                 max_value: 1000,
