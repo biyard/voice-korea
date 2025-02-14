@@ -1,5 +1,10 @@
 #![allow(non_snake_case)]
-use by_components::charts::{horizontal_bar::HorizontalBar, StackBarChart, StackBarData};
+use by_components::charts::{
+    bar_chart::{BarChart, BarChartData},
+    horizontal_bar::HorizontalBar,
+    pie_chart::*,
+    StackBarChart, StackBarData,
+};
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::SurveyV2;
@@ -105,11 +110,35 @@ pub fn SurveyPanelReport() -> Element {
                 ],
             }
             HorizontalBar {
-                id: "survey-bar",
+                width: "500px",
                 height: "23px",
                 value: 300,
                 max_value: 1000,
-                class: "w-full flex flex-row bg-[#EEEEEE] rounded-[6px] overflow-hidden",
+                class: "flex flex-row bg-[#EEEEEE] rounded-[6px] overflow-hidden",
+            }
+            PieChart {
+                width: "500px",
+                height: "500px",
+                class: "w-[500px]",
+                data: vec![
+                    PieChartData::new("A".to_string(), 10),
+                    PieChartData::new("B".to_string(), 20),
+                    PieChartData::new("c".to_string(), 100),
+                    PieChartData::new("d".to_string(), 50),
+                    PieChartData::new("i".to_string(), 10),
+                    PieChartData::new("k".to_string(), 10),
+                ],
+            }
+            BarChart {
+                width: "1000px",
+                height: "500px",
+                data: vec![
+                    BarChartData::new("A".to_string(), 500),
+                    BarChartData::new("B".to_string(), 0),
+                    BarChartData::new("C".to_string(), 0),
+                    BarChartData::new("D".to_string(), 600),
+                    BarChartData::new("E".to_string(), 1000),
+                ],
             }
         }
     }
