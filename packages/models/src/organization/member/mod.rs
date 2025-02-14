@@ -25,32 +25,39 @@ pub struct ListMemberResponse {
     pub bookmark: Option<String>,
 }
 
-#[api_model(base = "/members/v2", table = organization_members, iter_type=QueryResponse)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
+pub struct ListMemberResponseV2 {
+    pub members: Vec<OrganizationMember>,
+    pub role_count: Vec<i64>,
+    pub bookmark: Option<String>,
+}
+
+#[api_model(base = "/organizations/v2/:org-id/members", table = organization_members, iter_type=QueryResponse)]
 pub struct OrganizationMember {
     #[api_model(summary, primary_key)]
     pub id: i64,
+    #[api_model(summary, many_to_one = users, read_action = get_member, action = delete)]
+    pub user_id: i64,
+    #[api_model(summary, many_to_one = organizations)]
+    pub org_id: i64,
     #[api_model(summary, auto = [insert])]
     pub created_at: i64,
     #[api_model(summary, auto = [insert, update])]
     pub updated_at: i64,
 
-    #[api_model(many_to_one = users)]
-    pub user_id: i64,
-    #[api_model(many_to_one = organizations)]
-    pub org_id: i64,
-
-    #[api_model(summary, nullable)]
+    #[api_model(summary, action_by_id = [update], nullable)]
     pub name: String,
-    #[api_model(summary, type = INTEGER, nullable)]
+    #[api_model(summary, type = INTEGER, nullable, action_by_id = [update])]
     pub role: Option<Role>,
-    #[api_model(summary)]
+    #[api_model(summary, action_by_id = [update])]
     pub contact: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct OrganizationMemberResponse {
-    pub id: String,
+    pub id: i64,
     pub created_at: i64,
     pub updated_at: i64,
     pub deleted_at: Option<i64>,
@@ -91,11 +98,11 @@ pub struct MemberSummary {
 #[derive(Debug, Clone, PartialEq, Eq, ApiModel)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub enum Role {
-    Admin = 1,
-    PublicAdmin = 2,
-    Analyst = 3,
-    Mediator = 4,
-    Speaker = 5,
+    Admin = 0,
+    PublicAdmin = 1,
+    Analyst = 2,
+    Mediator = 3,
+    Speaker = 4,
 }
 
 impl std::fmt::Display for Role {
@@ -110,21 +117,7 @@ impl std::fmt::Display for Role {
     }
 }
 
-// impl std::str::FromStr for Role {
-//     type Err = String;
-
-//     fn from_str(r: &str) -> Result<Self, Self::Err> {
-//         match r {
-//             "admin" => Ok(Role::Admin),
-//             "public_admin" => Ok(Role::PublicAdmin),
-//             "analyst" => Ok(Role::Analyst),
-//             "mediator" => Ok(Role::Mediator),
-//             "speaker" => Ok(Role::Speaker),
-//             _ => Err("Invalid role".to_string()),
-//         }
-//     }
-// }
-
+// FIXME: deprecated
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct InviteMember {
@@ -142,6 +135,7 @@ pub struct InviteMember {
     pub projects: Option<Vec<MemberProject>>, //FIXME: implement project model sepalately after public opinion, investigation api implemented
 }
 
+// FIXME: deprecated
 impl InviteMember {
     pub fn new(
         id: String,

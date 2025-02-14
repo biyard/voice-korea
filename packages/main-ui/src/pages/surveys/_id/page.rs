@@ -98,7 +98,6 @@ pub fn SurveyPanelReport() -> Element {
     rsx! {
         div { class: "w-full flex flex-col bg-white gap-[10px] p-[20px]",
             StackBarChart {
-                id: "survey-panel-report",
                 class: "w-full flex flex-col gap-[10px] rounded-[8px] overflow-hidden",
                 height: "54px",
                 data: vec![

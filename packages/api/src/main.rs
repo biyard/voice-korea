@@ -30,11 +30,14 @@ mod controllers {
     pub mod organizations {
         pub mod v2;
     }
-    // pub mod members {
-    //     pub mod v1;
-    // }
+    pub mod members {
+        pub mod v2;
+    }
+    pub mod invitations {
+        pub mod v2;
+    }
     // pub mod groups {
-    //     pub mod v1;
+    //     pub mod v2;
     // }
     // pub mod attributes {
     //     pub mod v1;
@@ -75,6 +78,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let om = OrganizationMember::get_repository(pool.clone());
     let ps = PanelSurveys::get_repository(pool.clone());
     let sr = SurveyResponse::get_repository(pool.clone());
+    let g = GroupV2::get_repository(pool.clone());
+    let gm = GroupMemberV2::get_repository(pool.clone());
+    let iv = Invitation::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -86,6 +92,10 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     p.create_this_table().await?;
     ps.create_this_table().await?;
     sr.create_this_table().await?;
+    g.create_this_table().await?;
+    gm.create_this_table().await?;
+
+    iv.create_this_table().await?;
 
     v.create_related_tables().await?;
     o.create_related_tables().await?;
@@ -98,6 +108,10 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     p.create_related_tables().await?;
     ps.create_related_tables().await?;
     sr.create_related_tables().await?;
+    g.create_related_tables().await?;
+    gm.create_related_tables().await?;
+
+    iv.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())
@@ -131,16 +145,13 @@ async fn main() -> Result<()> {
             "/organizations/v2",
             controllers::organizations::v2::OrganizationControllerV2::route(pool.clone())?,
         )
+        .nest(
+            "/invitations/v2/:org-id",
+            crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
+        )
         .nest("/v2", Version2Controller::route(pool.clone())?)
         .layer(middleware::from_fn(authorization_middleware));
-    // .nest(
-    //     "/members/v1",
-    //     controllers::members::v1::MemberControllerV1::router(),
-    // )
-    // .nest(
-    //     "/groups/v1",
-    //     controllers::groups::v1::GroupControllerV1::router(),
-    // )
+
     // .nest(
     //     "/attributes/v1",
     //     controllers::attributes::v1::AttributeControllerV1::router(),
