@@ -1,6 +1,9 @@
 #![allow(non_snake_case)]
 use by_components::charts::{
-    horizontal_bar::HorizontalBar, pie_chart::*, StackBarChart, StackBarData,
+    bar_chart::{BarChart, BarChartData},
+    horizontal_bar::HorizontalBar,
+    pie_chart::*,
+    StackBarChart, StackBarData,
 };
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
@@ -123,6 +126,17 @@ pub fn SurveyPanelReport() -> Element {
                     PieChartData::new("d".to_string(), 50),
                     PieChartData::new("i".to_string(), 10),
                     PieChartData::new("k".to_string(), 10),
+                ],
+            }
+            BarChart {
+                width: "1000px",
+                height: "500px",
+                data: vec![
+                    BarChartData::new("A".to_string(), 500),
+                    BarChartData::new("B".to_string(), 0),
+                    BarChartData::new("C".to_string(), 0),
+                    BarChartData::new("D".to_string(), 600),
+                    BarChartData::new("E".to_string(), 1000),
                 ],
             }
         }
