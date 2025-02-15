@@ -5,11 +5,11 @@ use by_axum::aide;
 use by_macros::api_model;
 use by_types::QueryResponse;
 
-#[api_model(base = "/groups/v2", table = group_members, iter_type=QueryResponse)]
+#[api_model(base = "/organizations/v2/:org-id/groups", table = group_members, iter_type=QueryResponse)]
 pub struct GroupMemberV2 {
     #[api_model(summary, primary_key)]
     pub id: i64,
-    #[api_model(summary, many_to_one = groups)]
+    #[api_model(summary, many_to_one = groups)] // query_action = list_group_by_id)]
     pub group_id: i64,
     #[api_model(summary, many_to_one = users)]
     pub user_id: i64,

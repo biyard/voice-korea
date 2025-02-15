@@ -19,9 +19,13 @@ use crate::utils::hash::get_hash_string;
 
 #[derive(Clone, Debug)]
 pub struct UserControllerV1 {
+    pool: sqlx::Pool<sqlx::Postgres>,
     repo: UserRepository,
     verification: VerificationRepository,
     org: OrganizationRepository,
+    org_mem: OrganizationMemberRepository,
+    group_mem: GroupMemberV2Repository,
+    invite: InvitationRepository,
 }
 
 impl UserControllerV1 {
@@ -29,11 +33,17 @@ impl UserControllerV1 {
         let repo = User::get_repository(pool.clone());
         let verification = Verification::get_repository(pool.clone());
         let org = Organization::get_repository(pool.clone());
-
+        let org_mem = OrganizationMember::get_repository(pool.clone());
+        let group_mem: GroupMemberV2Repository = GroupMemberV2::get_repository(pool.clone());
+        let invite = Invitation::get_repository(pool.clone());
         let ctrl = UserControllerV1 {
+            pool: pool.clone(),
             repo,
             verification,
             org,
+            org_mem,
+            group_mem,
+            invite,
         };
 
         Ok(by_axum::axum::Router::new()
@@ -156,8 +166,11 @@ impl UserControllerV1 {
                 tracing::error!("Failed to insert user: {}", e);
                 ApiError::DuplicateUser
             })?;
-        self.org
-            .insert_with_dependency(user.id, user.clone().email)
+
+        let org = self.org.insert(user.email.clone()).await?;
+
+        self.org_mem
+            .insert(user.id, org.id, user.email.clone(), 0, None)
             .await?;
 
         let user = self
@@ -167,7 +180,7 @@ impl UserControllerV1 {
 
         let jwt = self.generate_token(&user)?;
 
-        // TODO: check invitation table and add user to organization (groups)
+        self.invite_user(user.clone()).await?;
 
         Ok(JsonWithHeaders::new(user)
             .with_bearer_token(&jwt)
@@ -201,5 +214,64 @@ impl UserControllerV1 {
         // TODO: update password
 
         todo!()
+    }
+
+    async fn invite_user(&self, user: User) -> Result<()> {
+        let query = InvitationSummary::base_sql_with("where email = $1");
+        tracing::debug!("invite_user query: {}", query);
+
+        match sqlx::query(&query)
+            .bind(user.email.clone())
+            .map(|r: sqlx::postgres::PgRow| r.into())
+            .fetch_all(&self.pool)
+            .await
+        {
+            Ok(invites) => {
+                let invites: Vec<InvitationSummary> = invites;
+                for i in invites.iter() {
+                    let mut tx = self.pool.begin().await?;
+                    match self
+                        .org_mem
+                        .insert_with_tx(
+                            &mut *tx,
+                            user.id,
+                            i.org_id,
+                            i.name.clone().unwrap_or(i.email.clone()),
+                            i.role.clone(),
+                            None,
+                        )
+                        .await
+                    {
+                        Ok(_) => {
+                            if let Some(group_id) = i.group_id {
+                                match self
+                                    .group_mem
+                                    .insert_with_tx(&mut *tx, group_id, user.id)
+                                    .await
+                                {
+                                    Ok(_) => {
+                                        self.invite.delete(i.id).await?;
+                                        tx.commit().await?;
+                                    }
+                                    Err(e) => {
+                                        tracing::error!("Failed to insert group member: {}", e);
+                                        tx.rollback().await?;
+                                    }
+                                }
+                            } else {
+                                self.invite.delete(i.id).await?;
+                                tx.commit().await?;
+                            }
+                        }
+                        Err(e) => {
+                            tracing::error!("Failed to insert org member: {}", e);
+                            tx.rollback().await?;
+                        }
+                    }
+                }
+            }
+            Err(_) => {}
+        };
+        Ok(())
     }
 }
