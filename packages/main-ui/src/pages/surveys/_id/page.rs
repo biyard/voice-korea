@@ -24,7 +24,7 @@ use super::controller::{Panel, PanelResponses, SurveyResponses};
 
 #[component]
 pub fn SurveyResultPage(lang: Language, survey_id: i64) -> Element {
-    let ctrl = Controller::new(lang, survey_id);
+    let ctrl = Controller::new(lang, survey_id)?;
     let tr: SurveyResultTranslate = translate(&lang);
 
     let survey = ctrl.get_survey();

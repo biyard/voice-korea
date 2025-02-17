@@ -73,11 +73,11 @@ pub struct Controller {
 }
 
 impl Controller {
-    pub fn new(_lang: Language, survey_id: i64) -> Self {
+    pub fn new(_lang: Language, survey_id: i64) -> std::result::Result<Self, RenderError> {
         let login_service: LoginService = use_context();
         let org_id = use_memo(move || login_service.get_selected_org().unwrap_or_default().id);
 
-        let surveys: Resource<SurveyV2> = use_resource(move || {
+        let surveys = use_server_future(move || {
             let org_id = org_id();
 
             async move {
@@ -91,35 +91,37 @@ impl Controller {
                     }
                 }
             }
-        });
+        })?;
 
-        let panels: Resource<QueryResponse<PanelV2Summary>> = use_resource(move || async move {
-            let cli = PanelV2::get_client(&crate::config::get().api_url);
+        let panels: Resource<QueryResponse<PanelV2Summary>> =
+            use_server_future(move || async move {
+                let cli = PanelV2::get_client(&crate::config::get().api_url);
 
-            match cli.query(org_id(), PanelV2Query::new(10000)).await {
-                Ok(d) => d,
-                Err(e) => {
-                    tracing::error!("Error: {:?}", e);
-                    QueryResponse::default()
-                }
-            }
-        });
-
-        let responses: Resource<QueryResponse<SurveyResponseSummary>> = use_resource(move || {
-            async move {
-                let cli = SurveyResponse::get_client(&crate::config::get().api_url);
-
-                // FIXME: this is workaround only for testing
-                //        fix to apply page
-                match cli.query(survey_id, SurveyResponseQuery::new(10000)).await {
+                match cli.query(org_id(), PanelV2Query::new(10000)).await {
                     Ok(d) => d,
                     Err(e) => {
                         tracing::error!("Error: {:?}", e);
                         QueryResponse::default()
                     }
                 }
-            }
-        });
+            })?;
+
+        let responses: Resource<QueryResponse<SurveyResponseSummary>> =
+            use_server_future(move || {
+                async move {
+                    let cli = SurveyResponse::get_client(&crate::config::get().api_url);
+
+                    // FIXME: this is workaround only for testing
+                    //        fix to apply page
+                    match cli.query(survey_id, SurveyResponseQuery::new(10000)).await {
+                        Ok(d) => d,
+                        Err(e) => {
+                            tracing::error!("Error: {:?}", e);
+                            QueryResponse::default()
+                        }
+                    }
+                }
+            })?;
 
         let endpoint = crate::config::get().api_url;
 
@@ -163,7 +165,7 @@ impl Controller {
             ctrl.survey_responses.set(survey_responses);
         });
 
-        ctrl
+        Ok(ctrl)
     }
 
     pub fn parsing_answers(
