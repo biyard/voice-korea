@@ -1,21 +1,75 @@
+use std::collections::HashMap;
+
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
 use models::{
     excel::SurveyResponseExcel,
     response::{Answer, SurveyResponse, SurveyResponseQuery, SurveyResponseSummary},
-    QueryResponse, SurveyV2,
+    PanelV2, PanelV2Query, PanelV2Summary, QueryResponse, SurveyV2,
 };
 
 use crate::service::login_service::LoginService;
+
+#[derive(Clone, Default, PartialEq)]
+pub struct PanelResponses {
+    pub quotes: i64,
+    pub response_count: i64,
+    pub panels: HashMap<i64, Panel>,
+}
+
+#[derive(Clone, Default, PartialEq, Debug)]
+pub struct Panel {
+    pub id: i64,
+    pub name: String,
+    pub count: i32,
+}
+
+#[derive(Clone, Default, PartialEq)]
+pub struct SurveyResponses {
+    pub answers: HashMap<i64, (String, i64, HashMap<i64, ParsedQuestion>)>, // question_id, (title, response_count, <panel_id, answer>)
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub enum ParsedQuestion {
+    SingleChoice {
+        answers: Vec<String>,
+        response_count: Vec<i64>,
+    },
+    MultipleChoice {
+        answers: Vec<String>,
+        response_count: Vec<i64>,
+    },
+    ShortAnswer {
+        answers: Vec<String>,
+    },
+    Subjective {
+        answers: Vec<String>,
+    },
+}
+
+impl Default for ParsedQuestion {
+    fn default() -> Self {
+        ParsedQuestion::SingleChoice {
+            answers: Vec::new(),
+            response_count: Vec::new(),
+        }
+    }
+}
 
 #[derive(Clone, Copy)]
 pub struct Controller {
     survey_id: i64,
     org_id: Memo<i64>,
     surveys: Resource<SurveyV2>,
+    panels: Resource<QueryResponse<PanelV2Summary>>,
     responses: Resource<QueryResponse<SurveyResponseSummary>>,
     endpoint: &'static str,
+
+    panel_responses: Signal<PanelResponses>,
+    survey_responses: Signal<SurveyResponses>,
+
+    total_panels: Signal<Vec<Panel>>,
 }
 
 impl Controller {
@@ -39,6 +93,18 @@ impl Controller {
             }
         });
 
+        let panels: Resource<QueryResponse<PanelV2Summary>> = use_resource(move || async move {
+            let cli = PanelV2::get_client(&crate::config::get().api_url);
+
+            match cli.query(org_id(), PanelV2Query::new(10000)).await {
+                Ok(d) => d,
+                Err(e) => {
+                    tracing::error!("Error: {:?}", e);
+                    QueryResponse::default()
+                }
+            }
+        });
+
         let responses: Resource<QueryResponse<SurveyResponseSummary>> = use_resource(move || {
             async move {
                 let cli = SurveyResponse::get_client(&crate::config::get().api_url);
@@ -57,15 +123,270 @@ impl Controller {
 
         let endpoint = crate::config::get().api_url;
 
-        let ctrl = Self {
+        let mut ctrl = Self {
             survey_id,
             org_id,
             surveys,
             endpoint,
             responses,
+            panels,
+
+            panel_responses: use_signal(|| PanelResponses::default()),
+            survey_responses: use_signal(|| SurveyResponses::default()),
+            total_panels: use_signal(|| vec![]),
         };
 
+        use_effect(move || {
+            let survey = ctrl.get_survey();
+            let responses = ctrl.responses();
+            let panels = ctrl.get_panels();
+
+            if survey.is_none() || responses.is_none() || panels.is_none() {
+                return;
+            }
+
+            let survey: SurveyV2 = survey.unwrap();
+            let responses: Vec<SurveyResponseSummary> = responses.unwrap().items;
+            let panels: Vec<PanelV2Summary> = panels.unwrap().items;
+
+            let panel_responses = PanelResponses {
+                quotes: survey.quotes,
+                response_count: survey.response_count,
+                panels: ctrl.parsing_panels(panels, responses.clone()),
+            };
+
+            let survey_responses = SurveyResponses {
+                answers: ctrl.parsing_answers(survey, responses.clone()),
+            };
+
+            ctrl.panel_responses.set(panel_responses);
+            ctrl.survey_responses.set(survey_responses);
+        });
+
         ctrl
+    }
+
+    pub fn parsing_answers(
+        &self,
+        survey: SurveyV2,
+        responses: Vec<SurveyResponseSummary>,
+    ) -> HashMap<i64, (String, i64, HashMap<i64, ParsedQuestion>)> {
+        let mut survey_maps: HashMap<i64, (String, i64, HashMap<i64, ParsedQuestion>)> =
+            HashMap::new();
+
+        for response in responses {
+            let id = response.panel_id;
+
+            for (i, answer) in response.answers.iter().enumerate() {
+                let questions = survey.questions.clone();
+
+                let question = questions[i].clone();
+                let title = questions[i].title();
+                let options = questions[i].options();
+
+                let response_count = survey.response_count;
+
+                let default_value = match question {
+                    models::Question::SingleChoice(_) => {
+                        let mut response_count = vec![0; options.len()];
+
+                        if let Answer::SingleChoice { answer } = answer {
+                            response_count[(answer - 1) as usize] += 1;
+                        }
+
+                        ParsedQuestion::SingleChoice {
+                            answers: options.clone(),
+                            response_count,
+                        }
+                    }
+                    models::Question::MultipleChoice(_) => {
+                        let mut response_count = vec![0; options.len()];
+
+                        if let Answer::MultipleChoice { answer } = answer {
+                            for ans in answer {
+                                response_count[(ans - 1) as usize] += 1;
+                            }
+                        }
+
+                        ParsedQuestion::MultipleChoice {
+                            answers: options.clone(),
+                            response_count,
+                        }
+                    }
+                    models::Question::ShortAnswer(_) => {
+                        if let Answer::ShortAnswer { answer } = answer {
+                            ParsedQuestion::ShortAnswer {
+                                answers: vec![answer.clone()],
+                            }
+                        } else {
+                            ParsedQuestion::ShortAnswer { answers: vec![] }
+                        }
+                    }
+                    models::Question::Subjective(_) => {
+                        if let Answer::Subjective { answer } = answer {
+                            ParsedQuestion::Subjective {
+                                answers: vec![answer.clone()],
+                            }
+                        } else {
+                            ParsedQuestion::Subjective { answers: vec![] }
+                        }
+                    }
+                };
+
+                survey_maps
+                    .entry(i as i64)
+                    .and_modify(|survey_data| {
+                        let mut map = survey_data.2.clone();
+
+                        match map.get(&id) {
+                            Some(v) => match v {
+                                ParsedQuestion::SingleChoice {
+                                    answers,
+                                    response_count,
+                                } => {
+                                    if let Answer::SingleChoice { answer } = answer {
+                                        let mut response_count = response_count.clone();
+                                        response_count[(answer - 1) as usize] += 1;
+                                        map.insert(
+                                            id,
+                                            ParsedQuestion::SingleChoice {
+                                                answers: answers.clone(),
+                                                response_count,
+                                            },
+                                        );
+                                        survey_data.2 = map;
+                                    }
+                                }
+                                ParsedQuestion::MultipleChoice {
+                                    answers,
+                                    response_count,
+                                } => {
+                                    if let Answer::MultipleChoice { answer } = answer {
+                                        let mut response_count = response_count.clone();
+
+                                        for ans in answer {
+                                            response_count[(ans - 1) as usize] += 1;
+                                        }
+
+                                        map.insert(
+                                            id,
+                                            ParsedQuestion::SingleChoice {
+                                                answers: answers.clone(),
+                                                response_count,
+                                            },
+                                        );
+                                        survey_data.2 = map;
+                                    }
+                                }
+                                ParsedQuestion::ShortAnswer { answers } => {
+                                    if let Answer::ShortAnswer { answer } = answer {
+                                        let mut answers = answers.clone();
+                                        answers.push(answer.clone());
+                                        map.insert(id, ParsedQuestion::ShortAnswer { answers });
+                                        survey_data.2 = map;
+                                    }
+                                }
+                                ParsedQuestion::Subjective { answers } => {
+                                    if let Answer::Subjective { answer } = answer {
+                                        let mut answers = answers.clone();
+                                        answers.push(answer.clone());
+                                        map.insert(id, ParsedQuestion::Subjective { answers });
+                                        survey_data.2 = map;
+                                    }
+                                }
+                            },
+                            None => {
+                                if let Answer::SingleChoice { answer } = answer {
+                                    let mut response_count = vec![0; options.len()];
+                                    response_count[(answer - 1) as usize] += 1;
+                                    map.insert(
+                                        id,
+                                        ParsedQuestion::SingleChoice {
+                                            answers: options.clone(),
+                                            response_count,
+                                        },
+                                    );
+                                    survey_data.2 = map;
+                                } else if let Answer::MultipleChoice { answer } = answer {
+                                    let mut response_count = vec![0; options.len()];
+                                    for ans in answer {
+                                        response_count[(ans - 1) as usize] += 1;
+                                    }
+                                    map.insert(
+                                        id,
+                                        ParsedQuestion::SingleChoice {
+                                            answers: options.clone(),
+                                            response_count,
+                                        },
+                                    );
+                                    survey_data.2 = map;
+                                } else if let Answer::ShortAnswer { answer } = answer {
+                                    let mut answers = vec![];
+                                    answers.push(answer.clone());
+                                    map.insert(id, ParsedQuestion::ShortAnswer { answers });
+                                    survey_data.2 = map;
+                                } else if let Answer::Subjective { answer } = answer {
+                                    let mut answers = vec![];
+                                    answers.push(answer.clone());
+                                    map.insert(id, ParsedQuestion::Subjective { answers });
+                                    survey_data.2 = map;
+                                }
+                            }
+                        }
+                    })
+                    .or_insert_with(|| {
+                        (title, response_count, HashMap::from([(id, default_value)]))
+                    });
+            }
+        }
+
+        survey_maps
+    }
+
+    pub fn parsing_panels(
+        &mut self,
+        panels: Vec<PanelV2Summary>,
+        responses: Vec<SurveyResponseSummary>,
+    ) -> HashMap<i64, Panel> {
+        let mut panel_maps: HashMap<i64, Panel> = HashMap::new();
+
+        let panel_lookup: HashMap<i64, &PanelV2Summary> =
+            panels.iter().map(|p| (p.id, p)).collect();
+
+        for response in responses {
+            let id = response.panel_id;
+
+            if let Some(matching_panel) = panel_lookup.get(&id) {
+                panel_maps
+                    .entry(id)
+                    .and_modify(|panel| panel.count += 1)
+                    .or_insert_with(|| Panel {
+                        id,
+                        name: matching_panel.name.clone(),
+                        count: 1,
+                    });
+            }
+        }
+        self.total_panels
+            .set(panel_maps.values().cloned().collect());
+
+        panel_maps
+    }
+
+    pub fn get_total_panels(&self) -> Signal<Vec<Panel>> {
+        self.total_panels
+    }
+
+    pub fn get_survey_responses(&self) -> SurveyResponses {
+        (self.survey_responses)()
+    }
+
+    pub fn get_panel_responses(&self) -> PanelResponses {
+        (self.panel_responses)()
+    }
+
+    pub fn get_panels(&self) -> Option<QueryResponse<PanelV2Summary>> {
+        self.panels.value()()
     }
 
     pub fn responses(&self) -> Option<QueryResponse<SurveyResponseSummary>> {

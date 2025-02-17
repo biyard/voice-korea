@@ -1,6 +1,62 @@
 use dioxus_translate::translate;
 
 translate! {
+    ObjectiveBoxTranslate;
+
+    necessary: {
+        ko: "[필수]",
+        en: "[Necessary]"
+    }
+    plural: {
+        ko: "[복수]",
+        en: "[Plural]"
+    }
+    people_participated: {
+        ko: "명 참여",
+        en: " people participated"
+    }
+    people: {
+        ko: "명",
+        en: " people"
+    }
+}
+
+translate! {
+    SubjectiveBoxTranslate;
+
+    people_participated: {
+        ko: "명 참여",
+        en: " people participated"
+    }
+    subjective_answer: {
+        ko: "주관식 답변",
+        en: "Subjective Answer",
+    }
+}
+
+translate! {
+    SurveyPanelReportTranslate;
+
+    survey_participation_rate: {
+        ko: "조사 참여 비율",
+        en: "Survey Participation Rate"
+    }
+    people: {
+        ko: "명",
+        en: " people"
+    }
+}
+
+translate! {
+    PanelSelectionBoxTranslate;
+
+    choose_participate: {
+        ko: "참여 대상 선택",
+        en: "Choose who to participate"
+    }
+}
+
+translate! {
     SurveyResultTranslate;
 
     survey_management: {
