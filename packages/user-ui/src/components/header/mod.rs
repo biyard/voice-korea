@@ -17,7 +17,7 @@ pub fn Header(lang: Language) -> Element {
                     lang: lang.clone(),
                 },
                 icons::Logo {}
-                div { class: "font-extrabold text-base text-[#34333e]", "VOCIE KOREA" }
+                div { class: "font-extrabold text-base text-[#34333e]", "VOICE KOREA" }
             }
             //TODO: Add more menus
             div { class: "flex gap-5",
