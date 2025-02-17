@@ -112,7 +112,6 @@ pub fn ObjectiveBox(
     lang: Language,
     title: String,
     responses: i64,
-    total_panel: i64,
     answers: Vec<String>,
     answer_count: Vec<i64>,
 
@@ -123,19 +122,25 @@ pub fn ObjectiveBox(
 ) -> Element {
     let tr: ObjectiveBoxTranslate = translate(&lang);
     let mut pie_charts: Signal<Vec<PieChartData>> = use_signal(|| vec![]);
+    let mut total_panel: Signal<i64> = use_signal(|| 0);
 
     use_effect(use_reactive(&answer_count, {
         let answers = answers.clone();
         move |answer_count| {
             let mut pies = vec![];
+            let mut panel = 0;
 
             for (i, answer) in answers.iter().enumerate() {
                 pies.push(PieChartData::new(answer.clone(), answer_count[i] as i32));
+                panel += answer_count[i];
             }
 
             pie_charts.set(pies);
+            total_panel.set(panel);
         }
     }));
+
+    let total_panel = total_panel();
 
     rsx! {
         div { class: "flex flex-col w-full  bg-white px-[40px] py-[20px] rounded-[8px] gap-[20px]",
@@ -181,7 +186,7 @@ pub fn ObjectiveBox(
                             div { class: "flex flex-row w-full justify-start items-center gap-[20px]",
                                 if total_panel != 0 {
                                     HorizontalBar {
-                                        id: format!("horizontal bar {index} {i}"),
+                                        id: format!("horizontal_bar_{}{}", index, i),
                                         value: answer_count[i],
                                         height: "23px",
                                         max_value: total_panel,
@@ -208,7 +213,7 @@ pub fn ObjectiveBox(
                     }
                 }
                 PieChart {
-                    id: "pie charts".to_string(),
+                    id: format!("pie_chart_{index}"),
                     width: "500px",
                     height: "500px",
                     class: "w-[500px]",
@@ -278,7 +283,6 @@ pub fn SurveyAnswerReport(
 ) -> Element {
     let answer_divs: Signal<Vec<Element>> = use_signal(|| vec![]);
     let answers = survey_report.clone().answers;
-    let panels = panel_report.clone().panels;
 
     let mut selected_panels = use_signal(|| vec![0; total_panels().len()]);
     let total_panels = total_panels();
@@ -290,9 +294,9 @@ pub fn SurveyAnswerReport(
         }
     }));
 
-    use_effect(use_reactive((&panels, &answers, &selected_panels), {
+    use_effect(use_reactive((&answers, &selected_panels), {
         let mut answer_divs = answer_divs.clone();
-        move |(panels, answers, mut selected_panels)| {
+        move |(answers, mut selected_panels)| {
             let keys: Vec<i64> = answers.keys().cloned().collect();
             let mut new_divs = vec![];
 
@@ -347,14 +351,12 @@ pub fn SurveyAnswerReport(
                             response_count,
                         } = panel_map.get(&selected_panels()[i]).unwrap()
                         {
-                            let total_panel = panels.get(&selected_panels()[i]).unwrap().count;
                             new_divs.push(rsx! {
                                 ObjectiveBox {
                                     index: i,
                                     lang,
                                     title,
                                     responses,
-                                    total_panel: total_panel.clone() as i64,
                                     answers: answers.clone(),
                                     answer_count: response_count.clone(),
                                     is_single: true,
@@ -373,16 +375,15 @@ pub fn SurveyAnswerReport(
                             response_count,
                         } = panel_map.get(&selected_panels()[i]).unwrap()
                         {
-                            let total_panel = panels.get(&selected_panels()[i]).unwrap().count;
                             new_divs.push(rsx! {
                                 ObjectiveBox {
                                     index: i,
                                     lang,
                                     title,
                                     responses,
-                                    total_panel: total_panel.clone() as i64,
                                     answers: answers.clone(),
                                     answer_count: response_count.clone(),
+                                    is_single: false,
 
                                     total_panels: total_panels.clone(),
                                     selected_panel: selected_panels()[i],

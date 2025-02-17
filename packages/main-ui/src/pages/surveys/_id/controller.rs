@@ -270,7 +270,7 @@ impl Controller {
 
                                         map.insert(
                                             id,
-                                            ParsedQuestion::SingleChoice {
+                                            ParsedQuestion::MultipleChoice {
                                                 answers: answers.clone(),
                                                 response_count,
                                             },
@@ -314,7 +314,7 @@ impl Controller {
                                     }
                                     map.insert(
                                         id,
-                                        ParsedQuestion::SingleChoice {
+                                        ParsedQuestion::MultipleChoice {
                                             answers: options.clone(),
                                             response_count,
                                         },
