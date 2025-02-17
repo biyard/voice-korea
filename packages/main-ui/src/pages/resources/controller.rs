@@ -110,6 +110,8 @@ impl Controller {
             total_count,
             resources,
         };
+
+        use_context_provider(|| ctrl);
         Ok(ctrl)
     }
     pub fn change_page(&mut self, page: usize) {

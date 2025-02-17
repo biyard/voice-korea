@@ -14,7 +14,7 @@ use crate::survey::ProjectArea;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
 #[derive(validator::Validate)]
-#[api_model(base = "/organizations/v2/:org_id/resource", table = resources, iter_type=QueryResponse)]
+#[api_model(base = "/organizations/v2/:org_id/resources", table = resources, iter_type=QueryResponse)]
 pub struct Resource {
     //FIXME: When add "action_by_id = delete", Error occured.
     /*
