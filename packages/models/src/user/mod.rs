@@ -1,7 +1,10 @@
 #![allow(unused_variables)]
-use crate::organization::Organization;
 #[allow(unused)]
 use crate::Result;
+use crate::{
+    // group::GroupV2,
+    organization::Organization,
+};
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::api_model;
@@ -27,6 +30,10 @@ pub struct User {
     #[api_model(many_to_many = organization_members, foreign_table_name = organizations, foreign_primary_key = org_id, foreign_reference_key = user_id)]
     #[serde(default)]
     pub orgs: Vec<Organization>,
+    // FIXME: error returned from database: table name \"j\" specified more than once
+    // #[api_model(many_to_many = group_members, foreign_table_name = groups, foreign_primary_key = group_id, foreign_reference_key = user_id)]
+    // #[serde(default)]
+    // pub groups: Vec<GroupV2>,
 }
 
 #[derive(validator::Validate)]

@@ -5,10 +5,11 @@ use crate::Result;
 use by_axum::aide;
 use by_macros::api_model;
 use by_types::QueryResponse;
-#[allow(unused)]
-#[api_model(base = "/organizations/v2/:org-id/groups", table = groups, iter_type=QueryResponse)]
+
+#[api_model(base = "/organizations/v2/:org-id/groups", table = groups, action_by_id = [add_group_member(email = String), remove_group_member(user_id = i64)], iter_type=QueryResponse)]
 pub struct GroupV2 {
-    #[api_model(summary, primary_key, action = delete)]
+    // FIXME: If add read action, it will be used as unused variable
+    #[api_model(summary, primary_key, action = delete)] //read_action = [get_group, find_by_id])]
     pub id: i64,
     #[api_model(summary, auto = [insert])]
     pub created_at: i64,
