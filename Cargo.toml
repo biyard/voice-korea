@@ -1,5 +1,11 @@
 [workspace]
-members = ["packages/models", "packages/api", "packages/main-ui", "packages/watcher"]
+members = [
+    "packages/models",
+    "packages/api",
+    "packages/main-ui",
+    "packages/watcher",
+    "packages/user-ui",
+]
 resolver = "2"
 exclude = ["deps"]
 
@@ -16,18 +22,20 @@ easy-dynamodb = { path = "deps/rust-sdk/packages/easy-dynamodb" }
 by-components = { path = "deps/rust-sdk/packages/by-components" }
 by-macros = { path = "deps/rust-sdk/packages/by-macros" }
 by-types = { path = "deps/rust-sdk/packages/by-types" }
-dioxus-translate = { path = "deps/rust-sdk/packages/dioxus-translate", features = ["ko"] }
+dioxus-translate = { path = "deps/rust-sdk/packages/dioxus-translate", features = [
+    "ko",
+] }
 dioxus-aws = { path = "deps/rust-sdk/packages/dioxus-aws" }
 rest-api = { path = "deps/rust-sdk/packages/rest-api" }
 
 models = { version = "1.0.0", path = "packages/models" }
 slog = "2.7.0"
 chrono = "0.4.38"
-serde = { version="1.0.215", features = ["derive"] }
+serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.137"
 reqwest = { version = "0.12.9", features = ["json"] }
 dioxus = { version = "0.6.3" }
-
+dioxus-logger = { version = "0.6.2" }
 sqlx = { version = "0.8.3", features = [
     "sqlite",
     "postgres",
