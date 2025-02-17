@@ -108,6 +108,7 @@ pub fn Nav(lang: Language, menu: String, name: String) -> Element {
 
 #[component]
 pub fn ObjectiveBox(
+    index: usize,
     lang: Language,
     title: String,
     responses: i64,
@@ -171,7 +172,7 @@ pub fn ObjectiveBox(
 
             div { class: "flex flex-row w-full justify-between items-start",
                 div { class: "flex flex-col flex-1 justify-start items-start gap-[20px]",
-                    for (index , answer) in answers.clone().iter().enumerate() {
+                    for (i , answer) in answers.clone().iter().enumerate() {
                         div { class: "flex flex-col w-full justify-start items-start gap-[5px]",
                             div { class: "font-medium text-[#2d2d2d] text-[15px] leading-[22.5px]",
                                 "{answer}"
@@ -180,8 +181,8 @@ pub fn ObjectiveBox(
                             div { class: "flex flex-row w-full justify-start items-center gap-[20px]",
                                 if total_panel != 0 {
                                     HorizontalBar {
-                                        id: format!("horizontal bar {index}"),
-                                        value: answer_count[index],
+                                        id: format!("horizontal bar {index} {i}"),
+                                        value: answer_count[i],
                                         height: "23px",
                                         max_value: total_panel,
                                         class: "flex flex-row flex-1 bg-[#EEEEEE] rounded-[6px] overflow-hidden",
@@ -192,10 +193,10 @@ pub fn ObjectiveBox(
                                     {
                                         format!(
                                             "{:?}{} ({:.2}%)",
-                                            answer_count[index],
+                                            answer_count[i],
                                             tr.people,
                                             if total_panel != 0 {
-                                                answer_count[index] as f64 * 100.0 / total_panel as f64
+                                                answer_count[i] as f64 * 100.0 / total_panel as f64
                                             } else {
                                                 0.0
                                             },
@@ -349,6 +350,7 @@ pub fn SurveyAnswerReport(
                             let total_panel = panels.get(&selected_panels()[i]).unwrap().count;
                             new_divs.push(rsx! {
                                 ObjectiveBox {
+                                    index: i,
                                     lang,
                                     title,
                                     responses,
@@ -374,6 +376,7 @@ pub fn SurveyAnswerReport(
                             let total_panel = panels.get(&selected_panels()[i]).unwrap().count;
                             new_divs.push(rsx! {
                                 ObjectiveBox {
+                                    index: i,
                                     lang,
                                     title,
                                     responses,
