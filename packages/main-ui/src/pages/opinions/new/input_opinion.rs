@@ -82,7 +82,11 @@ pub fn ConnectProject(lang: Language) -> Element {
                 }
             }
             div { class: "flex flex-row w-full h-[55px] justify-start items-center p-[15px] font-medium text-[15px] text-[#b4b4b4] bg-[#f7f7f7] rounded-[4px]",
-                "{i18n.research_selection}"
+                option { onchange: move |_| {},
+                    "{i18n.research_selection}"
+                    option { value: "" }
+                                // TODO: Need connect button to data
+                }
             }
         }
     }
