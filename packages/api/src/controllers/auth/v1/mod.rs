@@ -170,7 +170,7 @@ impl UserControllerV1 {
         let org = self.org.insert(user.email.clone()).await?;
 
         self.org_mem
-            .insert(user.id, org.id, user.email.clone(), 0, None)
+            .insert(user.id, org.id, user.email.clone(), Some(Role::Admin), None)
             .await?;
 
         let user = self
