@@ -167,6 +167,8 @@ impl UserControllerV1 {
 
         let jwt = self.generate_token(&user)?;
 
+        // TODO: check invitation table and add user to organization (groups)
+
         Ok(JsonWithHeaders::new(user)
             .with_bearer_token(&jwt)
             .with_cookie(&jwt))

@@ -11,6 +11,8 @@ use serde::{Deserialize, Serialize};
 
 mod member;
 pub use member::*;
+mod invitation;
+pub use invitation::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
@@ -29,7 +31,7 @@ pub struct Organization {
 
     #[api_model(summary)]
     pub name: String,
-    #[api_model(many_to_many = organization_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = org_id)]
+    #[api_model(many_to_many = organization_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = org_id, unique)]
     #[serde(default)]
     pub users: Vec<User>,
 }
