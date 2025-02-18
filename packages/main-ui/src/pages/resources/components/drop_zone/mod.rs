@@ -3,8 +3,12 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
+use models::MetadataRequest;
 
-use crate::components::{icons::UploadFile, upload_button::UploadButton};
+use crate::{
+    components::{icons::UploadFile, upload_button::UploadButton},
+    service::metadata_api::MetadataApi,
+};
 
 #[cfg(feature = "web")]
 use dioxus::html::{FileEngine, HasFileData};
@@ -32,8 +36,10 @@ fn human_readable_size(bytes: usize) -> String {
 
 #[cfg(feature = "web")]
 pub async fn handle_file_upload(file_engine: Arc<dyn FileEngine>) -> Vec<File> {
+    let api: MetadataApi = use_context();
     let mut result: Vec<File> = vec![];
     let files = file_engine.files();
+
     for f in files {
         match file_engine.read_file(f.as_str()).await {
             Some(bytes) => {
@@ -42,12 +48,19 @@ pub async fn handle_file_upload(file_engine: Arc<dyn FileEngine>) -> Vec<File> {
                 let extension = ext.parse::<super::create_resource_modal::FileExtension>();
                 match extension {
                     Ok(ext) => {
+                        let url = api
+                            .upload_metadata(MetadataRequest {
+                                file_name: file_name.clone(),
+                                bytes: bytes.clone(),
+                            })
+                            .await;
+
                         result.push(File {
                             name: file_name,
                             size: human_readable_size(bytes.len()),
                             bytes,
                             ext,
-                            url: None,
+                            url: Some(url),
                         });
                     }
                     Err(_) => {

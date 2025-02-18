@@ -8,12 +8,28 @@ use by_axum::aide;
 use by_macros::{api_model, ApiModel};
 use by_types::QueryResponse;
 use dioxus_translate::Translate;
+use serde::{Deserialize, Serialize};
 
 use crate::survey::ProjectArea;
 
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+pub struct GetObjectUriResponse {
+    pub presigned_uris: Vec<String>,
+    pub uris: Vec<String>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+pub struct GetObjectUriRequest {
+    pub filenames: Vec<String>,
+}
+
 #[derive(validator::Validate)]
+///FIXME: fix to filenames to type vector
 #[api_model(base = "/organizations/v2/:org_id/resources", table = resources, iter_type=QueryResponse)]
 pub struct Resource {
     //FIXME: When add "action_by_id = delete", Error occured.

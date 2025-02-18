@@ -1,211 +1,81 @@
 pub type Result<T> = std::result::Result<T, ServerFnError>;
 
-use std::collections::HashMap;
-
+use crate::utils::metadata::get_ext_from_name;
 use dioxus::prelude::*;
-use models::prelude::{
-    CreateMetadataRequest, GetPutObjectUriRequest, GetPutObjectUriResponse, MetadataActionRequest,
-    MetadataByIdActionRequest, ResourceMetadata, UpdateMetadataRequest,
-};
+use dioxus_logger::tracing;
+use models::{GetObjectUriRequest, GetObjectUriResponse, MetadataRequest};
+use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
 
-use crate::{api::common::CommonQueryResponse, utils::api::ReqwestClient};
-
-use super::{login_service::LoginService, organization_api::OrganizationApi};
+use crate::config;
 
 #[derive(Debug, Clone, Copy)]
-pub struct ResourceApi {
-    pub endpoint: Signal<String>,
-    pub login_service: LoginService,
-    pub organization_service: OrganizationApi,
-}
+pub struct MetadataApi {}
 
-impl ResourceApi {
+impl MetadataApi {
     pub fn init() {
-        let login_service: LoginService = use_context();
-        let organization_service: OrganizationApi = use_context();
-        let srv = Self {
-            endpoint: use_signal(|| crate::config::get().api_url.to_string()),
-            login_service,
-            organization_service,
-        };
+        let srv = Self {};
         use_context_provider(|| srv);
     }
 
-    pub async fn create_metadata(&self, req: CreateMetadataRequest) -> Result<()> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
-        let client = ReqwestClient::new()?;
-
-        let res = client
-            .post(&format!("/metadatas/v1"))
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .json(&MetadataActionRequest::Create(req))
+    pub async fn upload_metadata(&self, req: MetadataRequest) -> Result<String> {
+        let client = reqwest::Client::new();
+        let res = match client
+            .post(format!("{}/metadata/v2/put-uri", &*config::get().api_url))
+            .json(&GetObjectUriRequest {
+                filenames: vec![req.file_name.clone()],
+            })
             .send()
-            .await?;
+            .await
+        {
+            Ok(v) => match v.json::<GetObjectUriResponse>().await {
+                Ok(response) => Ok(response),
+                Err(e) => {
+                    tracing::error!("Failed to deserialize response: {}", e);
+                    Err(ServerFnError::new(format!(
+                        "upload metadata failed: deserialization error: {:?}",
+                        e
+                    )))
+                }
+            },
+            Err(e) => {
+                tracing::error!("Failed to upload metadata: network error {}", e);
+                Err(ServerFnError::new(format!(
+                    "upload metadata failed: network error: {:?}",
+                    e
+                )))
+            }
+        }?;
 
-        let _res = res.error_for_status()?;
+        let presigned_uri = res.presigned_uris[0].clone();
+        let uri = res.uris[0].clone();
 
-        Ok(())
-    }
+        tracing::debug!(
+            "presigned_uri: {} Request body size: {}",
+            presigned_uri.clone(),
+            req.bytes.len()
+        );
 
-    pub async fn update_metadata(
-        &self,
-        metadata_id: String,
-        req: UpdateMetadataRequest,
-    ) -> Result<()> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
-        let client = ReqwestClient::new()?;
+        let ext = get_ext_from_name(&req.file_name.clone()).unwrap();
+        let content_type = HeaderValue::from_str(&format!("image/{}", ext)).unwrap();
 
-        let res = client
-            .post(&format!("/metadatas/v1/{metadata_id}"))
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .json(&MetadataByIdActionRequest::Update(req))
+        let mut headers = HeaderMap::new();
+        headers.insert(CONTENT_TYPE, content_type);
+
+        match reqwest::Client::new()
+            .put(presigned_uri.clone())
+            .headers(headers)
+            .body(req.bytes)
             .send()
-            .await?;
-
-        let _res = res.error_for_status()?;
-
-        Ok(())
-    }
-
-    pub async fn list_metadata(
-        &self,
-        size: Option<i64>,
-        bookmark: Option<String>,
-    ) -> Result<CommonQueryResponse<ResourceMetadata>> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
-
-        let mut params = HashMap::new();
-        if let Some(size) = size {
-            params.insert("size", size.to_string());
+            .await
+        {
+            Ok(_) => Ok(uri.clone()),
+            Err(e) => {
+                tracing::error!("Failed to upload metadata {:?}", e);
+                return Err(ServerFnError::new(format!(
+                    "upload metadata failed: {:?}",
+                    e
+                )));
+            }
         }
-        if let Some(bookmark) = bookmark {
-            params.insert("bookmark", bookmark);
-        }
-
-        let client = ReqwestClient::new()?;
-
-        let res = client
-            .get(&format!("/metadatas/v1"))
-            .query(&params)
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .send()
-            .await?;
-
-        let res = res.error_for_status()?;
-
-        let metadatas = res.json().await?;
-        Ok(metadatas)
-    }
-
-    pub async fn upload_metadata(
-        &self,
-        req: GetPutObjectUriRequest,
-    ) -> Result<GetPutObjectUriResponse> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
-        let client = ReqwestClient::new()?;
-
-        let res = client
-            .post(format!("/metadatas/v1/upload").as_str())
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .json(&req)
-            .send()
-            .await?;
-
-        let res = res.error_for_status()?;
-
-        let metadata = res.json().await?;
-        Ok(metadata)
-    }
-
-    pub async fn remove_metadata(&self, metadata_id: String) -> Result<()> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
-        let client = ReqwestClient::new()?;
-
-        let res = client
-            .post(format!("/metadatas/v1/{}", metadata_id).as_str())
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .json(&MetadataByIdActionRequest::Delete)
-            .send()
-            .await?;
-
-        let _res = res.error_for_status()?;
-
-        Ok(())
-    }
-
-    pub async fn get_metadata(&self, metadata_id: String) -> Result<ResourceMetadata> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
-
-        let client = ReqwestClient::new()?;
-
-        let res = client
-            .get(&format!("/metadatas/v1/{metadata_id}"))
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .send()
-            .await?;
-
-        let res = res.error_for_status()?;
-
-        let metadata = res.json().await?;
-        Ok(metadata)
-    }
-
-    pub async fn search_metadatas(
-        &self,
-        keyword: String,
-    ) -> Result<CommonQueryResponse<ResourceMetadata>> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
-
-        let mut params = HashMap::new();
-        params.insert("keyword", keyword.to_string());
-
-        let client = ReqwestClient::new()?;
-
-        let res = client
-            .get(&format!("/metadatas/v1"))
-            .query(&params)
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .send()
-            .await?;
-
-        let res = res.error_for_status()?;
-
-        let metadatas = res.json().await?;
-        Ok(metadatas)
-    }
-
-    pub fn get_organization_id(&self) -> String {
-        let id = self.organization_service.get_selected_organization_id();
-        id
-    }
-
-    pub fn get_token(&self) -> String {
-        let cookie = if cfg!(feature = "web") {
-            self.login_service
-                .get_cookie_value()
-                .unwrap_or_else(|| "".to_string())
-        } else {
-            "".to_string()
-        };
-
-        let token = cookie.replace('"', "");
-        let format_cookie = format!("token={token}");
-        let token = format_cookie.replace("token=", "Bearer ").replace("\"", "");
-
-        token
     }
 }
