@@ -138,7 +138,7 @@ checksum = "34ac096ce696dc2fcabef30516bb13c0a68a11d30131d3df6f04711467681b04"
 
 [[package]]
 name = "api"
-version = "0.3.11"
+version = "0.3.13"
 dependencies = [
  "aws-config",
  "aws-sdk-s3",
@@ -3309,7 +3309,7 @@ dependencies = [
 
 [[package]]
 name = "main-ui"
-version = "0.3.8"
+version = "0.3.10"
 dependencies = [
  "by-components",
  "by-types",
@@ -3319,6 +3319,7 @@ dependencies = [
  "dioxus-logger 0.5.1",
  "dioxus-translate",
  "getrandom 0.2.15",
+ "indexmap",
  "models",
  "num-format",
  "regex",

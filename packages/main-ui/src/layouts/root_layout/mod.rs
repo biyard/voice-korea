@@ -55,26 +55,28 @@ pub fn RootLayout(lang: Language) -> Element {
                         selected_menu: (selected_menu)(),
                         lang,
                     }
-                    SuspenseBoundary {
-                        fallback: |_| rsx! {
-                            div { class: "absolute w-screen h-screen top-0 left-0 flex items-center justify-center text-white",
-                                CubeLoader {}
-                            }
-                        },
-                        div { class: "flex flex-col grow w-full bg-[#f0f2fc] px-[60px] pt-[25px]",
-                            div { class: "flex flex-row w-full justify-end items-end gap-[5px]",
-                                Link {
-                                    class: "flex flex-row justify-start items-start",
-                                    to: Route::LoginPage { lang },
-                                    div { class: "w-[20px] h-[20px]",
-                                        Logout { width: "20", height: "20" }
-                                    }
-                                    div { class: "ml-[5px] font-bold text-[#555462] text-[15px]",
-                                        "{tr.logout}"
-                                    }
+                    div { class: "flex flex-col w-full bg-[#f0f2fc] px-[60px] pt-[25px]",
+                        div { class: "flex flex-row w-full justify-end items-end gap-[5px]",
+                            Link {
+                                class: "flex flex-row justify-start items-start",
+                                to: Route::LoginPage { lang },
+                                div { class: "w-[20px] h-[20px]",
+                                    Logout { width: "20", height: "20" }
+                                }
+                                div { class: "ml-[5px] font-bold text-[#555462] text-[15px]",
+                                    "{tr.logout}"
                                 }
                             }
-                            Outlet::<Route> {}
+                        }
+                        SuspenseBoundary {
+                            fallback: |_| rsx! {
+                                div { class: "absolute w-screen h-screen top-0 left-0 flex items-center justify-center text-white",
+                                    CubeLoader {}
+                                }
+                            },
+                            div { class: "flex flex-col grow w-full bg-[#f0f2fc] px-[60px] pt-[25px]",
+                                Outlet::<Route> {}
+                            }
                         }
                     }
                 }

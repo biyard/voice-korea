@@ -302,7 +302,7 @@ pub fn SurveyAnswerReport(
 
             for (i, key) in keys.iter().enumerate() {
                 if selected_panels.len() != 0 {
-                    if let Some(answer) = answers.get(&key) {
+                    if let Some(answer) = answers.get(&(*key)) {
                         let title = answer.0.clone();
                         let responses = answer.1;
                         let panel_map: std::collections::HashMap<i64, ParsedQuestion> =
