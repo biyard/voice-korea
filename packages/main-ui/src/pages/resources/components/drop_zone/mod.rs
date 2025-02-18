@@ -33,8 +33,7 @@ fn human_readable_size(bytes: usize) -> String {
 }
 
 #[cfg(feature = "web")]
-pub async fn handle_file_upload(file_engine: Arc<dyn FileEngine>) -> Vec<File> {
-    let api: MetadataApi = use_context();
+pub async fn handle_file_upload(file_engine: Arc<dyn FileEngine>, api: MetadataApi) -> Vec<File> {
     let mut result: Vec<File> = vec![];
     let files = file_engine.files();
 
@@ -81,6 +80,7 @@ pub async fn handle_file_upload(file_engine: Arc<dyn FileEngine>) -> Vec<File> {
 
 #[component]
 pub fn DropZone(lang: Language, onchange: EventHandler<Vec<File>>) -> Element {
+    let api: MetadataApi = use_context();
     let mut indragzone = use_signal(|| false);
     let translate: DropZoneTranslate = translate(&lang);
 
@@ -116,7 +116,7 @@ pub fn DropZone(lang: Language, onchange: EventHandler<Vec<File>>) -> Element {
                     ev.stop_propagation();
                     #[cfg(feature = "web")]
                     if let Some(file_engine) = ev.files() {
-                        let result = handle_file_upload(file_engine).await;
+                        let result = handle_file_upload(file_engine, api).await;
                         onchange.call(result);
                     }
                     indragzone.set(false);
@@ -140,7 +140,7 @@ pub fn DropZone(lang: Language, onchange: EventHandler<Vec<File>>) -> Element {
                         spawn(async move {
                             #[cfg(feature = "web")]
                             if let Some(file_engine) = ev.files() {
-                                let result = handle_file_upload(file_engine).await;
+                                let result = handle_file_upload(file_engine, api).await;
                                 onchange.call(result);
                             }
                         });
