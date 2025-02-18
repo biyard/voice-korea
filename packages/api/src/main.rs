@@ -36,9 +36,9 @@ mod controllers {
     pub mod invitations {
         pub mod v2;
     }
-    // pub mod groups {
-    //     pub mod v2;
-    // }
+    pub mod groups {
+        pub mod v2;
+    }
     // pub mod attributes {
     //     pub mod v1;
     // }

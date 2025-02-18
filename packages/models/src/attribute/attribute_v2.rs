@@ -55,6 +55,16 @@ pub enum GenderV2 {
     Female = 2,
 }
 
+impl GenderV2 {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s.to_lowercase().as_str() {
+            "male" => Some(GenderV2::Male),
+            "female" => Some(GenderV2::Female),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default, ApiModel, Translate)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 pub enum RegionV2 {
