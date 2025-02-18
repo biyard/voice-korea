@@ -120,6 +120,7 @@ impl ResourceControllerV1 {
                 req.source,
                 req.access_level,
                 org_id,
+                req.files,
             )
             .await?;
         Ok(resource)
