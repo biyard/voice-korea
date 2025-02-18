@@ -5,6 +5,7 @@ use crate::Result;
 use by_axum::aide;
 use by_macros::ApiModel;
 use dioxus_translate::Translate;
+use serde::{Deserialize, Serialize};
 
 // NOTE: AgeV2 should cover specific age and range of age.
 //       If you need to change range of age, you must consider interaction with Noncelab.
@@ -44,8 +45,9 @@ impl AgeV2 {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, ApiModel, Translate)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, Serialize, Deserialize, Translate)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+#[serde(rename_all = "snake_case")]
 pub enum GenderV2 {
     #[default]
     None = 0,
@@ -55,8 +57,9 @@ pub enum GenderV2 {
     Female = 2,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, ApiModel, Translate)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, Serialize, Deserialize, Translate)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+#[serde(rename_all = "snake_case")]
 pub enum RegionV2 {
     #[default]
     None = 0,
@@ -96,8 +99,9 @@ pub enum RegionV2 {
     Jeju = 64,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, ApiModel, Translate)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, Serialize, Deserialize, Translate)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+#[serde(rename_all = "snake_case")]
 pub enum SalaryV2 {
     #[default]
     None = 0,
