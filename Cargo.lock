@@ -3319,6 +3319,7 @@ dependencies = [
  "dioxus-logger 0.5.1",
  "dioxus-translate",
  "getrandom 0.2.15",
+ "indexmap",
  "models",
  "num-format",
  "regex",

@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
+use indexmap::IndexMap;
 use models::{
     excel::SurveyResponseExcel,
     response::{Answer, SurveyResponse, SurveyResponseQuery, SurveyResponseSummary},
@@ -27,7 +28,7 @@ pub struct Panel {
 
 #[derive(Clone, Default, PartialEq)]
 pub struct SurveyResponses {
-    pub answers: HashMap<i64, (String, i64, HashMap<i64, ParsedQuestion>)>, // question_id, (title, response_count, <panel_id, answer>)
+    pub answers: IndexMap<i64, (String, i64, HashMap<i64, ParsedQuestion>)>, // question_id, (title, response_count, <panel_id, answer>)
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -172,9 +173,9 @@ impl Controller {
         &self,
         survey: SurveyV2,
         responses: Vec<SurveyResponseSummary>,
-    ) -> HashMap<i64, (String, i64, HashMap<i64, ParsedQuestion>)> {
-        let mut survey_maps: HashMap<i64, (String, i64, HashMap<i64, ParsedQuestion>)> =
-            HashMap::new();
+    ) -> IndexMap<i64, (String, i64, HashMap<i64, ParsedQuestion>)> {
+        let mut survey_maps: IndexMap<i64, (String, i64, HashMap<i64, ParsedQuestion>)> =
+            IndexMap::new();
 
         for response in responses {
             let id = response.panel_id;
