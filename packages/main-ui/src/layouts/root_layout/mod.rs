@@ -4,6 +4,7 @@ use crate::{
     prelude::*,
     service::{login_service::LoginService, popup_service::PopupZone},
 };
+use by_components::loaders::cube_loader::CubeLoader;
 use dioxus::prelude::*;
 use i18n::RootLayoutTranslate;
 use side_bar::{SelectedMenu, SideBar};
@@ -54,7 +55,7 @@ pub fn RootLayout(lang: Language) -> Element {
                         selected_menu: (selected_menu)(),
                         lang,
                     }
-                    div { class: "flex flex-col grow w-full bg-[#f0f2fc] px-[60px] pt-[25px]",
+                    div { class: "flex flex-col w-full bg-[#f0f2fc] px-[60px] pt-[25px]",
                         div { class: "flex flex-row w-full justify-end items-end gap-[5px]",
                             Link {
                                 class: "flex flex-row justify-start items-start",
@@ -67,7 +68,16 @@ pub fn RootLayout(lang: Language) -> Element {
                                 }
                             }
                         }
-                        Outlet::<Route> {}
+                        SuspenseBoundary {
+                            fallback: |_| rsx! {
+                                div { class: "absolute w-screen h-screen top-0 left-0 flex items-center justify-center text-white",
+                                    CubeLoader {}
+                                }
+                            },
+                            div { class: "flex flex-col grow w-full bg-[#f0f2fc] px-[60px] pt-[25px]",
+                                Outlet::<Route> {}
+                            }
+                        }
                     }
                 }
             }
