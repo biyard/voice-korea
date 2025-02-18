@@ -59,7 +59,7 @@ pub fn InputOpinion(props: InputOpinionProps) -> Element {
                     "{translates.temporary_save}"
                 }
                 div {
-                    class: "cursor-pointer flex flex-row w-[110px] h-[55px] rounded-[4px] justify-center items-center bg-[#b4b4b4] font-semibold text-[16px] text-white",
+                    class: "cursor-pointer flex flex-row w-[110px] h-[55px] rounded-[4px] justify-center items-center bg-[#2a60d3] font-semibold text-[16px] text-white",
                     onclick: move |_| {
                         ctrl.change_step(CurrentStep::CommitteeComposition);
                     },
