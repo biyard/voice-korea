@@ -11,6 +11,7 @@ use dioxus_translate::Language;
 use crate::attribute_v2::{GenderV2, RegionV2, SalaryV2};
 
 use super::{ChoiceQuestion, Question};
+use serde::{Deserialize, Serialize};
 
 #[api_model(base = "/v2/surveys/:survey-id/responses", table = survey_responses)]
 pub struct SurveyResponse {
@@ -126,11 +127,15 @@ impl PartialEq<Question> for Answer {
 
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
-#[serde(rename = "snake_case")]
+#[serde(rename_all = "snake_case")]
 pub enum Attribute {
+    #[serde(alias = "age")]
     Age(AgeV3),
+    #[serde(alias = "gender")]
     Gender(GenderV2),
+    #[serde(alias = "region")]
     Region(RegionV2),
+    #[serde(alias = "salary")]
     Salary(SalaryV2),
 
     #[default]
@@ -170,13 +175,16 @@ impl Attribute {
 
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
-#[serde(rename = "snake_case")]
+#[serde(rename_all = "snake_case")]
 pub enum AgeV3 {
+    #[serde(alias = "specific")]
     Specific(u8),
+    #[serde(alias = "range")]
     Range {
         inclusive_min: u8,
         inclusive_max: u8,
     },
+    #[serde(alias = "none")]
     #[default]
     None,
 }
