@@ -3,7 +3,7 @@ use by_axum::{
     axum::middleware,
 };
 use by_types::DatabaseConfig;
-use controllers::v2::Version2Controller;
+use controllers::{resources::v1::bucket::MetadataControllerV1, v2::Version2Controller};
 use models::response::SurveyResponse;
 use models::*;
 use sqlx::postgres::PgPoolOptions;
@@ -150,7 +150,8 @@ async fn main() -> Result<()> {
             crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
         )
         .nest("/v2", Version2Controller::route(pool.clone())?)
-        .layer(middleware::from_fn(authorization_middleware));
+        .layer(middleware::from_fn(authorization_middleware))
+        .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?);
 
     // .nest(
     //     "/attributes/v1",

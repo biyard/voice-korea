@@ -4,13 +4,18 @@ use by_axum::{
     auth::Authorization,
     axum::{
         extract::{Path, Query, State},
-        routing::get,
+        routing::{get, post},
         Extension, Json, Router,
     },
 };
 
+pub mod bucket;
+
 use models::{
     // ResourceDeleteRequest,
+    ApiError,
+    GetObjectUriRequest,
+    GetObjectUriResponse,
     Resource,
     ResourceAction,
     ResourceByIdAction,
@@ -21,6 +26,7 @@ use models::{
     ResourceRepository,
     ResourceUpdateRequest,
 };
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug)]
 pub struct ResourceControllerV1 {
@@ -40,6 +46,7 @@ impl ResourceControllerV1 {
             )
             .with_state(ctrl))
     }
+
     async fn get_resource(
         State(ctrl): State<ResourceControllerV1>,
         Extension(_auth): Extension<Option<Authorization>>,
@@ -113,6 +120,7 @@ impl ResourceControllerV1 {
                 req.source,
                 req.access_level,
                 org_id,
+                req.files,
             )
             .await?;
         Ok(resource)
