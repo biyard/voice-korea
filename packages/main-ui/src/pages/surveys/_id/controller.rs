@@ -49,6 +49,59 @@ pub enum ParsedQuestion {
     },
 }
 
+impl From<(&models::Question, &Answer)> for ParsedQuestion {
+    fn from((question, answer): (&models::Question, &Answer)) -> Self {
+        match question {
+            models::Question::SingleChoice(_) => {
+                let options = question.options();
+                let mut response_count = vec![0; options.len()];
+
+                if let Answer::SingleChoice { answer } = answer {
+                    response_count[(answer - 1) as usize] += 1;
+                }
+
+                ParsedQuestion::SingleChoice {
+                    answers: options.clone(),
+                    response_count,
+                }
+            }
+            models::Question::MultipleChoice(_) => {
+                let options = question.options();
+                let mut response_count = vec![0; options.len()];
+
+                if let Answer::MultipleChoice { answer } = answer {
+                    for ans in answer {
+                        response_count[(ans - 1) as usize] += 1;
+                    }
+                }
+
+                ParsedQuestion::MultipleChoice {
+                    answers: options.clone(),
+                    response_count,
+                }
+            }
+            models::Question::ShortAnswer(_) => {
+                if let Answer::ShortAnswer { answer } = answer {
+                    ParsedQuestion::ShortAnswer {
+                        answers: vec![answer.clone()],
+                    }
+                } else {
+                    ParsedQuestion::ShortAnswer { answers: vec![] }
+                }
+            }
+            models::Question::Subjective(_) => {
+                if let Answer::Subjective { answer } = answer {
+                    ParsedQuestion::Subjective {
+                        answers: vec![answer.clone()],
+                    }
+                } else {
+                    ParsedQuestion::Subjective { answers: vec![] }
+                }
+            }
+        }
+    }
+}
+
 impl Default for ParsedQuestion {
     fn default() -> Self {
         ParsedQuestion::SingleChoice {
@@ -182,163 +235,50 @@ impl Controller {
 
             for (i, answer) in response.answers.iter().enumerate() {
                 let questions = survey.questions.clone();
-
-                let question = questions[i].clone();
-                let title = questions[i].title();
-                let options = questions[i].options();
-
+                let question = &questions[i];
+                let title = question.title();
                 let response_count = survey.response_count;
 
-                let default_value = match question {
-                    models::Question::SingleChoice(_) => {
-                        let mut response_count = vec![0; options.len()];
-
-                        if let Answer::SingleChoice { answer } = answer {
-                            response_count[(answer - 1) as usize] += 1;
-                        }
-
-                        ParsedQuestion::SingleChoice {
-                            answers: options.clone(),
-                            response_count,
-                        }
-                    }
-                    models::Question::MultipleChoice(_) => {
-                        let mut response_count = vec![0; options.len()];
-
-                        if let Answer::MultipleChoice { answer } = answer {
-                            for ans in answer {
-                                response_count[(ans - 1) as usize] += 1;
-                            }
-                        }
-
-                        ParsedQuestion::MultipleChoice {
-                            answers: options.clone(),
-                            response_count,
-                        }
-                    }
-                    models::Question::ShortAnswer(_) => {
-                        if let Answer::ShortAnswer { answer } = answer {
-                            ParsedQuestion::ShortAnswer {
-                                answers: vec![answer.clone()],
-                            }
-                        } else {
-                            ParsedQuestion::ShortAnswer { answers: vec![] }
-                        }
-                    }
-                    models::Question::Subjective(_) => {
-                        if let Answer::Subjective { answer } = answer {
-                            ParsedQuestion::Subjective {
-                                answers: vec![answer.clone()],
-                            }
-                        } else {
-                            ParsedQuestion::Subjective { answers: vec![] }
-                        }
-                    }
-                };
+                let parsed_question: ParsedQuestion = (question, answer).into();
 
                 survey_maps
                     .entry(i as i64)
                     .and_modify(|survey_data| {
-                        let mut map = survey_data.2.clone();
-
-                        match map.get(&id) {
-                            Some(v) => match v {
-                                ParsedQuestion::SingleChoice {
-                                    answers,
-                                    response_count,
-                                } => {
+                        survey_data
+                            .2
+                            .entry(id)
+                            .and_modify(|existing| match existing {
+                                ParsedQuestion::SingleChoice { response_count, .. } => {
                                     if let Answer::SingleChoice { answer } = answer {
-                                        let mut response_count = response_count.clone();
                                         response_count[(answer - 1) as usize] += 1;
-                                        map.insert(
-                                            id,
-                                            ParsedQuestion::SingleChoice {
-                                                answers: answers.clone(),
-                                                response_count,
-                                            },
-                                        );
-                                        survey_data.2 = map;
                                     }
                                 }
-                                ParsedQuestion::MultipleChoice {
-                                    answers,
-                                    response_count,
-                                } => {
+                                ParsedQuestion::MultipleChoice { response_count, .. } => {
                                     if let Answer::MultipleChoice { answer } = answer {
-                                        let mut response_count = response_count.clone();
-
                                         for ans in answer {
                                             response_count[(ans - 1) as usize] += 1;
                                         }
-
-                                        map.insert(
-                                            id,
-                                            ParsedQuestion::MultipleChoice {
-                                                answers: answers.clone(),
-                                                response_count,
-                                            },
-                                        );
-                                        survey_data.2 = map;
                                     }
                                 }
                                 ParsedQuestion::ShortAnswer { answers } => {
                                     if let Answer::ShortAnswer { answer } = answer {
-                                        let mut answers = answers.clone();
                                         answers.push(answer.clone());
-                                        map.insert(id, ParsedQuestion::ShortAnswer { answers });
-                                        survey_data.2 = map;
                                     }
                                 }
                                 ParsedQuestion::Subjective { answers } => {
                                     if let Answer::Subjective { answer } = answer {
-                                        let mut answers = answers.clone();
                                         answers.push(answer.clone());
-                                        map.insert(id, ParsedQuestion::Subjective { answers });
-                                        survey_data.2 = map;
                                     }
                                 }
-                            },
-                            None => {
-                                if let Answer::SingleChoice { answer } = answer {
-                                    let mut response_count = vec![0; options.len()];
-                                    response_count[(answer - 1) as usize] += 1;
-                                    map.insert(
-                                        id,
-                                        ParsedQuestion::SingleChoice {
-                                            answers: options.clone(),
-                                            response_count,
-                                        },
-                                    );
-                                    survey_data.2 = map;
-                                } else if let Answer::MultipleChoice { answer } = answer {
-                                    let mut response_count = vec![0; options.len()];
-                                    for ans in answer {
-                                        response_count[(ans - 1) as usize] += 1;
-                                    }
-                                    map.insert(
-                                        id,
-                                        ParsedQuestion::MultipleChoice {
-                                            answers: options.clone(),
-                                            response_count,
-                                        },
-                                    );
-                                    survey_data.2 = map;
-                                } else if let Answer::ShortAnswer { answer } = answer {
-                                    let mut answers = vec![];
-                                    answers.push(answer.clone());
-                                    map.insert(id, ParsedQuestion::ShortAnswer { answers });
-                                    survey_data.2 = map;
-                                } else if let Answer::Subjective { answer } = answer {
-                                    let mut answers = vec![];
-                                    answers.push(answer.clone());
-                                    map.insert(id, ParsedQuestion::Subjective { answers });
-                                    survey_data.2 = map;
-                                }
-                            }
-                        }
+                            })
+                            .or_insert_with(|| parsed_question.clone());
                     })
                     .or_insert_with(|| {
-                        (title, response_count, HashMap::from([(id, default_value)]))
+                        (
+                            title,
+                            response_count,
+                            HashMap::from([(id, parsed_question)]),
+                        )
                     });
             }
         }
