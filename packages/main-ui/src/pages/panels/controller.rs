@@ -370,7 +370,7 @@ impl Controller {
                             let org_id = org_id.clone();
                             let attributes = attributes.clone();
                             async move {
-                                if gender.is_ok() {
+                                if gender.is_some() {
                                     let gender = gender.unwrap();
                                     req.attributes = ctrl
                                         .update_attribute_vec(

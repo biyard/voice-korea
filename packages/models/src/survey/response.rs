@@ -129,13 +129,9 @@ impl PartialEq<Question> for Answer {
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 #[serde(rename_all = "snake_case")]
 pub enum Attribute {
-    #[serde(alias = "age")]
     Age(AgeV3),
-    #[serde(alias = "gender")]
     Gender(GenderV2),
-    #[serde(alias = "region")]
     Region(RegionV2),
-    #[serde(alias = "salary")]
     Salary(SalaryV2),
 
     #[default]
@@ -177,14 +173,11 @@ impl Attribute {
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 #[serde(rename_all = "snake_case")]
 pub enum AgeV3 {
-    #[serde(alias = "specific")]
     Specific(u8),
-    #[serde(alias = "range")]
     Range {
         inclusive_min: u8,
         inclusive_max: u8,
     },
-    #[serde(alias = "none")]
     #[default]
     None,
 }
