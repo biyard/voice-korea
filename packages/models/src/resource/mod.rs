@@ -41,14 +41,14 @@ pub struct Resource {
     14 |     pub id: String,
        |         ^^ used as parameter more than once
         */
-    #[api_model(summary, primary_key, read_action = find_by_id )]
+    #[api_model(summary, primary_key, action = delete, read_action = find_by_id )]
     pub id: i64,
     #[api_model(auto = insert)]
     pub created_at: i64,
     #[api_model(auto = [insert, update], summary)]
     pub updated_at: i64,
 
-    #[api_model(summary, action = create, action_by_id = update)]
+    #[api_model(summary, action = create, action_by_id = update, query_action = search_by)]
     pub title: String,
 
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]

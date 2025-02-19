@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::{AccessLevel, File, ProjectArea, ResourceType, Source, UsagePurpose};
+use models::{AccessLevel, File, FileExtension, ProjectArea, ResourceType, Source, UsagePurpose};
 
 use crate::{
-    components::icons::{self, CloseWithBackGround, Pptx},
+    components::icons::{self, CloseWithBackGround, Docs, Jpg, Pdf, Png, Pptx, Xlsx, Zip},
     pages::resources::components::drop_zone::DropZone,
 };
 use std::str::FromStr;
@@ -291,14 +291,29 @@ pub fn FileList(items: Vec<File>, onremove: EventHandler<usize>) -> Element {
         div { class: "w-full h-full overflow-y-auto flex flex-col gap-2.5 max-h-[170px] pr-2.5",
             for (index , item) in items.iter().enumerate() {
                 div { class: "w-full px-4 py-3 flex flex-row text-xs gap-2 rounded-lg items-center border border-[#E7E7E7] ",
-                    Pptx {}
+                    if item.ext == FileExtension::JPG {
+                        Jpg {}
+                    } else if item.ext == FileExtension::PNG {
+                        Png {}
+                    } else if item.ext == FileExtension::PDF {
+                        Pdf {}
+                    } else if item.ext == FileExtension::ZIP {
+                        Zip {}
+                    } else if item.ext == FileExtension::WORD {
+                        Docs {}
+                    } else if item.ext == FileExtension::PPTX {
+                        Pptx {}
+                    } else {
+                        Xlsx {}
+                    }
+
                     div { class: "text-xs flex-1",
                         p { class: "text-[#0b0b0b] font-semibold leading-[18px]",
                             "{item.name}"
                         }
                         p { class: "text-[#6d6d6d]", "{item.size}" }
                     }
-                    div {
+                    button {
                         onclick: move |_| {
                             onremove.call(index);
                         },

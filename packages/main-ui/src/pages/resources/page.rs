@@ -3,6 +3,7 @@ use std::str::FromStr;
 
 use dioxus::prelude::*;
 
+use crate::components::icons::Search;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use models::{AccessLevel, ProjectArea, ResourceSummary, ResourceType, Source, UsagePurpose};
@@ -277,20 +278,46 @@ pub fn TableHeaderCell(
 }
 
 #[component]
-pub fn Search(placeholder: String, onsearch: EventHandler<String>) -> Element {
+pub fn SearchComponent(placeholder: String, onsearch: EventHandler<String>) -> Element {
     let mut value = use_signal(String::default);
+
+    let mut is_focused = use_signal(|| false);
+    let mut search_keyword = use_signal(|| "".to_string());
+
     rsx! {
-        div { class: "text-sm gap-2 flex flex-row flex-[0_1_590px] justify-between items-center rounded-lg pl-[18px] pr-[15px] py-[10px] bg-[#f7f7f7] border border-[#7c8292] focus:bg-[#ffffff] focus:border-[#2a60d3]",
+        div {
+            class: format!(
+                "flex flex-row w-[590px] h-[45px] justify-between items-center rounded-lg  {} px-[11px] py-[13px]",
+                if (is_focused)() {
+                    "bg-[#ffffff] border border-[#2a60d3]"
+                } else {
+                    "bg-[#f7f7f7] border border-[#7c8292]"
+                },
+            ),
             input {
-                class: "flex flex-row bg-transparent focus:outline-none flex-1",
+                class: "flex flex-row w-full h-full bg-transparent focus:outline-none",
                 r#type: "text",
                 placeholder,
-                value: value(),
+                value: (search_keyword)(),
+                onfocus: move |_| {
+                    is_focused.set(true);
+                },
+                onblur: move |_| {
+                    is_focused.set(false);
+                },
+                onkeypress: move |e: KeyboardEvent| {
+                    let key = e.key();
+                    if key == Key::Enter {
+                        tracing::debug!("search: {search_keyword}");
+                        onsearch(search_keyword());
+                    }
+                },
                 oninput: move |event| {
-                    value.set(event.value());
+                    search_keyword.set(event.value());
+                    onsearch(search_keyword());
                 },
             }
-            SearchIcon { width: "18", height: "18", color: "#7c8292" }
+            Search { width: "18", height: "18", color: "#7c8292" }
         }
     }
 }
@@ -339,17 +366,18 @@ pub fn ResourcePage(props: ResourceProps) -> Element {
         div { class: "flex flex-col w-full justify-start items-start",
             div { class: "flex flex-col w-full justify-start items-start mb-6",
                 div { class: "text-[#b3b3b3] font-medium text-sm mb-2", "{translate.title}" }
-                div { class: "text-[#222222] text-[28px] font-semibold leading-[42px] mb-10",
+                div { class: "text-[#222222] text-[28px] font-semibold leading-[42px] mb-[25px]",
                     "{translate.title}"
                 }
             }
             div { class: "text-[#35343f] font-normal text-sm mb-10", "{translate.description}" }
             div { class: "flex flex-col w-full p-5 bg-white rounded-lg",
                 div { class: "flex-1 flex justify-between",
-                    Search {
+                    SearchComponent {
                         placeholder: translate.placeholder.to_string(),
                         onsearch: move |p| {
                             tracing::debug!("Params: {:?}", p);
+                            ctrl.search_keyword.set(p);
                         },
                     }
                     button {
@@ -462,9 +490,10 @@ pub fn ResourcePage(props: ResourceProps) -> Element {
                                     },
                                     ondownload: move |id| {
                                         tracing::debug!("Download Button Clicked: {}", id);
+                                        ctrl.download_files(id);
                                     },
-                                    onupdate: move |update_field| {
-                                        ctrl.handle_update_resource(index, update_field);
+                                    onupdate: move |update_field| async move {
+                                        ctrl.handle_update_resource(index, update_field).await;
                                     },
                                 }
                             }
