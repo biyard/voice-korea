@@ -14,7 +14,6 @@ BUCKET ?= metadata.voice-korea.dev.biyard.co
 
 ifeq ("$(ENV)","prod")
 	RUST_LOG ?= error
-	VOICEKOREA_AWS_S3_ENDPOINT ?= 
 endif
 
 ifeq ("$(ENV)","local")
