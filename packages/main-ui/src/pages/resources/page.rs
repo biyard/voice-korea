@@ -3,6 +3,7 @@ use std::str::FromStr;
 
 use dioxus::prelude::*;
 
+use crate::components::icons::Search;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use models::{AccessLevel, ProjectArea, ResourceSummary, ResourceType, Source, UsagePurpose};
@@ -99,9 +100,9 @@ pub fn TableRow(
     access_level_options.insert(0, no_selection_text.to_string());
 
     rsx! {
-        tr {
+        div {
             tabindex: "0",
-            class: "[&>*]:px-6 [&>*]:py-3 [&>*]:text-center h-[56px] [&>*]:w-full [&>*]:text-sm [&>*]:font-semibold [&>*]:text-[#34333e]",
+            class: "flex flex-row w-full [&>*]:px-6 [&>*]:py-3 [&>*]:text-center h-[56px] [&>*]:w-full [&>*]:text-sm [&>*]:font-semibold [&>*]:text-[#34333e]",
             style: if is_editing { "background: #F7F7F7;" } else { "" },
             onclick: move |evt: MouseEvent| {
                 if !is_editing {
@@ -111,6 +112,7 @@ pub fn TableRow(
             },
 
             EditableTableBodyCell {
+                class: "flex flex-row min-w-[150px] w-[150px] justify-center items-center",
                 edit_mode: is_editing,
                 default_value: resource_type,
                 options: resource_type_options,
@@ -120,6 +122,7 @@ pub fn TableRow(
                 },
             }
             EditableTableBodyCell {
+                class: "flex flex-row min-w-[120px] w-[120px] justify-center items-center",
                 edit_mode: is_editing,
                 default_value: project_area,
                 options: project_area_options,
@@ -129,6 +132,7 @@ pub fn TableRow(
                 },
             }
             EditableTableBodyCell {
+                class: "flex flex-row min-w-[180px] w-[180px] justify-center items-center",
                 edit_mode: is_editing,
                 default_value: usage_purpose,
 
@@ -138,15 +142,16 @@ pub fn TableRow(
                     onupdate.call(UpdateResource::UsagePurpose(purpose));
                 },
             }
-            td { "{resource.title}" }
+            div { class: "flex flex-1 min-w-[200px] justify-center items-center", "{resource.title}" }
             //TODO: Use Resource Data
-            td {
+            div { class: "flex flex-1 min-w-[200px] justify-center items-center",
                 Badge {
                     class: "text-white bg-[#2a60d3] rounded-[4px] px-[5px] py-[2px]",
                     value: "공론명",
                 }
             }
             EditableTableBodyCell {
+                class: "flex flex-1 min-w-[200px] justify-center items-center",
                 default_value: source,
                 edit_mode: is_editing,
                 options: source_options,
@@ -156,6 +161,7 @@ pub fn TableRow(
                 },
             }
             EditableTableBodyCell {
+                class: "flex flex-row min-w-[150px] w-[150px] justify-center items-center",
                 default_value: access_level,
                 edit_mode: is_editing,
                 options: access_level_options,
@@ -164,10 +170,11 @@ pub fn TableRow(
                     onupdate.call(UpdateResource::AccessLevel(access_level));
                 },
             }
-            td { class: "font-semibold",
+            div { class: "flex flex-row min-w-[150px] w-[150px] font-semibold justify-center items-center",
                 "{Controller::convert_timestamp_to_date(resource.updated_at)}"
             }
-            td {
+            div {
+                class: "flex flex-row min-w-[150px] w-[150px] justify-center items-center",
                 onclick: move |event: Event<MouseData>| {
                     event.stop_propagation();
                     event.prevent_default();
@@ -180,7 +187,7 @@ pub fn TableRow(
                     "{translate.download}"
                 }
             }
-            td {
+            div { class: "flex flex-row min-w-[90px] w-[90px] max-w-7xl justify-center items-center",
                 More {
                     options: vec![
                         translate.more_option_update_resource.to_string(),
@@ -207,6 +214,7 @@ pub fn TableRow(
 
 #[component]
 pub fn EditableTableBodyCell(
+    class: String,
     edit_mode: bool,
     options: Vec<String>,
     default_value: String,
@@ -214,7 +222,8 @@ pub fn EditableTableBodyCell(
 ) -> Element {
     let mut value: Signal<String> = use_signal(|| default_value);
     rsx! {
-        td {
+        div {
+            class,
             onclick: move |evt| {
                 if edit_mode {
                     evt.stop_propagation();
@@ -277,20 +286,46 @@ pub fn TableHeaderCell(
 }
 
 #[component]
-pub fn Search(placeholder: String, onsearch: EventHandler<String>) -> Element {
+pub fn SearchComponent(placeholder: String, onsearch: EventHandler<String>) -> Element {
     let mut value = use_signal(String::default);
+
+    let mut is_focused = use_signal(|| false);
+    let mut search_keyword = use_signal(|| "".to_string());
+
     rsx! {
-        div { class: "text-sm gap-2 flex flex-row flex-[0_1_590px] justify-between items-center rounded-lg pl-[18px] pr-[15px] py-[10px] bg-[#f7f7f7] border border-[#7c8292] focus:bg-[#ffffff] focus:border-[#2a60d3]",
+        div {
+            class: format!(
+                "flex flex-row w-[590px] h-[45px] justify-between items-center rounded-lg  {} px-[11px] py-[13px]",
+                if (is_focused)() {
+                    "bg-[#ffffff] border border-[#2a60d3]"
+                } else {
+                    "bg-[#f7f7f7] border border-[#7c8292]"
+                },
+            ),
             input {
-                class: "flex flex-row bg-transparent focus:outline-none flex-1",
+                class: "flex flex-row w-full h-full bg-transparent focus:outline-none",
                 r#type: "text",
                 placeholder,
-                value: value(),
+                value: (search_keyword)(),
+                onfocus: move |_| {
+                    is_focused.set(true);
+                },
+                onblur: move |_| {
+                    is_focused.set(false);
+                },
+                onkeypress: move |e: KeyboardEvent| {
+                    let key = e.key();
+                    if key == Key::Enter {
+                        tracing::debug!("search: {search_keyword}");
+                        onsearch(search_keyword());
+                    }
+                },
                 oninput: move |event| {
-                    value.set(event.value());
+                    search_keyword.set(event.value());
+                    onsearch(search_keyword());
                 },
             }
-            SearchIcon { width: "18", height: "18", color: "#7c8292" }
+            Search { width: "18", height: "18", color: "#7c8292" }
         }
     }
 }
@@ -335,21 +370,23 @@ pub fn More(options: Vec<String>, onclick: EventHandler<usize>) -> Element {
 pub fn ResourcePage(props: ResourceProps) -> Element {
     let translate: ResourceTranslate = translate(&props.lang);
     let mut ctrl = Controller::new(props.lang)?;
+
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
             div { class: "flex flex-col w-full justify-start items-start mb-6",
                 div { class: "text-[#b3b3b3] font-medium text-sm mb-2", "{translate.title}" }
-                div { class: "text-[#222222] text-[28px] font-semibold leading-[42px] mb-10",
+                div { class: "text-[#222222] text-[28px] font-semibold leading-[42px] mb-[25px]",
                     "{translate.title}"
                 }
             }
             div { class: "text-[#35343f] font-normal text-sm mb-10", "{translate.description}" }
             div { class: "flex flex-col w-full p-5 bg-white rounded-lg",
                 div { class: "flex-1 flex justify-between",
-                    Search {
+                    SearchComponent {
                         placeholder: translate.placeholder.to_string(),
                         onsearch: move |p| {
                             tracing::debug!("Params: {:?}", p);
+                            ctrl.search_keyword.set(p);
                         },
                     }
                     button {
@@ -364,112 +401,144 @@ pub fn ResourcePage(props: ResourceProps) -> Element {
                         }
                     }
                 }
-                div { class: "overflow-x-scroll my-[30px] border border-[#bfc8d9] rounded",
-                    table { class: "border-collapse w-full table-fixed",
-                        colgroup {
-                            col { class: "min-w-[150px]" }
-                            col { class: "min-w-[120px]" }
-                            col { class: "min-w-[180px]" }
-                            col { class: "min-w-[200px]" }
-                            col { class: "min-w-[200px]" }
-                            col { class: "min-w-[200px]" }
-                            col { class: "min-w-[150px]" }
-                            col { class: "min-w-[150px]" }
-                            col { class: "min-w-[150px]" }
-                            col { class: "min-w-[90px] max-w-7xl" }
+                div { class: "flex flex-col w-full my-[30px] border border-[#bfc8d9] rounded",
+                    div { class: "flex flex-row border-collapse w-full",
+                        TableHeaderCell {
+                            class: "min-w-[150px] w-[150px]",
+                            value: translate.metadata_type,
+                            order: ctrl.is_sorted_by(OrderBy::ResourceType),
+                            onclick: move |v| {
+                                ctrl.handle_sorting_order(OrderBy::ResourceType);
+                            },
                         }
-                        thead {
-                            tr {
-                                TableHeaderCell {
-                                    value: translate.metadata_type,
-                                    order: ctrl.is_sorted_by(OrderBy::ResourceType),
-                                    onclick: move |v| {
-                                        ctrl.handle_sorting_order(OrderBy::ResourceType);
-                                    },
-                                }
-                                TableHeaderCell {
-                                    value: translate.field,
-                                    order: ctrl.is_sorted_by(OrderBy::ProjectArea),
-                                    onclick: move |v| {
-                                        ctrl.handle_sorting_order(OrderBy::ProjectArea);
-                                    },
-                                }
-                                TableHeaderCell {
-                                    value: translate.purpose,
-                                    order: ctrl.is_sorted_by(OrderBy::UsagePurpose),
-                                    onclick: move |v| {
-                                        ctrl.handle_sorting_order(OrderBy::UsagePurpose);
-                                    },
-                                }
-                                TableHeaderCell {
-                                    value: translate.header_title,
-                                    order: ctrl.is_sorted_by(OrderBy::Title),
-                                    onclick: move |v| {
-                                        ctrl.handle_sorting_order(OrderBy::Title);
-                                    },
-                                }
-                                TableHeaderCell {
-                                    value: translate.linked_deliberation_survey,
-                                    order: ctrl.is_sorted_by(OrderBy::LinkedDeliberationSurvey),
-                                    onclick: move |v| {
-                                        ctrl.handle_sorting_order(OrderBy::LinkedDeliberationSurvey);
-                                    },
-                                }
-                                TableHeaderCell {
-                                    value: translate.source,
-                                    order: ctrl.is_sorted_by(OrderBy::Source),
-                                    onclick: move |v| {
-                                        ctrl.handle_sorting_order(OrderBy::Source);
-                                    },
-                                }
-                                TableHeaderCell {
-                                    value: translate.authority,
-                                    order: ctrl.is_sorted_by(OrderBy::AccessLevel),
-                                    onclick: move |v| {
-                                        ctrl.handle_sorting_order(OrderBy::AccessLevel);
-                                    },
-                                }
-                                TableHeaderCell {
-                                    value: translate.last_modified_date,
-                                    order: ctrl.is_sorted_by(OrderBy::LastModifiedDate),
-                                    onclick: move |v| {
-                                        ctrl.handle_sorting_order(OrderBy::LastModifiedDate);
-                                    },
-                                }
-                                TableHeaderCell {
-                                    value: translate.function,
-                                    disabled: true,
-                                    onclick: move |v| {},
-                                }
-                                th {
-                                }
-                            }
+                        TableHeaderCell {
+                            class: "min-w-[120px] w-[120px]",
+                            value: translate.field,
+                            order: ctrl.is_sorted_by(OrderBy::ProjectArea),
+                            onclick: move |v| {
+                                ctrl.handle_sorting_order(OrderBy::ProjectArea);
+                            },
                         }
-                        tbody {
-                            for (index , resource) in ctrl.get_resources().into_iter().enumerate() {
-                                TableRow {
-                                    key: format!("resource-{}", resource.id),
-                                    resource_index: index,
-                                    lang: props.lang,
-                                    is_editing: ctrl.is_editing(index as i32),
-                                    resource: resource.clone(),
-                                    onedit: move |v: bool| {
-                                        if !v {
-                                            ctrl.handle_change_editing_row(-1);
-                                        } else {
-                                            ctrl.handle_change_editing_row(index as i32);
-                                        }
-                                    },
-                                    ondownload: move |id| {
-                                        tracing::debug!("Download Button Clicked: {}", id);
-                                    },
-                                    onupdate: move |update_field| {
-                                        ctrl.handle_update_resource(index, update_field);
-                                    },
-                                }
+                        TableHeaderCell {
+                            class: "min-w-[180px] w-[180px]",
+                            value: translate.purpose,
+                            order: ctrl.is_sorted_by(OrderBy::UsagePurpose),
+                            onclick: move |v| {
+                                ctrl.handle_sorting_order(OrderBy::UsagePurpose);
+                            },
+                        }
+                        TableHeaderCell {
+                            class: "flex flex-1 min-w-[200px] justify-center items-center",
+                            value: translate.header_title,
+                            order: ctrl.is_sorted_by(OrderBy::Title),
+                            onclick: move |v| {
+                                ctrl.handle_sorting_order(OrderBy::Title);
+                            },
+                        }
+                        TableHeaderCell {
+                            class: "flex flex-1 min-w-[200px] justify-center items-center",
+                            value: translate.linked_deliberation_survey,
+                            order: ctrl.is_sorted_by(OrderBy::LinkedDeliberationSurvey),
+                            onclick: move |v| {
+                                ctrl.handle_sorting_order(OrderBy::LinkedDeliberationSurvey);
+                            },
+                        }
+                        TableHeaderCell {
+                            class: "flex flex-1 min-w-[200px] justify-center items-center",
+                            value: translate.source,
+                            order: ctrl.is_sorted_by(OrderBy::Source),
+                            onclick: move |v| {
+                                ctrl.handle_sorting_order(OrderBy::Source);
+                            },
+                        }
+                        TableHeaderCell {
+                            class: "min-w-[150px] w-[150px]",
+                            value: translate.authority,
+                            order: ctrl.is_sorted_by(OrderBy::AccessLevel),
+                            onclick: move |v| {
+                                ctrl.handle_sorting_order(OrderBy::AccessLevel);
+                            },
+                        }
+                        TableHeaderCell {
+                            class: "min-w-[150px] w-[150px]",
+                            value: translate.last_modified_date,
+                            order: ctrl.is_sorted_by(OrderBy::LastModifiedDate),
+                            onclick: move |v| {
+                                ctrl.handle_sorting_order(OrderBy::LastModifiedDate);
+                            },
+                        }
+                        TableHeaderCell {
+                            class: "min-w-[150px] w-[150px]",
+                            value: translate.function,
+                            disabled: true,
+                            onclick: move |v| {},
+                        }
+                        div { class: "min-w-[90px] w-[90px] max-w-7xl" }
+                    }
+                    div { class: "flex flex-col w-full ",
+                        for (index , resource) in ctrl.get_resources().into_iter().enumerate() {
+                            TableRow {
+                                key: format!("resource-{}", resource.id),
+                                resource_index: index,
+                                lang: props.lang,
+                                is_editing: ctrl.is_editing(index as i32),
+                                resource: resource.clone(),
+                                onedit: move |v: bool| {
+                                    if !v {
+                                        ctrl.handle_change_editing_row(-1);
+                                    } else {
+                                        ctrl.handle_change_editing_row(index as i32);
+                                    }
+                                },
+                                ondownload: move |id| {
+                                    tracing::debug!("Download Button Clicked: {}", id);
+                                    ctrl.download_files(id);
+                                },
+                                onupdate: move |update_field| async move {
+                                    ctrl.handle_update_resource(index, update_field).await;
+                                },
                             }
                         }
                     }
+                                // table { class: "border-collapse w-full table-fixed",
+                //     colgroup {
+                //         col { class: "min-w-[150px]" }
+                //         col { class: "min-w-[120px]" }
+                //         col { class: "min-w-[180px]" }
+                //         col { class: "min-w-[200px]" }
+                //         col { class: "min-w-[200px]" }
+                //         col { class: "min-w-[200px]" }
+                //         col { class: "min-w-[150px]" }
+                //         col { class: "min-w-[150px]" }
+                //         col { class: "min-w-[150px]" }
+                //         col { class: "min-w-[90px] max-w-7xl" }
+                //     }
+                //     tbody {
+                //         for (index , resource) in ctrl.get_resources().into_iter().enumerate() {
+                //             TableRow {
+                //                 key: format!("resource-{}", resource.id),
+                //                 resource_index: index,
+                //                 lang: props.lang,
+                //                 is_editing: ctrl.is_editing(index as i32),
+                //                 resource: resource.clone(),
+                //                 onedit: move |v: bool| {
+                //                     if !v {
+                //                         ctrl.handle_change_editing_row(-1);
+                //                     } else {
+                //                         ctrl.handle_change_editing_row(index as i32);
+                //                     }
+                //                 },
+                //                 ondownload: move |id| {
+                //                     tracing::debug!("Download Button Clicked: {}", id);
+                //                     ctrl.download_files(id);
+                //                 },
+                //                 onupdate: move |update_field| async move {
+                //                     ctrl.handle_update_resource(index, update_field).await;
+                //                 },
+                //             }
+                //         }
+                //     }
+                // }
                 }
             }
         }

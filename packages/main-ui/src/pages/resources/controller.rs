@@ -61,7 +61,9 @@ pub struct Controller {
     pub total_count: Signal<i64>,
     pub page: Signal<usize>,
     pub size: usize,
+    pub search_keyword: Signal<String>,
     resources: Signal<Vec<ResourceSummary>>,
+    metadata_resources: Resource<QueryResponse<ResourceSummary>>,
 }
 
 impl Controller {
@@ -69,37 +71,38 @@ impl Controller {
         let user: LoginService = use_context();
         let page = use_signal(|| 1);
         let size = 10;
+        let search_keyword = use_signal(|| "".to_string());
 
         //FIXME:
         let mut resources: Signal<Vec<ResourceSummary>> = use_signal(Vec::new);
         let mut total_count = use_signal(|| 0);
 
-        let _ = use_resource(move || {
+        let metadata_resources = use_server_future(move || {
             let page = page();
+            let keyword = search_keyword().clone();
             async move {
+                let client = models::Resource::get_client(&config::get().api_url);
                 let org_id = user.get_selected_org();
                 if org_id.is_none() {
                     tracing::error!("Organization ID is missing");
-                    return;
+                    return QueryResponse::default();
                 }
-                match models::Resource::get_client(&config::get().api_url)
-                    .query(
-                        org_id.unwrap().id,
-                        models::ResourceQuery::new(size).with_page(page),
-                    )
-                    .await
-                {
-                    Ok(v) => {
-                        resources.set(v.items);
-                        total_count.set(v.total_count);
-                    }
-                    Err(e) => {
-                        tracing::error!("Error: {:?}", e);
-                    }
-                };
+
+                if keyword.is_empty() {
+                    let query = ResourceQuery::new(size).with_page(page);
+                    client
+                        .query(org_id.unwrap().id, query)
+                        .await
+                        .unwrap_or_default()
+                } else {
+                    client
+                        .search_by(size, Some(page.to_string()), org_id.unwrap().id, keyword)
+                        .await
+                        .unwrap_or_default()
+                }
             }
-        });
-        let ctrl = Self {
+        })?;
+        let mut ctrl = Self {
             lang,
             size,
             user: use_context(),
@@ -107,9 +110,18 @@ impl Controller {
             sort_order: use_signal(|| None),
             editing_row_index: use_signal(|| -1),
             page,
+            metadata_resources,
             total_count,
             resources,
+            search_keyword,
         };
+
+        use_effect(move || {
+            if let Some(v) = metadata_resources.value()() {
+                ctrl.resources.set(v.items);
+                ctrl.total_count.set(v.total_count);
+            };
+        });
 
         use_context_provider(|| ctrl);
         Ok(ctrl)
@@ -158,14 +170,39 @@ impl Controller {
     pub fn handle_change_editing_row(&mut self, next_index: i32) {
         self.editing_row_index.set(next_index);
     }
-    pub fn handle_update_resource(&mut self, index: usize, field: UpdateResource) {
-        let mut resources = self.resources.write();
+    pub async fn handle_update_resource(&mut self, index: usize, field: UpdateResource) {
+        let client = models::Resource::get_client(&config::get().api_url);
+        let mut ctrl = self.clone();
+        let mut resource = (self.resources)()[index].clone();
+
         match field {
-            UpdateResource::ResourceType(v) => resources[index].resource_type = v,
-            UpdateResource::ProjectArea(v) => resources[index].project_area = v,
-            UpdateResource::UsagePurpose(v) => resources[index].usage_purpose = v,
-            UpdateResource::Source(v) => resources[index].source = v,
-            UpdateResource::AccessLevel(v) => resources[index].access_level = v,
+            UpdateResource::ResourceType(v) => resource.resource_type = v,
+            UpdateResource::ProjectArea(v) => resource.project_area = v,
+            UpdateResource::UsagePurpose(v) => resource.usage_purpose = v,
+            UpdateResource::Source(v) => resource.source = v,
+            UpdateResource::AccessLevel(v) => resource.access_level = v,
+        }
+
+        match client
+            .update(
+                resource.org_id,
+                resource.id,
+                resource.title,
+                resource.resource_type,
+                resource.project_area,
+                resource.usage_purpose,
+                resource.source,
+                resource.access_level,
+                resource.files,
+            )
+            .await
+        {
+            Ok(_) => {
+                ctrl.clone().metadata_resources.restart();
+            }
+            Err(e) => {
+                tracing::error!("metadata update failed: {:?}", e);
+            }
         }
     }
 
@@ -180,7 +217,7 @@ impl Controller {
     }
 
     pub async fn create_resource(
-        &self,
+        &mut self,
         title: String,
         resource_type: Option<ResourceType>,
         project_area: Option<ProjectArea>,
@@ -216,16 +253,48 @@ impl Controller {
         }
     }
 
+    pub fn download_files(&self, id: i64) {
+        let resources: Vec<ResourceSummary> = (self.resources)()
+            .iter()
+            .filter(|d| d.id == id)
+            .map(|v| v.clone())
+            .collect();
+
+        let resource = resources.first().unwrap().clone();
+        let files = resource.files;
+
+        #[cfg(feature = "web")]
+        {
+            use wasm_bindgen::JsCast;
+
+            let window = web_sys::window().unwrap();
+            let document = window.document().unwrap();
+
+            for (index, file) in files.iter().enumerate() {
+                let a = document.create_element("a").unwrap();
+                a.set_attribute("href", &file.url.clone().unwrap().clone())
+                    .unwrap();
+
+                document.body().unwrap().append_child(&a).unwrap();
+                let a: web_sys::HtmlElement = a.unchecked_into();
+                a.click();
+                a.remove();
+            }
+        }
+    }
+
     pub async fn update_resource(
         &self,
         index: usize,
         title: String,
+        files: Vec<File>,
     ) -> Result<(), models::ApiError> {
+        let mut ctrl = self.clone();
         let client = models::Resource::get_client(&config::get().api_url);
         let resource = self.resources.read()[index].clone();
         match client
             .update(
-                resource.id,
+                resource.org_id,
                 resource.id,
                 title,
                 resource.resource_type,
@@ -233,11 +302,14 @@ impl Controller {
                 resource.usage_purpose,
                 resource.source,
                 resource.access_level,
-                resource.files,
+                files,
             )
             .await
         {
-            Ok(_) => Ok(()),
+            Ok(_) => {
+                ctrl.clone().metadata_resources.restart();
+                Ok(())
+            }
             Err(e) => {
                 tracing::error!("Resource Update Failed: {:?}", e);
                 Err(models::ApiError::ApiCallError(e.to_string()))
@@ -246,8 +318,19 @@ impl Controller {
     }
 
     pub async fn remove_resource(&self, id: i64) -> Result<(), models::ApiError> {
-        //TODO: remove resource
-        Err(models::ApiError::InvalidAction)
+        let org = self.user.get_selected_org();
+        if org.is_none() {
+            return Err(models::ApiError::OrganizationNotFound);
+        }
+        let org_id = org.unwrap().id;
+        let client = models::Resource::get_client(&config::get().api_url);
+        match client.delete(org_id, id).await {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                tracing::error!("Resource Delete Failed: {:?}", e);
+                Err(models::ApiError::ApiCallError(e.to_string()))
+            }
+        }
     }
 }
 
@@ -256,14 +339,15 @@ impl Controller {
         let mut popup_service = self.popup_service.clone();
         let translate: CreateResourceModalTranslate = translate(&self.lang);
         let lang = self.lang;
-        let ctrl = self.clone();
+        let mut ctrl = self.clone();
         popup_service
             .open(rsx! {
                 CreateResourceModal {
                     lang,
                     onupload: move |(title, resource_type, field, purpose, source, access_level, files)| {
                         async move {
-                            ctrl.create_resource(
+                            match ctrl
+                                .create_resource(
                                     title,
                                     resource_type,
                                     field,
@@ -272,7 +356,17 @@ impl Controller {
                                     access_level,
                                     files,
                                 )
-                                .await;
+                                .await
+                            {
+                                Ok(_) => {
+                                    ctrl.clone().metadata_resources.restart();
+                                    popup_service.close();
+                                }
+                                Err(e) => {
+                                    tracing::error!("failed to create resource: {}", e);
+                                    popup_service.clone();
+                                }
+                            };
                         }
                     },
                     onclose: move |_| {
@@ -295,10 +389,11 @@ impl Controller {
                 ModifyResourceModal {
                     lang,
                     title: resource.title,
-                    files: vec![],
+                    files: resource.files,
                     onupload: move |(title, files): (String, Vec<File>)| {
                         async move {
-                            ctrl.update_resource(index, title).await;
+                            ctrl.update_resource(index, title, files).await;
+                            popup_service.close();
                         }
                     },
                     onclose: move |_| {
@@ -320,8 +415,16 @@ impl Controller {
             .open(rsx! {
                 RemoveResourceModal {
                     lang,
-                    onremove: move |_| {
-                        ctrl.remove_resource(resource.id);
+                    onremove: move |_| async move {
+                        match ctrl.remove_resource(resource.id).await {
+                            Ok(_) => {
+                                ctrl.clone().metadata_resources.restart();
+                                popup_service.close();
+                            }
+                            Err(_) => {
+                                popup_service.close();
+                            }
+                        };
                     },
                     onclose: move |_| {
                         popup_service.close();
