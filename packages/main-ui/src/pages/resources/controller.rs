@@ -5,14 +5,14 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
 use models::{
-    AccessLevel, ProjectArea, QueryResponse, ResourceCreateRequest, ResourceGetResponse,
+    AccessLevel, File, ProjectArea, QueryResponse, ResourceCreateRequest, ResourceGetResponse,
     ResourceQuery, ResourceSummary, ResourceType, ResourceUpdateRequest, Source, UsagePurpose,
 };
 
 use crate::{
     api, config,
     pages::resources::components::create_resource_modal::{
-        CreateResourceModal, File, ModifyResourceModal, RemoveResourceModal,
+        CreateResourceModal, ModifyResourceModal, RemoveResourceModal,
     },
     service::{
         login_service::LoginService,
@@ -110,6 +110,8 @@ impl Controller {
             total_count,
             resources,
         };
+
+        use_context_provider(|| ctrl);
         Ok(ctrl)
     }
     pub fn change_page(&mut self, page: usize) {
@@ -185,6 +187,7 @@ impl Controller {
         usage_purpose: Option<UsagePurpose>,
         source: Option<Source>,
         access_level: Option<AccessLevel>,
+        files: Vec<File>,
     ) -> Result<(), models::ApiError> {
         let org = self.user.get_selected_org();
         if org.is_none() {
@@ -201,6 +204,7 @@ impl Controller {
                 usage_purpose,
                 source,
                 access_level,
+                files,
             )
             .await
         {
@@ -229,6 +233,7 @@ impl Controller {
                 resource.usage_purpose,
                 resource.source,
                 resource.access_level,
+                resource.files,
             )
             .await
         {
@@ -256,7 +261,7 @@ impl Controller {
             .open(rsx! {
                 CreateResourceModal {
                     lang,
-                    onupload: move |(title, resource_type, field, purpose, source, access_level, _files)| {
+                    onupload: move |(title, resource_type, field, purpose, source, access_level, files)| {
                         async move {
                             ctrl.create_resource(
                                     title,
@@ -265,6 +270,7 @@ impl Controller {
                                     purpose,
                                     source,
                                     access_level,
+                                    files,
                                 )
                                 .await;
                         }

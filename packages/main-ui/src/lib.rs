@@ -16,6 +16,7 @@ pub mod service {
     pub mod group_api;
     pub mod login_service;
     pub mod member_api;
+    pub mod metadata_api;
     pub mod opinion_api;
     pub mod organization_api;
     pub mod popup_service;
@@ -35,6 +36,7 @@ pub mod utils {
     pub mod api;
     pub mod context;
     pub mod hash;
+    pub mod metadata;
     pub mod time;
 }
 

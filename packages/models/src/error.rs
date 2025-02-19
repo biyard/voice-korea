@@ -44,6 +44,10 @@ pub enum ApiError {
 
     DuplicateUser,
 
+    SetExpiredTimeFailed,
+
+    PutObjectFailed,
+
     ReqwestFailed(String),
 
     JSONSerdeError(String),
@@ -135,7 +139,9 @@ impl IntoResponse for ApiError {
             ApiError::AlreadyExists => StatusCode::ALREADY_REPORTED,
             ApiError::InvalidPermissions => StatusCode::FORBIDDEN,
             ApiError::OrganizationNotFound => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::PutObjectFailed => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::ResourceNotFound => StatusCode::NOT_FOUND,
+            ApiError::SetExpiredTimeFailed => StatusCode::INTERNAL_SERVER_ERROR,
             _ => StatusCode::BAD_REQUEST,
         };
 

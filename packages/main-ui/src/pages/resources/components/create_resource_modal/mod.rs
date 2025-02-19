@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::{AccessLevel, ProjectArea, ResourceType, Source, UsagePurpose};
+use models::{AccessLevel, File, ProjectArea, ResourceType, Source, UsagePurpose};
 
 use crate::{
     components::icons::{self, CloseWithBackGround, Pptx},
@@ -9,43 +9,6 @@ use crate::{
 use std::str::FromStr;
 pub mod i18n;
 use i18n::{CreateResourceModalTranslate, RemoveResourceModalTranslate};
-
-#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, PartialEq, Eq)]
-pub enum FileExtension {
-    JPG = 1,
-    PNG = 2,
-    PDF = 3,
-    ZIP = 4,
-    WORD = 5,
-    PPTX = 6,
-    EXCEL = 7,
-}
-
-impl std::str::FromStr for FileExtension {
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "jpg" | "jpeg" => Ok(FileExtension::JPG),
-            "png" => Ok(FileExtension::PNG),
-            "pdf" => Ok(FileExtension::PDF),
-            "zip" => Ok(FileExtension::ZIP),
-            "doc" | "docx" => Ok(FileExtension::WORD),
-            "ppt" | "pptx" => Ok(FileExtension::PPTX),
-            "xls" | "xlsx" => Ok(FileExtension::EXCEL),
-            _ => Err(format!("invalid field")),
-        }
-    }
-
-    type Err = String;
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, PartialEq, Eq)]
-pub struct File {
-    pub name: String,
-    pub bytes: Vec<u8>,
-    pub size: String,
-    pub ext: FileExtension,
-    pub url: Option<String>,
-}
 
 #[component]
 pub fn CreateResourceModal(
