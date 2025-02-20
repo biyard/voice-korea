@@ -58,8 +58,8 @@ pub enum GenderV2 {
 impl GenderV2 {
     pub fn from_str(s: &str) -> Option<Self> {
         match s.to_lowercase().as_str() {
-            "male" => Some(GenderV2::Male),
-            "female" => Some(GenderV2::Female),
+            "male" | "남성" => Some(GenderV2::Male),
+            "female" | "여성" => Some(GenderV2::Female),
             _ => None,
         }
     }

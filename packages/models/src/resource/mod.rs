@@ -8,13 +8,31 @@ use by_axum::aide;
 use by_macros::{api_model, ApiModel};
 use by_types::QueryResponse;
 use dioxus_translate::Translate;
+use serde::{Deserialize, Serialize};
+
+use by_types::ApiError;
 
 use crate::survey::ProjectArea;
 
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+pub struct GetObjectUriResponse {
+    pub presigned_uris: Vec<String>,
+    pub uris: Vec<String>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+pub struct GetObjectUriRequest {
+    pub filenames: Vec<String>,
+}
+
 #[derive(validator::Validate)]
-#[api_model(base = "/organizations/v2/:org_id/resource", table = resources, iter_type=QueryResponse)]
+///FIXME: fix to filenames to type vector
+#[api_model(base = "/organizations/v2/:org_id/resources", table = resources, iter_type=QueryResponse)]
 pub struct Resource {
     //FIXME: When add "action_by_id = delete", Error occured.
     /*
@@ -23,14 +41,14 @@ pub struct Resource {
     14 |     pub id: String,
        |         ^^ used as parameter more than once
         */
-    #[api_model(summary, primary_key, read_action = find_by_id )]
+    #[api_model(summary, primary_key, action = delete, read_action = find_by_id )]
     pub id: i64,
     #[api_model(auto = insert)]
     pub created_at: i64,
     #[api_model(auto = [insert, update], summary)]
     pub updated_at: i64,
 
-    #[api_model(summary, action = create, action_by_id = update)]
+    #[api_model(summary, action = create, action_by_id = update, query_action = search_by)]
     pub title: String,
 
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]
@@ -46,6 +64,8 @@ pub struct Resource {
 
     #[api_model(summary, many_to_one = organizations)]
     pub org_id: i64,
+    #[api_model(summary, action = create, type = JSONB, version = v0.1, action_by_id = update)]
+    pub files: Vec<File>,
     // TODO: After Implement Deliberation Table
     // #[api_model(many_to_many = resource_delierations, foreign_table_name = delierations, foreign_primary_key = delieration_id, foreign_reference_key = resource_id)]
     // pub deliberations: Option<Vec<Deliberation>>,
@@ -58,6 +78,42 @@ pub struct Resource {
     // #[api_model(one_to_many = metadatas, foreign_key = resource_id)]
     // #[serde(default)]
     // pub files: Vec<Metadata>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+pub struct File {
+    pub name: String,
+    pub size: String,
+    pub ext: FileExtension,
+    pub url: Option<String>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+pub enum FileExtension {
+    JPG = 1,
+    PNG = 2,
+    PDF = 3,
+    ZIP = 4,
+    WORD = 5,
+    PPTX = 6,
+    EXCEL = 7,
+}
+
+impl FileExtension {
+    pub fn from_str(s: &str) -> Result<FileExtension> {
+        match s {
+            "jpg" | "jpeg" => Ok(FileExtension::JPG),
+            "png" => Ok(FileExtension::PNG),
+            "pdf" => Ok(FileExtension::PDF),
+            "zip" => Ok(FileExtension::ZIP),
+            "doc" | "docx" => Ok(FileExtension::WORD),
+            "ppt" | "pptx" => Ok(FileExtension::PPTX),
+            "xls" | "xlsx" => Ok(FileExtension::EXCEL),
+            _ => Err(crate::ApiError::InvalidType),
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, ApiModel, Translate)]

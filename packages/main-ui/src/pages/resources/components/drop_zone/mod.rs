@@ -3,8 +3,12 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
+use models::{File, MetadataRequest};
 
-use crate::components::{icons::UploadFile, upload_button::UploadButton};
+use crate::{
+    components::{icons::UploadFile, upload_button::UploadButton},
+    service::metadata_api::MetadataApi,
+};
 
 #[cfg(feature = "web")]
 use dioxus::html::{FileEngine, HasFileData};
@@ -14,8 +18,6 @@ use std::sync::Arc;
 
 mod i18n;
 use i18n::DropZoneTranslate;
-
-use super::create_resource_modal::File;
 
 fn human_readable_size(bytes: usize) -> String {
     let sizes = ["B", "KB", "MB", "GB", "TB"];
@@ -31,23 +33,34 @@ fn human_readable_size(bytes: usize) -> String {
 }
 
 #[cfg(feature = "web")]
-pub async fn handle_file_upload(file_engine: Arc<dyn FileEngine>) -> Vec<File> {
+pub async fn handle_file_upload(file_engine: Arc<dyn FileEngine>, api: MetadataApi) -> Vec<File> {
     let mut result: Vec<File> = vec![];
     let files = file_engine.files();
+
     for f in files {
         match file_engine.read_file(f.as_str()).await {
             Some(bytes) => {
                 let file_name: String = f.into();
                 let ext = file_name.rsplitn(2, '.').next().unwrap_or("");
-                let extension = ext.parse::<super::create_resource_modal::FileExtension>();
+                let extension = models::FileExtension::from_str(ext);
                 match extension {
                     Ok(ext) => {
+                        let url = match api
+                            .upload_metadata(MetadataRequest {
+                                file_name: file_name.clone(),
+                                bytes: bytes.clone(),
+                            })
+                            .await
+                        {
+                            Ok(v) => Some(v),
+                            Err(_) => None,
+                        };
+
                         result.push(File {
                             name: file_name,
                             size: human_readable_size(bytes.len()),
-                            bytes,
                             ext,
-                            url: None,
+                            url,
                         });
                     }
                     Err(_) => {
@@ -67,6 +80,7 @@ pub async fn handle_file_upload(file_engine: Arc<dyn FileEngine>) -> Vec<File> {
 
 #[component]
 pub fn DropZone(lang: Language, onchange: EventHandler<Vec<File>>) -> Element {
+    let api: MetadataApi = use_context();
     let mut indragzone = use_signal(|| false);
     let translate: DropZoneTranslate = translate(&lang);
 
@@ -102,7 +116,7 @@ pub fn DropZone(lang: Language, onchange: EventHandler<Vec<File>>) -> Element {
                     ev.stop_propagation();
                     #[cfg(feature = "web")]
                     if let Some(file_engine) = ev.files() {
-                        let result = handle_file_upload(file_engine).await;
+                        let result = handle_file_upload(file_engine, api).await;
                         onchange.call(result);
                     }
                     indragzone.set(false);
@@ -126,7 +140,7 @@ pub fn DropZone(lang: Language, onchange: EventHandler<Vec<File>>) -> Element {
                         spawn(async move {
                             #[cfg(feature = "web")]
                             if let Some(file_engine) = ev.files() {
-                                let result = handle_file_upload(file_engine).await;
+                                let result = handle_file_upload(file_engine, api).await;
                                 onchange.call(result);
                             }
                         });
