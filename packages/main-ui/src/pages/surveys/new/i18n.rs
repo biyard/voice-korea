@@ -119,6 +119,26 @@ translate! {
         ko: "취소하기",
         en: "Cancel"
     }
+
+    btn_back: {
+        ko: "이전으로",
+        en: "Back"
+    }
+
+    title_required: {
+        ko: "타이틀을 입력해 주세요.",
+        en: "Please fill the title."
+    }
+
+    description_required: {
+        ko: "설명을 입력해 주세요.",
+        en: "Please fill the description."
+    }
+
+    questions_required: {
+        ko: "질문을 추가해 주세요.",
+        en: "Please add a question."
+    }
 }
 
 translate! {
@@ -168,5 +188,11 @@ translate! {
     btn_cancel: {
         ko: "취소하기",
         en: "Cancel"
+    }
+
+    panel_error_message: {
+        ko: "패널을 추가해 주세요.",
+        en: "Please add a panel.
+"
     }
 }

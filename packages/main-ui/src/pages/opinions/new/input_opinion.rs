@@ -59,7 +59,7 @@ pub fn InputOpinion(props: InputOpinionProps) -> Element {
                     "{translates.temporary_save}"
                 }
                 div {
-                    class: "cursor-pointer flex flex-row w-[110px] h-[55px] rounded-[4px] justify-center items-center bg-[#b4b4b4] font-semibold text-[16px] text-white",
+                    class: "cursor-pointer flex flex-row w-[110px] h-[55px] rounded-[4px] justify-center items-center bg-[#2a60d3] font-semibold text-[16px] text-white",
                     onclick: move |_| {
                         ctrl.change_step(CurrentStep::CommitteeComposition);
                     },
@@ -82,7 +82,11 @@ pub fn ConnectProject(lang: Language) -> Element {
                 }
             }
             div { class: "flex flex-row w-full h-[55px] justify-start items-center p-[15px] font-medium text-[15px] text-[#b4b4b4] bg-[#f7f7f7] rounded-[4px]",
-                "{i18n.research_selection}"
+                option { onchange: move |_| {},
+                    "{i18n.research_selection}"
+                    option { value: "" }
+                                // TODO: Need connect button to data
+                }
             }
         }
     }
