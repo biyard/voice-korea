@@ -9,10 +9,25 @@ use crate::components::{Footer, Header};
 #[component]
 pub fn RootLayout(lang: Language) -> Element {
     rsx! {
-        div { class: "w-full flex justify-center",
+        div { class: "w-full flex justify-center px-[10px]",
             div { class: "w-full flex flex-col max-w-[1300px] min-h-lvh",
                 Header { lang: lang.clone() }
                 Outlet::<Route> {}
+            }
+        }
+    }
+}
+
+#[component]
+pub fn RootLayoutWithFooter(lang: Language) -> Element {
+    rsx! {
+        div { class: "w-full flex flex-col justify-center items-center",
+            div { class: "w-full flex flex-col max-w-[1300px] min-h-lvh px-[10px]",
+                Header { lang: lang.clone() }
+                Outlet::<Route> {}
+            
+            }
+            div { class: "flex flex-row w-full ",
                 Footer { lang: lang.clone() }
             }
         }

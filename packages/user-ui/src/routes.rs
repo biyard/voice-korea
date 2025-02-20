@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use dioxus_translate::Language;
 
 #[allow(unused)]
-use crate::layout::RootLayout;
+use crate::layout::{RootLayout, RootLayoutWithFooter};
 
 use crate::pages::main::MainPage;
 use crate::pages::users::login::UserLoginPage;
@@ -12,7 +12,7 @@ use crate::pages::NotFoundPage;
 #[rustfmt::skip]
 pub enum Route {
     #[nest("/:lang")]
-        #[layout(RootLayout)]
+        #[layout(RootLayoutWithFooter)]
             #[route("/")]
             MainPage { lang: Language },
             #[nest("/users")]
