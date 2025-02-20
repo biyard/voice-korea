@@ -41,6 +41,10 @@ pub struct PublicOpinionProject {
     pub num_of_participation: i64,
     #[api_model(summary, action = create, action_by_id = update,)]
     pub num_of_vote: i64,
+    #[api_model(summary, action = create, action_by_id = update,)]
+    pub accepters: i64,
+    #[api_model(summary, action = create, action_by_id = update,)]
+    pub rejecters: i64,
 }
 
 #[api_model(base = "/organizations/v2/:org_id/public-opinion-institutions", table = public_opinion_institutions, iter_type=QueryResponse)]
@@ -59,6 +63,8 @@ pub struct PublicOpinionInstitution {
     #[api_model(summary, one_to_many = public_opinions, foreign_key = institution_id)]
     pub projects: Vec<PublicOpinionProject>,
 
+    #[api_model(summary, action = create, action_by_id: update)]
+    pub num_of_participation: i64,
     #[api_model(summary, one_to_many = public_opinions, foreign_key = institution_id, aggregator = count)]
     pub num_of_projects: i64,
     #[api_model(summary, action = create, action_by_id = update,)]

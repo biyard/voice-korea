@@ -14,6 +14,7 @@ use crate::pages::main::i18n::{
     OpinionInstitutionTranslate, OpinionProjectTranslate, PriceSectionTranslate,
     ProjectBoxTranslate,
 };
+use crate::routes::Route;
 
 use super::controller;
 #[component]
@@ -212,7 +213,13 @@ pub fn OpinionInstitution(
                 div { class: "flex flex-col w-full gap-[40px]",
                     div { class: "flex flex-wrap w-full gap-[20px] justify-center items-center",
                         for institution in public_opinion_institutions {
-                            InstitutionBox { lang, institution }
+                            Link {
+                                to: Route::GovernancePage {
+                                    lang,
+                                    governance_id: institution.id,
+                                },
+                                InstitutionBox { lang, institution }
+                            }
                         }
                     }
                 }

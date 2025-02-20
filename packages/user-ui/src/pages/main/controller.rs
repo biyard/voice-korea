@@ -32,6 +32,8 @@ impl Controller {
                         num_of_participation: 9121,
                         num_of_vote: 1102,
                         institution_id: 1,
+                        accepters: 1102,
+                        rejecters: 1102,
                     },
                     PublicOpinionProjectSummary {
                         id: 1,
@@ -46,6 +48,8 @@ impl Controller {
                         num_of_participation: 9121,
                         num_of_vote: 1102,
                         institution_id: 1,
+                        accepters: 1102,
+                        rejecters: 1102,
                     },
                     PublicOpinionProjectSummary {
                         id: 2,
@@ -60,6 +64,8 @@ impl Controller {
                         num_of_participation: 9121,
                         num_of_vote: 1102,
                         institution_id: 1,
+                        accepters: 1102,
+                        rejecters: 1102,
                     },
                     PublicOpinionProjectSummary {
                         id: 3,
@@ -74,6 +80,8 @@ impl Controller {
                         num_of_participation: 9121,
                         num_of_vote: 1102,
                         institution_id: 1,
+                        accepters: 1102,
+                        rejecters: 1102,
                     },
                     PublicOpinionProjectSummary {
                         id: 4,
@@ -88,6 +96,8 @@ impl Controller {
                         num_of_participation: 9121,
                         num_of_vote: 1102,
                         institution_id: 1,
+                        accepters: 1102,
+                        rejecters: 1102,
                     },
                     PublicOpinionProjectSummary {
                         id: 5,
@@ -102,101 +112,124 @@ impl Controller {
                         num_of_participation: 9121,
                         num_of_vote: 1102,
                         institution_id: 1,
+                        accepters: 1102,
+                        rejecters: 1102,
                     },
                 ]
             }),
             public_opinion_institutions: use_signal(|| {
-                vec![PublicOpinionInstitutionSummary {
-                    id: 1,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }, PublicOpinionInstitutionSummary {
-                    id: 2,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }, PublicOpinionInstitutionSummary {
-                    id: 3,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }, PublicOpinionInstitutionSummary {
-                    id: 4,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }, PublicOpinionInstitutionSummary {
-                    id: 5,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }, PublicOpinionInstitutionSummary {
-                    id: 6,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }, PublicOpinionInstitutionSummary {
-                    id: 7,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }, PublicOpinionInstitutionSummary {
-                    id: 8,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }, PublicOpinionInstitutionSummary {
-                    id: 9,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }, PublicOpinionInstitutionSummary {
-                    id: 10,
-                    updated_at: 10000000000,
-                    name: "부산광역시".to_string(),
-                    description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
-                    projects: vec![
-                    ],
-                    num_of_projects: 9121,
-                    num_of_vote: 1102,
-                }]
+                vec![
+                    PublicOpinionInstitutionSummary {
+                        id: 1,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }, 
+                    PublicOpinionInstitutionSummary {
+                        id: 2,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }, 
+                    PublicOpinionInstitutionSummary {
+                        id: 3,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }, 
+                    PublicOpinionInstitutionSummary {
+                        id: 4,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }, 
+                    PublicOpinionInstitutionSummary {
+                        id: 5,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }, 
+                    PublicOpinionInstitutionSummary {
+                        id: 6,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }, 
+                    PublicOpinionInstitutionSummary {
+                        id: 7,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }, 
+                    PublicOpinionInstitutionSummary {
+                        id: 8,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }, 
+                    PublicOpinionInstitutionSummary {
+                        id: 9,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }, 
+                    PublicOpinionInstitutionSummary {
+                        id: 10,
+                        updated_at: 10000000000,
+                        name: "부산광역시".to_string(),
+                        description: "거버넌스를 소개하는 상세내용이 들어갑니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다. 4줄이 넘어가는 경우 자동 생략 처리가 됩니다.....".to_string(),
+                        projects: vec![
+                        ],
+                        num_of_projects: 9121,
+                        num_of_vote: 1102,
+                        num_of_participation: 560000,
+                    }
+                ]
             }),
         };
 
