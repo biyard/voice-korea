@@ -51,6 +51,12 @@ pub fn OpinionProject(
                     "여러분의 의견이 정책에 반영될 수 있도록 진행된 공론조사 프로젝트 목록입니다. 함께 살펴보고, 어떤 주제들이 논의되었는지 확인해 보세요."
                 }
             }
+
+            div { class: "flex flex-wrap gap-[20px] justify-start items-start",
+                for project in public_opinions {
+                    ProjectBox { project }
+                }
+            }
         }
     }
 }
@@ -59,7 +65,10 @@ pub fn OpinionProject(
 pub fn ProjectBox(project: PublicOpinionProjectSummary) -> Element {
     let project_url = asset!("/public/images/project.png").to_string();
     rsx! {
-        div { style: "background-image: url('{project_url}'); background-size: cover; height: 300px; width: ;" }
+        div {
+            class: "rounded-lg",
+            style: "background-image: url('{project_url}'); background-size: cover; height: 450px; width: 400px;",
+        }
     }
 }
 
