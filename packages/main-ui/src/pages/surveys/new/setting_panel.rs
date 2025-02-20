@@ -32,7 +32,7 @@ pub fn SettingPanel(
     let total_panels = ctrl.input_total_panels_memo;
     let translate: SettingPanelTranslate = translate(&lang);
     let mut panel_error = use_signal(|| false);
-    let mut selected_panels = use_signal(|| Vec::<(PanelV2, i64)>::new());
+    let mut selected_panels = ctrl.selected_panels;
 
     rsx! {
         div {
