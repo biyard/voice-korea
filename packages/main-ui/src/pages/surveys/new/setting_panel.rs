@@ -29,9 +29,10 @@ pub fn SettingPanel(
     let mut is_open = use_signal(|| false);
     let mut ctrl = PanelController::new(lang, survey_id)?;
 
-    let mut selected_panels = ctrl.selected_panels;
     let total_panels = ctrl.input_total_panels_memo;
     let translate: SettingPanelTranslate = translate(&lang);
+    let mut panel_error = use_signal(|| false);
+    let mut selected_panels = ctrl.selected_panels;
 
     rsx! {
         div {
@@ -147,6 +148,7 @@ pub fn SettingPanel(
                     }
                 }
 
+
                 div { class: "flex flex-col w-full justify-start items-start",
                     div { class: "flex flex-row w-full h-[1px] bg-[#ebeff5] my-[20px]" }
                     div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
@@ -164,6 +166,10 @@ pub fn SettingPanel(
                 }
             }
 
+            if panel_error() {
+                div { class: "text-red-500 text-sm mt-2", "{translate.panel_error_message}" }
+            }
+
             div { class: "flex flex-row w-full justify-end items-center gap-[20px] text-white mt-[40px]",
                 button {
                     class: "px-[20px] py-[10px] border-[#BFC8D9] bg-white border-[1px] text-[#555462] font-semibold text-[14px] rounded-[4px]",
@@ -176,9 +182,15 @@ pub fn SettingPanel(
                 button {
                     class: "px-[20px] py-[10px] bg-[#2A60D3] font-semibold text-[14px] rounded-[4px]",
                     onclick: move |_| async move {
+                        let panels = selected_panels();
+                        let is_valid = !panels.is_empty() && panels.iter().all(|v| v.1 > 0);
+                        panel_error.set(!is_valid);
+                        if !is_valid {
+                            return;
+                        }
                         onnext(PanelRequest {
                             total_panels: total_panels(),
-                            selected_panels: selected_panels
+                            selected_panels: panels
                                 .iter()
                                 .map(|v| {
                                     let user_count = v.1;
@@ -198,6 +210,7 @@ pub fn SettingPanel(
                     },
                     "{translate.btn_complete}"
                 }
+            
             }
         }
     }
@@ -248,7 +261,7 @@ pub fn PanelSettingInput(
         }
     }
 }
-
+// TODO: 패널 선택이 작동 안함, 코드 수정 필요
 #[component]
 pub fn PanelLabel(label: String, onclose: EventHandler<MouseEvent>) -> Element {
     rsx! {
