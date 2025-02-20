@@ -10,6 +10,42 @@ translate! {
 }
 
 translate! {
+    OpinionProjectTranslate;
+
+    project: {
+        ko: "프로젝트",
+        en: "Project"
+    }
+    project_description: {
+        ko: "여러분의 의견이 정책에 반영될 수 있도록 진행된 공론조사 프로젝트 목록입니다. 함께 살펴보고, 어떤 주제들이 논의되었는지 확인해 보세요.",
+        en: "This is a list of public opinion survey projects conducted to ensure that your opinions are reflected in policies. Take a look together and see what topics were discussed."
+    }
+}
+
+translate! {
+    MoreButtonTranslate;
+
+    more: {
+        ko: "더보기",
+        en: "More"
+    }
+}
+
+translate! {
+    ProjectBoxTranslate;
+
+    participant: {
+        ko: "참여자",
+        en: "Participant"
+    }
+
+    vote: {
+        ko: "투표",
+        en: "Vote"
+    }
+}
+
+translate! {
     OpinionFeatureTranslate;
 
     title: {
