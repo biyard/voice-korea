@@ -10,6 +10,126 @@ translate! {
 }
 
 translate! {
+    OpinionInstitutionTranslate;
+
+    institution: {
+        ko: "정책 결정 기관",
+        en: "Policy Making Institution"
+    }
+    institution_description: {
+        ko: "정책 결정 기관은 중요한 문제를 논의하고 정책을 결정하는 곳으로, 여러분의 의견을 반영한 공론조사를 진행합니다. ",
+        en: "The policy-making body is a place where important issues are discussed and policies are decided, and public opinion surveys are conducted that reflect your opinions."
+    }
+}
+
+translate! {
+    PriceSectionTranslate;
+
+    free_title: {
+        ko: "Free 무료",
+        en: "Free"
+    }
+
+    free_description: {
+        ko: "무료로 공론조사에 참여하고, 사회적 의사결정에 기여하세요. 투명한 블록체인 시스템에서 당신의 의견을 안전하게 제출할 수 있습니다.",
+        en: "Participate in public opinion surveys for free and contribute to social decision-making. You can safely submit your opinions in a transparent blockchain system."
+    }
+
+    won: {
+        ko: "원",
+        en: "Won"
+    }
+
+    free_info_label_1: {
+        ko: "기본 공론조사 참여",
+        en: "Participation in basic public opinion surveys"
+    }
+    free_info_description_1: {
+        ko: "사회적 이슈에 의견을 제출할 수 있습니다.",
+        en: "You can submit your opinion on social issues."
+    }
+    free_info_label_2: {
+        ko: "투명한 블록체인 기록",
+        en: "Transparent blockchain records"
+    }
+    free_info_description_2: {
+        ko: "결과는 블록체인에 기록되어 안전하고 투명합니다.",
+        en: "Results are recorded on the blockchain, making them secure and transparent."
+    }
+    free_info_label_3: {
+        ko: "기본 보상",
+        en: "basic reward"
+    }
+    free_info_description_3: {
+        ko: "참여한 조사에 소량의 보상 지급",
+        en: "A small amount of compensation is paid for participating in the survey."
+    }
+    start: {
+        ko: "시작하기",
+        en: "Start"
+    }
+
+    premium_title: {
+        ko: "Premium 유료",
+        en: "Premium"
+    }
+
+    premium_description: {
+        ko: "프리미엄 서비스로 더 많은 공론조사에 참여하고, 심층 분석 리포트와 더 큰 보상을 받으세요. 더 나은 사회적 결정을 함께 만들어갈 수 있습니다.",
+        en: "Participate in more public opinion polls, receive in-depth analysis reports, and receive greater rewards with our premium service. We can make better social decisions together."
+    }
+
+    premium_info_label_1: {
+        ko: "무제한 공론조사 참여",
+        en: "Participation in unlimited public opinion surveys"
+    }
+    premium_info_description_1: {
+        ko: "유료 사용자는 다양한 중요 이슈에 대한 무제한 참여가 가능하며, 특별한 조사에도 참여할 수 있습니다.",
+        en: "Paid users have unlimited participation in a variety of important issues and can participate in special surveys."
+    }
+
+    premium_info_label_2: {
+        ko: "전문가 분석 레포트 제공",
+        en: "Provides expert analysis reports"
+    }
+    premium_info_description_2: {
+        ko: "유료 사용자는 다양한 중요 이슈에 대한 무제한 참여가 가능하며, 특별한 조사에도 참여할 수 있습니다.",
+        en: "We provide in-depth analysis of survey results and customized reports to help users make better decisions."
+    }
+
+    premium_info_label_3: {
+        ko: "높은 참여 보상",
+        en: "High participation rewards"
+    }
+    premium_info_description_3: {
+        ko: "유료 사용자는 공론조사 참여에 대해 더 많은 보상을 받으며, 이는 블록체인 기반의 토큰으로 지급됩니다.",
+        en: "Paid users receive more compensation for participating in public opinion polls, which are paid in blockchain-based tokens."
+    }
+
+    premium_info_label_4: {
+        ko: "모든 고급 기능 사용 가능",
+        en: "All advanced features available"
+    }
+    premium_info_description_4: {
+        ko: "유료 서비스 이용자는 데이터 분석 도구, 심층 투표 시스템 등 모든 고급 기능에 접근하여 더 깊이 있는 참여가 가능합니다.",
+        en: "Paid users have access to all advanced features, including data analysis tools and an in-depth voting system, for deeper engagement."
+    }
+}
+
+translate! {
+    InstitutionBoxTranslate;
+
+    project: {
+        ko: "프로젝트",
+        en: "Project"
+    }
+    vote: {
+        ko: "투표",
+        en: "Vote"
+    }
+}
+
+translate! {
     OpinionProjectTranslate;
 
     project: {

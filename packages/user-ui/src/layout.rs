@@ -22,11 +22,10 @@ pub fn RootLayout(lang: Language) -> Element {
 pub fn RootLayoutWithFooter(lang: Language) -> Element {
     rsx! {
         div { class: "w-full flex flex-col justify-center items-center",
-            div { class: "w-full flex flex-col max-w-[1300px] min-h-lvh px-[10px]",
+            div { class: "w-full flex flex-col max-w-[1300px] px-[10px]",
                 Header { lang: lang.clone() }
-                Outlet::<Route> {}
-            
             }
+            div { class: "flex flex-col w-full min-h-lvh", Outlet::<Route> {} }
             div { class: "flex flex-row w-full ",
                 Footer { lang: lang.clone() }
             }
