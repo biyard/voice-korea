@@ -5664,6 +5664,7 @@ dependencies = [
  "getrandom 0.2.15",
  "models",
  "num-format",
+ "regex",
  "rest-api",
  "wasm-bindgen",
  "wasm-bindgen-futures",

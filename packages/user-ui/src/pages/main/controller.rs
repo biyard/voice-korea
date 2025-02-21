@@ -1,5 +1,6 @@
 #![allow(unused)]
 use dioxus::prelude::*;
+use dioxus_logger::tracing;
 use dioxus_translate::Language;
 use models::{
     v2::{PublicOpinionInstitutionSummary, PublicOpinionProjectSummary},
@@ -235,6 +236,10 @@ impl Controller {
 
         use_context_provider(|| ctrl);
         Ok(ctrl)
+    }
+
+    pub fn send_inquiry(&self, name: String, email: String, message: String) {
+        tracing::debug!("send inquiry button clicked: {} {} {}", name, email, message);
     }
 
     pub fn get_public_opinions(&self) -> Vec<PublicOpinionProjectSummary> {

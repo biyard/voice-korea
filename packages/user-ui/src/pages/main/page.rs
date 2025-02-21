@@ -4,6 +4,7 @@ use dioxus_translate::{translate, Language};
 use models::v2::{PublicOpinionInstitutionSummary, PublicOpinionProjectSummary};
 
 use crate::components::icons::check::Check;
+use crate::pages::main::components::inquiry::InquirySection;
 use crate::pages::main::components::institution_box::InstitutionBox;
 use crate::pages::main::components::project_box::ProjectBox;
 use crate::pages::main::i18n::{
@@ -21,16 +22,37 @@ pub fn MainPage(lang: Language) -> Element {
     let public_opinion_institutions = ctrl.get_public_opinion_institutions();
 
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center gap-[50px] mb-[50px]",
-            MainBanner { lang }
+        div { class: "flex flex-col w-full justify-center items-center gap-[100px]",
+            div { class: "flex flex-col w-full justify-center items-center gap-[150px]",
+                div { class: "flex flex-col w-full justify-center items-center gap-[50px]",
+                    MainBanner { lang }
 
-            OpinionSection {
-                lang,
-                public_opinions,
-                public_opinion_institutions,
+                    OpinionSection {
+                        lang,
+                        public_opinions,
+                        public_opinion_institutions,
+                    }
+
+                    PriceSection { lang }
+                }
+
+                InquirySection {
+                    lang,
+                    send_inquiry: move |(name, email, message): (String, String, String)| {
+                        ctrl.send_inquiry(name, email, message);
+                    },
+                }
             }
+            Review {}
+        }
+    }
+}
 
-            PriceSection { lang }
+#[component]
+pub fn Review() -> Element {
+    rsx! {
+        div { class: "flex flex-col w-full justify-center items-center py-[100px] bg-gradient-to-b from-[#f1f3fa] to-[#a6e0d3] gap-[]",
+            "Hello"
         }
     }
 }
