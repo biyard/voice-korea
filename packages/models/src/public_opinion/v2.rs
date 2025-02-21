@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 #[allow(unused)]
 use crate::Result;
 #[cfg(feature = "server")]
