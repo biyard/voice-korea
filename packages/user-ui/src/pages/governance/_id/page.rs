@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_translate::Language;
 
-use crate::pages::governance::controller;
+use crate::pages::governance::_id::controller;
 
 #[component]
 pub fn GovernancePage(lang: Language, governance_id: i64) -> Element {

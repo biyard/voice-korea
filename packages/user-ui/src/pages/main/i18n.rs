@@ -93,7 +93,7 @@ translate! {
         en: "Provides expert analysis reports"
     }
     premium_info_description_2: {
-        ko: "유료 사용자는 다양한 중요 이슈에 대한 무제한 참여가 가능하며, 특별한 조사에도 참여할 수 있습니다.",
+        ko: "조사 결과에 대한 심층 분석 및 맞춤형 보고서를 제공하여, 유저가 의사결정을 더 잘 할 수 있도록 돕습니다.",
         en: "We provide in-depth analysis of survey results and customized reports to help users make better decisions."
     }
 

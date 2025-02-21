@@ -37,4 +37,8 @@ translate! {
         en: "Guide"
     },
 
+    public_opinion_design: {
+        ko: "공론 조사 설계",
+        en: "Public Opinion Design"
+    }
 }

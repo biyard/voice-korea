@@ -70,7 +70,7 @@ pub fn Header(lang: Language) -> Element {
                     "{translates.login}"
                 }
                 div { class: "flex flex-row w-[105px] h-[30px] justify-center items-center rounded-lg px-[5px] py-[10px] bg-white border border-[#35343f]",
-                    "공론 조사 설계"
+                    "{translates.public_opinion_design}"
                 }
             }
         }

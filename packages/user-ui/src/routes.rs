@@ -4,7 +4,7 @@ use dioxus_translate::Language;
 #[allow(unused)]
 use crate::layout::{RootLayout, RootLayoutWithFooter};
 
-use crate::pages::governance::GovernancePage;
+use crate::pages::governance::_id::GovernancePage;
 use crate::pages::main::MainPage;
 use crate::pages::users::login::UserLoginPage;
 use crate::pages::NotFoundPage;
@@ -23,7 +23,7 @@ pub enum Route {
         #[end_layout]
 
         #[layout(RootLayout)]
-            #[route("/governances/:governance_id")]
+            #[route("/governance/:governance_id")]
             GovernancePage { lang: Language, governance_id: i64 },
         #[end_layout]
         

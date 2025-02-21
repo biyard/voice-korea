@@ -1,16 +1,9 @@
-#![allow(unused)]
-
-use crate::Field;
 #[allow(unused)]
 use crate::Result;
 #[cfg(feature = "server")]
 use by_axum::aide;
-use by_macros::{api_model, ApiModel};
+use by_macros::api_model;
 use by_types::QueryResponse;
-use dioxus_translate::Translate;
-use serde::{Deserialize, Serialize};
-
-use by_types::ApiError;
 
 use crate::survey::ProjectArea;
 
