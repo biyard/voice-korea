@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::profile::ProfileSummary;
+use num_format::{Locale, ToFormattedString};
 
 use crate::{
     components::{icons::badge::Badge, search::SearchBox},
@@ -18,6 +19,8 @@ pub fn ProfilePage(lang: Language) -> Element {
     let tr: ProfileTranslate = translate(&lang);
 
     let profile = ctrl.get_profile();
+    let designed_projects = profile.clone().designed_projects;
+    let participant_projects = profile.clone().participant_projects;
     let keyword = ctrl.get_keyword();
 
     rsx! {
@@ -52,9 +55,9 @@ pub fn ProfilePage(lang: Language) -> Element {
                     }
 
                     if ctrl.get_selected_type() == controller::ProjectType::Design {
-                        DesignedTable {}
+                        DesignedTable { lang, projects: designed_projects }
                     } else {
-                        ParticipantTable {}
+                        ParticipantTable { lang, projects: participant_projects }
                     }
                 }
             
@@ -89,20 +92,23 @@ pub fn ProfileBanner(lang: Language, profile: ProfileSummary) -> Element {
     let banner_url = asset!("/public/images/profile-banner.png").to_string();
     let date = formatted_timestamp(profile.created_at);
 
+    let projects = profile.num_of_projects.to_formatted_string(&Locale::ko);
+    let votes = profile.num_of_votes.to_formatted_string(&Locale::ko);
+    let tokens = profile.num_of_tokens.to_formatted_string(&Locale::ko);
     rsx! {
         div { class: "relative flex flex-col w-full h-[200px] justify-start items-center",
             div { class: "relative flex flex-row w-full h-[150px] justify-end items-center rounded-[16px] py-[52px] px-[73px] gap-[48px] overflow-hidden",
                 div { class: "absolute inset-0 bg-[url('{banner_url}')] bg-cover bg-center rounded-2xl" }
                 div { class: "flex flex-col w-fit gap-[3px] justify-center items-center",
-                    div { class: "font-bold text-white text-[20px] z-1", "{profile.num_of_projects}" }
+                    div { class: "font-bold text-white text-[20px] z-1", "{projects}" }
                     div { class: "font-normal text-white text-[14px] z-1", "{tr.total_project}" }
                 }
                 div { class: "flex flex-col w-fit gap-[3px] justify-center items-center",
-                    div { class: "font-bold text-white text-[20px] z-1", "{profile.num_of_votes}" }
+                    div { class: "font-bold text-white text-[20px] z-1", "{votes}" }
                     div { class: "font-normal text-white text-[14px] z-1", "{tr.vote}" }
                 }
                 div { class: "flex flex-col w-fit gap-[3px] justify-center items-center",
-                    div { class: "font-bold text-white text-[20px] z-1", "{profile.num_of_tokens}" }
+                    div { class: "font-bold text-white text-[20px] z-1", "{tokens}" }
                     div { class: "font-normal text-white text-[14px] z-1", "{tr.token}" }
                 }
             }
