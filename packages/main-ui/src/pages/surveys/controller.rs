@@ -104,8 +104,18 @@ impl Controller {
     }
 
     pub fn total_pages(&self) -> usize {
-        self.surveys
-            .with(|v| if let Some(v) = v { v.total_count } else { 0 }) as usize
+        let size = self.size;
+        self.surveys.with(|v| {
+            if let Some(v) = v {
+                if v.total_count != 0 {
+                    (v.total_count as usize - 1) / size + 1
+                } else {
+                    0
+                }
+            } else {
+                0
+            }
+        }) as usize
     }
 
     pub fn get_surveys(&self) -> Option<QueryResponse<SurveyV2Summary>> {
