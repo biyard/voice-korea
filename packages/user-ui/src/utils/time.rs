@@ -26,3 +26,12 @@ pub fn format_prev_time(timestamp: i64) -> String {
         return format!("{}년 전", years);
     }
 }
+
+pub fn formatted_timestamp(timestamp: i64) -> String {
+    let datetime = Utc
+        .timestamp_opt(timestamp, 0)
+        .single()
+        .expect("Invalid timestamp");
+
+    datetime.format("%-m월 %-d일 %Y년").to_string()
+}
