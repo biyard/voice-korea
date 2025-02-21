@@ -79,6 +79,6 @@ pub struct PublicOpinionReview {
     pub name: String,
     #[api_model(summary, action = create, action_by_id = update)]
     pub image: String,
-    #[api_model(summary, one_to_many = public_opinions, foreign_key = institution_id)]
+    #[api_model(summary, action = create, action_by_id = update)]
     pub review: String,
 }
