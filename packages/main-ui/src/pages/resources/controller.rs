@@ -274,6 +274,9 @@ impl Controller {
                 let a = document.create_element("a").unwrap();
                 a.set_attribute("href", &file.url.clone().unwrap().clone())
                     .unwrap();
+                //FIXME: file name setting not working. checking this line
+                a.set_attribute("download", &format!("{} - {}", file.name.clone(), index))
+                    .unwrap();
 
                 document.body().unwrap().append_child(&a).unwrap();
                 let a: web_sys::HtmlElement = a.unchecked_into();

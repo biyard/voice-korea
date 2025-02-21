@@ -57,7 +57,7 @@ impl Controller {
         let client = SurveyV2::get_client(&crate::config::get().api_url);
         let client_copy = client.clone();
 
-        let surveys = use_resource(move || {
+        let surveys = use_server_future(move || {
             let page = page();
             let client = client.clone();
 
@@ -79,7 +79,7 @@ impl Controller {
                     }
                 }
             }
-        });
+        })?;
 
         let ctrl = Self {
             client: use_signal(|| client_copy.clone()),

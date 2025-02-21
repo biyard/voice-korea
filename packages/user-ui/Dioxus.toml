@@ -1,12 +1,12 @@
 [application]
 
 # App (Project) Name
-name = "user-ui"
+name = "Voice Korea User"
 
 [web.app]
 
 # HTML title tag content
-title = "user-ui"
+title = "Voice Korea User"
 
 # include `assets` in web platform
 [web.resource]

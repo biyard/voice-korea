@@ -84,7 +84,7 @@ pub fn SurveyPage(props: SurveyProps) -> Element {
                                 lang: props.lang,
                             },
                             div { class: "flex flex-row justify-center items-center px-[14px] py-[8px] bg-[#2a60d3] rounded-[4px]",
-                                div { class: "text-white font-semibold text-[#16px]",
+                                div { class: "text-white font-semibold text-[16px]",
                                     "{translate.start_survey}"
                                 }
                             }
