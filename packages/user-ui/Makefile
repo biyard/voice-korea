@@ -26,7 +26,7 @@ setup.tool:
 	cargo binstall toml-cli
 	npm install tailwindcss @tailwindcss/cli
 
-run:
+run: public/tailwind.css
 	$(BUILD_ENV) dx serve
 
 clean:

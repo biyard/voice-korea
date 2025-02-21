@@ -5663,6 +5663,7 @@ dependencies = [
  "dioxus-translate",
  "getrandom 0.2.15",
  "models",
+ "num-format",
  "rest-api",
  "wasm-bindgen",
  "wasm-bindgen-futures",

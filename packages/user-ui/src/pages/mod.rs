@@ -1,3 +1,4 @@
+pub mod governance;
 pub mod main;
 pub mod not_found;
 pub mod users;

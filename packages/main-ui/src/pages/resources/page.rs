@@ -395,7 +395,7 @@ pub fn ResourcePage(props: ResourceProps) -> Element {
                         },
                         div { class: "flex flex-row h-[40px] justify-center items-center px-[14px] py-[8px] bg-[#2a60d3] rounded-[4px] gap-[5px]",
                             Upload { width: "24", height: "24" }
-                            div { class: "text-white font-semibold text-[#16px]",
+                            div { class: "text-white font-semibold text-[16px]",
                                 "{translate.upload_resource}"
                             }
                         }

@@ -1,3 +1,5 @@
+pub mod v2;
+
 use crate::{field::Field, group::MemberInfo, survey::ProjectStatus};
 #[cfg(feature = "server")]
 use by_axum::aide;

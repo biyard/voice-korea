@@ -34,13 +34,6 @@ pub struct GetObjectUriRequest {
 ///FIXME: fix to filenames to type vector
 #[api_model(base = "/organizations/v2/:org_id/resources", table = resources, iter_type=QueryResponse)]
 pub struct Resource {
-    //FIXME: When add "action_by_id = delete", Error occured.
-    /*
-        error[E0415]: identifier `id` is bound more than once in this parameter list
-        --> packages/models/src/metadata/v2.rs:14:9
-    14 |     pub id: String,
-       |         ^^ used as parameter more than once
-        */
     #[api_model(summary, primary_key, action = delete, read_action = find_by_id )]
     pub id: i64,
     #[api_model(auto = insert)]

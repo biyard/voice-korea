@@ -20,7 +20,7 @@ pub fn Header(lang: Language) -> Element {
                 div { class: "font-extrabold text-base text-[#34333e]", "VOICE KOREA" }
             }
             //TODO: Add more menus
-            div { class: "flex gap-5",
+            div { class: "flex font-bold justify-center items-center text-[#35343f] text-[15px] leading-[18.75px] gap-[45px]",
                 Link {
                     //TODO: Change Target
                     to: Route::MainPage {
@@ -68,6 +68,9 @@ pub fn Header(lang: Language) -> Element {
                         lang: lang.clone(),
                     },
                     "{translates.login}"
+                }
+                div { class: "flex flex-row w-[105px] h-[30px] justify-center items-center rounded-lg px-[5px] py-[10px] bg-white border border-[#35343f]",
+                    "{translates.public_opinion_design}"
                 }
             }
         }
