@@ -10,6 +10,15 @@ translate! {
 }
 
 translate! {
+    ReviewSectionTranslate;
+
+    participation_review: {
+        ko: "참여 후기",
+        en: "Participation Review"
+    }
+}
+
+translate! {
     InquirySectionTranslate;
 
     inquiry_title: {

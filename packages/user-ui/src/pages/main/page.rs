@@ -7,6 +7,7 @@ use crate::components::icons::check::Check;
 use crate::pages::main::components::inquiry::InquirySection;
 use crate::pages::main::components::institution_box::InstitutionBox;
 use crate::pages::main::components::project_box::ProjectBox;
+use crate::pages::main::components::review::ReviewSection;
 use crate::pages::main::i18n::{
     MainBannerTranslate, MoreButtonTranslate, OpinionFeatureTranslate, OpinionInstitutionTranslate,
     OpinionProjectTranslate, PriceSectionTranslate,
@@ -20,6 +21,7 @@ pub fn MainPage(lang: Language) -> Element {
 
     let public_opinions = ctrl.get_public_opinions();
     let public_opinion_institutions = ctrl.get_public_opinion_institutions();
+    let public_opinion_reviews = ctrl.get_public_opinion_reviews();
 
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center gap-[100px]",
@@ -43,16 +45,7 @@ pub fn MainPage(lang: Language) -> Element {
                     },
                 }
             }
-            Review {}
-        }
-    }
-}
-
-#[component]
-pub fn Review() -> Element {
-    rsx! {
-        div { class: "flex flex-col w-full justify-center items-center py-[100px] bg-gradient-to-b from-[#f1f3fa] to-[#a6e0d3] gap-[]",
-            "Hello"
+            ReviewSection { lang, public_opinion_reviews }
         }
     }
 }

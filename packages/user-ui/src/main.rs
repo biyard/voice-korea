@@ -9,6 +9,10 @@ pub mod service {
     pub mod popup_service;
 }
 
+pub mod utils {
+    pub mod time;
+}
+
 pub mod routes;
 
 use routes::Route;

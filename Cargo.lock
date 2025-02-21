@@ -5657,6 +5657,7 @@ version = "0.1.0"
 dependencies = [
  "by-components",
  "by-types",
+ "chrono",
  "dioxus",
  "dioxus-aws",
  "dioxus-logger 0.6.2",
