@@ -102,7 +102,7 @@ pub fn TableRow(
     rsx! {
         div {
             tabindex: "0",
-            class: "flex flex-row w-full [&>*]:px-6 [&>*]:py-3 [&>*]:text-center h-[56px] [&>*]:w-full [&>*]:text-sm [&>*]:font-semibold [&>*]:text-[#34333e]",
+            class: "flex flex-row w-full [&>*]:px-6 [&>*]:py-3 [&>*]:text-center h-[56px] [&>*]:text-sm [&>*]:font-semibold [&>*]:text-[#34333e]",
             style: if is_editing { "background: #F7F7F7;" } else { "" },
             onclick: move |evt: MouseEvent| {
                 if !is_editing {
