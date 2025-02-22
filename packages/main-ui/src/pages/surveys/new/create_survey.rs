@@ -39,8 +39,6 @@ pub fn CreateSurvey(
     let translates: CreateSurveyTranslate = translate(&lang);
     let mut title = use_signal(move || title);
     let mut description = use_signal(move || description);
-    let mut title_error = use_signal(|| false);
-    let mut description_error = use_signal(|| false);
     let mut start_date = use_signal(move || {
         if start_date > 0 {
             start_date
@@ -52,11 +50,11 @@ pub fn CreateSurvey(
     let mut area = use_signal(move || area);
     let mut questions = use_signal(move || questions);
     let nav = use_navigator();
-    let mut questions_error = use_signal(|| false);
 
     use_effect(use_reactive(&value.clone(), move |value| {
         title.set(value.title.clone());
         description.set(value.description.clone());
+        questions.set(value.questions.clone());
 
         if value.start_date > 0 {
             start_date.set(value.start_date);
@@ -76,10 +74,6 @@ pub fn CreateSurvey(
 
         area.set(value.area.clone());
     }));
-
-    use_effect(move || {
-        questions_error.set(questions().is_empty());
-    });
 
     rsx! {
         div {
@@ -112,7 +106,6 @@ pub fn CreateSurvey(
                         let value = value.clone();
                         move |v: String| {
                             title.set(v.clone());
-                            title_error.set(v.trim().is_empty());
                             onchange
                                 .call(CreateSurveyResponse {
                                     title: v.clone(),
@@ -149,7 +142,6 @@ pub fn CreateSurvey(
                         let value = value.clone();
                         move |v: String| {
                             description.set(v.clone());
-                            description_error.set(v.trim().is_empty());
                             onchange
                                 .call(CreateSurveyResponse {
                                     description: v.clone(),
@@ -157,18 +149,6 @@ pub fn CreateSurvey(
                                 })
                         }
                     },
-                }
-
-                if title_error() {
-                    div { class: "text-red-500 text-sm", "{translates.title_required}" }
-                }
-
-                if description_error() {
-                    div { class: "text-red-500 text-sm", "{translates.description_required}" }
-                }
-
-                if questions_error() {
-                    div { class: "text-red-500 text-sm", "{translates.questions_required}" }
                 }
 
                 QuestionListView {
@@ -199,29 +179,14 @@ pub fn CreateSurvey(
                 button {
                     class: "px-[20px] py-[10px] bg-[#2A60D3] font-semibold text-[14px] rounded-[4px]",
                     onclick: move |_| async move {
-                        let mut has_error = false;
-                        if title().trim().is_empty() {
-                            title_error.set(true);
-                            has_error = true;
-                        }
-                        if description().trim().is_empty() {
-                            description_error.set(true);
-                            has_error = true;
-                        }
-                        if questions().is_empty() {
-                            questions_error.set(true);
-                            has_error = true;
-                        }
-                        if !has_error {
-                            onnext(CreateSurveyResponse {
-                                title: title(),
-                                description: description(),
-                                start_date: start_date(),
-                                end_date: end_date(),
-                                area: area(),
-                                questions: questions(),
-                            });
-                        }
+                        onnext(CreateSurveyResponse {
+                            title: title(),
+                            description: description(),
+                            start_date: start_date(),
+                            end_date: end_date(),
+                            area: area(),
+                            questions: questions(),
+                        });
                     },
                     "{translates.btn_next}"
                 }
