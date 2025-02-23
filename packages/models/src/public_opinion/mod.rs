@@ -1,3 +1,4 @@
+pub mod profile;
 pub mod v2;
 
 use crate::{field::Field, group::MemberInfo, survey::ProjectStatus};

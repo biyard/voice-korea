@@ -57,7 +57,7 @@ impl Controller {
         let client = SurveyV2::get_client(&crate::config::get().api_url);
         let client_copy = client.clone();
 
-        let surveys = use_resource(move || {
+        let surveys = use_server_future(move || {
             let page = page();
             let client = client.clone();
 
@@ -79,7 +79,7 @@ impl Controller {
                     }
                 }
             }
-        });
+        })?;
 
         let ctrl = Self {
             client: use_signal(|| client_copy.clone()),
@@ -104,8 +104,18 @@ impl Controller {
     }
 
     pub fn total_pages(&self) -> usize {
-        self.surveys
-            .with(|v| if let Some(v) = v { v.total_count } else { 0 }) as usize
+        let size = self.size;
+        self.surveys.with(|v| {
+            if let Some(v) = v {
+                if v.total_count != 0 {
+                    (v.total_count as usize - 1) / size + 1
+                } else {
+                    0
+                }
+            } else {
+                0
+            }
+        }) as usize
     }
 
     pub fn get_surveys(&self) -> Option<QueryResponse<SurveyV2Summary>> {

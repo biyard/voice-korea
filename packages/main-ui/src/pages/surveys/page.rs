@@ -264,7 +264,7 @@ pub fn SurveyPage(props: SurveyProps) -> Element {
                     }
 
                     Pagination {
-                        total_page: ctrl.total_pages(),
+                        total_page: if ctrl.size != 0 { ctrl.total_pages() } else { 0 },
                         current_page: ctrl.page(),
                         size: ctrl.size,
                         onclick: move |page| {

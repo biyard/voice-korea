@@ -10,6 +10,82 @@ translate! {
 }
 
 translate! {
+    ReviewSectionTranslate;
+
+    participation_review: {
+        ko: "참여 후기",
+        en: "Participation Review"
+    }
+}
+
+translate! {
+    InquirySectionTranslate;
+
+    inquiry_title: {
+        ko: "공정하고 투명한 의사결정을 위한 공론조사 솔루션, VOICE KOREA",
+        en: "Public opinion survey solution for fair and transparent decision-making, VOICE KOREA"
+    }
+
+    inquiry_description: {
+        ko: "VOICE KOREA는 DAO 블록체인 기술을 활용하여, 데이터 조작 없이 신뢰할 수 있는 공론조사를 제공합니다.\n귀 기관에 최적화된 공론조사 시스템을 원하신다면, 지금 문의하세요!",
+        en: "VOICE KOREA utilizes DAO blockchain technology to provide reliable public opinion surveys without data manipulation.\nIf you want a public opinion survey system optimized for your organization, contact us now!"
+    }
+
+    blockchain_info_1: {
+        ko: "DAO 기반의 분산형 의사결정",
+        en: "DAO-based decentralized decision-making"
+    }
+    blockchain_info_2: {
+        ko: "데이터 조작 걱정 없는 블록체인 기술",
+        en: "Blockchain technology without worrying about data manipulation"
+    }
+    blockchain_info_3: {
+        ko: "소통을 위한 직관적인 인터페이스",
+        en: "Intuitive interface for communication"
+    }
+
+    name: {
+        ko: "이름",
+        en: "Name"
+    }
+    name_hint: {
+        ko: "이름을 입력해주세요.",
+        en: "Please Enter Your Name"
+    }
+
+    email: {
+        ko: "이메일",
+        en: "Email"
+    }
+    email_hint: {
+        ko: "이메일을 입력해주세요.",
+        en: "Please Enter Your Email"
+    }
+    email_error: {
+        ko: "이메일 형식에 맞게 입력해주세요.",
+        en: "Please enter your email address in the correct email format."
+    }
+
+    message: {
+        ko: "메세지",
+        en: "Message"
+    }
+    message_hint: {
+        ko: "문의하고 싶은 내용을 입력해주세요.",
+        en: "Please enter the information you would like to inquire about."
+    }
+    message_error: {
+        ko: "문의 내용을 입력해주세요.",
+        en: "Please enter your inquiry details."
+    }
+
+    inquiry: {
+        ko: "문의하기",
+        en: "Inquiry"
+    }
+}
+
+translate! {
     OpinionInstitutionTranslate;
 
     institution: {

@@ -2,17 +2,15 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use models::v2::{PublicOpinionInstitutionSummary, PublicOpinionProjectSummary};
-use num_format::{Locale, ToFormattedString};
 
-use crate::components::icons::auth::Auth;
 use crate::components::icons::check::Check;
-use crate::components::icons::project::ProjectIcon;
-use crate::components::icons::user::User;
-use crate::components::icons::vote::Vote;
+use crate::pages::main::components::inquiry::InquirySection;
+use crate::pages::main::components::institution_box::InstitutionBox;
+use crate::pages::main::components::project_box::ProjectBox;
+use crate::pages::main::components::review::ReviewSection;
 use crate::pages::main::i18n::{
-    InstitutionBoxTranslate, MainBannerTranslate, MoreButtonTranslate, OpinionFeatureTranslate,
-    OpinionInstitutionTranslate, OpinionProjectTranslate, PriceSectionTranslate,
-    ProjectBoxTranslate,
+    MainBannerTranslate, MoreButtonTranslate, OpinionFeatureTranslate, OpinionInstitutionTranslate,
+    OpinionProjectTranslate, PriceSectionTranslate,
 };
 use crate::routes::Route;
 
@@ -23,18 +21,31 @@ pub fn MainPage(lang: Language) -> Element {
 
     let public_opinions = ctrl.get_public_opinions();
     let public_opinion_institutions = ctrl.get_public_opinion_institutions();
+    let public_opinion_reviews = ctrl.get_public_opinion_reviews();
 
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center gap-[50px] mb-[50px]",
-            MainBanner { lang }
+        div { class: "flex flex-col w-full justify-center items-center gap-[100px]",
+            div { class: "flex flex-col w-full justify-center items-center gap-[150px]",
+                div { class: "flex flex-col w-full justify-center items-center gap-[50px]",
+                    MainBanner { lang }
 
-            OpinionSection {
-                lang,
-                public_opinions,
-                public_opinion_institutions,
+                    OpinionSection {
+                        lang,
+                        public_opinions,
+                        public_opinion_institutions,
+                    }
+
+                    PriceSection { lang }
+                }
+
+                InquirySection {
+                    lang,
+                    send_inquiry: move |(name, email, message): (String, String, String)| {
+                        ctrl.send_inquiry(name, email, message);
+                    },
+                }
             }
-
-            PriceSection { lang }
+            ReviewSection { lang, public_opinion_reviews }
         }
     }
 }
@@ -211,7 +222,7 @@ pub fn OpinionInstitution(
                     }
                 }
                 div { class: "flex flex-col w-full gap-[40px]",
-                    div { class: "flex flex-wrap w-full gap-[20px] justify-center items-center",
+                    div { class: "grid grid-cols-5 gap-[20px]",
                         for institution in public_opinion_institutions {
                             Link {
                                 to: Route::GovernancePage {
@@ -237,62 +248,6 @@ pub fn OpinionInstitution(
 }
 
 #[component]
-pub fn InstitutionBox(lang: Language, institution: PublicOpinionInstitutionSummary) -> Element {
-    let institution_badge_url = asset!("/public/images/institution_badge.png").to_string();
-    let tr: InstitutionBoxTranslate = translate(&lang);
-
-    rsx! {
-        div { class: "relative flex flex-col w-[300px] justify-start items-start rounded-[20px] bg-white shadow-[0px_8px_20px_rgba(148,176,214,0.25)]",
-            div { class: "bg-gray-200 w-full h-[75px] rounded-t-[20px]" }
-
-            div { class: "absolute flex flex-row w-[60px] h-[60px] bg-white justify-center items-center top-[45px] left-[15px] rounded-[10px]",
-                img { src: institution_badge_url, width: 48, height: 48 }
-            }
-
-            div { class: "flex flex-col w-full justify-start items-start pt-[40px] pb-[12px] px-[16px] gap-[48px]",
-                div { class: "flex flex-col w-full gap-[10px]",
-                    div { class: "flex flex-row w-full gap-[6px]",
-                        div { class: "font-bold text-[16px] text-[#222222] ", "{institution.name}" }
-                        Auth { width: "24", height: "24" }
-                    }
-                    div { class: "font-normal text-[14px] text-[#555462] leading-[22.4px] line-clamp-4",
-                        "{institution.description}"
-                    }
-                }
-
-                div { class: "flex flex-row w-full justify-between items-center",
-                    div { class: "flex flex-row flex-1 justify-start items-center gap-[5px]",
-                        ProjectIcon { width: "18", height: "18" }
-
-                        div { class: "flex flex-row gap-[4px]",
-                            div { class: "font-normal text-[14px] text-[#222222] leading-[17px]",
-                                "{tr.project}"
-                            }
-                            div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
-                                {institution.num_of_projects.to_formatted_string(&Locale::en)}
-                            }
-                        }
-                    }
-
-                    div { class: "flex flex-row justify-start items-center gap-[5px]",
-                        Vote { width: "18", height: "18" }
-
-                        div { class: "flex flex-row gap-[4px]",
-                            div { class: "font-normal text-[14px] text-[#222222] leading-[17px]",
-                                "{tr.vote}"
-                            }
-                            div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
-                                {institution.num_of_vote.to_formatted_string(&Locale::en)}
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-#[component]
 pub fn OpinionProject(
     lang: Language,
     public_opinions: Vec<PublicOpinionProjectSummary>,
@@ -310,11 +265,13 @@ pub fn OpinionProject(
                     }
                 }
 
-                div { class: "flex flex-wrap gap-[20px] justify-center items-center",
+                div { class: "grid grid-cols-3 gap-[20px]",
                     for project in public_opinions {
                         ProjectBox { lang, project }
                     }
                 }
+
+                div { class: "flex flex-wrap  justify-center items-center" }
                 div { class: "flex flex-row w-full justify-center items-center",
                     MoreButton {
                         lang,
@@ -338,82 +295,6 @@ pub fn MoreButton(lang: Language, onclick: EventHandler<MouseEvent>) -> Element 
                 onclick.call(e);
             },
             "{tr.more}"
-        }
-    }
-}
-
-#[component]
-pub fn ProjectBox(lang: Language, project: PublicOpinionProjectSummary) -> Element {
-    let project_url = asset!("/public/images/project.png").to_string();
-    let institution_badge_url = asset!("/public/images/institution_badge.png").to_string();
-    let tr: ProjectBoxTranslate = translate(&lang);
-
-    rsx! {
-        div {
-            class: "flex flex-col justify-end items-end rounded-[30px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)]",
-            style: "background-image: url('{project_url}'); background-size: cover; height: 450px; width: 400px;",
-            div { class: "flex flex-col w-full justify-start items-start rounded-[20px] bg-white px-[16px] pt-[20px] pb-[12px]",
-                div { class: "flex flex-col gap-[16px]",
-                    div { class: "flex flex-col gap-[8px]",
-                        div { class: "font-bold text-[18px] text-[#222222]", "{project.title}" }
-                        div { class: "flex flex-col gap-[12px]",
-                            div { class: "font-normal text-[#555462] text-[14px]",
-                                "{project.description}"
-                            }
-                            div { class: "flex flex-col gap-[8px]",
-                                div { class: "flex flex-row gap-[4px]",
-                                    img {
-                                        src: institution_badge_url,
-                                        width: 24,
-                                        height: 24,
-                                    }
-                                    div { class: "font-semibold text-[#222222] text-[14px]",
-                                        "{project.policy_making_institution}"
-                                    }
-                                }
-                                if project.project_area.is_some() {
-                                    Label { name: project.project_area.unwrap().to_string() }
-                                }
-                            }
-                        }
-                    }
-
-                    div { class: "flex flex-row w-full justify-between items-center",
-                        div { class: "flex flex-row gap-[6px]",
-                            User { width: "18", height: "18" }
-                            div { class: "flex flex-row gap-[4px]",
-                                div { class: "font-normal text-[14px] text-[#222222] leading-[17px]",
-                                    "{tr.participant}"
-                                }
-                                div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
-                                    {project.num_of_participation.to_formatted_string(&Locale::en)}
-                                }
-                            }
-                        }
-
-                        div { class: "flex flex-row gap-[6px]",
-                            Vote { width: "18", height: "18" }
-                            div { class: "flex flex-row gap-[4px]",
-                                div { class: "font-normal text-[14px] text-[#222222] leading-[17px]",
-                                    "{tr.vote}"
-                                }
-                                div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
-                                    {project.num_of_vote.to_formatted_string(&Locale::en)}
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-#[component]
-pub fn Label(name: String) -> Element {
-    rsx! {
-        div { class: "inline-block w-fit p-[7px] border-[2px] border-[#7c8292] bg-white font-medium text-[14px] leading-[22.4px] text-[#555462] rounded-[100px]",
-            "{name}"
         }
     }
 }

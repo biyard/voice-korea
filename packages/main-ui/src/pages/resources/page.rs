@@ -543,7 +543,7 @@ pub fn ResourcePage(props: ResourceProps) -> Element {
             }
         }
         Pagination {
-            total_page: (ctrl.total_count)() as usize,
+            total_page: ctrl.total_pages(),
             current_page: (ctrl.page)(),
             size: ctrl.size,
             onclick: move |page| {

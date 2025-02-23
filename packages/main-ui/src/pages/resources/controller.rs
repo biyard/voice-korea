@@ -146,6 +146,17 @@ impl Controller {
         }
     }
 
+    pub fn total_pages(&self) -> usize {
+        let size = self.size;
+        let total_count = (self.total_count)() as usize;
+
+        if total_count != 0 && size != 0 {
+            (total_count - 1) / size + 1
+        } else {
+            0
+        }
+    }
+
     pub fn handle_sorting_order(&mut self, order_by: OrderBy) {
         if let Some((prev_order, prev_order_by)) = (self.sort_order)() {
             if order_by == prev_order_by {
@@ -273,6 +284,9 @@ impl Controller {
             for (index, file) in files.iter().enumerate() {
                 let a = document.create_element("a").unwrap();
                 a.set_attribute("href", &file.url.clone().unwrap().clone())
+                    .unwrap();
+                //FIXME: file name setting not working. checking this line
+                a.set_attribute("download", &format!("{} - {}", file.name.clone(), index))
                     .unwrap();
 
                 document.body().unwrap().append_child(&a).unwrap();
