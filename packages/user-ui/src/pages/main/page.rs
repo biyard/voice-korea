@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::v2::{PublicOpinionInstitutionSummary, PublicOpinionProjectSummary};
+use models::v2::{InstitutionSummary, PublicOpinionProjectSummary};
 
 use crate::components::icons::check::Check;
 use crate::pages::main::components::inquiry::InquirySection;
@@ -188,7 +188,7 @@ pub fn InfoBox(label: String, description: String) -> Element {
 pub fn OpinionSection(
     lang: Language,
     public_opinions: Vec<PublicOpinionProjectSummary>,
-    public_opinion_institutions: Vec<PublicOpinionInstitutionSummary>,
+    public_opinion_institutions: Vec<InstitutionSummary>,
 ) -> Element {
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center gap-[120px]",
@@ -207,7 +207,7 @@ pub fn OpinionSection(
 #[component]
 pub fn OpinionInstitution(
     lang: Language,
-    public_opinion_institutions: Vec<PublicOpinionInstitutionSummary>,
+    public_opinion_institutions: Vec<InstitutionSummary>,
 ) -> Element {
     let tr: OpinionInstitutionTranslate = translate(&lang);
     rsx! {

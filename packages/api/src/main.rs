@@ -3,9 +3,16 @@ use by_axum::{
     axum::middleware,
 };
 use by_types::DatabaseConfig;
-use controllers::{resources::v1::bucket::MetadataControllerV1, v2::Version2Controller};
-use models::response::SurveyResponse;
-use models::*;
+use controllers::{
+    institutions::m1::InstitutionControllerM1, public_opinions::v2::OpinionControllerV2,
+    resources::v1::bucket::MetadataControllerV1, reviews::v1::ReviewControllerV1,
+    v2::Version2Controller,
+};
+use models::{
+    response::SurveyResponse,
+    v2::{Institution, PublicOpinionProject},
+};
+use models::{v2::Review, *};
 use sqlx::postgres::PgPoolOptions;
 // use by_types::DatabaseConfig;
 // use sqlx::postgres::PgPoolOptions;
@@ -39,28 +46,18 @@ mod controllers {
     pub mod groups {
         pub mod v2;
     }
-    // pub mod attributes {
-    //     pub mod v1;
-    // }
-    // pub mod metadatas {
-    //     pub mod v1;
-    //     // pub mod v2;
-    // }
-    // pub mod search {
-    //     pub mod v1;
-    // }
 
-    // pub mod public_opinions {
-    //     pub mod v1;
-    // }
-    // pub mod public_surveys {
-    //     pub mod v1;
-    // }
-    // pub mod survey {
-    //     // FIXME: deprecated
-    //     pub mod m1;
-    //     pub mod v1;
-    // }
+    pub mod reviews {
+        pub mod v1;
+    }
+
+    pub mod public_opinions {
+        pub mod v2;
+    }
+
+    pub mod institutions {
+        pub mod m1;
+    }
 }
 pub mod config;
 // mod middleware;
@@ -81,6 +78,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let g = GroupV2::get_repository(pool.clone());
     let gm = GroupMemberV2::get_repository(pool.clone());
     let iv = Invitation::get_repository(pool.clone());
+    let institution = Institution::get_repository(pool.clone());
+    let review = Review::get_repository(pool.clone());
+    let opinions = PublicOpinionProject::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -96,6 +96,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     gm.create_this_table().await?;
 
     iv.create_this_table().await?;
+    institution.create_this_table().await?;
+    review.create_this_table().await?;
+    opinions.create_this_table().await?;
 
     v.create_related_tables().await?;
     o.create_related_tables().await?;
@@ -112,6 +115,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     gm.create_related_tables().await?;
 
     iv.create_related_tables().await?;
+    institution.create_related_tables().await?;
+    review.create_related_tables().await?;
+    opinions.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())
@@ -151,7 +157,19 @@ async fn main() -> Result<()> {
         )
         .nest("/v2", Version2Controller::route(pool.clone())?)
         .layer(middleware::from_fn(authorization_middleware))
-        .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?);
+        .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
+        .nest(
+            "/institutions/m1",
+            InstitutionControllerM1::route(pool.clone())?, //FIXME: fix to authorize
+        )
+        .nest(
+            "/reviews/v1",
+            ReviewControllerV1::route(pool.clone())?, //FIXME: fix to authorize
+        )
+        .nest(
+            "/opinions/v2",
+            OpinionControllerV2::route(pool.clone())?, //FIXME: fix to authorize
+        );
 
     // .nest(
     //     "/attributes/v1",
