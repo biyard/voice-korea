@@ -38,14 +38,14 @@ pub struct SurveyV2 {
     #[api_model(summary, action = create, action_by_id = update)]
     pub ended_at: i64,
 
-    #[api_model(action = create, action_by_id = update)]
+    #[api_model(summary, action = create, action_by_id = update)]
     pub description: String,
     #[api_model(summary, action = create, action_by_id = update)]
     pub quotes: i64,
 
     #[api_model(summary, many_to_one = organizations)]
     pub org_id: i64,
-    #[api_model(action = create, type = JSONB, version = v0.1, action_by_id = update)]
+    #[api_model(summary, action = create, type = JSONB, version = v0.1, action_by_id = update)]
     pub questions: Vec<Question>,
 
     //FIXME: add action_by_id tag

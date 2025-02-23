@@ -10,6 +10,23 @@ translate! {
 }
 
 translate! {
+    ErrorModalTranslate;
+
+    title: {
+        ko: "설문조사 확인",
+        en: "Check the survey"
+    }
+    error_info: {
+        ko: "빈 항목이 존재합니다. \n설문조사를 다시 확인해주세요.",
+        en: "An empty entry exists. \nPlease check the survey again."
+    }
+    confirm: {
+        ko: "확인",
+        en: "Confirm"
+    }
+}
+
+translate! {
     SettingPanelTranslate;
 
     composition_panel: {

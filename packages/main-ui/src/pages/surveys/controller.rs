@@ -6,11 +6,11 @@ use models::{
     SurveyV2StartSurveyRequest, SurveyV2Summary,
 };
 
-use crate::pages::surveys::page::RemoveSurveyModal;
+use crate::pages::surveys::page::{ErrorModal, RemoveSurveyModal};
 use crate::service::login_service::LoginService;
 use crate::service::popup_service::PopupService;
 
-use super::i18n::SurveyTranslate;
+use super::i18n::{ErrorModalTranslate, SurveyTranslate};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Controller {
@@ -123,23 +123,58 @@ impl Controller {
     }
 
     pub async fn start_survey(&mut self, survey_id: i64) {
+        let mut popup_service = self.popup_service;
         let client = (self.client)().clone();
         let org_id = (self.org_id)().parse::<i64>().unwrap_or_default();
         let mut survey_resource = self.surveys;
 
-        match client
-            .act_by_id(
-                org_id,
-                survey_id,
-                models::SurveyV2ByIdAction::StartSurvey(SurveyV2StartSurveyRequest {}),
-            )
-            .await
+        let surveys = self.get_surveys().unwrap().items;
+        let surveys: Vec<SurveyV2Summary> = surveys
+            .iter()
+            .filter(|v| v.id == survey_id)
+            .map(|v| v.clone())
+            .collect();
+
+        let survey = if surveys.is_empty() {
+            SurveyV2Summary::default()
+        } else {
+            surveys[0].clone()
+        };
+
+        let tr: ErrorModalTranslate = translate(&self.lang);
+
+        if survey.name.trim().is_empty()
+            || survey.description.trim().is_empty()
+            || survey.questions.is_empty()
+            || survey.panels.is_empty()
+            || survey.panel_counts.is_empty()
         {
-            Ok(_) => {
-                survey_resource.restart();
-            }
-            Err(e) => {
-                tracing::error!("Failed to start survey: {:?}", e);
+            popup_service
+                .open(rsx! {
+                    ErrorModal {
+                        lang: self.lang,
+                        onclose: move |_e: MouseEvent| {
+                            popup_service.close();
+                        },
+                    }
+                })
+                .with_id("survey error")
+                .with_title(tr.title);
+        } else {
+            match client
+                .act_by_id(
+                    org_id,
+                    survey_id,
+                    models::SurveyV2ByIdAction::StartSurvey(SurveyV2StartSurveyRequest {}),
+                )
+                .await
+            {
+                Ok(_) => {
+                    survey_resource.restart();
+                }
+                Err(e) => {
+                    tracing::error!("Failed to start survey: {:?}", e);
+                }
             }
         }
     }
