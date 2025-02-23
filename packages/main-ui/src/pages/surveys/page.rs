@@ -9,7 +9,7 @@ use crate::{
     },
     pages::surveys::{
         controller::Controller,
-        i18n::{RemoveSurveyModalTranslate, SurveyTranslate},
+        i18n::{ErrorModalTranslate, RemoveSurveyModalTranslate, SurveyTranslate},
     },
     routes::Route,
 };
@@ -84,7 +84,7 @@ pub fn SurveyPage(props: SurveyProps) -> Element {
                                 lang: props.lang,
                             },
                             div { class: "flex flex-row justify-center items-center px-[14px] py-[8px] bg-[#2a60d3] rounded-[4px]",
-                                div { class: "text-white font-semibold text-[#16px]",
+                                div { class: "text-white font-semibold text-[16px]",
                                     "{translate.start_survey}"
                                 }
                             }
@@ -271,6 +271,28 @@ pub fn SurveyPage(props: SurveyProps) -> Element {
                             ctrl.set_page(page);
                         },
                     }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn ErrorModal(lang: Language, onclose: EventHandler<MouseEvent>) -> Element {
+    let i18n: ErrorModalTranslate = translate(&lang);
+
+    rsx! {
+        div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
+            div { class: "flex flex-col text-[#222222] font-normal text-[14px] mt-[30px] whitespace-pre-line",
+                div { "{i18n.error_info}" }
+            }
+            div { class: "flex flex-row w-full justify-end items-end",
+                div {
+                    class: "flex flex-row w-[85px] h-[40px] font-semibold text-[16px] text-[#222222] justify-center items-center cursor-pointer",
+                    onclick: move |e: MouseEvent| {
+                        onclose.call(e);
+                    },
+                    "{i18n.confirm}"
                 }
             }
         }

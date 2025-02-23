@@ -41,9 +41,11 @@ pub fn QuestionListView(
                 div { class: "flex flex-col w-full justify-start items-start",
                     div { class: "flex flex-row w-full justify-start items-center",
                         QuestionTypeSelector {
+                            selected: questions()[index].to_type(&lang),
                             lang,
                             onchange: {
                                 move |qtype: String| {
+                                    questions()[index].to_type(&lang);
                                     questions
                                         .with_mut(move |q| {
                                             q[index] = Question::new(&qtype);
@@ -92,7 +94,7 @@ pub fn QuestionListView(
                         }
                     }
                 }
-
+            
             }
         }
 

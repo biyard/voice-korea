@@ -31,7 +31,6 @@ pub fn SettingPanel(
 
     let total_panels = ctrl.input_total_panels_memo;
     let translate: SettingPanelTranslate = translate(&lang);
-    let mut panel_error = use_signal(|| false);
     let mut selected_panels = ctrl.selected_panels;
 
     rsx! {
@@ -166,10 +165,6 @@ pub fn SettingPanel(
                 }
             }
 
-            if panel_error() {
-                div { class: "text-red-500 text-sm mt-2", "{translate.panel_error_message}" }
-            }
-
             div { class: "flex flex-row w-full justify-end items-center gap-[20px] text-white mt-[40px]",
                 button {
                     class: "px-[20px] py-[10px] border-[#BFC8D9] bg-white border-[1px] text-[#555462] font-semibold text-[14px] rounded-[4px]",
@@ -183,11 +178,6 @@ pub fn SettingPanel(
                     class: "px-[20px] py-[10px] bg-[#2A60D3] font-semibold text-[14px] rounded-[4px]",
                     onclick: move |_| async move {
                         let panels = selected_panels();
-                        let is_valid = !panels.is_empty() && panels.iter().all(|v| v.1 > 0);
-                        panel_error.set(!is_valid);
-                        if !is_valid {
-                            return;
-                        }
                         onnext(PanelRequest {
                             total_panels: total_panels(),
                             selected_panels: panels
