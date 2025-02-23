@@ -2,14 +2,14 @@
 use dioxus::prelude::*;
 use dioxus_translate::Language;
 use models::{
-    v2::{PublicOpinionInstitutionSummary, PublicOpinionProject, PublicOpinionProjectSummary},
+    v2::{InstitutionSummary, PublicOpinionProject, PublicOpinionProjectSummary},
     ProjectArea,
 };
 
 #[derive(Debug, Clone, Copy)]
 pub struct Controller {
     lang: Language,
-    public_opinion_institution: Signal<PublicOpinionInstitutionSummary>,
+    public_opinion_institution: Signal<InstitutionSummary>,
 }
 
 impl Controller {
@@ -17,7 +17,7 @@ impl Controller {
         let ctrl = Self {
             lang,
             public_opinion_institution: use_signal(|| {
-                PublicOpinionInstitutionSummary {
+                InstitutionSummary {
                     id: 1,
                     updated_at: 1737686001,
                     name: "부산광역시".to_string(),
@@ -205,7 +205,7 @@ impl Controller {
         Ok(ctrl)
     }
 
-    pub fn get_public_opinion_institution(&self) -> PublicOpinionInstitutionSummary {
+    pub fn get_public_opinion_institution(&self) -> InstitutionSummary {
         (self.public_opinion_institution)()
     }
 }

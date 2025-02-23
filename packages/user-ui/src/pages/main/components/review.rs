@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::v2::PublicOpinionReviewSummary;
+use models::v2::ReviewSummary;
 
 use crate::{
     components::icons::{left_arrow::LeftArrow, right_arrow::RightArrow},
@@ -9,10 +9,7 @@ use crate::{
 };
 
 #[component]
-pub fn ReviewSection(
-    lang: Language,
-    public_opinion_reviews: Vec<PublicOpinionReviewSummary>,
-) -> Element {
+pub fn ReviewSection(lang: Language, public_opinion_reviews: Vec<ReviewSummary>) -> Element {
     let tr: ReviewSectionTranslate = translate(&lang);
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center py-[100px] bg-gradient-to-b from-[#f1f3fa] to-[#a6e0d3] gap-[30px]",
@@ -35,7 +32,7 @@ pub fn ReviewSection(
 }
 
 #[component]
-pub fn Review(review: PublicOpinionReviewSummary) -> Element {
+pub fn Review(review: ReviewSummary) -> Element {
     let prev_date = format_prev_time(review.created_at);
     rsx! {
         div { class: "flex flex-col w-full h-[240px] px-[32px] py-[40px] bg-white rounded-[12px] gap-[20px]",

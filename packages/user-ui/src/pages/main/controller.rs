@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
 use models::{
-    v2::{PublicOpinionInstitutionSummary, PublicOpinionProjectSummary, PublicOpinionReviewSummary},
+    v2::{InstitutionSummary, PublicOpinionProjectSummary, ReviewSummary},
     ProjectArea,
 };
 
@@ -11,8 +11,8 @@ use models::{
 pub struct Controller {
     lang: Language,
     public_opinions: Signal<Vec<PublicOpinionProjectSummary>>,
-    public_opinion_institutions: Signal<Vec<PublicOpinionInstitutionSummary>>,
-    public_opinion_reviews: Signal<Vec<PublicOpinionReviewSummary>>
+    public_opinion_institutions: Signal<Vec<InstitutionSummary>>,
+    public_opinion_reviews: Signal<Vec<ReviewSummary>>
 }
 
 impl Controller {
@@ -121,7 +121,7 @@ impl Controller {
             }),
             public_opinion_institutions: use_signal(|| {
                 vec![
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 1,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -132,7 +132,7 @@ impl Controller {
                         num_of_vote: 1102,
                         num_of_participation: 560000,
                     }, 
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 2,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -143,7 +143,7 @@ impl Controller {
                         num_of_vote: 1102,
                         num_of_participation: 560000,
                     }, 
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 3,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -154,7 +154,7 @@ impl Controller {
                         num_of_vote: 1102,
                         num_of_participation: 560000,
                     }, 
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 4,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -165,7 +165,7 @@ impl Controller {
                         num_of_vote: 1102,
                         num_of_participation: 560000,
                     }, 
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 5,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -176,7 +176,7 @@ impl Controller {
                         num_of_vote: 1102,
                         num_of_participation: 560000,
                     }, 
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 6,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -187,7 +187,7 @@ impl Controller {
                         num_of_vote: 1102,
                         num_of_participation: 560000,
                     }, 
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 7,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -198,7 +198,7 @@ impl Controller {
                         num_of_vote: 1102,
                         num_of_participation: 560000,
                     }, 
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 8,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -209,7 +209,7 @@ impl Controller {
                         num_of_vote: 1102,
                         num_of_participation: 560000,
                     }, 
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 9,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -220,7 +220,7 @@ impl Controller {
                         num_of_vote: 1102,
                         num_of_participation: 560000,
                     }, 
-                    PublicOpinionInstitutionSummary {
+                    InstitutionSummary {
                         id: 10,
                         updated_at: 10000000000,
                         name: "부산광역시".to_string(),
@@ -234,7 +234,7 @@ impl Controller {
                 ]
             }),
             public_opinion_reviews: use_signal(|| vec![
-                PublicOpinionReviewSummary { 
+                ReviewSummary { 
                     id: 0, 
                     created_at: 1740063600, 
                     updated_at: 1740063600, 
@@ -242,7 +242,7 @@ impl Controller {
                     image: "".to_string(), 
                     review: "고급 분석 리포트가 제공되어 제 의견이 어떻게 사회에 영향을 미치는지 더 깊이 이해할 수 있었어요. 또한, 전문가의 개인화된 상담을 통해 많은 도움을 받았습니다. 확실히 유료 서비스가 가치를 더하는 것 같아요.".to_string() 
                 },
-                PublicOpinionReviewSummary { 
+                ReviewSummary { 
                     id: 1, 
                     created_at: 1740063600, 
                     updated_at: 1740063600, 
@@ -250,7 +250,7 @@ impl Controller {
                     image: "".to_string(), 
                     review: "공론조사에 참여하면서 내 의견이 중요한 사회적 결정을 만드는 데 기여하고 있다는 느낌을 받았어요. 특히, 이 플랫폼은 모더레이션 기능 덕분에 의견 교환이 정말 건전하고 유익하게 이루어집니다. 기술 지원도 빠르고, 사용하기 정말 편리한 시스템이었습니다.".to_string() 
                 },
-                PublicOpinionReviewSummary { 
+                ReviewSummary { 
                     id: 2, 
                     created_at: 1740063600, 
                     updated_at: 1740063600, 
@@ -269,7 +269,7 @@ impl Controller {
         tracing::debug!("send inquiry button clicked: {} {} {}", name, email, message);
     }
 
-    pub fn get_public_opinion_reviews(&self) -> Vec<PublicOpinionReviewSummary> {
+    pub fn get_public_opinion_reviews(&self) -> Vec<ReviewSummary> {
         (self.public_opinion_reviews)()
     }
 
@@ -277,7 +277,7 @@ impl Controller {
         (self.public_opinions)()
     }
 
-    pub fn get_public_opinion_institutions(&self) -> Vec<PublicOpinionInstitutionSummary> {
+    pub fn get_public_opinion_institutions(&self) -> Vec<InstitutionSummary> {
         (self.public_opinion_institutions)()
     }
 }
