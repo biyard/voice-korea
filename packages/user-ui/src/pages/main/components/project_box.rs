@@ -37,8 +37,9 @@ pub fn ProjectBox(lang: Language, project: PublicOpinionProjectSummary) -> Eleme
                                         "{project.policy_making_institution}"
                                     }
                                 }
-                                if project.project_area.is_some() {
-                                    Label { name: project.project_area.unwrap().to_string() }
+
+                                if let Some(area) = project.project_area {
+                                    Label { name: area.to_string() }
                                 }
                             }
                         }
