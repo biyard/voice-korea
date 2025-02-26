@@ -26,6 +26,7 @@ pub use by_types::QueryResponse;
 pub mod prelude {
     pub use crate::attribute::*;
     pub use crate::auth::*;
+    pub use crate::deliberation::*;
     pub use crate::error::*;
     pub use crate::field::*;
     pub use crate::group::*;
