@@ -4,7 +4,7 @@ use by_axum::{
 };
 use by_types::DatabaseConfig;
 use controllers::{
-    institutions::m1::InstitutionControllerM1, public_opinions::v2::OpinionControllerV2,
+    institutions::m1::InstitutionControllerM1, public_deliberations::v2::OpinionControllerV2,
     resources::v1::bucket::MetadataControllerV1, reviews::v1::ReviewControllerV1,
     v2::Version2Controller,
 };
@@ -192,7 +192,7 @@ async fn main() -> Result<()> {
 
     // .nest(
     //     "/public-opinions/v1",
-    //     controllers::public_opinions::v1::PublicOpinionControllerV1::router(),
+    //     controllers::public_deliberations::v1::PublicOpinionControllerV1::router(),
     // )
     // .nest(
     //     "/public-surveys/v1",

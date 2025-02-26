@@ -2,13 +2,13 @@ use dioxus::prelude::*;
 
 use crate::pages::attributes::AttributePage;
 use crate::pages::create::CreatePage;
+use crate::pages::deliberations::new::page::OpinionCreatePage;
+use crate::pages::deliberations::page::DeliberationPage;
 use crate::pages::find_email::FindEmailPage;
 use crate::pages::groups::_id::page::GroupDetailPage;
 use crate::pages::groups::page::GroupPage;
 use crate::pages::members::_id::page::MemberDetailPage;
 use crate::pages::members::page::MemberPage;
-use crate::pages::opinions::new::page::OpinionCreatePage;
-use crate::pages::opinions::page::OpinionPage;
 use crate::pages::panels::page::PanelPage;
 use crate::pages::reset_password::ResetPasswordPage;
 use crate::pages::resources::page::ResourcePage;
@@ -29,9 +29,9 @@ pub enum Route {
             GroupPage { lang: Language },
             #[route("/groups/:group_id")]
             GroupDetailPage { lang: Language, group_id: String },
-            #[route("/opinions")]
-            OpinionPage { lang: Language },
-            #[route("/opinions/new")]
+            #[route("/deliberations")]
+            DeliberationPage { lang: Language },
+            #[route("/deliberations/new")]
             OpinionCreatePage { lang: Language },
             #[route("/members")]
             MemberPage { lang: Language },
@@ -81,8 +81,10 @@ impl Route {
             Route::GroupDetailPage { lang, .. } if lang == &Language::En => {
                 Some("Group Management".to_string())
             }
-            Route::OpinionPage { lang } if lang == &Language::Ko => Some("공론 조사".to_string()),
-            Route::OpinionPage { lang } if lang == &Language::En => {
+            Route::DeliberationPage { lang } if lang == &Language::Ko => {
+                Some("공론 조사".to_string())
+            }
+            Route::DeliberationPage { lang } if lang == &Language::En => {
                 Some("Public Opinion Survey".to_string())
             }
             Route::OpinionCreatePage { lang } if lang == &Language::Ko => {

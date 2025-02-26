@@ -5,7 +5,7 @@ use models::prelude::{AttributeResponse, PanelAttribute};
 
 use crate::{
     components::icons::{Checked, Clear, Remove, UnChecked},
-    pages::opinions::new::{
+    pages::deliberations::new::{
         controller::Controller,
         i18n::{
             AddAttributeModalTranslate, CompositionPanelTranslate, CreateNewPanelModalTranslate,

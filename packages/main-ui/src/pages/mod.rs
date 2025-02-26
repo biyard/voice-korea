@@ -4,11 +4,11 @@ mod page;
 
 pub mod attributes;
 pub mod create;
+pub mod deliberations;
 pub mod find_email;
 pub mod groups;
 pub mod members;
 pub mod not_found;
-pub mod opinions;
 pub mod panels;
 pub mod reset_password;
 pub mod resources;

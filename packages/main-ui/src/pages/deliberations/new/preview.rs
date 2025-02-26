@@ -3,7 +3,7 @@ use dioxus_translate::{translate, Language};
 
 use crate::{
     components::icons::{ArrowRight, Message},
-    pages::opinions::new::{
+    pages::deliberations::new::{
         controller::Controller,
         i18n::{
             CompositionCommitteeSummaryTranslate, CompositionOpinionSummaryTranslate,
