@@ -52,6 +52,7 @@ pub struct Deliberation {
     #[api_model(summary, action = create, many_to_many = panel_deliberations, foreign_table_name = panels, foreign_primary_key = panel_id, foreign_reference_key = deliberation_id,)]
     #[serde(default)]
     pub panels: Vec<PanelV2>,
+    // TODO: discussion should be added
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Default)]
