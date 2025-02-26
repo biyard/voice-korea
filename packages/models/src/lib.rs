@@ -12,6 +12,8 @@ mod panel_survey;
 mod public_opinion;
 mod resource;
 // mod public_survey;
+pub mod deliberation;
+mod projects;
 mod search;
 mod strings;
 mod survey;
@@ -24,6 +26,7 @@ pub use by_types::QueryResponse;
 pub mod prelude {
     pub use crate::attribute::*;
     pub use crate::auth::*;
+    pub use crate::deliberation::*;
     pub use crate::error::*;
     pub use crate::field::*;
     pub use crate::group::*;
@@ -33,6 +36,7 @@ pub mod prelude {
     pub use crate::panel::*;
     pub use crate::panel_count::*;
     pub use crate::panel_survey::*;
+    pub use crate::projects::*;
     pub use crate::public_opinion::*;
     pub use crate::resource::*;
     // pub use crate::public_survey::*;
