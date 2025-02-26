@@ -38,19 +38,17 @@ impl DeliberationController {
     }
 
     pub fn route(&self) -> Result<by_axum::axum::Router> {
-        let ctrl = Self::new(pool);
-
         Ok(by_axum::axum::Router::new()
             .route(
                 "/:id",
                 get(Self::get_deliberation_by_id), // .post(Self::act_deliberation_by_id)
             )
-            .with_state(ctrl.clone())
+            .with_state(self.clone())
             .route(
                 "/",
                 post(Self::act_deliberation).get(Self::get_deliberation),
             )
-            .with_state(ctrl.clone()))
+            .with_state(self.clone()))
     }
 
     pub async fn act_deliberation(
