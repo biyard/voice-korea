@@ -1,10 +1,13 @@
 #![allow(unused_variables)]
+pub mod role;
+pub use role::*;
+
 pub use crate::group::{Group, GroupInfo};
 #[allow(unused)]
 use crate::Result;
 #[cfg(feature = "server")]
 use by_axum::aide;
-use by_macros::{api_model, ApiModel};
+use by_macros::api_model;
 use by_types::QueryResponse;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
@@ -93,28 +96,6 @@ pub struct MemberSummary {
     pub member: OrganizationMember,
     pub groups: Vec<Group>,
     pub project: Vec<MemberProject>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, ApiModel)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub enum Role {
-    Admin = 0,
-    PublicAdmin = 1,
-    Analyst = 2,
-    Mediator = 3,
-    Speaker = 4,
-}
-
-impl std::fmt::Display for Role {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Role::Admin => write!(f, "admin"),
-            Role::PublicAdmin => write!(f, "public_admin"),
-            Role::Analyst => write!(f, "analyst"),
-            Role::Mediator => write!(f, "mediator"),
-            Role::Speaker => write!(f, "speaker"),
-        }
-    }
 }
 
 // FIXME: deprecated

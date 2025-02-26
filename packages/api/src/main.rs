@@ -4,7 +4,7 @@ use by_axum::{
 };
 use by_types::DatabaseConfig;
 use controllers::{
-    institutions::m1::InstitutionControllerM1, public_deliberations::v2::OpinionControllerV2,
+    institutions::m1::InstitutionControllerM1, public_opinions::v2::OpinionControllerV2,
     resources::v1::bucket::MetadataControllerV1, reviews::v1::ReviewControllerV1,
     v2::Version2Controller,
 };

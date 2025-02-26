@@ -146,9 +146,9 @@ impl MemberControllerV2 {
         for member in members.clone() {
             match member.role {
                 Some(Role::Admin) => role_count[1] += 1,
-                Some(Role::PublicAdmin) => role_count[2] += 1,
+                Some(Role::DeliberationAdmin) => role_count[2] += 1,
                 Some(Role::Analyst) => role_count[3] += 1,
-                Some(Role::Mediator) => role_count[4] += 1,
+                Some(Role::Moderator) => role_count[4] += 1,
                 Some(Role::Speaker) => role_count[5] += 1,
                 _ => {}
             }

@@ -539,11 +539,11 @@ pub fn AddMemberModal(
                                     if select_role() == i18n.manager {
                                         Some(Role::Admin)
                                     } else if select_role() == i18n.public_opinion_manager {
-                                        Some(Role::PublicAdmin)
+                                        Some(Role::DeliberationAdmin)
                                     } else if select_role() == i18n.analyst {
                                         Some(Role::Analyst)
                                     } else if select_role() == i18n.repeater {
-                                        Some(Role::Mediator)
+                                        Some(Role::Moderator)
                                     } else {
                                         Some(Role::Speaker)
                                     }
