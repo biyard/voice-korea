@@ -37,7 +37,7 @@ impl DeliberationController {
         Self { repo }
     }
 
-    pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
+    pub fn route(&self) -> Result<by_axum::axum::Router> {
         let ctrl = Self::new(pool);
 
         Ok(by_axum::axum::Router::new()
