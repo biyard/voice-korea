@@ -4,9 +4,9 @@ use by_axum::{
 };
 use by_types::DatabaseConfig;
 use controllers::{
-    institutions::m1::InstitutionControllerM1, public_opinions::v2::OpinionControllerV2,
-    resources::v1::bucket::MetadataControllerV1, reviews::v1::ReviewControllerV1,
-    v2::Version2Controller,
+    institutions::m1::InstitutionControllerM1, participant_users::v1::ParticipantUserControllerV1,
+    public_opinions::v2::OpinionControllerV2, resources::v1::bucket::MetadataControllerV1,
+    reviews::v1::ReviewControllerV1, v2::Version2Controller,
 };
 use models::{
     response::SurveyResponse,
@@ -21,6 +21,10 @@ use tokio::net::TcpListener;
 mod common;
 mod controllers {
     pub mod v2;
+
+    pub mod participant_users {
+        pub mod v1;
+    }
 
     pub mod panels {
         pub mod v2;
@@ -81,6 +85,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let institution = Institution::get_repository(pool.clone());
     let review = Review::get_repository(pool.clone());
     let opinions = PublicOpinionProject::get_repository(pool.clone());
+    let pu = ParticipantUser::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -99,6 +104,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     institution.create_this_table().await?;
     review.create_this_table().await?;
     opinions.create_this_table().await?;
+    pu.create_this_table().await?;
 
     v.create_related_tables().await?;
     o.create_related_tables().await?;
@@ -118,6 +124,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     institution.create_related_tables().await?;
     review.create_related_tables().await?;
     opinions.create_related_tables().await?;
+    pu.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())
@@ -156,6 +163,10 @@ async fn main() -> Result<()> {
             crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
         )
         .nest("/v2", Version2Controller::route(pool.clone())?)
+        .nest(
+            "/users/v1",
+            ParticipantUserControllerV1::route(pool.clone())?,
+        )
         .layer(middleware::from_fn(authorization_middleware))
         .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
         .nest(

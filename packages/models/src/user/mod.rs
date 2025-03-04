@@ -9,6 +9,7 @@ use crate::{
 use by_axum::aide;
 use by_macros::api_model;
 use by_types::QueryResponse;
+use lazy_static::lazy_static;
 use validator::ValidationError;
 
 #[derive(validator::Validate)]
@@ -37,6 +38,29 @@ pub struct User {
 }
 
 #[derive(validator::Validate)]
+#[api_model(base = "/users/v1", read_action = user_info, table = participant_users, iter_type=QueryResponse)]
+pub struct ParticipantUser {
+    #[api_model(primary_key)]
+    pub id: i64,
+    #[api_model(auto = insert)]
+    pub created_at: i64,
+    #[api_model(auto = [insert, update])]
+    pub updated_at: i64,
+
+    #[api_model(action = signup)]
+    #[validate(custom(function = "validate_nickname"))]
+    pub nickname: String,
+    #[api_model(unique, read_action = by_principal)]
+    pub principal: String,
+    #[api_model(action = signup, read_action = [check_email, login], unique)]
+    #[validate(email)]
+    pub email: String,
+    #[api_model(action = signup, nullable)]
+    #[validate(url)]
+    pub profile_url: String,
+}
+
+#[derive(validator::Validate)]
 #[api_model(base = "/auth/v1/verification", table = verifications, iter_type=QueryResponse)]
 pub struct Verification {
     #[api_model(primary_key)]
@@ -59,6 +83,19 @@ fn validate_hex(value: &str) -> std::result::Result<(), ValidationError> {
     } else {
         Err(ValidationError::new("invalid_hex"))
     }
+}
+
+fn validate_nickname(nickname: &str) -> std::result::Result<(), ValidationError> {
+    lazy_static! {
+        static ref NICKNAME_REGEX: regex::Regex =
+            regex::Regex::new(r"^[a-zA-Z0-9][a-zA-Z0-9-_]{1,20}$").unwrap();
+    }
+
+    if !NICKNAME_REGEX.is_match(nickname) {
+        return Err(ValidationError::new("Nickname must be started with alphabet or number and only allow alphabet, number, hyphen and underscore, maximum 20 characters"));
+    }
+
+    Ok(())
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]

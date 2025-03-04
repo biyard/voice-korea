@@ -20,18 +20,35 @@ RUST_LOG ?= debug
 
 BUILD_ENV ?= ENV=$(ENV) VERSION=$(VERSION) COMMIT=$(COMMIT) RUST_LOG=$(RUST_LOG) AWS_REGION=${REGION} AWS_ACCESS_KEY_ID=${ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${SECRET_ACCESS_KEY} TABLE_NAME=$(VOICE_KOREA_TABLE_NAME) BASE_URL=$(BASE_URL) API_URL=${API_URL} RUSTFLAGS="${RUSTFLAGS}"
 
+ifeq ("$(ENV)","local")
+	MODE = development
+else
+	MODE = production
+endif
+
 setup.tool:
 	cargo install binstall
 	cargo binstall dioxus-cli
 	cargo binstall toml-cli
 	npm install tailwindcss @tailwindcss/cli
 
-run: public/tailwind.css
+run: public
 	$(BUILD_ENV) dx serve
 
 clean:
 	rm -rf assets/tailwind.css
 
+node_modules:
+	npm i
+
+.PHONY: public
+public: node_modules public/tailwind.css public/dep.js
+
+.PHONY: public/dep.js
+public/dep.js:
+	npx webpack --mode $(MODE)
+
+.PHONY: public/dep.js
 public/tailwind.css:
 	npx @tailwindcss/cli -i $(PWD)/input.css -o $(PWD)/assets/tailwind.css
 

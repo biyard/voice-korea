@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[cfg(feature = "server")]
 use by_axum::{
     aide,
@@ -7,15 +9,25 @@ use by_axum::{
         Json,
     },
 };
-use dioxus_translate::Translate;
+
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Translate)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 pub enum Error {
     Unauthorized,
+    SignupFailed(String),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Error::Unauthorized => write!(f, "Unauthorized access"),
+            Error::SignupFailed(v) => write!(f, "Signup Failed: {v}"),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, PartialEq, Eq, Deserialize)]
@@ -30,6 +42,8 @@ pub enum ApiError {
     Unauthorized,
 
     NotFound,
+    Unknown(String),
+    BadRequest,
 
     ValidationError(String),
 
