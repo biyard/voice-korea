@@ -7,7 +7,7 @@ use crate::{
         icons::{Search, Switch, UploadFile},
         upload_button::UploadButton,
     },
-    pages::opinions::new::{
+    pages::deliberations::new::{
         controller::Controller,
         i18n::{
             ConnectProjectTranslate, DirectUploadTranslate, ImportDocumentTranslate,

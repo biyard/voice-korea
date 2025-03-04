@@ -14,13 +14,13 @@ use crate::components::icons::SwitchOff;
 use crate::components::icons::SwitchOn;
 use crate::components::icons::Trash;
 use crate::components::icons::{BottomDropdownArrow, DiscussionUser, TopDropdownArrow};
-use crate::pages::opinions::new::controller::Controller;
-use crate::pages::opinions::new::controller::CurrentStep;
-use crate::pages::opinions::new::i18n::CreateMeetingTranslate;
-use crate::pages::opinions::new::i18n::SettingDiscussionTranslate;
-use crate::pages::opinions::new::i18n::SettingGroupTranslate;
-use crate::pages::opinions::new::i18n::SettingScheduleTranslate;
-use crate::pages::opinions::new::i18n::UploadDiscussionMetadataTranslate;
+use crate::pages::deliberations::new::controller::Controller;
+use crate::pages::deliberations::new::controller::CurrentStep;
+use crate::pages::deliberations::new::i18n::CreateMeetingTranslate;
+use crate::pages::deliberations::new::i18n::SettingDiscussionTranslate;
+use crate::pages::deliberations::new::i18n::SettingGroupTranslate;
+use crate::pages::deliberations::new::i18n::SettingScheduleTranslate;
+use crate::pages::deliberations::new::i18n::UploadDiscussionMetadataTranslate;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct SettingDiscussionProps {

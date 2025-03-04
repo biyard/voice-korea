@@ -192,7 +192,7 @@ async fn main() -> Result<()> {
 
     // .nest(
     //     "/public-opinions/v1",
-    //     controllers::public_opinions::v1::PublicOpinionControllerV1::router(),
+    //     controllers::public_deliberations::v1::PublicOpinionControllerV1::router(),
     // )
     // .nest(
     //     "/public-surveys/v1",

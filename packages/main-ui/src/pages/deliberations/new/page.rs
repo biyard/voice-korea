@@ -1,14 +1,14 @@
 #![allow(non_snake_case)]
-use crate::pages::opinions::new::composition_commitee::CompositionCommitee;
-use crate::pages::opinions::new::composition_opinion::CompositionOpinion;
-use crate::pages::opinions::new::composition_panel::CompositionPanel;
-use crate::pages::opinions::new::input_opinion::InputOpinion;
-use crate::pages::opinions::new::preview::Preview;
-use crate::pages::opinions::new::setting_discussion::SettingDiscussion;
+use crate::pages::deliberations::new::composition_commitee::CompositionCommitee;
+use crate::pages::deliberations::new::composition_opinion::CompositionOpinion;
+use crate::pages::deliberations::new::composition_panel::CompositionPanel;
+use crate::pages::deliberations::new::input_opinion::InputOpinion;
+use crate::pages::deliberations::new::preview::Preview;
+use crate::pages::deliberations::new::setting_discussion::SettingDiscussion;
 
 use crate::{
     components::{icons::ArrowLeft, stepper::Stepper},
-    pages::opinions::new::controller::{Controller, CurrentStep},
+    pages::deliberations::new::controller::{Controller, CurrentStep},
     routes::Route,
 };
 
@@ -35,7 +35,7 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
             div { class: "flex flex-row w-full justify-start items-center mb-[25px]",
                 Link {
                     class: "mr-[6px]",
-                    to: Route::OpinionPage {
+                    to: Route::DeliberationPage {
                         lang: props.lang,
                     },
                     ArrowLeft { width: "24", height: "24", color: "#3a3a3a" }

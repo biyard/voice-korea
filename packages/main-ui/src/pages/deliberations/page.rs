@@ -33,7 +33,7 @@ pub enum ModalType {
 }
 
 #[component]
-pub fn OpinionPage(props: OpinionProps) -> Element {
+pub fn DeliberationPage(props: OpinionProps) -> Element {
     let ctrl = Controller::init(props.lang);
     let translates: OpinionTranslate = translate(&props.lang.clone());
     let mut is_focused = use_signal(|| false);

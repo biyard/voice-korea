@@ -1,8 +1,8 @@
 #![allow(unused)]
 
-use crate::Field;
 #[allow(unused)]
 use crate::Result;
+use crate::{Field, ProjectArea};
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::{api_model, ApiModel};
@@ -11,8 +11,6 @@ use dioxus_translate::Translate;
 use serde::{Deserialize, Serialize};
 
 use by_types::ApiError;
-
-use crate::survey::ProjectArea;
 
 #[cfg(feature = "server")]
 use schemars::JsonSchema;

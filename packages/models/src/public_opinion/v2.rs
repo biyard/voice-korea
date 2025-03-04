@@ -7,7 +7,7 @@ use by_axum::aide;
 use by_macros::api_model;
 use by_types::QueryResponse;
 
-use crate::survey::ProjectArea;
+use crate::ProjectArea;
 
 //FIXME: fix to full public opinion model
 #[api_model(base = "/opinions/v2", table = opinions, iter_type=QueryResponse)]

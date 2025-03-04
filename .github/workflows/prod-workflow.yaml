@@ -121,7 +121,7 @@ jobs:
           ENABLE_CRON: false
 
         run: |
-          make deploy-web-if-needed
+          make deploy-web
 
   api-deployment:
     runs-on: ubuntu-22.04
@@ -181,7 +181,7 @@ jobs:
           ENABLE_RDS: false
         run: |
           npm i -g aws-cdk
-          make deploy-if-needed
+          make deploy
 
   watcher-deployment:
     runs-on: ubuntu-22.04

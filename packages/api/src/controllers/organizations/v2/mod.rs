@@ -1,3 +1,5 @@
+pub mod deliberations;
+
 use by_axum::{
     auth::Authorization,
     axum::{
@@ -8,6 +10,7 @@ use by_axum::{
     },
 };
 use by_types::DatabaseConfig;
+use deliberations::DeliberationController;
 use models::*;
 use reqwest::StatusCode;
 use sqlx::postgres::PgPoolOptions;
@@ -18,6 +21,10 @@ pub struct OrganizationControllerV2 {}
 impl OrganizationControllerV2 {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
+            .nest(
+                "/:org-id/deliberations",
+                DeliberationController::new(pool.clone()).route()?,
+            )
             .nest(
                 "/:org-id/surveys",
                 crate::controllers::survey::v2::SurveyControllerV2::route(pool.clone())?,

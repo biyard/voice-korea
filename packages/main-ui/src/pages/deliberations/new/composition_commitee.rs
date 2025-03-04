@@ -4,7 +4,7 @@ use models::prelude::PanelInfo;
 
 use crate::{
     components::icons::{Clear, Remove},
-    pages::opinions::new::{
+    pages::deliberations::new::{
         controller::{Controller, CurrentStep},
         i18n::CompositionCommitteeTranslate,
     },

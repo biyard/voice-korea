@@ -114,7 +114,7 @@ pub fn SideBar(props: SidebarProps) -> Element {
                                     id: "".to_string(),
                                     title: "공론 조사".to_string(),
                                     is_selected: props.selected_menu == "공론 조사",
-                                    link: Some(Route::OpinionPage {
+                                    link: Some(Route::DeliberationPage {
                                         lang: props.lang,
                                     }),
                                 },
