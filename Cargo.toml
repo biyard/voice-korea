@@ -25,6 +25,8 @@ by-types = { path = "deps/rust-sdk/packages/by-types" }
 dioxus-translate = { path = "deps/rust-sdk/packages/dioxus-translate", features = [
     "ko",
 ] }
+dioxus-oauth = { path = "deps/rust-sdk/packages/dioxus-oauth" }
+google-wallet = { path = "deps/rust-sdk/packages/google-wallet" }
 dioxus-aws = { path = "deps/rust-sdk/packages/dioxus-aws" }
 rest-api = { path = "deps/rust-sdk/packages/rest-api" }
 

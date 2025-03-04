@@ -7,9 +7,16 @@ use by_axum::{
         Json,
     },
 };
+use dioxus_translate::Translate;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Translate)]
+#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+pub enum Error {
+    Unauthorized,
+}
 
 #[derive(Debug, Serialize, PartialEq, Eq, Deserialize)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
