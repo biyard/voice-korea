@@ -29,11 +29,13 @@ pub struct Deliberation {
     // ended_at indicates the end time of the deliberation.
     #[api_model(action = create)]
     pub ended_at: i64,
-    #[api_model(action = create)]
-    pub steps: Vec<Step>,
+    // FIXME: can't create a deliberation with steps (enum vector in database)
+    // "DatabaseQueryError": "error returned from database: null value in column \"steps\" of relation \"deliberations\" violates not-null constraint"
+    // #[api_model(action = create)]
+    // pub steps: Vec<Step>,
 
     // Second page of creating a deliberation
-    #[api_model(action = create)]
+    #[api_model(summary, type = INTEGER, action = create)]
     pub project_area: ProjectArea,
     #[api_model(action = create)]
     pub title: String,

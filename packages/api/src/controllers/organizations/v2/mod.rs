@@ -1,6 +1,5 @@
-pub mod deliberations;
-
 use by_axum::{
+    aide,
     auth::Authorization,
     axum::{
         body::Body,
@@ -10,10 +9,16 @@ use by_axum::{
     },
 };
 use by_types::DatabaseConfig;
-use deliberations::DeliberationController;
 use models::*;
 use reqwest::StatusCode;
 use sqlx::postgres::PgPoolOptions;
+
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
+)]
+pub struct OrganizationPath {
+    pub org_id: i64,
+}
 
 #[derive(Clone, Debug)]
 pub struct OrganizationControllerV2 {}
@@ -23,7 +28,8 @@ impl OrganizationControllerV2 {
         Ok(by_axum::axum::Router::new()
             .nest(
                 "/:org-id/deliberations",
-                DeliberationController::new(pool.clone()).route()?,
+                crate::controllers::deliberations::v2::DeliberationController::new(pool.clone())
+                    .route()?,
             )
             .nest(
                 "/:org-id/surveys",

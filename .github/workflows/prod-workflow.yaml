@@ -121,6 +121,7 @@ jobs:
           ENABLE_CRON: false
 
         run: |
+          cargo update -p time --precise 0.3.37
           make deploy-web
 
   api-deployment:
@@ -232,7 +233,7 @@ jobs:
           ENABLE_LAMBDA: true
           BASE_DOMAIN: biyard.co
           ENABLE_CRON: true
-          SCHEDULE: 'cron(0 15 * * ? *)'
+          SCHEDULE: "cron(0 15 * * ? *)"
           DOMAIN: voice-korea-watcher-api.dev.biyard.co
 
         run: |
