@@ -83,7 +83,14 @@ pub fn CompletePopup(lang: Language, onclose: EventHandler<MouseEvent>) -> Eleme
 }
 
 #[component]
-pub fn SignupPopup(lang: Language, oncomplete: EventHandler<String>) -> Element {
+pub fn SignupPopup(
+    lang: Language,
+    principal: String,
+    email: String,
+    profile_url: String,
+) -> Element {
+    let user_service: UserService = use_context();
+    let mut popup_service: PopupService = use_context();
     let tr: SignupPopupTranslate = translate(&lang);
     let mut nickname: Signal<String> = use_signal(|| "".to_string());
     let mut checked_1: Signal<bool> = use_signal(|| false);
@@ -132,8 +139,33 @@ pub fn SignupPopup(lang: Language, oncomplete: EventHandler<String>) -> Element 
             }
             div {
                 class: "cursor-pointer flex flex-row w-full h-[57px] justify-center items-center rounded-[12px] bg-[#8095EA] font-extrabold text-[18px] text-white",
-                onclick: move |_| async move {
-                    oncomplete.call(nickname());
+                onclick: move |_| {
+                    let principal = principal.clone();
+                    let email = email.clone();
+                    let profile_url = profile_url.clone();
+                    async move {
+                        match user_service
+                            .login_or_signup(&principal, &email, &nickname(), &profile_url)
+                            .await
+                        {
+                            Ok(_) => {
+                                popup_service
+                                    .open(rsx! {
+                                        CompletePopup {
+                                            lang,
+                                            onclose: move |_| {
+                                                popup_service.close();
+                                            },
+                                        }
+                                    })
+                                    .with_id("complete")
+                                    .with_title("VOICE KOREA");
+                            }
+                            Err(e) => {
+                                tracing::error!("signup failed: {:?}", e);
+                            }
+                        };
+                    }
                 },
                 "{tr.next}"
             }
@@ -156,14 +188,14 @@ pub fn GoogleLoginPopup(lang: Language, onclose: EventHandler<MouseEvent>) -> El
                     async move {
                         let v: UserEvent = user_service.google_login().await;
                         match v {
-                            UserEvent::Signup(_principal, _email, _, _profile_url) => {
+                            UserEvent::Signup(principal, email, _, profile_url) => {
                                 popup_service
                                     .open(rsx! {
                                         SignupPopup {
                                             lang,
-                                            oncomplete: move |nickname: String| async move {
-                                                tracing::error!("Inside spawn async move {nickname}");
-                                            },
+                                            principal,
+                                            email,
+                                            profile_url,
                                         }
                                     })
                                     .with_id("signup")
