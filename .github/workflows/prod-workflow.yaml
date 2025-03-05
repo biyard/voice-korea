@@ -121,6 +121,7 @@ jobs:
           ENABLE_CRON: false
 
         run: |
+          cargo update -p time --precise 0.3.37
           make deploy-web
 
   api-deployment:
