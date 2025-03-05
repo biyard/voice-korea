@@ -253,6 +253,7 @@ pub fn OpinionProject(
     public_opinions: Vec<PublicOpinionProjectSummary>,
 ) -> Element {
     let tr: OpinionProjectTranslate = translate(&lang);
+    let nav = use_navigator();
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
             div { class: "flex flex-col gap-[30px]",
@@ -266,8 +267,20 @@ pub fn OpinionProject(
                 }
 
                 div { class: "grid grid-cols-3 gap-[20px]",
-                    for project in public_opinions {
-                        ProjectBox { lang, project }
+                    for project in public_opinions.clone() {
+                        div {
+                            class: "cursor-pointer",
+                            onclick: {
+                                let project_id = project.clone().id.clone();
+                                move |_| {
+                                    nav.push(Route::ProjectPage {
+                                        lang,
+                                        project_id,
+                                    });
+                                }
+                            },
+                            ProjectBox { lang, project: project.clone() }
+                        }
                     }
                 }
 
