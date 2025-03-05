@@ -55,7 +55,7 @@ pub struct Deliberation {
     #[serde(default)]
     pub panels: Vec<PanelV2>,
     // TODO: discussion should be added
-    #[api_model(one_to_many = deliberation_comments, action = create_comments)]
+    #[api_model(one_to_many = deliberation_comments)]
     pub comments: Vec<DeliberationComment>,
 }
 
