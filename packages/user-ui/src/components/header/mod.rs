@@ -83,12 +83,7 @@ pub fn CompletePopup(lang: Language, onclose: EventHandler<MouseEvent>) -> Eleme
 }
 
 #[component]
-pub fn SignupPopup(
-    lang: Language,
-    principal: String,
-    email: String,
-    profile_url: String,
-) -> Element {
+pub fn SignupPopup(lang: Language, email: String, profile_url: String) -> Element {
     let user_service: UserService = use_context();
     let mut popup_service: PopupService = use_context();
     let tr: SignupPopupTranslate = translate(&lang);
@@ -140,14 +135,10 @@ pub fn SignupPopup(
             div {
                 class: "cursor-pointer flex flex-row w-full h-[57px] justify-center items-center rounded-[12px] bg-[#8095EA] font-extrabold text-[18px] text-white",
                 onclick: move |_| {
-                    let principal = principal.clone();
                     let email = email.clone();
                     let profile_url = profile_url.clone();
                     async move {
-                        match user_service
-                            .login_or_signup(&principal, &email, &nickname(), &profile_url)
-                            .await
-                        {
+                        match user_service.login_or_signup(&email, &nickname(), &profile_url).await {
                             Ok(_) => {
                                 popup_service
                                     .open(rsx! {
@@ -188,15 +179,10 @@ pub fn GoogleLoginPopup(lang: Language, onclose: EventHandler<MouseEvent>) -> El
                     async move {
                         let v: UserEvent = user_service.google_login().await;
                         match v {
-                            UserEvent::Signup(principal, email, _, profile_url) => {
+                            UserEvent::Signup(email, _, profile_url) => {
                                 popup_service
                                     .open(rsx! {
-                                        SignupPopup {
-                                            lang,
-                                            principal,
-                                            email,
-                                            profile_url,
-                                        }
+                                        SignupPopup { lang, email, profile_url }
                                     })
                                     .with_id("signup")
                                     .with_title(tr.signup);

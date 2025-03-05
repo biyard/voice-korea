@@ -50,9 +50,7 @@ pub struct ParticipantUser {
     #[api_model(action = signup)]
     #[validate(custom(function = "validate_nickname"))]
     pub nickname: String,
-    #[api_model(unique, read_action = by_principal)]
-    pub principal: String,
-    #[api_model(action = signup, read_action = [check_email, login], unique)]
+    #[api_model(action = [signup, login], read_action = [check_email], unique)]
     #[validate(email)]
     pub email: String,
     #[api_model(action = signup, nullable)]

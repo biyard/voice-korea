@@ -5,7 +5,7 @@ use dioxus_logger::tracing;
 use dioxus_oauth::prelude::FirebaseService;
 use models::{ApiError, Error, ParticipantUser, ParticipantUserClient};
 pub enum UserEvent {
-    Signup(String, String, String, String),
+    Signup(String, String, String),
     Login,
     Logout,
 }
@@ -18,7 +18,6 @@ pub struct UserService {
     pub email: Signal<String>,
     pub nickname: Signal<String>,
     pub profile_url: Signal<String>,
-    pub principal: Signal<String>,
 }
 
 impl UserService {
@@ -57,7 +56,6 @@ impl UserService {
             email: use_signal(|| "".to_string()),
             nickname: use_signal(|| "".to_string()),
             profile_url: use_signal(|| "".to_string()),
-            principal: use_signal(|| "".to_string()),
         };
 
         use_context_provider(move || firebase);
@@ -65,7 +63,7 @@ impl UserService {
     }
 
     pub async fn google_login(&mut self) -> UserEvent {
-        let (evt, principal, email, name, profile_url) = self.request_to_firebase().await.unwrap();
+        let (evt, email, name, profile_url) = self.request_to_firebase().await.unwrap();
 
         match evt {
             google_wallet::WalletEvent::Signup => {
@@ -76,7 +74,7 @@ impl UserService {
                     profile_url
                 );
 
-                return UserEvent::Signup(principal, email, name, profile_url);
+                return UserEvent::Signup(email, name, profile_url);
             }
             google_wallet::WalletEvent::Login => {
                 tracing::debug!(
@@ -85,19 +83,19 @@ impl UserService {
                     name,
                     profile_url
                 );
-                rest_api::set_signer(Box::new(*self));
                 let cli = (self.cli)();
 
                 let user: ParticipantUser = match cli.check_email(email.clone()).await {
                     // Login
-                    Ok(v) => v,
+                    Ok(v) => {
+                        self.email.set(email.clone());
+                        v
+                    }
                     Err(e) => {
                         // Signup
-                        rest_api::remove_signer();
-
                         match e {
                             ApiError::NotFound => {
-                                return UserEvent::Signup(principal, email, name, profile_url);
+                                return UserEvent::Signup(email, name, profile_url);
                             }
                             e => {
                                 tracing::error!("UserService::login: error={:?}", e);
@@ -110,7 +108,6 @@ impl UserService {
                 self.email.set(email);
                 self.nickname.set(user.nickname);
                 self.profile_url.set(user.profile_url);
-                self.principal.set(principal);
 
                 return UserEvent::Login;
             }
@@ -124,22 +121,19 @@ impl UserService {
 
     pub async fn login_or_signup(
         &self,
-        principal: &str,
         email: &str,
         nickname: &str,
         profile_url: &str,
     ) -> Result<(), Error> {
-        rest_api::set_signer(Box::new(*self));
-
         tracing::debug!(
-            "UserService::signup: principal={} email={} nickname={} profile_url={}",
-            principal,
+            "UserService::signup: email={} nickname={} profile_url={}",
             email,
             nickname,
             profile_url
         );
 
         let cli = (self.cli)();
+        let mut ctrl = self.clone();
 
         let res: ParticipantUser = match cli
             .signup(
@@ -149,10 +143,12 @@ impl UserService {
             )
             .await
         {
-            Ok(v) => v,
+            Ok(v) => {
+                ctrl.email.set(email.to_string());
+                v
+            }
             Err(e) => {
                 tracing::error!("UserService::signup: error={:?}", e);
-                rest_api::remove_signer();
                 return Err(Error::SignupFailed(e.to_string()));
             }
         };
@@ -163,35 +159,28 @@ impl UserService {
 
     async fn request_to_firebase(
         &mut self,
-    ) -> Result<(google_wallet::WalletEvent, String, String, String, String), Error> {
+    ) -> Result<(google_wallet::WalletEvent, String, String, String), Error> {
         let mut firebase = (self.firebase_wallet)();
-        let (evt, principal, email, name, profile_url) =
-            match firebase.request_wallet_with_google().await {
-                Ok(evt) => {
-                    tracing::debug!("UserService::login: cred={:?}", evt);
-                    let principal = firebase.get_principal();
-                    if principal.is_empty() {
-                        tracing::error!("UserService::login: principal is empty");
+        let (evt, email, name, profile_url) = match firebase.request_wallet_with_google().await {
+            Ok(evt) => {
+                tracing::debug!("UserService::login: cred={:?}", evt);
+                let (email, name, profile_url) = match firebase.get_user_info() {
+                    Some(v) => v,
+                    None => {
+                        tracing::error!("UserService::login: None");
                         return Err(Error::Unauthorized);
                     }
+                };
 
-                    let (email, name, profile_url) = match firebase.get_user_info() {
-                        Some(v) => v,
-                        None => {
-                            tracing::error!("UserService::login: None");
-                            return Err(Error::Unauthorized);
-                        }
-                    };
+                (evt, email, name, profile_url)
+            }
+            Err(e) => {
+                tracing::error!("UserService::login: error={:?}", e);
+                return Err(Error::Unauthorized);
+            }
+        };
 
-                    (evt, principal, email, name, profile_url)
-                }
-                Err(e) => {
-                    tracing::error!("UserService::login: error={:?}", e);
-                    return Err(Error::Unauthorized);
-                }
-            };
-
-        Ok((evt, principal, email, name, profile_url))
+        Ok((evt, email, name, profile_url))
     }
 }
 

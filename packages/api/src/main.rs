@@ -1,7 +1,4 @@
-use by_axum::{
-    auth::{authorization_middleware, set_auth_config},
-    axum::middleware,
-};
+use by_axum::auth::{authorization_middleware, set_auth_config};
 use by_types::DatabaseConfig;
 use controllers::{
     institutions::m1::InstitutionControllerM1, participant_users::v1::ParticipantUserControllerV1,
@@ -64,7 +61,6 @@ mod controllers {
     }
 }
 pub mod config;
-// mod middleware;
 mod utils;
 
 async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
@@ -167,7 +163,7 @@ async fn main() -> Result<()> {
             "/users/v1",
             ParticipantUserControllerV1::route(pool.clone())?,
         )
-        .layer(middleware::from_fn(authorization_middleware))
+        .layer(by_axum::axum::middleware::from_fn(authorization_middleware))
         .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
         .nest(
             "/institutions/m1",
@@ -339,7 +335,7 @@ pub mod tests {
                 controllers::organizations::v2::OrganizationControllerV2::route(pool.clone())?,
             )
             .nest("/v2", Version2Controller::route(pool.clone())?)
-            .layer(middleware::from_fn(authorization_middleware));
+            .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
         let user = setup_test_user(&id, &pool).await.unwrap();
         let (claims, admin_token) = setup_jwt_token(user.clone());
