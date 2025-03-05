@@ -1,5 +1,7 @@
+pub mod deliberation_comment;
 pub mod deliberation_user;
 
+pub use deliberation_comment::*;
 pub use deliberation_user::*;
 
 #[cfg(feature = "server")]
@@ -53,6 +55,8 @@ pub struct Deliberation {
     #[serde(default)]
     pub panels: Vec<PanelV2>,
     // TODO: discussion should be added
+    #[api_model(one_to_many = deliberation_comments, action = create_comments)]
+    pub comments: Vec<DeliberationComment>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Default)]
