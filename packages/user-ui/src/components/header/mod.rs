@@ -91,6 +91,9 @@ pub fn SignupPopup(lang: Language, email: String, profile_url: String) -> Elemen
     let mut nickname: Signal<String> = use_signal(|| "".to_string());
     let mut checked_1: Signal<bool> = use_signal(|| false);
     let mut checked_2: Signal<bool> = use_signal(|| false);
+
+    let mut nickname_error = use_signal(|| "".to_string());
+    let mut check_error = use_signal(|| "".to_string());
     rsx! {
         div { class: "flex flex-col min-w-[420px] justify-between items-center gap-[25px]",
             div { class: "flex flex-col w-full justify-start items-start gap-[15px]",
@@ -107,6 +110,9 @@ pub fn SignupPopup(lang: Language, email: String, profile_url: String) -> Elemen
                         },
                     }
                     div { class: "font-normal text-[#7C8292] text-[14px]", "{tr.nickname_warning}" }
+                    if nickname_error() != "" {
+                        div { class: "font-normal text-red-400 text-[14px]", {nickname_error()} }
+                    }
                 }
                 div { class: "flex flex-col w-full justify-start items-center gap-[15px]",
                     div { class: "flex flex-row w-full gap-[10px]",
@@ -131,6 +137,9 @@ pub fn SignupPopup(lang: Language, email: String, profile_url: String) -> Elemen
                         div { class: "font-medium text-[#555462] text-[16px]", "{tr.agree_2}" }
                         SeeDetailButton { lang }
                     }
+                    if check_error() != "" {
+                        div { class: "font-normal text-red-400 text-[14px]", {check_error()} }
+                    }
                 }
             }
             div {
@@ -138,6 +147,15 @@ pub fn SignupPopup(lang: Language, email: String, profile_url: String) -> Elemen
                 onclick: move |_| {
                     let email = email.clone();
                     async move {
+                        if nickname() == "" {
+                            nickname_error.set(tr.nickname_error.to_string());
+                            return;
+                        } else if !checked_1() || !checked_2() {
+                            check_error.set(tr.check_error.to_string());
+                            return;
+                        }
+                        nickname_error.set("".to_string());
+                        check_error.set("".to_string());
                         match user_service.login_or_signup(&email, &nickname()).await {
                             Ok(_) => {
                                 popup_service
@@ -219,20 +237,30 @@ pub fn GoogleLoginPopup(lang: Language, onclose: EventHandler<MouseEvent>) -> El
 pub fn Header(lang: Language) -> Element {
     let translates: Translate = translate(&lang);
     let mut popup_service: PopupService = use_context();
+    let user_service: UserService = use_context();
+    let email = (user_service.email)();
 
-    let onclick = move |_| {
-        tracing::debug!("signup button clicked");
-        popup_service
-            .open(rsx! {
-                GoogleLoginPopup {
-                    lang: lang.clone(),
-                    onclose: move |_| {
-                        popup_service.close();
-                    },
-                }
-            })
-            .with_id("google_login")
-            .with_title(translates.login);
+    let onclick = {
+        let email = email.clone();
+        move |_| {
+            tracing::debug!("signup button clicked");
+
+            if email != "" {
+                return;
+            }
+
+            popup_service
+                .open(rsx! {
+                    GoogleLoginPopup {
+                        lang: lang.clone(),
+                        onclose: move |_| {
+                            popup_service.close();
+                        },
+                    }
+                })
+                .with_id("google_login")
+                .with_title(translates.login);
+        }
     };
 
     rsx! {
@@ -289,7 +317,13 @@ pub fn Header(lang: Language) -> Element {
                     },
                     "{translates.guide}"
                 }
-                div { class: "cursor-pointer", onclick, "{translates.login}" }
+                div { class: "cursor-pointer", onclick,
+                    if email == "" {
+                        "{translates.login}"
+                    } else {
+                        "{translates.logout}"
+                    }
+                }
                 div { class: "flex flex-row w-[105px] h-[30px] justify-center items-center rounded-lg px-[5px] py-[10px] bg-white border border-[#35343f]",
                     "{translates.public_opinion_design}"
                 }

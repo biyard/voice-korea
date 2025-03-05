@@ -49,6 +49,14 @@ translate! {
         ko: "개인정보 처리 방침에 동의합니다.",
         en: "I agree to the privacy policy."
     }
+    nickname_error: {
+        ko: "닉네임은 빈 값이 올 수 없습니다.",
+        en: "Nickname cannot be an empty value."
+    }
+    check_error: {
+        ko: "약관에 동의가 필요합니다.",
+        en: "You must agree to the terms and conditions."
+    }
     next: {
         ko: "다음",
         en: "Next"
@@ -92,6 +100,11 @@ translate! {
     login: {
         ko: "로그인",
         en: "Login"
+    },
+
+    logout: {
+        ko: "로그아웃",
+        en: "Logout"
     },
 
     plan: {
