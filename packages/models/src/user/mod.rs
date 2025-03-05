@@ -13,7 +13,7 @@ use lazy_static::lazy_static;
 use validator::ValidationError;
 
 #[derive(validator::Validate)]
-#[api_model(base = "/auth/v1", action = [signup(code = String), reset(code = String)], read_action = refresh, table = users, iter_type=QueryResponse)]
+#[api_model(base = "/auth/v1", action = [signup(code = String), reset(code = String), user_signup(token = String), user_login(token = String)], read_action = refresh, table = users, iter_type=QueryResponse)]
 pub struct User {
     #[api_model(primary_key, read_action = find_by_id)]
     pub id: i64,
@@ -21,12 +21,15 @@ pub struct User {
     pub created_at: i64,
     #[api_model(auto = [insert, update])]
     pub updated_at: i64,
-    #[api_model(action = [signup, login, reset], unique, read_action = [get_user, find_by_email])]
+    #[api_model(action = [signup, login, reset, user_signup, user_login], unique, read_action = [get_user, find_by_email])]
     #[validate(email)]
     pub email: String,
     #[api_model(action = [signup, login, reset], read_action = get_user)]
     #[validate(custom(function = "validate_hex"))]
     pub password: String,
+    #[api_model(action = [user_signup])]
+    #[validate(custom(function = "validate_nickname"))]
+    pub nickname: Option<String>,
 
     #[api_model(many_to_many = organization_members, foreign_table_name = organizations, foreign_primary_key = org_id, foreign_reference_key = user_id)]
     #[serde(default)]
@@ -35,27 +38,6 @@ pub struct User {
     // #[api_model(many_to_many = group_members, foreign_table_name = groups, foreign_primary_key = group_id, foreign_reference_key = user_id)]
     // #[serde(default)]
     // pub groups: Vec<GroupV2>,
-}
-
-#[derive(validator::Validate)]
-#[api_model(base = "/users/v1", read_action = user_info, table = participant_users, iter_type=QueryResponse)]
-pub struct ParticipantUser {
-    #[api_model(primary_key)]
-    pub id: i64,
-    #[api_model(auto = insert)]
-    pub created_at: i64,
-    #[api_model(auto = [insert, update])]
-    pub updated_at: i64,
-
-    #[api_model(action = signup)]
-    #[validate(custom(function = "validate_nickname"))]
-    pub nickname: String,
-    #[api_model(action = [signup, login], read_action = [check_email], unique)]
-    #[validate(email)]
-    pub email: String,
-    #[api_model(action = signup, nullable)]
-    #[validate(url)]
-    pub profile_url: String,
 }
 
 #[derive(validator::Validate)]

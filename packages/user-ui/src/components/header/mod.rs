@@ -60,6 +60,7 @@ fn CustomCheckbox(lang: Language, mut checked: bool, onchange: EventHandler<bool
 #[component]
 pub fn CompletePopup(lang: Language, onclose: EventHandler<MouseEvent>) -> Element {
     let tr: CompletePopupTranslate = translate(&lang);
+    let mut popup_service: PopupService = use_context();
     rsx! {
         div { class: "flex flex-col min-w-[420px] justify-center items-center gap-[35px]",
             div { class: "flex flex-col w-full justify-center items-center gap-[15px]",
@@ -73,8 +74,8 @@ pub fn CompletePopup(lang: Language, onclose: EventHandler<MouseEvent>) -> Eleme
             }
             div {
                 class: "cursor-pointer flex flex-row w-full h-[57px] justify-center items-center rounded-[12px] bg-[#8095EA] font-extrabold text-[18px] text-white",
-                onclick: move |e: Event<MouseData>| {
-                    onclose.call(e);
+                onclick: move |_| {
+                    popup_service.close();
                 },
                 "{tr.start}"
             }
@@ -136,9 +137,8 @@ pub fn SignupPopup(lang: Language, email: String, profile_url: String) -> Elemen
                 class: "cursor-pointer flex flex-row w-full h-[57px] justify-center items-center rounded-[12px] bg-[#8095EA] font-extrabold text-[18px] text-white",
                 onclick: move |_| {
                     let email = email.clone();
-                    let profile_url = profile_url.clone();
                     async move {
-                        match user_service.login_or_signup(&email, &nickname(), &profile_url).await {
+                        match user_service.login_or_signup(&email, &nickname()).await {
                             Ok(_) => {
                                 popup_service
                                     .open(rsx! {
