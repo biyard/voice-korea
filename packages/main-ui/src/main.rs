@@ -44,7 +44,17 @@ fn App() -> Element {
             r#type: "image/x-icon",
             href: asset!("/public/favicon.ico"),
         }
-
+        document::Link { href: "https://fonts.googleapis.com", rel: "preconnect" }
+        document::Link {
+            crossorigin: "false",
+            href: "https://fonts.gstatic.com",
+            rel: "preconnect",
+        }
+        document::Link {
+            href: "https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard.css",
+            r#type: "text/css",
+            rel: "stylesheet",
+        }
         document::Script { src: "https://d3js.org/d3.v7.min.js" }
 
         head {
