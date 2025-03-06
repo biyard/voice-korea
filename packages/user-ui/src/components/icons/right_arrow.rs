@@ -4,6 +4,7 @@ use dioxus::prelude::*;
 pub fn RightArrow(
     #[props(default = "24".to_string())] width: String,
     #[props(default = "24".to_string())] height: String,
+    #[props(default = "#FFFFFF".to_string())] color: String,
 ) -> Element {
     rsx! {
         svg {
@@ -16,7 +17,7 @@ pub fn RightArrow(
                 path {
                     "stroke-linecap": "round",
                     "stroke-width": "1.5",
-                    stroke: "white",
+                    stroke: "{color}",
                     d: "M10.3027 5.83398L15.8074 11.8891C16.1226 12.2359 16.1226 12.7654 15.8074 13.1122L10.3027 19.1673",
                     "stroke-linejoin": "round",
                 }
