@@ -77,6 +77,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let review = Review::get_repository(pool.clone());
     let opinions = PublicOpinionProject::get_repository(pool.clone());
     let deliberation = Deliberation::get_repository(pool.clone());
+    let step = Step::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -96,6 +97,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     review.create_this_table().await?;
     opinions.create_this_table().await?;
     deliberation.create_this_table().await?;
+    step.create_this_table().await?;
 
     v.create_related_tables().await?;
     o.create_related_tables().await?;
@@ -115,10 +117,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     institution.create_related_tables().await?;
     review.create_related_tables().await?;
     opinions.create_related_tables().await?;
-    // deliberation.create_related_tables().await?;
-    // FIXME: fix the following error
-    // summary="CREATE TABLE IF NOT …" db.statement="\n\n\nCREATE TABLE IF NOT EXISTS deliberation_resources (\n    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,\n    resource_id BIGINT NOT NULL,\n    deliberation_id BIGINT NOT NULL,\n    created_at BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),\n\n    CONSTRAINT fk_deliberations_ FOREIGN KEY (deliberation_id) REFERENCES deliberations(id) ON DELETE CASCADE,\n    CONSTRAINT fk__deliberations FOREIGN KEY (resource_id) REFERENCES (id) ON DELETE CASCADE\n);\n\n" rows_affected=0 rows_returned=0 elapsed=11.832167ms elapsed_secs=0.011832167
-    // Error: DatabaseQueryError("error returned from database: syntax error at or near \"(\"")
+    deliberation.create_related_tables().await?;
+    step.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())

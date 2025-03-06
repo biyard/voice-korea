@@ -32,7 +32,8 @@ pub struct Deliberation {
     // ended_at indicates the end time of the deliberation.
     #[api_model(action = create)]
     pub ended_at: i64,
-    #[api_model(summary, one_to_many = steps, action = create)]
+    #[api_model(summary, one_to_many = deliberations_steps, foreign_key = deliberation_id, action = create)]
+    #[serde(default)]
     pub steps: Vec<Step>,
 
     // Second page of creating a deliberation
@@ -43,13 +44,13 @@ pub struct Deliberation {
     #[api_model(action = create)]
     pub description: String,
 
-    #[api_model(many_to_many = deliberation_resources, table_name = resources foreign_primary_key = resource_id, foreign_reference_key = deliberation_id)]
+    #[api_model(many_to_many = deliberation_resources, table_name = resources, foreign_primary_key = resource_id, foreign_reference_key = deliberation_id)]
     pub resources: Vec<Resource>,
 
     #[api_model(many_to_many = deliberation_surveys, table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = deliberation_id)]
     pub surveys: Vec<SurveyV2>,
     // Third page of creating a deliberation
-    #[api_model(many_to_many = deliberations_users, table_name = deliberation_users, foreign_primary_key = user_id, foreign_reference_key = deliberation_id)]
+    #[api_model(many_to_many = deliberations_users, table_name = users, foreign_primary_key = user_id, foreign_reference_key = deliberation_id)]
     #[serde(default)]
     pub members: Vec<User>,
 
@@ -57,7 +58,7 @@ pub struct Deliberation {
     #[serde(default)]
     pub panels: Vec<PanelV2>,
     // TODO: discussion should be added
-    #[api_model(one_to_many = deliberation_comments)]
+    #[api_model(one_to_many = deliberation_comments, foreign_key = deliberation_id)]
     pub comments: Vec<DeliberationComment>,
 }
 
@@ -73,7 +74,7 @@ pub enum StepType {
     PostBoard = 5,
 }
 
-#[api_model(base = "/organizations/v2/:org-id/deliberations", table = deliberations)]
+#[api_model(base = "/organizations/v2/:org-id/deliberations", table = deliberations_steps)]
 pub struct Step {
     #[api_model(summary, primary_key)]
     pub id: i64,
