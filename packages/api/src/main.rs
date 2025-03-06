@@ -1,7 +1,4 @@
-use by_axum::{
-    auth::{authorization_middleware, set_auth_config},
-    axum::middleware,
-};
+use by_axum::auth::{authorization_middleware, set_auth_config};
 use by_types::DatabaseConfig;
 use controllers::{
     institutions::m1::InstitutionControllerM1, resources::v1::bucket::MetadataControllerV1,
@@ -55,7 +52,6 @@ mod controllers {
     }
 }
 pub mod config;
-// mod middleware;
 mod utils;
 
 async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
@@ -151,7 +147,6 @@ async fn main() -> Result<()> {
             crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
         )
         .nest("/v2", Version2Controller::route(pool.clone())?)
-        .layer(middleware::from_fn(authorization_middleware))
         .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
         .nest(
             "/institutions/m1",
@@ -160,7 +155,8 @@ async fn main() -> Result<()> {
         .nest(
             "/reviews/v1",
             ReviewControllerV1::route(pool.clone())?, //FIXME: fix to authorize
-        );
+        )
+        .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
     // .nest(
     //     "/attributes/v1",
@@ -230,7 +226,7 @@ pub mod tests {
         let password = format!("password-{id}");
         let password = get_hash_string(password.as_bytes());
 
-        let u = user.insert(email.clone(), password.clone()).await?;
+        let u = user.insert(email.clone(), password.clone(), None).await?;
         tracing::debug!("{:?}", u);
 
         org.insert_with_dependency(u.id, email.clone()).await?;
@@ -319,7 +315,7 @@ pub mod tests {
                 controllers::organizations::v2::OrganizationControllerV2::route(pool.clone())?,
             )
             .nest("/v2", Version2Controller::route(pool.clone())?)
-            .layer(middleware::from_fn(authorization_middleware));
+            .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
         let user = setup_test_user(&id, &pool).await.unwrap();
         let (claims, admin_token) = setup_jwt_token(user.clone());
