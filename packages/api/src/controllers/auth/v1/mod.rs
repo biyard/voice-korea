@@ -160,7 +160,7 @@ impl UserControllerV1 {
 
         let user = self
             .repo
-            .insert_with_tx(&mut *tx, email.clone(), pw.clone())
+            .insert_with_tx(&mut *tx, email.clone(), pw.clone(), None)
             .await?
             .ok_or(ApiError::DuplicateUser)?;
 
