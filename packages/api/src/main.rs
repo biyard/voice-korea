@@ -273,12 +273,12 @@ pub mod tests {
         .execute(&pool)
         .await;
 
+        let app = make_app().await?;
+        let app = by_axum::into_api_adapter(app);
+
         let id = uuid::Uuid::new_v4().to_string();
         let user = setup_test_user(&id, &pool).await.unwrap();
         let (claims, admin_token) = setup_jwt_token(user.clone());
-
-        let app = make_app().await?;
-        let app = by_axum::into_api_adapter(app);
 
         let app = Box::new(app);
         rest_api::set_api_service(app.clone());
