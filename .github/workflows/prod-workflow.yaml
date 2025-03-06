@@ -184,58 +184,58 @@ jobs:
           npm i -g aws-cdk
           make deploy
 
-  watcher-deployment:
-    runs-on: ubuntu-22.04
+  # watcher-deployment:
+  #   runs-on: ubuntu-22.04
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          ssh-key: ${{ secrets.PULL_KEY_REPO }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
+  #         ssh-key: ${{ secrets.PULL_KEY_REPO }}
 
-      - uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2
+  #     - uses: aws-actions/configure-aws-credentials@v2
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ap-northeast-2
 
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          components: clippy, rustfmt
-          target: wasm32-unknown-unknown
-          toolchain: stable
+  #     - uses: actions-rust-lang/setup-rust-toolchain@v1
+  #       with:
+  #         components: clippy, rustfmt
+  #         target: wasm32-unknown-unknown
+  #         toolchain: stable
 
-      - name: Install dependencies
-        run: |
-          cargo install toml-cli
+  #     - name: Install dependencies
+  #       run: |
+  #         cargo install toml-cli
 
-      - name: Watcher Cache builder
-        id: watcher-cache-builder
-        uses: actions/cache@v3
-        with:
-          key: watcher-cache-builder
-          path: |
-            target
+  #     - name: Watcher Cache builder
+  #       id: watcher-cache-builder
+  #       uses: actions/cache@v3
+  #       with:
+  #         key: watcher-cache-builder
+  #         path: |
+  #           target
 
-      - name: Deploy APIs
-        env:
-          REGION: ap-northeast-2
-          ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          INTERNAL_SERVER_KEY: ${{ secrets.VOICE_KOREA_INTERNAL_SERVER_KEY }}
-          STACK: voice-korea-watcher-api-dev-stack
-          ENV: dev
-          SERVICE: watcher
-          ENABLE_S3: false
-          ENABLE_FARGATE: false
-          ENABLE_DYNAMO: false
-          ENABLE_RDS: false
-          ENABLE_LAMBDA: true
-          BASE_DOMAIN: biyard.co
-          ENABLE_CRON: true
-          SCHEDULE: 'cron(0 15 * * ? *)'
-          DOMAIN: voice-korea-watcher-api.dev.biyard.co
+  #     - name: Deploy APIs
+  #       env:
+  #         REGION: ap-northeast-2
+  #         ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         INTERNAL_SERVER_KEY: ${{ secrets.VOICE_KOREA_INTERNAL_SERVER_KEY }}
+  #         STACK: voice-korea-watcher-api-dev-stack
+  #         ENV: dev
+  #         SERVICE: watcher
+  #         ENABLE_S3: false
+  #         ENABLE_FARGATE: false
+  #         ENABLE_DYNAMO: false
+  #         ENABLE_RDS: false
+  #         ENABLE_LAMBDA: true
+  #         BASE_DOMAIN: biyard.co
+  #         ENABLE_CRON: true
+  #         SCHEDULE: 'cron(0 15 * * ? *)'
+  #         DOMAIN: voice-korea-watcher-api.dev.biyard.co
 
-        run: |
-          npm i -g aws-cdk
-          make deploy-if-needed
+  #       run: |
+  #         npm i -g aws-cdk
+  #         make deploy-if-needed

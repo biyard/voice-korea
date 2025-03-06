@@ -1,6 +1,5 @@
-use crate::user::User;
 #[allow(unused)]
-use crate::Result;
+use crate::User;
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::api_model;
