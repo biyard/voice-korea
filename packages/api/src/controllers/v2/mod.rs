@@ -16,18 +16,12 @@ impl Version2Controller {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
             .nest(
-                "/users",
-                crate::controllers::v1::users::UserControllerV1::route(pool.clone())?,
-            )
-            .nest(
                 "/surveys/:survey-id/responses",
                 SurveyResponseController::route(pool.clone())?,
             )
             .nest(
                 "/organizations",
-                crate::controllers::organizations::v2::OrganizationControllerV2::route(
-                    pool.clone(),
-                )?,
+                crate::controllers::organizations::v2::OrganizationController::route(pool.clone())?,
             )
             .nest("/reviews", ReviewControllerV1::route(pool.clone())?)
             .nest("/metadata", MetadataControllerV1::route(pool.clone())?))

@@ -16,9 +16,9 @@ use reqwest::StatusCode;
 use sqlx::postgres::PgPoolOptions;
 
 #[derive(Clone, Debug)]
-pub struct OrganizationControllerV2 {}
+pub struct OrganizationController {}
 
-impl OrganizationControllerV2 {
+impl OrganizationController {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
             .nest(
@@ -39,7 +39,8 @@ impl OrganizationControllerV2 {
             )
             .nest(
                 "/:org-id/members",
-                crate::controllers::members::v2::MemberControllerV2::route(pool.clone())?,
+                crate::controllers::members::v2::OrganizationMemberController::new(pool.clone())
+                    .route(),
             )
             .nest(
                 "/:org-id/groups",

@@ -135,12 +135,12 @@ async fn main() -> Result<()> {
         .nest("/v2", Version2Controller::route(pool.clone())?)
         .nest(
             "/v1/users",
-            controllers::v1::users::UserControllerV1::route(pool.clone())?,
+            controllers::v1::users::UserController::route(pool.clone())?,
         )
         // NOTE: Deprecated
         .nest(
             "/organizations/v2",
-            controllers::organizations::v2::OrganizationControllerV2::route(pool.clone())?,
+            controllers::organizations::v2::OrganizationController::route(pool.clone())?,
         )
         // NOTE: Deprecated
         .nest(
@@ -281,7 +281,7 @@ pub mod tests {
             )
             .nest(
                 "/organizations/v2",
-                controllers::organizations::v2::OrganizationControllerV2::route(pool.clone())?,
+                controllers::organizations::v2::OrganizationController::route(pool.clone())?,
             )
             .nest("/v2", Version2Controller::route(pool.clone())?)
             .layer(by_axum::axum::middleware::from_fn(authorization_middleware));

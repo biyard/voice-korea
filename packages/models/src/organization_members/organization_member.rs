@@ -1,17 +1,15 @@
 #![allow(unused_variables)]
-pub mod role;
-pub use role::*;
-
 pub use crate::group::{Group, GroupInfo};
 #[allow(unused)]
 use crate::Result;
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::api_model;
-use by_types::QueryResponse;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+
+use super::Role;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, Eq)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
@@ -36,11 +34,11 @@ pub struct ListMemberResponseV2 {
     pub bookmark: Option<String>,
 }
 
-#[api_model(base = "/organizations/v2/:org-id/members", table = organization_members, iter_type=QueryResponse)]
+#[api_model(base = "/organizations/v2/:org-id/members", table = organization_members, action_by_id = delete)]
 pub struct OrganizationMember {
     #[api_model(summary, primary_key)]
     pub id: i64,
-    #[api_model(summary, many_to_one = users, read_action = get_member, action = delete)]
+    #[api_model(summary, many_to_one = users, read_action = get_member)]
     pub user_id: i64,
     #[api_model(summary, many_to_one = organizations)]
     pub org_id: i64,
@@ -49,11 +47,11 @@ pub struct OrganizationMember {
     #[api_model(summary, auto = [insert, update])]
     pub updated_at: i64,
 
-    #[api_model(summary, action_by_id = [update], nullable)]
+    #[api_model(summary, action = [create], action_by_id = [update], nullable)]
     pub name: String,
-    #[api_model(summary, type = INTEGER, nullable, action_by_id = [update])]
+    #[api_model(summary, type = INTEGER, action = [create], nullable, action_by_id = [update])]
     pub role: Option<Role>,
-    #[api_model(summary, action_by_id = [update])]
+    #[api_model(summary, action_by_id = [update], action = [create])]
     pub contact: Option<String>,
 }
 

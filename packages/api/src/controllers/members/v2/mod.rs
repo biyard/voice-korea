@@ -1,4 +1,5 @@
 use by_axum::{
+    aide,
     auth::Authorization,
     axum::{
         extract::{Path, Query, State},
@@ -6,209 +7,198 @@ use by_axum::{
         Extension, Json,
     },
 };
+use by_types::QueryResponse;
 use models::*;
+use sqlx::postgres::PgRow;
 
-#[allow(unused)]
 #[derive(Clone, Debug)]
-pub struct MemberControllerV2 {
-    pool: sqlx::Pool<sqlx::Postgres>,
+pub struct OrganizationMemberController {
     repo: OrganizationMemberRepository,
-    user: UserRepository,
+    pool: sqlx::Pool<sqlx::Postgres>,
 }
 
-impl MemberControllerV2 {
-    pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
-        let repo = OrganizationMember::get_repository(pool.clone());
-        let user = User::get_repository(pool.clone());
-        let ctrl = MemberControllerV2 { pool, repo, user };
-
-        Ok(by_axum::axum::Router::new()
-            .route("/", get(Self::list_member).post(Self::act_member))
-            .with_state(ctrl.clone())
-            .route(
-                "/:user_id",
-                post(Self::act_member_by_id).get(Self::get_member),
-            )
-            .with_state(ctrl.clone()))
-    }
-
-    pub async fn act_member(
-        State(ctrl): State<MemberControllerV2>,
-        Extension(_auth): Extension<Option<Authorization>>,
-        Path(org_id): Path<i64>,
-        Json(body): Json<OrganizationMemberAction>,
-    ) -> Result<Json<OrganizationMember>> {
-        tracing::debug!("act_member {:?}", body);
-
-        match body {
-            OrganizationMemberAction::Delete(req) => ctrl.delete_member(org_id, req.user_id).await,
-        }
-    }
-
-    pub async fn act_member_by_id(
-        State(ctrl): State<MemberControllerV2>,
-        Extension(_auth): Extension<Option<Authorization>>,
-        Path((org_id, user_id)): Path<(i64, i64)>,
-        Json(body): Json<OrganizationMemberByIdAction>,
-    ) -> Result<Json<OrganizationMember>> {
-        tracing::debug!("act_member_by_id {:?} {:?} {:?}", org_id, user_id, body);
-
-        match body {
-            OrganizationMemberByIdAction::Update(req) => {
-                ctrl.update_member(org_id, user_id, req).await
-            }
-        }
-    }
-
-    pub async fn get_member(
-        State(ctrl): State<MemberControllerV2>,
-        Extension(_auth): Extension<Option<Authorization>>,
-        Path((org_id, user_id)): Path<(i64, i64)>,
-    ) -> Result<Json<OrganizationMember>> {
-        tracing::debug!("get_member {:?}", user_id);
-
-        ctrl.get_member_by_user_id(org_id, user_id).await
-    }
-
-    pub async fn list_member(
-        State(ctrl): State<MemberControllerV2>,
-        Extension(_auth): Extension<Option<Authorization>>,
-        Path(org_id): Path<i64>,
-        Query(param): Query<OrganizationMemberParam>,
-    ) -> Result<Json<ListMemberResponseV2>> {
-        tracing::debug!("list_member {:?}", param);
-
-        match param {
-            OrganizationMemberParam::Query(q) => ctrl.list_member_by_org_id(org_id, q).await,
-            _ => Err(ApiError::InvalidAction),
-        }
-    }
-}
-
-impl MemberControllerV2 {
-    async fn get_member_by_user_id(
+impl OrganizationMemberController {
+    async fn query(
         &self,
         org_id: i64,
-        user_id: i64,
-    ) -> Result<Json<OrganizationMember>> {
-        let query = OrganizationMemberSummary::base_sql_with("where org_id = $1 AND user_id = $2");
-        tracing::debug!("get_member query: {:?}", query);
-
-        let member = match sqlx::query(&query)
-            .bind(org_id)
-            .bind(user_id)
-            .map(|r: sqlx::postgres::PgRow| r.into())
-            .fetch_one(&self.pool)
-            .await
-        {
-            Ok(v) => v,
-            Err(e) => {
-                tracing::error!("Failed to find member: {}", e);
-                return Err(ApiError::InvalidPermissions);
-            }
-        };
-
-        Ok(Json(member))
-    }
-
-    async fn list_member_by_org_id(
-        &self,
-        org_id: i64,
-        q: OrganizationMemberQuery,
-    ) -> Result<Json<ListMemberResponseV2>> {
-        let query =
-            OrganizationMemberSummary::base_sql_with("where org_id = $1 limit $2 offset $3");
-        tracing::debug!("list_member query: {:?}", query);
-
-        let mut total_count: i64 = 0;
-        let members: Vec<OrganizationMember> = sqlx::query(&query)
-            .bind(org_id)
-            .bind(q.size as i64)
-            .bind(
-                q.size as i64
-                    * (q.bookmark
-                        .clone()
-                        .unwrap_or("1".to_string())
-                        .parse::<i64>()
-                        .unwrap()
-                        - 1),
-            )
-            .map(|r: sqlx::postgres::PgRow| {
+        _auth: Option<Authorization>,
+        param: OrganizationMemberQuery,
+    ) -> Result<QueryResponse<OrganizationMemberSummary>> {
+        let mut total_count = 0;
+        let items: Vec<OrganizationMemberSummary> = OrganizationMemberSummary::query_builder()
+            .limit(param.size())
+            .page(param.page())
+            .org_id_equals(org_id)
+            .query()
+            .map(|row: PgRow| {
                 use sqlx::Row;
-                total_count = r.get("total_count");
-                r.into()
+
+                total_count = row.try_get("total_count").unwrap_or_default();
+                row.into()
             })
             .fetch_all(&self.pool)
             .await?;
 
-        let mut role_count = vec![total_count, 0, 0, 0, 0, 0]; //[전체, 관리자, 공론 관리자, 분석가, 중계자, 강연자]
+        Ok(QueryResponse { total_count, items })
+    }
 
-        for member in members.clone() {
-            match member.role {
-                Some(Role::Admin) => role_count[1] += 1,
-                Some(Role::DeliberationAdmin) => role_count[2] += 1,
-                Some(Role::Analyst) => role_count[3] += 1,
-                Some(Role::Moderator) => role_count[4] += 1,
-                Some(Role::Speaker) => role_count[5] += 1,
-                _ => {}
-            }
+    async fn create(
+        &self,
+        _org_id: i64,
+        _auth: Option<Authorization>,
+        _param: OrganizationMemberCreateRequest,
+    ) -> Result<OrganizationMember> {
+        todo!()
+    }
+
+    async fn update(
+        &self,
+        id: i64,
+        auth: Option<Authorization>,
+        param: OrganizationMemberUpdateRequest,
+    ) -> Result<OrganizationMember> {
+        if auth.is_none() {
+            return Err(ApiError::Unauthorized);
         }
 
-        Ok(Json(ListMemberResponseV2 {
-            members,
-            role_count,
-            bookmark: q.bookmark,
-        }))
+        let member = self.repo.update(id, param.into()).await?;
+
+        Ok(member)
     }
 
-    async fn update_member(
-        &self,
-        org_id: i64,
-        user_id: i64,
-        params: OrganizationMemberUpdateRequest,
+    async fn delete(&self, id: i64, auth: Option<Authorization>) -> Result<OrganizationMember> {
+        if auth.is_none() {
+            return Err(ApiError::Unauthorized);
+        }
+
+        let member = self.repo.delete(id).await?;
+
+        Ok(member)
+    }
+
+    // async fn run_read_action(
+    //     &self,
+    //     _auth: Option<Authorization>,
+    //     OrganizationMemberReadAction { action, .. }: OrganizationMemberReadAction,
+    // ) -> Result<OrganizationMember> {
+    //     todo!()
+    // }
+}
+
+impl OrganizationMemberController {
+    pub fn new(pool: sqlx::Pool<sqlx::Postgres>) -> Self {
+        let repo = OrganizationMember::get_repository(pool.clone());
+
+        Self { repo, pool }
+    }
+
+    pub fn route(&self) -> by_axum::axum::Router {
+        by_axum::axum::Router::new()
+            .route(
+                "/:id",
+                get(Self::get_organization_member_by_id).post(Self::act_organization_member_by_id),
+            )
+            .with_state(self.clone())
+            .route(
+                "/",
+                post(Self::act_organization_member).get(Self::get_organization_member),
+            )
+            .with_state(self.clone())
+    }
+
+    pub async fn act_organization_member(
+        State(ctrl): State<OrganizationMemberController>,
+        Path(OrganizationMemberParentPath { org_id }): Path<OrganizationMemberParentPath>,
+        Extension(auth): Extension<Option<Authorization>>,
+        Json(body): Json<OrganizationMemberAction>,
     ) -> Result<Json<OrganizationMember>> {
-        let query = OrganizationMemberSummary::base_sql_with("where org_id = $1 AND user_id = $2");
-        tracing::debug!("update_member query: {:?}", query);
+        tracing::debug!("act_organization_member {} {:?}", org_id, body);
 
-        let member: OrganizationMember = match sqlx::query(&query)
-            .bind(org_id)
-            .bind(user_id)
-            .map(|r: sqlx::postgres::PgRow| r.into())
-            .fetch_one(&self.pool)
-            .await
-        {
-            Ok(v) => v,
-            Err(e) => {
-                tracing::error!("Failed to find member: {}", e);
-                return Err(ApiError::InvalidPermissions);
+        match body {
+            OrganizationMemberAction::Create(param) => {
+                let res = ctrl.create(org_id, auth, param).await?;
+                Ok(Json(res))
             }
-        };
-
-        self.repo.update(member.id, params.into()).await?;
-
-        Ok(Json(member))
+        }
     }
 
-    async fn delete_member(&self, org_id: i64, user_id: i64) -> Result<Json<OrganizationMember>> {
-        let query = OrganizationMemberSummary::base_sql_with("where org_id = $1 AND user_id = $2");
-        tracing::debug!("delete_member query: {:?}", query);
+    pub async fn act_organization_member_by_id(
+        State(ctrl): State<OrganizationMemberController>,
+        Extension(auth): Extension<Option<Authorization>>,
+        Path(OrganizationMemberPath { org_id, id }): Path<OrganizationMemberPath>,
+        Json(body): Json<OrganizationMemberByIdAction>,
+    ) -> Result<Json<OrganizationMember>> {
+        tracing::debug!(
+            "act_organization_member_by_id {} {:?} {:?}",
+            org_id,
+            id,
+            body
+        );
 
-        let member: OrganizationMember = match sqlx::query(&query)
-            .bind(org_id)
-            .bind(user_id)
-            .map(|r: sqlx::postgres::PgRow| r.into())
-            .fetch_one(&self.pool)
-            .await
-        {
-            Ok(v) => v,
-            Err(e) => {
-                tracing::error!("Failed to find member: {}", e);
-                return Err(ApiError::InvalidPermissions);
+        match body {
+            OrganizationMemberByIdAction::Update(param) => {
+                let res = ctrl.update(id, auth, param).await?;
+                Ok(Json(res))
             }
-        };
-
-        self.repo.delete(member.id).await?;
-
-        Ok(Json(member))
+            OrganizationMemberByIdAction::Delete(_) => {
+                let res = ctrl.delete(id, auth).await?;
+                Ok(Json(res))
+            }
+        }
     }
+
+    pub async fn get_organization_member_by_id(
+        State(ctrl): State<OrganizationMemberController>,
+        Extension(_auth): Extension<Option<Authorization>>,
+        Path(OrganizationMemberPath { org_id, id }): Path<OrganizationMemberPath>,
+    ) -> Result<Json<OrganizationMember>> {
+        tracing::debug!("get_organization_member {} {:?}", org_id, id);
+        Ok(Json(
+            Deliberation::query_builder()
+                .id_equals(id)
+                .org_id_equals(org_id)
+                .query()
+                .map(OrganizationMember::from)
+                .fetch_one(&ctrl.pool)
+                .await?,
+        ))
+    }
+
+    pub async fn get_organization_member(
+        State(ctrl): State<OrganizationMemberController>,
+        Path(OrganizationMemberParentPath { org_id }): Path<OrganizationMemberParentPath>,
+        Extension(auth): Extension<Option<Authorization>>,
+        Query(q): Query<OrganizationMemberParam>,
+    ) -> Result<Json<OrganizationMemberGetResponse>> {
+        tracing::debug!("list_organization_member {} {:?}", org_id, q);
+
+        match q {
+            OrganizationMemberParam::Query(param) => Ok(Json(
+                OrganizationMemberGetResponse::Query(ctrl.query(org_id, auth, param).await?),
+            )),
+            _ => {
+                unimplemented!()
+            } // OrganizationMemberParam::Read(param)
+              //     if param.action == Some(OrganizationMemberReadActionType::ActionType) =>
+              // {
+              //     let res = ctrl.run_read_action(auth, param).await?;
+              //     Ok(Json(OrganizationMemberGetResponse::Read(res)))
+              // }
+        }
+    }
+}
+
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
+)]
+pub struct OrganizationMemberPath {
+    pub org_id: i64,
+    pub id: i64,
+}
+
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
+)]
+pub struct OrganizationMemberParentPath {
+    pub org_id: i64,
 }
