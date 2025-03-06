@@ -317,7 +317,7 @@ pub mod tests {
 
         let app = app
             .nest(
-                "/auth/v1",
+                "/v1/users",
                 controllers::auth::v1::UserControllerV1::route(pool.clone())?,
             )
             .nest(
