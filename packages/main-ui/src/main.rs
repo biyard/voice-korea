@@ -4,7 +4,6 @@ use by_components::effects::HoverEffects;
 use dioxus_logger::tracing;
 
 use dioxus::prelude::*;
-use main_ui::service::auth_api::AuthApi;
 use main_ui::service::group_api::GroupApi;
 use main_ui::service::member_api::MemberApi;
 use main_ui::service::metadata_api::MetadataApi;
@@ -14,7 +13,6 @@ use main_ui::service::popup_service::PopupService;
 
 use main_ui::config;
 use main_ui::service::theme::Theme;
-use main_ui::service::user_api::UserApi;
 
 use main_ui::{
     routes::Route, service::login_service::LoginService, utils::context::use_iitp_context_provider,
@@ -36,8 +34,6 @@ fn App() -> Element {
 
     OrganizationApi::init();
     MemberApi::init();
-    AuthApi::init();
-    UserApi::init();
     GroupApi::init();
     OpinionApi::init();
     MetadataApi::init();
