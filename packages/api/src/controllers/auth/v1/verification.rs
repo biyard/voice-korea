@@ -13,14 +13,16 @@ use crate::utils::email::send_email;
 #[derive(Clone, Debug)]
 pub struct VerificationControllerV1 {
     repo: VerificationRepository,
+    pool: sqlx::Pool<sqlx::Postgres>,
     verification_expiration: i64,
 }
 
 impl VerificationControllerV1 {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
-        let repo = Verification::get_repository(pool);
+        let repo = Verification::get_repository(pool.clone());
 
         let ctrl = VerificationControllerV1 {
+            pool,
             repo,
             verification_expiration: crate::config::get().verification_expiration,
         };
@@ -41,11 +43,41 @@ impl VerificationControllerV1 {
             VerificationAction::SendVerificationCode(params) => {
                 ctrl.send_verification_email(params).await
             }
+            VerificationAction::Verify(params) => ctrl.verify(params).await,
         }
     }
 }
 
 impl VerificationControllerV1 {
+    pub async fn verify(
+        &self,
+        VerificationVerifyRequest { email, value }: VerificationVerifyRequest,
+    ) -> Result<Json<Verification>> {
+        let now = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64;
+
+        let code = Verification::query_builder()
+            .email_equals(email)
+            .value_equals(value)
+            .expired_at_greater_than(now)
+            .query()
+            .map(Verification::from)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|e| {
+                tracing::error!("Verification Error: {:?}", e);
+                ApiError::InvalidVerificationCode
+            })?;
+
+        Ok(Json(Verification {
+            id: code.id,
+            expired_at: code.expired_at,
+            ..Verification::default()
+        }))
+    }
+
     #[instrument]
     pub async fn send_verification_email(
         &self,

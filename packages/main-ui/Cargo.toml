@@ -13,6 +13,7 @@ dioxus-translate.workspace = true
 dioxus-aws.workspace = true
 by-types.workspace = true
 rest-api.workspace = true
+by-macros.workspace = true
 
 # This Repo Dependencies
 models.workspace = true
@@ -32,6 +33,8 @@ web-sys = { version = "0.3.74" }
 getrandom = { version = "0.2", features = ["js"] }
 num-format = "0.4.4"
 indexmap = "2.7.1"
+btracing.workspace = true
+tracing = "0.1.41"
 uuid = { version = "1.12.0", features = ["v4"] }
 
 [features]
