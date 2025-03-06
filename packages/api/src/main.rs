@@ -31,9 +31,6 @@ mod controllers {
     pub mod organizations {
         pub mod v2;
     }
-    pub mod members {
-        pub mod v2;
-    }
     pub mod invitations {
         pub mod v2;
     }

@@ -11,6 +11,27 @@ use serde::{Deserialize, Serialize};
 
 use super::Role;
 
+#[api_model(base = "/v2/organizations/:org-id/members", table = organization_members, action_by_id = delete, action = [create(email = String)])]
+pub struct OrganizationMember {
+    #[api_model(summary, primary_key)]
+    pub id: i64,
+    #[api_model(summary, many_to_one = users, read_action = get_member)]
+    pub user_id: i64,
+    #[api_model(summary, many_to_one = organizations)]
+    pub org_id: i64,
+    #[api_model(summary, auto = [insert])]
+    pub created_at: i64,
+    #[api_model(summary, auto = [insert, update])]
+    pub updated_at: i64,
+
+    #[api_model(summary, action = [create], action_by_id = [update], nullable)]
+    pub name: String,
+    #[api_model(summary, type = INTEGER, action = [create], nullable, action_by_id = [update, update_role])]
+    pub role: Option<Role>,
+    #[api_model(summary, action_by_id = [update], action = [create])]
+    pub contact: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, Eq)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct MemberProject {
@@ -32,27 +53,6 @@ pub struct ListMemberResponseV2 {
     pub members: Vec<OrganizationMember>,
     pub role_count: Vec<i64>,
     pub bookmark: Option<String>,
-}
-
-#[api_model(base = "/organizations/v2/:org-id/members", table = organization_members, action_by_id = delete)]
-pub struct OrganizationMember {
-    #[api_model(summary, primary_key)]
-    pub id: i64,
-    #[api_model(summary, many_to_one = users, read_action = get_member)]
-    pub user_id: i64,
-    #[api_model(summary, many_to_one = organizations)]
-    pub org_id: i64,
-    #[api_model(summary, auto = [insert])]
-    pub created_at: i64,
-    #[api_model(summary, auto = [insert, update])]
-    pub updated_at: i64,
-
-    #[api_model(summary, action = [create], action_by_id = [update], nullable)]
-    pub name: String,
-    #[api_model(summary, type = INTEGER, action = [create], nullable, action_by_id = [update])]
-    pub role: Option<Role>,
-    #[api_model(summary, action_by_id = [update], action = [create])]
-    pub contact: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
@@ -87,7 +87,7 @@ impl Into<OrganizationMember> for (CreateMemberRequest, i64, i64, i64) {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct MemberSummary {
     pub email: String,
@@ -158,37 +158,37 @@ impl InviteMember {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, Eq)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub struct InviteMemberRequest {
-    pub email: String,
-    pub name: String,
-    pub group: Option<GroupInfo>,
-    pub role: Option<Role>,
-    pub projects: Option<Vec<MemberProject>>,
-}
+// #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, Eq)]
+// #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
+// pub struct InviteMemberRequest {
+//     pub email: String,
+//     pub name: String,
+//     pub group: Option<GroupInfo>,
+//     pub role: Option<Role>,
+//     pub projects: Option<Vec<MemberProject>>,
+// }
 
-impl Into<InviteMember> for (InviteMemberRequest, String) {
-    fn into(self) -> InviteMember {
-        let (req, invite_id) = self;
-        let now = chrono::Utc::now().timestamp_millis();
+// impl Into<InviteMember> for (InviteMemberRequest, String) {
+//     fn into(self) -> InviteMember {
+//         let (req, invite_id) = self;
+//         let now = chrono::Utc::now().timestamp_millis();
 
-        InviteMember {
-            id: invite_id,
-            r#type: InviteMember::get_type(),
-            gsi1: InviteMember::get_gsi1(req.email.clone()),
-            created_at: now,
-            updated_at: now,
-            deleted_at: None,
+//         InviteMember {
+//             id: invite_id,
+//             r#type: InviteMember::get_type(),
+//             gsi1: InviteMember::get_gsi1(req.email.clone()),
+//             created_at: now,
+//             updated_at: now,
+//             deleted_at: None,
 
-            email: req.email,
-            name: req.name,
-            group: req.group,
-            role: req.role,
-            projects: req.projects,
-        }
-    }
-}
+//             email: req.email,
+//             name: req.name,
+//             group: req.group,
+//             role: req.role,
+//             projects: req.projects,
+//         }
+//     }
+// }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]

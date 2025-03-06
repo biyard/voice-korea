@@ -2,12 +2,12 @@ use chrono::{Local, TimeZone};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::prelude::{GroupInfo, GroupMemberResponse, TeamMemberRequest, UpdateMemberRequest};
+use models::prelude::{GroupMemberResponse, TeamMemberRequest};
 
 use crate::{
     models::role_field::RoleField,
     routes::Route,
-    service::{group_api::GroupApi, member_api::MemberApi, popup_service::PopupService},
+    service::{group_api::GroupApi, popup_service::PopupService},
 };
 
 use super::{
@@ -178,27 +178,27 @@ impl Controller {
         self.group_resource.restart();
     }
 
-    pub async fn update_role(&mut self, index: usize, role_name: String) {
-        let api: MemberApi = use_context();
-        let members = self.get_group().group_members;
-        let member = members[index].clone();
-        let _ = api
-            .update_member(
-                member.org_member_id,
-                UpdateMemberRequest {
-                    name: if member.user_name != "" {
-                        Some(member.user_name.clone())
-                    } else {
-                        None
-                    },
-                    group: Some(GroupInfo {
-                        id: member.group_id,
-                        name: member.group_name,
-                    }),
-                    role: Some(role_name),
-                },
-            )
-            .await;
+    pub async fn update_role(&mut self, _index: usize, _role_name: String) {
+        // let api: MemberApi = use_context();
+        // let members = self.get_group().group_members;
+        // let member = members[index].clone();
+        // let _ = api
+        //     .update_member(
+        //         member.org_member_id,
+        //         UpdateMemberRequest {
+        //             name: if member.user_name != "" {
+        //                 Some(member.user_name.clone())
+        //             } else {
+        //                 None
+        //             },
+        //             group: Some(GroupInfo {
+        //                 id: member.group_id,
+        //                 name: member.group_name,
+        //             }),
+        //             role: Some(role_name),
+        //         },
+        //     )
+        //     .await;
         self.group_resource.restart();
     }
 

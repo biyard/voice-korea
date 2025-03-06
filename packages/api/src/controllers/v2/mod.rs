@@ -9,6 +9,10 @@ pub mod surveys {
     }
 }
 
+pub mod organizations {
+    pub mod _id;
+}
+
 #[derive(Clone, Debug)]
 pub struct Version2Controller {}
 

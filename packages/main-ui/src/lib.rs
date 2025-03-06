@@ -14,7 +14,6 @@ pub mod service {
     pub mod attribute_api;
     pub mod group_api;
     pub mod login_service;
-    pub mod member_api;
     pub mod metadata_api;
     pub mod opinion_api;
     pub mod organization_api;

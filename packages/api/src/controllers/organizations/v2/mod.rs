@@ -39,7 +39,7 @@ impl OrganizationController {
             )
             .nest(
                 "/:org-id/members",
-                crate::controllers::members::v2::OrganizationMemberController::new(pool.clone())
+                crate::controllers::v2::organizations::_id::members::OrganizationMemberController::new(pool.clone())
                     .route(),
             )
             .nest(

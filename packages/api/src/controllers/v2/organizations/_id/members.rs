@@ -21,9 +21,14 @@ impl OrganizationMemberController {
     async fn query(
         &self,
         org_id: i64,
-        _auth: Option<Authorization>,
+        auth: Option<Authorization>,
         param: OrganizationMemberQuery,
     ) -> Result<QueryResponse<OrganizationMemberSummary>> {
+        tracing::debug!("{param}");
+        if auth.is_none() {
+            return Err(ApiError::Unauthorized);
+        }
+
         let mut total_count = 0;
         let items: Vec<OrganizationMemberSummary> = OrganizationMemberSummary::query_builder()
             .limit(param.size())
@@ -44,11 +49,38 @@ impl OrganizationMemberController {
 
     async fn create(
         &self,
-        _org_id: i64,
-        _auth: Option<Authorization>,
-        _param: OrganizationMemberCreateRequest,
+        org_id: i64,
+        auth: Option<Authorization>,
+        OrganizationMemberCreateRequest {
+            name,
+            role,
+            contact,
+            email,
+        }: OrganizationMemberCreateRequest,
     ) -> Result<OrganizationMember> {
-        todo!()
+        if auth.is_none() {
+            return Err(ApiError::Unauthorized);
+        }
+
+        let mut tx = self.pool.begin().await?;
+
+        let user = User::query_builder()
+            .email_equals(email)
+            .query()
+            .map(User::from)
+            .fetch_optional(&mut *tx)
+            .await?
+            .ok_or(ApiError::NoUser)?;
+
+        let member = self
+            .repo
+            .insert_with_tx(&mut *tx, user.id, org_id, name, role, contact)
+            .await?
+            .ok_or(ApiError::CannotCreateOrganizationMember)?;
+
+        tx.commit().await?;
+
+        Ok(member)
     }
 
     async fn update(
@@ -56,6 +88,21 @@ impl OrganizationMemberController {
         id: i64,
         auth: Option<Authorization>,
         param: OrganizationMemberUpdateRequest,
+    ) -> Result<OrganizationMember> {
+        if auth.is_none() {
+            return Err(ApiError::Unauthorized);
+        }
+
+        let member = self.repo.update(id, param.into()).await?;
+
+        Ok(member)
+    }
+
+    async fn update_role(
+        &self,
+        id: i64,
+        auth: Option<Authorization>,
+        param: OrganizationMemberUpdateRoleRequest,
     ) -> Result<OrganizationMember> {
         if auth.is_none() {
             return Err(ApiError::Unauthorized);
@@ -140,6 +187,11 @@ impl OrganizationMemberController {
                 let res = ctrl.update(id, auth, param).await?;
                 Ok(Json(res))
             }
+
+            OrganizationMemberByIdAction::UpdateRole(param) => {
+                let res = ctrl.update_role(id, auth, param).await?;
+                Ok(Json(res))
+            }
             OrganizationMemberByIdAction::Delete(_) => {
                 let res = ctrl.delete(id, auth).await?;
                 Ok(Json(res))
@@ -191,6 +243,7 @@ impl OrganizationMemberController {
 #[derive(
     Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
 )]
+#[serde(rename_all = "kebab-case")]
 pub struct OrganizationMemberPath {
     pub org_id: i64,
     pub id: i64,
@@ -199,6 +252,7 @@ pub struct OrganizationMemberPath {
 #[derive(
     Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
 )]
+#[serde(rename_all = "kebab-case")]
 pub struct OrganizationMemberParentPath {
     pub org_id: i64,
 }

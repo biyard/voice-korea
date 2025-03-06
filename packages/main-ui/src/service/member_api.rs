@@ -2,9 +2,12 @@ pub type Result<T> = std::result::Result<T, ServerFnError>;
 use std::collections::HashMap;
 
 use dioxus::prelude::*;
-use models::prelude::{
-    CreateMemberRequest, InviteMemberRequest, ListMemberResponse, MemberActionRequest,
-    MemberByIdActionRequest, MemberSummary, UpdateMemberRequest,
+use models::{
+    prelude::{
+        CreateMemberRequest, InviteMemberRequest, ListMemberResponse, MemberActionRequest,
+        MemberByIdActionRequest, MemberSummary, UpdateMemberRequest,
+    },
+    OrganizationMember,
 };
 
 use super::{login_service::LoginService, organization_api::OrganizationApi};
@@ -30,53 +33,53 @@ impl MemberApi {
     }
 
     pub async fn create_member(&self, req: CreateMemberRequest) -> Result<()> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
+        // let token = self.get_token();
+        // let id = self.get_organization_id();
 
-        let client = ReqwestClient::new()?;
+        // let client = ReqwestClient::new()?;
 
-        let res = client
-            .post(&format!("/members/v1"))
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .json(&MemberActionRequest::Create(req))
-            .send()
-            .await?;
+        // let res = client
+        //     .post(&format!("/members/v1"))
+        //     .header("Authorization", token)
+        //     .header("x-organization", id)
+        //     .json(&MemberActionRequest::Create(req))
+        //     .send()
+        //     .await?;
 
-        let _res = res.error_for_status()?;
+        // let _res = res.error_for_status()?;
         Ok(())
     }
 
     pub async fn update_member(&self, user_id: String, req: UpdateMemberRequest) -> Result<()> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
+        // let token = self.get_token();
+        // let id = self.get_organization_id();
 
-        let client = ReqwestClient::new()?;
+        // let client = ReqwestClient::new()?;
 
-        let _res = client
-            .post(format!("/members/v1/{}", user_id).as_str())
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .json(&MemberByIdActionRequest::Update(req))
-            .send()
-            .await?;
+        // let _res = client
+        //     .post(format!("/members/v1/{}", user_id).as_str())
+        //     .header("Authorization", token)
+        //     .header("x-organization", id)
+        //     .json(&MemberByIdActionRequest::Update(req))
+        //     .send()
+        //     .await?;
 
         Ok(())
     }
 
     pub async fn remove_member(&self, user_id: String) -> Result<()> {
-        let token = self.get_token();
-        let id = self.get_organization_id();
+        // let token = self.get_token();
+        // let id = self.get_organization_id();
 
-        let client = ReqwestClient::new()?;
+        // let client = ReqwestClient::new()?;
 
-        let _res = client
-            .post(format!("/members/v1/{}", user_id).as_str())
-            .header("Authorization", token)
-            .header("x-organization", id)
-            .json(&MemberByIdActionRequest::Delete)
-            .send()
-            .await?;
+        // let _res = client
+        //     .post(format!("/members/v1/{}", user_id).as_str())
+        //     .header("Authorization", token)
+        //     .header("x-organization", id)
+        //     .json(&MemberByIdActionRequest::Delete)
+        //     .send()
+        //     .await?;
 
         Ok(())
     }
@@ -132,7 +135,21 @@ impl MemberApi {
         Ok(members)
     }
 
-    pub async fn invite_member(&self, req: InviteMemberRequest) -> Result<()> {
+    pub async fn invite_member(
+        &self,
+        InviteMemberRequest {
+            email,
+            name,
+            group,
+            role,
+            ..
+        }: InviteMemberRequest,
+    ) -> Result<()> {
+        let endpoint = crate::config::get().api_url;
+        OrganizationMember::get_client(endpoint)
+            .create(org_id, name, role, None, email)
+            .await?;
+
         let token = self.get_token();
         let id = self.get_organization_id();
 
@@ -149,9 +166,8 @@ impl MemberApi {
         Ok(())
     }
 
-    pub fn get_organization_id(&self) -> String {
-        let id = self.organization_service.get_selected_organization_id();
-        id
+    pub fn get_organization_id(&self) -> i64 {
+        self.login_service.get_selected_org().unwrap_or_default().id
     }
 
     pub fn get_token(&self) -> String {

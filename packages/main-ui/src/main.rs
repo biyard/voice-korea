@@ -5,7 +5,6 @@ use dioxus_logger::tracing;
 
 use dioxus::prelude::*;
 use main_ui::service::group_api::GroupApi;
-use main_ui::service::member_api::MemberApi;
 use main_ui::service::metadata_api::MetadataApi;
 use main_ui::service::opinion_api::OpinionApi;
 use main_ui::service::organization_api::OrganizationApi;
@@ -33,7 +32,6 @@ fn App() -> Element {
     PopupService::init();
 
     OrganizationApi::init();
-    MemberApi::init();
     GroupApi::init();
     OpinionApi::init();
     MetadataApi::init();

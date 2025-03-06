@@ -34,6 +34,15 @@ pub enum ApiError {
     VerificationCodeExpired,
     #[translate(ko = "이미 가입한 사용자입니다.", en = "User already exists.")]
     DuplicateUser,
+    #[translate(ko = "사용자를 찾을 수 없습니다.", en = "User not found.")]
+    NoUser,
+
+    // OrganizationMember
+    #[translate(
+        ko = "조직원을 만들 수 없습니다.",
+        en = "Cannot create organization member."
+    )]
+    CannotCreateOrganizationMember,
 
     InvalidAction,
     Unauthorized,

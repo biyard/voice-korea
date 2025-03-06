@@ -1,51 +1,24 @@
 #![allow(non_snake_case)]
 use super::controller::Controller;
 use super::i18n::MemberTranslate;
+use crate::pages::members::i18n::RemoveMemberModalTranslate;
+use crate::{
+    components::icons::{AddUser, ArrowLeft, ArrowRight, RowOption, Search, Switch},
+    routes::Route,
+};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::translate;
 use dioxus_translate::Language;
-use models::prelude::GroupInfo;
-use models::prelude::GroupResponse;
-use models::prelude::InviteMemberRequest;
-use models::prelude::Role;
-
-use crate::models::role_field::RoleField;
-use crate::pages::members::i18n::AddMemberModalTranslate;
-use crate::pages::members::i18n::RemoveMemberModalTranslate;
-use crate::{
-    components::{
-        icons::{AddUser, ArrowLeft, ArrowRight, Expand, RowOption, Search, Switch},
-        label::Label,
-    },
-    routes::Route,
-    service::popup_service::PopupService,
-};
-
-#[derive(Props, Clone, PartialEq)]
-pub struct MemberPageProps {
-    lang: Language,
-}
 
 #[component]
-pub fn MemberPage(props: MemberPageProps) -> Element {
-    let popup: PopupService = use_context();
-    let mut ctrl = Controller::init(props.lang, popup);
+pub fn MemberPage(lang: Language) -> Element {
+    let mut ctrl = Controller::new(lang)?;
     let mut name = use_signal(|| "".to_string());
     let mut is_focused = use_signal(|| false);
-    let translates: MemberTranslate = translate(&props.lang.clone());
+    let translates: MemberTranslate = translate(&lang);
 
-    let member_summary = ctrl.get_members();
-    let groups = ctrl.get_groups();
-    let roles = ctrl.get_roles();
-
-    let mut clicked_member_id = use_signal(|| "".to_string());
-
-    let members = member_summary.clone().members;
-    let member_len = members.len();
-
-    let mut projects_clicked = use_signal(|| vec![false; member_len]);
-    let mut projects_extended = use_signal(|| vec![false; member_len]);
+    let members = ctrl.members()?.items;
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -59,30 +32,16 @@ pub fn MemberPage(props: MemberPageProps) -> Element {
                 "{translates.team_member_description}"
             }
             div { class: "flex flex-row w-full justify-start items-start mb-[10px]",
-                MemberCountCard {
-                    label_name: translates.total,
-                    label_count: member_summary.role_counts.get(0).unwrap_or(&0).clone(),
-                }
-                MemberCountCard {
-                    label_name: translates.manager,
-                    label_count: member_summary.role_counts.get(1).unwrap_or(&0).clone(),
-                }
+                // FIXME: reflect real data
+                MemberCountCard { label_name: translates.total, label_count: 0 }
+                MemberCountCard { label_name: translates.manager, label_count: 0 }
                 MemberCountCard {
                     label_name: translates.public_opinion_manager,
-                    label_count: member_summary.role_counts.get(2).unwrap_or(&0).clone(),
+                    label_count: 0,
                 }
-                MemberCountCard {
-                    label_name: translates.analyst,
-                    label_count: member_summary.role_counts.get(3).unwrap_or(&0).clone(),
-                }
-                MemberCountCard {
-                    label_name: translates.repeater,
-                    label_count: member_summary.role_counts.get(4).unwrap_or(&0).clone(),
-                }
-                MemberCountCard {
-                    label_name: translates.lecturer,
-                    label_count: member_summary.role_counts.get(5).unwrap_or(&0).clone(),
-                }
+                MemberCountCard { label_name: translates.analyst, label_count: 0 }
+                MemberCountCard { label_name: translates.repeater, label_count: 0 }
+                MemberCountCard { label_name: translates.lecturer, label_count: 0 }
             }
             div {
                 class: "flex flex-col w-full justify-start items-start bg-white rounded-lg shadow-lg p-[20px]",
@@ -118,7 +77,7 @@ pub fn MemberPage(props: MemberPageProps) -> Element {
                         div {
                             class: "flex flex-row w-[150px] h-[40px] bg-[#2a60d3] rounded-md px-[14px] py-[8px] gap-[5px] cursor-pointer",
                             onclick: move |_| async move {
-                                ctrl.open_add_member_modal(props.lang).await;
+                                ctrl.open_add_member_modal(lang).await;
                             },
                             AddUser { width: "24", height: "24" }
                             div { class: "text-white font-bold text-[16px] ",
@@ -154,158 +113,58 @@ pub fn MemberPage(props: MemberPageProps) -> Element {
                         }
                         div { class: "w-[90px] h-full justify-center items-center gap-[10px]" }
                     }
-                    for index in 0..members.len() {
+                    for member in members {
                         div { class: "flex flex-col w-full justify-start items-start",
                             div { class: "flex flex-row w-full h-[1px] bg-[#bfc8d9]" }
                             div { class: "flex flex-row w-full",
                                 div { class: "flex flex-row w-full h-[55px] justify-start items-center text-[#3a3a3a] font-medium text-[14px]",
                                     Link {
                                         to: Route::MemberDetailPage {
-                                            lang: props.lang.clone(),
-                                            member_id: members[index].member_id.clone(),
+                                            lang,
+                                            member_id: member.id.to_string(),
                                         },
                                         div { class: "flex flex-row w-[355px] min-w-[355px] h-full justify-center items-center gap-[10px] px-[50px]",
                                             div { class: "w-[36px] h-[36px] rounded-[40px] bg-[#9baae4] mr-[10px]" }
                                             div { class: "flex flex-col justify-start items-start w-full",
                                                 div { class: "text-[14px] font-medium text-[#3a3a3a] mb-[5px]",
-                                                    {members[index].clone().profile_name}
+                                                    "{member.name}"
                                                 }
                                                 div { class: "text-[14px] font-normal text-[#7c8292]",
-                                                    {members[index].clone().email}
+                                                    "email"
                                                 }
                                             }
                                         }
                                     }
+                                    div { class: "flex flex-row w-[310px] min-w-[310px] h-full justify-center items-center gap-[10px]" }
                                     div { class: "flex flex-row w-[310px] min-w-[310px] h-full justify-center items-center gap-[10px]",
-                                        select {
-                                            class: "bg-transparent focus:outline-none",
-                                            value: members[index].clone().group,
-                                            //TODO: update member group
-                                            onchange: move |e: Event<FormData>| {
-                                                spawn(async move {
-                                                    ctrl.update_group(index, e.value().parse::<usize>().unwrap()).await;
-                                                });
-                                            },
-                                            option {
-                                                value: "",
-                                                disabled: true,
-                                                selected: members[index].clone().group == "",
-                                                {translates.no_group}
-                                            }
-                                            for (i , group) in groups.clone().iter().enumerate() {
-                                                option {
-                                                    value: i.to_string(),
-                                                    selected: group.name == members[index].group,
-                                                    "{group.name}"
-                                                }
-                                            }
-                                        }
-                                    }
-                                    div { class: "flex flex-row w-[310px] min-w-[310px] h-full justify-center items-center gap-[10px]",
-                                        select {
-                                            class: "bg-transparent focus:outline-none",
-                                            value: members[index].clone().role,
-                                            //TODO: update member role
-                                            onchange: move |e: Event<FormData>| {
-                                                spawn(async move {
+                                        if let Some(role) = &member.role {
+                                            select {
+                                                class: "bg-transparent focus:outline-none",
+                                                value: role.translate(&lang),
+                                                onchange: move |e: Event<FormData>| async move {
                                                     tracing::debug!("select_role: {}", e.value());
-                                                    ctrl.update_role(index, e.value()).await;
-                                                });
-                                            },
-                                            option {
-                                                value: "",
-                                                disabled: true,
-                                                selected: members[index].clone().role == "",
-                                                {translates.no_role}
-                                            }
-                                            for role in roles.clone() {
+                                                    ctrl.update_role(member.id, e.value()).await;
+                                                },
                                                 option {
-                                                    value: role.clone().db_name,
-                                                    selected: role.db_name == members[index].role,
-                                                    "{role.field}"
+                                                    value: "",
+                                                    disabled: true,
+                                                    selected: member.role.is_none(),
+                                                    {translates.no_role}
                                                 }
+                                                                                        // for role in roles.clone() {
+                                            //     option {
+                                            //         value: role.clone().db_name,
+                                            //         selected: role.db_name == member.role,
+                                            //         "{role.field}"
+                                            //     }
+                                            // }
                                             }
                                         }
                                     }
-                                    div {
-                                        class: "flex flex-row w-full h-full justify-center items-center gap-[10px] cursor-pointer relative",
-                                        onclick: move |_| {
-                                            if index < projects_clicked().len() {
-                                                let mut clicked = projects_clicked.clone()();
-                                                clicked[index] = !clicked[index];
-                                                projects_clicked.set(clicked);
-                                            }
-                                        },
-                                        if members.len() != 0 && index < projects_clicked().len()
-                                            && (!projects_clicked()[index] && members[index].projects.len() > 0)
-                                        {
-                                            Label {
-                                                label_name: members[index].projects[0].clone(),
-                                                label_color: "bg-[#35343f]",
-                                                is_delete: false,
-                                                //FIXME: implement onremove logic
-                                                onremove: move |_| {},
-                                            }
-                                        } else {
-                                            if members.len() != 0 {
-                                                div { class: "flex flex-row w-full h-full",
-                                                    div { class: "flex flex-row w-full justify-center items-center",
-                                                        div { class: "inline-flex flex-wrap justify-center items-center gap-[10px] mr-[20px]",
-                                                            for project in members[index].projects.clone() {
-                                                                Label {
-                                                                    label_name: project,
-                                                                    label_color: "bg-[#35343f]",
-                                                                    //FIXME: implement onremove logic
-                                                                    onremove: move |_| {},
-                                                                }
-                                                            }
-                                                        }
-                                                        div {
-                                                            onclick: move |e: MouseEvent| {
-                                                                e.stop_propagation();
-                                                                e.prevent_default();
-                                                                let mut extended = projects_extended.clone()();
-                                                                if index < extended.len() {
-                                                                    extended[index] = !extended[index];
-                                                                    projects_extended.set(extended);
-                                                                }
-                                                            },
-                                                            Expand {
-                                                                width: "24",
-                                                                height: "24",
-                                                            }
-                                                        }
-                                                    }
-                                                    if index < projects_extended().len() && projects_extended()[index] {
-                                                        div { class: "absolute top-full bg-white border border-[#bfc8d9] shadow-lg rounded-lg w-full z-50 py-[20px] pl-[15px] pr-[100px]",
-                                                            div { class: "font-semibold text-[#7c8292] text-[14px] mb-[20px]",
-                                                                {translates.project}
-                                                            }
-                                                            div { class: "inline-flex flex-wrap justify-start items-start gap-[10px] mr-[20px]",
-                                                                for project in members[index].projects.clone() {
-                                                                    Label {
-                                                                        label_name: project,
-                                                                        label_color: "bg-[#35343f]",
-                                                                        //FIXME: implement onremove logic
-                                                                        onremove: move |_| {},
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    div { class: "flex flex-row w-full h-full justify-center items-center gap-[10px] cursor-pointer relative" }
                                     div { class: "p-4",
                                         div { class: "group relative",
-                                            button {
-                                                onclick: {
-                                                    let member_id = members[index].member_id.clone();
-                                                    move |_| {
-                                                        clicked_member_id.set(member_id.clone());
-                                                    }
-                                                },
+                                            button { onclick: move |_| {},
                                                 RowOption { width: 24, height: 24 }
                                             }
                                             nav {
@@ -315,7 +174,7 @@ pub fn MemberPage(props: MemberPageProps) -> Element {
                                                     li {
                                                         class: "p-3 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer",
                                                         onclick: move |_| async move {
-                                                            ctrl.open_remove_member_modal(props.lang, clicked_member_id).await;
+                                                            ctrl.open_remove_member_modal(lang, member.id).await;
                                                         },
                                                         {translates.remove_team_member_li}
                                                     }
@@ -374,185 +233,6 @@ pub fn RemoveMemberModal(
                         remove_member.call(e);
                     },
                     div { class: "text-white font-bold text-[16px]", {i18n.remove} }
-                }
-                div {
-                    class: "flex flex-row w-[85px] h-[40px] font-semibold text-[16px] text-[#222222] justify-center items-center cursor-pointer",
-                    onclick: move |e: MouseEvent| {
-                        onclose.call(e);
-                    },
-                    {i18n.cancel}
-                }
-            }
-        }
-    }
-}
-
-#[component]
-pub fn AddMemberModal(
-    lang: Language,
-    groups: Vec<GroupResponse>,
-    roles: Vec<RoleField>,
-    onclose: EventHandler<MouseEvent>,
-    invite_member: EventHandler<InviteMemberRequest>,
-) -> Element {
-    let i18n: AddMemberModalTranslate = translate(&lang);
-    let mut email = use_signal(|| "".to_string());
-
-    let mut name = use_signal(|| "".to_string());
-
-    let mut select_role = use_signal(|| "".to_string());
-    let mut select_group: Signal<GroupInfo> = use_signal(|| GroupInfo::default());
-
-    rsx! {
-        div { class: "flex flex-col w-full justify-start items-start",
-            div { class: "flex flex-row w-full mb-[16px]",
-                div { class: "text-[#eb5757] font-semibold text-[14px] mr-[5px]", {i18n.necessary} }
-                div { class: "text-[#222222] font-semibold text-[14px]", {i18n.enter_email_address} }
-            }
-            input {
-                class: "flex flex-row w-full h-[45px] bg-[#f7f7f7] rounded-sm focus:outline-none focus:border focus:border-[#2a60d3] focus:bg-white px-[15px] items-center mb-[5px] text-[#222222]",
-                r#type: "text",
-                placeholder: i18n.enter_email_address_hint,
-                value: (email)(),
-                oninput: move |event| {
-                    email.set(event.value());
-                },
-            }
-            div { class: "font-normal text-[#6f6f6f] text-[13px] mt-[5px] mb-[40px]",
-                {i18n.email_format_info}
-            }
-            div { class: "flex flex-col w-full justify-start itmes-start",
-                div { class: "font-medium text-[15px] text-[#222222] mb-[16px]", "개인정보" }
-                div { class: "flex flex-col w-full justify-start items-start border border-[#bfc8d9] rounded-lg p-[24px]",
-                    div { class: "flex flex-row w-full justify-start items-center mb-[10px]",
-                        div { class: "flex flex-row w-[60px]",
-                            div { class: "text-[#eb5757] font-medium text-[15px] mr-[3px]",
-                                "*"
-                            }
-                            div { class: "text-[#222222] font-medium text-[15px] mr-[3px] w-[40px]",
-                                {i18n.name}
-                            }
-                        }
-                        input {
-                            class: "flex flex-row w-full h-[45px] bg-[#f7f7f7] rounded-sm focus:outline-none focus:border focus:border-[#2a60d3] focus:bg-white px-[15px] items-center mb-[5px] text-[#222222]",
-                            r#type: "text",
-                            placeholder: i18n.necessary_input,
-                            value: (name)(),
-                            oninput: move |event| {
-                                name.set(event.value());
-                            },
-                        }
-                    }
-                    div { class: "flex flex-row w-full justify-start items-center mb-[10px]",
-                        div { class: "text-[#222222] font-medium text-[15px] mr-[3px] w-[60px]",
-                            {i18n.role}
-                        }
-                        select {
-                            class: "flex flex-row w-full h-[45px] bg-[#f7f7f7] rounded-sm focus:outline-none focus:border focus:border-[#2a60d3] focus:bg-white px-[15px] items-center mb-[5px] text-[#222222]",
-                            value: select_role(),
-                            onchange: move |evt| {
-                                select_role.set(evt.value());
-                            },
-                            option { value: "", selected: select_role() == "", {i18n.select_role} }
-                            for role in roles.clone() {
-                                option {
-                                    value: role.db_name.clone(),
-                                    selected: role.db_name == select_role(),
-                                    "{role.field}"
-                                }
-                            }
-                        }
-                    }
-                    div { class: "flex flex-row w-full justify-start items-center mb-[10px]",
-                        div { class: "text-[#222222] font-medium text-[15px] mr-[3px] w-[60px]",
-                            {i18n.group}
-                        }
-                        select {
-                            class: "flex flex-row w-full h-[45px] bg-[#f7f7f7] rounded-sm focus:outline-none focus:border focus:border-[#2a60d3] focus:bg-white px-[15px] items-center mb-[5px] text-[#222222]",
-                            value: select_group().id,
-                            //TODO: update member group
-                            onchange: move |evt| {
-                                let value = evt.value();
-                                let parts: Vec<&str> = value.split('|').collect();
-                                if parts.len() == 2 {
-                                    let id = parts[0].to_string();
-                                    let name = parts[1].to_string();
-                                    select_group.set(GroupInfo { id, name });
-                                }
-                            },
-                            option {
-                                value: "|",
-                                selected: select_group().name == "",
-                                {i18n.select_group}
-                            }
-                            for group in groups.clone() {
-                                option {
-                                    value: format!("{}|{}", group.id, group.name),
-                                    selected: group.id == select_group().id,
-                                    "{group.name}"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            div { class: "flex flex-col w-full justify-start items-start mt-[40px]",
-                div { class: "font-medium text-[15px] text-[#222222] mb-[16px]", "프로젝트 초대" }
-                div { class: "flex flex-col w-full justify-start items-start border border-[#bfc8d9] rounded-lg p-[24px]",
-                    div { class: "flex flex-row w-full justify-start items-center mb-[10px]",
-                        div { class: "flex flex-row w-[60px]",
-                            div { class: "text-[#222222] font-medium text-[15px] mr-[3px] w-[40px]",
-                                {i18n.public_opinion}
-                            }
-                        }
-                        div { class: "flex flex-row w-full h-[45px] justify-start items-center px-[11px] py-[13px] bg-[#f7f7f7] rounded-lg " }
-                    }
-                    div { class: "flex flex-row w-full justify-start items-center mb-[10px]",
-                        div { class: "flex flex-row w-[60px]",
-                            div { class: "text-[#222222] font-medium text-[15px] mr-[3px] w-[40px]",
-                                {i18n.investigation}
-                            }
-                        }
-                        div { class: "flex flex-row w-full h-[45px] justify-start items-center px-[11px] py-[13px] bg-[#f7f7f7] rounded-lg " }
-                    }
-                }
-            }
-            div { class: "flex flex-row w-full justify-start items-start mt-[40px] gap-[20px]",
-                div {
-                    class: "flex flex-row w-[120px] h-[40px] bg-[#2a60d3] rounded-md px-[14px] py-[8px] gap-[5px] cursor-pointer",
-                    onclick: move |_| async move {
-                        invite_member
-                            .call(InviteMemberRequest {
-                                email: email(),
-                                name: name(),
-                                group: if select_group().name == "" {
-                                    None
-                                } else {
-                                    Some(GroupInfo {
-                                        id: select_group().id,
-                                        name: select_group().name,
-                                    })
-                                },
-                                role: if select_role().is_empty() {
-                                    None
-                                } else {
-                                    if select_role() == i18n.manager {
-                                        Some(Role::Admin)
-                                    } else if select_role() == i18n.public_opinion_manager {
-                                        Some(Role::DeliberationAdmin)
-                                    } else if select_role() == i18n.analyst {
-                                        Some(Role::Analyst)
-                                    } else if select_role() == i18n.repeater {
-                                        Some(Role::Moderator)
-                                    } else {
-                                        Some(Role::Speaker)
-                                    }
-                                },
-                                projects: None,
-                            });
-                    },
-                    AddUser { width: "24", height: "24" }
-                    div { class: "text-white font-bold text-[16px]", {i18n.invite} }
                 }
                 div {
                     class: "flex flex-row w-[85px] h-[40px] font-semibold text-[16px] text-[#222222] justify-center items-center cursor-pointer",
