@@ -1,15 +1,15 @@
 #![allow(non_snake_case)]
+use by_macros::DioxusController;
 use dioxus::prelude::*;
-use dioxus_logger::tracing;
+use dioxus_translate::*;
+use models::*;
 use regex::Regex;
 
-use crate::service::auth_api::{SendNotificationParams, VerifyAuthenticationParams};
+use crate::utils::hash::get_hash_string;
 
-use crate::service::user_api::{ResetRequest, UserApi};
-use crate::{service::auth_api::AuthApi, utils::hash::get_hash_string};
-
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
+    lang: Language,
     email: Signal<String>,
     name: Signal<String>,
     phone_number: Signal<String>,
@@ -27,17 +27,12 @@ pub struct Controller {
     password_check_error: Signal<bool>,
     password_pattern_error: Signal<bool>,
     password_unknown_error: Signal<bool>,
-
-    user_api: UserApi,
-    auth_api: AuthApi,
 }
 
 impl Controller {
-    pub fn init() -> Self {
-        let user_api: UserApi = use_context();
-        let auth_api: AuthApi = use_context();
-
+    pub fn init(lang: Language) -> Self {
         let ctrl = Self {
+            lang,
             email: use_signal(|| "".to_string()),
             name: use_signal(|| "".to_string()),
             phone_number: use_signal(|| "".to_string()),
@@ -54,9 +49,6 @@ impl Controller {
             password_check_error: use_signal(|| false),
             password_pattern_error: use_signal(|| false),
             password_unknown_error: use_signal(|| false),
-
-            user_api,
-            auth_api,
         };
 
         use_context_provider(|| ctrl);
@@ -156,58 +148,44 @@ impl Controller {
         self.new_password_check.set(new_password_check);
     }
 
-    pub async fn set_click_send_authentication(&mut self) {
+    pub async fn send_verification_code(&mut self) -> models::Result<()> {
         let re = Regex::new(r"^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").unwrap();
 
         if !re.is_match(self.get_email().as_str()) {
             self.email_address_error.set(true);
-            return;
+            return Err(ApiError::ValidationError(
+                "email must be formed as email address".to_string(),
+            ));
         }
-
         self.email_address_error.set(false);
-        let res = self
-            .auth_api
-            .send_notification(SendNotificationParams {
-                email: self.get_email(),
-            })
-            .await;
 
-        match res {
-            Ok(s) => {
-                tracing::debug!("auth key: {s}");
-                self.auth_key.set(s);
-            }
-            Err(e) => {
-                tracing::error!("send email failed: {}", e);
-            }
-        }
+        let endpoint = crate::config::get().api_url;
+        Verification::get_client(endpoint)
+            .send_verification_code(self.get_email())
+            .await?;
+
+        Ok(())
     }
 
-    pub async fn clicked_email_authentication(&mut self) {
-        let res = self
-            .auth_api
-            .verify_authentication(VerifyAuthenticationParams {
-                id: self.get_auth_key(),
-                value: self.get_authentication_number(),
-            })
-            .await;
+    pub async fn verify_code(&mut self) {
+        let endpoint = crate::config::get().api_url;
 
-        match res {
+        match Verification::get_client(endpoint)
+            .verify(self.email(), self.authentication_number())
+            .await
+        {
             Ok(_) => {
                 self.invalid_authkey_error.set(false);
                 self.unknown_error.set(false);
                 self.set_step(1);
             }
-            Err(e) => match e {
-                ServerFnError::ServerError(v) => {
-                    if v.contains("does not match") {
-                        self.invalid_authkey_error.set(true);
-                    } else {
-                        self.unknown_error.set(true);
-                    }
-                }
-                _ => {}
-            },
+            Err(ApiError::InvalidVerificationCode) => {
+                self.invalid_authkey_error.set(true);
+            }
+            Err(e) => {
+                btracing::error!("{}", e.translate(&self.lang));
+                self.unknown_error.set(true);
+            }
         }
     }
 
@@ -235,18 +213,15 @@ impl Controller {
             self.password_pattern_error.set(true);
             return;
         }
-
-        let res = self
-            .user_api
-            .reset_password(ResetRequest {
-                auth_id: self.get_auth_key(),
-                auth_value: self.get_authentication_number(),
-                email: self.get_email(),
-                password: get_hash_string(self.get_new_password().as_bytes()),
-            })
-            .await;
-
-        match res {
+        let endpoint = crate::config::get().api_url;
+        match User::get_client(endpoint)
+            .reset(
+                self.email(),
+                get_hash_string(self.get_new_password().as_bytes()),
+                self.authentication_number(),
+            )
+            .await
+        {
             Ok(_) => {
                 self.password_error.set(false);
                 self.password_check_error.set(false);
@@ -254,12 +229,10 @@ impl Controller {
                 self.password_unknown_error.set(false);
                 self.set_step(2);
             }
-            Err(e) => match e {
-                ServerFnError::ServerError(_v) => {
-                    self.password_unknown_error.set(true);
-                }
-                _ => {}
-            },
+            Err(e) => {
+                btracing::error!("{}", e.translate(&self.lang));
+                self.password_unknown_error.set(true);
+            }
         }
     }
 }

@@ -1,6 +1,4 @@
 #![allow(unused_variables)]
-#[allow(unused)]
-use crate::Result;
 use crate::{
     // group::GroupV2,
     organization::Organization,
@@ -8,12 +6,11 @@ use crate::{
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::api_model;
-use by_types::QueryResponse;
-use lazy_static::lazy_static;
 use validator::ValidationError;
+use lazy_static::lazy_static;
 
 #[derive(validator::Validate)]
-#[api_model(base = "/auth/v1", action = [signup(code = String), reset(code = String), user_signup(token = String), user_login(token = String)], read_action = refresh, table = users, iter_type=QueryResponse)]
+#[api_model(base = "/v1/users", action = [signup(code = String), reset(code = String)], read_action = refresh, table = users)]
 pub struct User {
     #[api_model(primary_key, read_action = find_by_id)]
     pub id: i64,
@@ -38,22 +35,6 @@ pub struct User {
     // #[api_model(many_to_many = group_members, foreign_table_name = groups, foreign_primary_key = group_id, foreign_reference_key = user_id)]
     // #[serde(default)]
     // pub groups: Vec<GroupV2>,
-}
-
-#[derive(validator::Validate)]
-#[api_model(base = "/auth/v1/verification", table = verifications, iter_type=QueryResponse)]
-pub struct Verification {
-    #[api_model(primary_key)]
-    pub id: i64,
-    #[api_model(auto = insert)]
-    pub created_at: i64,
-    #[api_model(action = send_verification_code, read_action = get_verification_code)]
-    #[validate(email)]
-    pub email: String,
-    #[api_model(read_action = get_verification_code)]
-    pub value: String,
-    pub expired_at: i64,
-    pub attemp_count: i32,
 }
 
 fn validate_hex(value: &str) -> std::result::Result<(), ValidationError> {
