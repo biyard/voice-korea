@@ -1,7 +1,9 @@
 pub mod deliberation_comment;
+pub mod deliberation_response;
 pub mod deliberation_user;
 
 pub use deliberation_comment::*;
+pub use deliberation_response::*;
 pub use deliberation_user::*;
 
 #[cfg(feature = "server")]
@@ -57,6 +59,8 @@ pub struct Deliberation {
     // TODO: discussion should be added
     #[api_model(one_to_many = deliberation_comments)]
     pub comments: Vec<DeliberationComment>,
+    #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id, aggregator = count)]
+    pub response_count: i64,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq, Default)]
