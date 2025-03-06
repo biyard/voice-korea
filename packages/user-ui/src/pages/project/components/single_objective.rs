@@ -9,6 +9,7 @@ pub fn SingleObjective(
     question: ChoiceQuestion,
     answer: i32,
     onchange: EventHandler<i32>,
+    #[props(default = false)] blocked: bool,
 ) -> Element {
     let mut ans: Signal<i32> = use_signal(|| 0);
     let mut options: Signal<Vec<String>> = use_signal(|| vec![]);
@@ -31,6 +32,7 @@ pub fn SingleObjective(
                 for (i , option) in options().iter().enumerate() {
                     div { class: "flex flex-row gap-[10px]",
                         CustomCheckbox {
+                            blocked,
                             checked: (i + 1) as i32 == answer,
                             onchange: move |checked: bool| {
                                 if checked {

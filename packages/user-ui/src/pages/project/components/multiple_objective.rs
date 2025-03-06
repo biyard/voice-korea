@@ -9,6 +9,7 @@ pub fn MultipleObjective(
     question: ChoiceQuestion,
     answer: Vec<i32>,
     onchange: EventHandler<Vec<i32>>,
+    #[props(default = false)] blocked: bool,
 ) -> Element {
     let mut ans: Signal<Vec<i32>> = use_signal(|| vec![]);
     let mut options: Signal<Vec<String>> = use_signal(|| vec![]);
@@ -31,6 +32,7 @@ pub fn MultipleObjective(
                 for (i , option) in options().iter().enumerate() {
                     div { class: "flex flex-row gap-[10px]",
                         CustomCheckbox {
+                            blocked,
                             checked: answer.contains(&((i + 1) as i32)),
                             onchange: move |checked: bool| {
                                 if checked {

@@ -1,11 +1,18 @@
 #![allow(unused)]
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
-use dioxus_translate::Language;
+use dioxus_translate::{translate, Language};
 use models::{
     response::Answer, ChoiceQuestion, Deliberation, DeliberationUser, PanelCountsV2, PanelV2,
     Question, Resource, ResourceType, Step, SubjectiveQuestion, SurveyV2,
 };
+
+use crate::{
+    pages::project::components::not_complete_survey_modal::NotCompleteSurveyModal,
+    service::popup_service::PopupService, utils::time::formatted_timestamp_to_sec,
+};
+
+use super::i18n::ProjectTranslate;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Controller {}
@@ -227,8 +234,6 @@ impl SampleController {
                     }
                 }
 
-                tracing::debug!("this line come");
-
                 ctrl.answers.set(answers);
             }
         });
@@ -244,6 +249,74 @@ impl SampleController {
 
     pub fn answers(&self) -> Vec<Answer> {
         (self.answers)()
+    }
+
+    pub fn send_sample_survey(&self, lang: Language) {
+        let tr: ProjectTranslate = translate(&lang);
+        let mut popup_service: PopupService = use_context();
+        let mut is_empty = false;
+        let answers = self.answers();
+        let ended_at = self.get_deliberation().ended_at;
+        let formatted_ended_at = formatted_timestamp_to_sec(ended_at);
+        let description = self.sample_survey_modal_description(lang, formatted_ended_at);
+
+        for answer in answers {
+            match answer {
+                Answer::SingleChoice { answer } => {
+                    if answer == 0 {
+                        is_empty = true;
+                        break;
+                    }
+                }
+                Answer::MultipleChoice { answer } => {
+                    if answer.len() == 0 {
+                        is_empty = true;
+                        break;
+                    }
+                }
+                Answer::ShortAnswer { answer } => {
+                    if answer == "" {
+                        is_empty = true;
+                        break;
+                    }
+                }
+                Answer::Subjective { answer } => {
+                    if answer == "" {
+                        is_empty = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if is_empty {
+            popup_service
+                .open(rsx! {
+                    NotCompleteSurveyModal {
+                        lang,
+                        description,
+                        onclose: move |_| {
+                            popup_service.close();
+                        },
+                        onsave: move |_| {
+                            tracing::debug!("send survey answer");
+                            popup_service.close();
+                        },
+                    }
+                })
+                .with_id("empty_survey")
+                .with_title(tr.not_complete_survey_modal_title);
+        } else {
+            //TODO: send survey answer value to use API
+            tracing::debug!("send survey answer");
+        }
+    }
+
+    pub fn sample_survey_modal_description(&self, lang: Language, ended_at: String) -> String {
+        match lang {
+            Language::Ko => format!("모든 질문 항목에 응답하지 않으면, 보상 대상에서 제외됩니다.\n이번 조사는 [{ended_at} (UTC 기준)]까지 다시 참여할 수 있습니다.\n조사를 계속하시겠습니까?"),
+            Language::En => format!("If you do not answer all the questions, you will not be eligible for rewards.\nYou can re-take this survey until [{ended_at} (UTC)].\nDo you want to continue taking the survey?"),
+        }
     }
 
     pub fn get_deliberation(&self) -> Deliberation {

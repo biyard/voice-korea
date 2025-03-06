@@ -1,5 +1,6 @@
 use crate::{
     components::icons::{
+        left_arrow::LeftArrow,
         person::Person,
         triangle::{TriangleDown, TriangleUp},
     },
@@ -63,6 +64,12 @@ pub fn Sample(lang: Language) -> Element {
                     onchange: move |(index, answer)| {
                         ctrl.change_answer(index, answer);
                     },
+                    onsend: move |_| {
+                        ctrl.send_sample_survey(lang);
+                    },
+                    onprev: move |_| {
+                        survey_clicked.set(false);
+                    },
                 }
             } else {
                 SurveyInfo {
@@ -84,12 +91,25 @@ pub fn Survey(
     lang: Language,
     survey: SurveyV2,
     answers: Vec<Answer>,
+    onprev: EventHandler<MouseEvent>,
     onchange: EventHandler<(usize, Answer)>,
+    onsend: EventHandler<MouseEvent>,
 ) -> Element {
     let tr: SurveyTranslate = translate(&lang);
+    let survey_title = survey.name;
 
     rsx! {
         div { class: "flex flex-col gap-[10px]",
+            div { class: "flex flex-row w-full justify-start items-center gap-[8px] mb-[10px]",
+                div {
+                    class: "cursor-pointer w-[24px] h-[24px]",
+                    onclick: move |e: Event<MouseData>| {
+                        onprev.call(e);
+                    },
+                    LeftArrow { stroke: "black" }
+                }
+                div { class: "font-semibold text-[#222222] text-[20px]", "{survey_title}" }
+            }
             for (i , question) in survey.questions.iter().enumerate() {
                 match question {
                     Question::SingleChoice(v) => {
@@ -170,7 +190,11 @@ pub fn Survey(
             }
 
             div { class: "flex flex-row w-full justify-center items-center",
-                div { class: "flex flex-row justify-center items-center w-[200px] py-[13px] font-bold text-white text-[16px] bg-[#8095EA] rounded-[8px]",
+                div {
+                    class: "cursor-pointer flex flex-row justify-center items-center w-[200px] py-[13px] font-bold text-white text-[16px] bg-[#8095EA] rounded-[8px]",
+                    onclick: move |e: Event<MouseData>| {
+                        onsend.call(e);
+                    },
                     "{tr.submit}"
                 }
             }
