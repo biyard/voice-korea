@@ -229,12 +229,7 @@ pub mod tests {
     }
 
     pub async fn setup() -> Result<TestContext> {
-        let app = by_axum::new();
-
         let conf = config::get();
-        tracing::debug!("config: {:?}", conf);
-        set_auth_config(conf.auth.clone());
-
         let pool = if let DatabaseConfig::Postgres { url, pool_size } = conf.database {
             PgPoolOptions::new()
                 .max_connections(pool_size)
