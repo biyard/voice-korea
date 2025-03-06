@@ -88,7 +88,7 @@ checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
 
 [[package]]
 name = "api"
-version = "0.3.17"
+version = "0.3.18"
 dependencies = [
  "aws-config",
  "aws-sdk-s3",
@@ -3324,7 +3324,6 @@ dependencies = [
  "serde",
  "sha3",
  "tracing",
- "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
