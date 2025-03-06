@@ -58,7 +58,7 @@ impl UserApi {
         let client = ReqwestClient::new()?;
 
         let res = client
-            .post(&format!("/v1/users/signup"))
+            .post(&format!("/v1/users"))
             .json(&AuthActionRequest::SignUp(SignUpParams {
                 auth_id: req.auth_id,
                 auth_value: req.auth_value,
@@ -77,7 +77,7 @@ impl UserApi {
         let client = ReqwestClient::new()?;
 
         let res = client
-            .post(&format!("/v1/users/signup"))
+            .post(&format!("/v1/users"))
             .json(&AuthActionRequest::Reset(ResetParams {
                 auth_id: req.auth_id,
                 auth_value: req.auth_value,
