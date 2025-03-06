@@ -16,13 +16,11 @@ use tokio::net::TcpListener;
 
 mod common;
 mod controllers {
+    pub mod v1;
     pub mod v2;
 
     pub mod panels {
         pub mod v2;
-    }
-    pub mod auth {
-        pub mod v1;
     }
     pub mod resources {
         pub mod v1;
@@ -134,59 +132,30 @@ async fn main() -> Result<()> {
     migration(&pool).await?;
 
     let app = app
+        .nest("/v2", Version2Controller::route(pool.clone())?)
         .nest(
             "/v1/users",
-            controllers::auth::v1::UserControllerV1::route(pool.clone())?,
+            controllers::v1::users::UserControllerV1::route(pool.clone())?,
         )
+        // NOTE: Deprecated
         .nest(
             "/organizations/v2",
             controllers::organizations::v2::OrganizationControllerV2::route(pool.clone())?,
         )
+        // NOTE: Deprecated
         .nest(
             "/invitations/v2/:org-id",
             crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
         )
-        .nest("/v2", Version2Controller::route(pool.clone())?)
+        // NOTE: Deprecated
         .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
         .nest(
             "/institutions/m1",
-            InstitutionControllerM1::route(pool.clone())?, //FIXME: fix to authorize
+            InstitutionControllerM1::route(pool.clone())?,
         )
-        .nest(
-            "/reviews/v1",
-            ReviewControllerV1::route(pool.clone())?, //FIXME: fix to authorize
-        )
+        // NOTE: Deprecated
+        .nest("/reviews/v1", ReviewControllerV1::route(pool.clone())?)
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
-
-    // .nest(
-    //     "/attributes/v1",
-    //     controllers::attributes::v1::AttributeControllerV1::router(),
-    // )
-    // .nest(
-    //     "/metadatas/v1",
-    //     controllers::metadatas::v1::MetadataControllerV1::router(),
-    // )
-    // .nest(
-    //     "/metadatas/v2",
-    //     controllers::metadatas::v2::MetadataControllerV2::route(pool.clone())
-    //         .await
-    //         .unwrap(),
-    // )
-    // .nest(
-    //     "/search/v1",
-    //     controllers::search::v1::SearchControllerV1::router(),
-    // )
-
-    // .nest(
-    //     "/public-opinions/v1",
-    //     controllers::public_deliberations::v1::PublicOpinionControllerV1::router(),
-    // )
-    // .nest(
-    //     "/public-surveys/v1",
-    //     controllers::public_surveys::v1::PublicSurveyControllerV1::router(),
-    // )
-    // .nest("/survey/v1", controllers::survey::v1::AxumState::router()) // FIXME: deprecated
-    // .nest("/survey/m1", controllers::survey::m1::AxumState::router()); // FIXME: deprecated
 
     let port = option_env!("PORT").unwrap_or("3000");
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port))

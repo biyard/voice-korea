@@ -45,6 +45,10 @@ impl OrganizationControllerV2 {
                 "/:org-id/groups",
                 crate::controllers::groups::v2::GroupControllerV2::route(pool.clone())?,
             )
+            .nest(
+                "/:org-id/invitations",
+                crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
+            )
             .layer(middleware::from_fn(authorize_organization)))
     }
 }
