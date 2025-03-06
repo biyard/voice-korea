@@ -7,8 +7,6 @@ use by_types::QueryResponse;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-mod member;
-pub use member::*;
 mod invitation;
 pub use invitation::*;
 

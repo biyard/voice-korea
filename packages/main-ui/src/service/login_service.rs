@@ -51,6 +51,14 @@ impl LoginService {
         (self.orgs)()
     }
 
+    pub fn org_id(&self) -> i64 {
+        let org = self.get_selected_org();
+        match org {
+            Some(org) => org.id,
+            None => 0,
+        }
+    }
+
     pub fn select_org(&mut self, id: String) {
         let org = self.get_orgs();
         let org = org.iter().find(|org| org.id.to_string() == id);

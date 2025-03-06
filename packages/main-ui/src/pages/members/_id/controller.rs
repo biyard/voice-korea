@@ -1,19 +1,13 @@
-use chrono::{Local, TimeZone};
 use dioxus::prelude::*;
-use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::prelude::{Group, GroupResponse, MemberSummary, UpdateMemberRequest};
-
-use crate::{
-    api::common::CommonQueryResponse,
-    models::role_field::RoleField,
-    service::{group_api::GroupApi, member_api::MemberApi, popup_service::PopupService},
+use models::{
+    prelude::{Group, GroupResponse, MemberSummary, UpdateMemberRequest},
+    QueryResponse,
 };
 
-use super::{
-    i18n::MemberDetailTranslate,
-    page::{RemoveMemberModal, RemoveProjectModal},
-};
+use crate::{models::role_field::RoleField, service::popup_service::PopupService};
+
+use super::i18n::MemberDetailTranslate;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub enum ProjectType {
@@ -57,11 +51,10 @@ pub struct Controller {
     pub member: Signal<MemberDetail>,
     pub groups: Signal<Vec<GroupResponse>>,
     pub roles: Signal<Vec<RoleField>>,
-    pub member_resource: Resource<Result<MemberSummary, ServerFnError>>,
+    pub member_resource: Resource<MemberSummary>,
 
-    pub member_api: MemberApi,
     pub popup_service: Signal<PopupService>,
-    pub group_resource: Resource<Result<CommonQueryResponse<GroupResponse>, ServerFnError>>,
+    pub group_resource: Resource<QueryResponse<GroupResponse>>,
 }
 
 impl Controller {
@@ -71,22 +64,15 @@ impl Controller {
         member_id: String,
     ) -> Self {
         let translates: MemberDetailTranslate = translate(&lang);
-        let api: MemberApi = use_context();
-        let member_resource: Resource<Result<MemberSummary, ServerFnError>> =
-            use_resource(move || {
-                let api = api.clone();
-                let member_id = member_id.clone();
-                async move { api.get_member(member_id.clone()).await }
-            });
+        let member_resource: Resource<MemberSummary> = use_resource(move || {
+            let _member_id = member_id.clone();
+            async move { MemberSummary::default() }
+        });
 
-        let group_api: GroupApi = use_context();
-        let group_resource: Resource<Result<CommonQueryResponse<GroupResponse>, ServerFnError>> =
-            use_resource(move || {
-                let api = group_api.clone();
-                async move { api.list_groups(Some(100), None).await }
-            });
+        let group_resource: Resource<QueryResponse<GroupResponse>> =
+            use_resource(move || async move { Default::default() });
 
-        let mut ctrl = Self {
+        let ctrl = Self {
             member: use_signal(|| MemberDetail::default()),
             groups: use_signal(|| vec![]),
             roles: use_signal(|| {
@@ -115,61 +101,60 @@ impl Controller {
             }),
             group_resource,
             member_resource,
-            member_api: api,
             popup_service: use_signal(|| popup_service),
         };
 
-        let member = if let Some(v) = member_resource.value()() {
-            match v {
-                Ok(d) => {
-                    let seconds = d.member.created_at / 1000;
-                    let nanoseconds = (d.member.created_at % 1000) * 1_000_000;
-                    let datetime = Local.timestamp_opt(seconds, nanoseconds as u32).unwrap();
+        // let member = if let Some(v) = member_resource.value()() {
+        //     match v {
+        //         Ok(d) => {
+        //             let seconds = d.member.created_at / 1000;
+        //             let nanoseconds = (d.member.created_at % 1000) * 1_000_000;
+        //             let datetime = Local.timestamp_opt(seconds, nanoseconds as u32).unwrap();
 
-                    let formatted_date = datetime.format("%Y년 %m월 %d일").to_string();
+        //             let formatted_date = datetime.format("%Y년 %m월 %d일").to_string();
 
-                    let data = MemberDetail {
-                        email: d.email.clone(),
-                        profile_image: None,
-                        profile_name: Some(d.member.name),
-                        //FIXME: fix to group
-                        group: if d.groups.len() == 0 {
-                            Group::default()
-                        } else {
-                            d.groups[0].clone()
-                        },
-                        role: if d.member.role.is_none() {
-                            "".to_string()
-                        } else {
-                            d.member.role.clone().unwrap().to_string()
-                        },
-                        register_date: formatted_date,
-                        project_history: vec![],
-                    };
+        //             let data = MemberDetail {
+        //                 email: d.email.clone(),
+        //                 profile_image: None,
+        //                 profile_name: Some(d.member.name),
+        //                 //FIXME: fix to group
+        //                 group: if d.groups.len() == 0 {
+        //                     Group::default()
+        //                 } else {
+        //                     d.groups[0].clone()
+        //                 },
+        //                 role: if d.member.role.is_none() {
+        //                     "".to_string()
+        //                 } else {
+        //                     d.member.role.clone().unwrap().to_string()
+        //                 },
+        //                 register_date: formatted_date,
+        //                 project_history: vec![],
+        //             };
 
-                    tracing::debug!("member data: {:?}", data);
-                    data
-                }
-                Err(_) => MemberDetail::default(),
-            }
-        } else {
-            MemberDetail::default()
-        };
+        //             tracing::debug!("member data: {:?}", data);
+        //             data
+        //         }
+        //         Err(_) => MemberDetail::default(),
+        //     }
+        // } else {
+        //     MemberDetail::default()
+        // };
 
-        let groups = if let Some(v) = group_resource.value()() {
-            match v {
-                Ok(v) => v.items,
-                Err(e) => {
-                    tracing::error!("list groups failed: {:?}", e);
-                    vec![]
-                }
-            }
-        } else {
-            vec![]
-        };
+        // let groups = if let Some(v) = group_resource.value()() {
+        //     match v {
+        //         Ok(v) => v.items,
+        //         Err(e) => {
+        //             tracing::error!("list groups failed: {:?}", e);
+        //             vec![]
+        //         }
+        //     }
+        // } else {
+        //     vec![]
+        // };
 
-        ctrl.groups.set(groups);
-        ctrl.member.set(member);
+        // ctrl.groups.set(groups);
+        // ctrl.member.set(member);
 
         ctrl
     }
@@ -186,83 +171,83 @@ impl Controller {
         (self.roles)()
     }
 
-    pub async fn update_member(&mut self, member_id: String, req: UpdateMemberRequest) {
-        let api: MemberApi = use_context();
-        let _ = match api.update_member(member_id, req).await {
-            Ok(_) => self.member_resource.restart(),
-            Err(v) => {
-                tracing::error!("update failed: {v}");
-            }
-        };
+    pub async fn update_member(&mut self, _member_id: String, _req: UpdateMemberRequest) {
+        // let api: MemberApi = use_context();
+        // let _ = match api.update_member(member_id, req).await {
+        //     Ok(_) => self.member_resource.restart(),
+        //     Err(v) => {
+        //         tracing::error!("update failed: {v}");
+        //     }
+        // };
     }
 
-    pub async fn remove_member(&mut self, user_id: String) {
-        let api: MemberApi = use_context();
-        let _ = match api.remove_member(user_id).await {
-            Ok(_) => self.member_resource.restart(),
-            Err(v) => {
-                tracing::error!("remove failed: {v}");
-            }
-        };
+    pub async fn remove_member(&mut self, _user_id: String) {
+        // let api: MemberApi = use_context();
+        // let _ = match api.remove_member(user_id).await {
+        //     Ok(_) => self.member_resource.restart(),
+        //     Err(v) => {
+        //         tracing::error!("remove failed: {v}");
+        //     }
+        // };
     }
 
     pub async fn open_remove_project_modal(
         &self,
-        lang: Language,
-        member_id: String,
-        history_id: String,
+        _lang: Language,
+        _member_id: String,
+        _history_id: String,
     ) {
-        let mut popup_service = (self.popup_service)().clone();
-        let translates: MemberDetailTranslate = translate(&lang);
-        let _api: MemberApi = self.member_api;
+        // let mut popup_service = (self.popup_service)().clone();
+        // let translates: MemberDetailTranslate = translate(&lang);
+        // let _api: MemberApi = self.member_api;
 
-        let _member_resource = self.member_resource;
+        // let _member_resource = self.member_resource;
 
-        popup_service
-            .open(rsx! {
-                RemoveProjectModal {
-                    lang,
-                    remove_project: move |_e: MouseEvent| {
-                        let member_id = member_id.clone();
-                        let history_id = history_id.clone();
-                        async move {
-                            tracing::debug!("remove project clicked id: {} {}", member_id, history_id);
-                        }
-                    },
-                    onclose: move |_e: MouseEvent| {
-                        popup_service.close();
-                    },
-                }
-            })
-            .with_id("remove_project_title")
-            .with_title(translates.remove_project_title);
+        // popup_service
+        //     .open(rsx! {
+        //         RemoveProjectModal {
+        //             lang,
+        //             remove_project: move |_e: MouseEvent| {
+        //                 let member_id = member_id.clone();
+        //                 let history_id = history_id.clone();
+        //                 async move {
+        //                     tracing::debug!("remove project clicked id: {} {}", member_id, history_id);
+        //                 }
+        //             },
+        //             onclose: move |_e: MouseEvent| {
+        //                 popup_service.close();
+        //             },
+        //         }
+        //     })
+        //     .with_id("remove_project_title")
+        //     .with_title(translates.remove_project_title);
     }
 
-    pub async fn open_remove_member_modal(&self, lang: Language, member_id: String) {
-        let mut popup_service = (self.popup_service)().clone();
-        let translates: MemberDetailTranslate = translate(&lang);
-        let api: MemberApi = self.member_api;
+    pub async fn open_remove_member_modal(&self, _lang: Language, _member_id: String) {
+        // let mut popup_service = (self.popup_service)().clone();
+        // let translates: MemberDetailTranslate = translate(&lang);
+        // let api: MemberApi = self.member_api;
 
-        let mut member_resource = self.member_resource;
+        // let mut member_resource = self.member_resource;
 
-        popup_service
-            .open(rsx! {
-                RemoveMemberModal {
-                    lang,
-                    remove_member: move |_e: MouseEvent| {
-                        let member_id = member_id.clone();
-                        async move {
-                            let _ = api.remove_member(member_id.clone()).await;
-                            member_resource.restart();
-                            popup_service.close();
-                        }
-                    },
-                    onclose: move |_e: MouseEvent| {
-                        popup_service.close();
-                    },
-                }
-            })
-            .with_id("remove_team_member_title")
-            .with_title(translates.remove_team_member_title);
+        // popup_service
+        //     .open(rsx! {
+        //         RemoveMemberModal {
+        //             lang,
+        //             remove_member: move |_e: MouseEvent| {
+        //                 let member_id = member_id.clone();
+        //                 async move {
+        //                     let _ = api.remove_member(member_id.clone()).await;
+        //                     member_resource.restart();
+        //                     popup_service.close();
+        //                 }
+        //             },
+        //             onclose: move |_e: MouseEvent| {
+        //                 popup_service.close();
+        //             },
+        //         }
+        //     })
+        //     .with_id("remove_team_member_title")
+        //     .with_title(translates.remove_team_member_title);
     }
 }

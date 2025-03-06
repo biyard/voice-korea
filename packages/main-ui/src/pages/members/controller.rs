@@ -1,66 +1,77 @@
+use std::str::FromStr;
+
+use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::prelude::{
-    GroupInfo, GroupResponse, InviteMemberRequest, ListMemberResponse, UpdateMemberRequest,
+use models::{
+    OrganizationMember, OrganizationMemberQuery, OrganizationMemberSummary, QueryResponse, Role,
 };
 
 use crate::{
-    api::common::CommonQueryResponse,
     models::role_field::RoleField,
-    pages::members::page::AddMemberModal,
-    service::{group_api::GroupApi, member_api::MemberApi, popup_service::PopupService},
+    pages::members::components::add_member_modal::AddMemberModal,
+    service::{login_service::LoginService, popup_service::PopupService},
 };
 
-use super::{i18n::MemberTranslate, page::RemoveMemberModal};
+use super::{
+    components::add_member_modal::InviteMemberRequest, i18n::MemberTranslate,
+    page::RemoveMemberModal,
+};
 
-#[derive(Debug, Clone, PartialEq, Default)]
-pub struct MemberSummary {
-    pub role_counts: Vec<u64>, // [전체 팀원, 관리자 수, 공론 관리자 수, 분석가 수, 중개자 수, 강연자 수],
-    pub members: Vec<Member>,
-}
-#[derive(Debug, Clone, PartialEq, Default)]
-pub struct Member {
-    pub member_id: String,
-    pub profile: Option<String>,
-    pub profile_name: Option<String>,
-    pub email: String,
-    pub group: String,
-    pub role: String,
-    pub projects: Vec<String>, //유저가 속해있는 프로젝트
-}
+// #[derive(Debug, Clone, PartialEq, Default)]
+// pub struct MemberSummary {
+//     pub role_counts: Vec<u64>, // [전체 팀원, 관리자 수, 공론 관리자 수, 분석가 수, 중개자 수, 강연자 수],
+//     pub members: Vec<Member>,
+// }
+// #[derive(Debug, Clone, PartialEq, Default)]
+// pub struct Member {
+//     pub member_id: String,
+//     pub profile: Option<String>,
+//     pub profile_name: Option<String>,
+//     pub email: String,
+//     pub group: String,
+//     pub role: String,
+//     pub projects: Vec<String>, //유저가 속해있는 프로젝트
+// }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
-    pub members: Signal<MemberSummary>,
-    pub groups: Signal<Vec<GroupResponse>>,
+    pub members: Resource<QueryResponse<OrganizationMemberSummary>>,
     pub roles: Signal<Vec<RoleField>>,
-    pub member_resource: Resource<Result<ListMemberResponse, ServerFnError>>,
-    popup_service: Signal<PopupService>,
-    member_api: MemberApi,
-    pub group_resource: Resource<Result<CommonQueryResponse<GroupResponse>, ServerFnError>>,
+    pub popup_service: PopupService,
+    pub user_service: LoginService,
+    pub page: Signal<usize>,
+    pub selected_member: Signal<Option<i64>>,
+    pub lang: Language,
 }
 
 impl Controller {
-    pub fn init(lang: dioxus_translate::Language, popup_service: PopupService) -> Self {
+    pub fn new(lang: dioxus_translate::Language) -> std::result::Result<Self, RenderError> {
         let translates: MemberTranslate = translate(&lang);
-        let api: MemberApi = use_context();
-        let member_resource: Resource<Result<ListMemberResponse, ServerFnError>> =
-            use_resource(move || {
-                let api = api.clone();
-                async move { api.list_members(Some(100), None).await }
-            });
+        let page = use_signal(|| 1);
+        let user_service: LoginService = use_context();
 
-        let group_api: GroupApi = use_context();
-        let group_resource: Resource<Result<CommonQueryResponse<GroupResponse>, ServerFnError>> =
-            use_resource(move || {
-                let api = group_api.clone();
-                async move { api.list_groups(Some(100), None).await }
-            });
+        let members = use_server_future(move || {
+            let page = page();
+            let org_id = user_service.org_id();
+            let size = 10;
+            async move {
+                let endpoint = crate::config::get().api_url;
+                let res = OrganizationMember::get_client(endpoint)
+                    .query(org_id, OrganizationMemberQuery::new(size).with_page(page))
+                    .await;
 
-        let mut ctrl = Self {
-            members: use_signal(|| MemberSummary::default()),
-            groups: use_signal(|| vec![]),
+                res.unwrap_or_default()
+            }
+        })?;
+
+        let ctrl = Self {
+            lang,
+            members,
+            page,
+            user_service,
+            selected_member: use_signal(|| None),
             roles: use_signal(|| {
                 vec![
                     RoleField {
@@ -85,165 +96,72 @@ impl Controller {
                     },
                 ]
             }),
-            member_resource,
-            member_api: api,
-            popup_service: use_signal(|| popup_service),
-            group_resource,
+            popup_service: use_context(),
         };
 
-        let groups = if let Some(v) = group_resource.value()() {
-            match v {
-                Ok(v) => v.items,
-                Err(e) => {
-                    tracing::error!("list groups failed: {:?}", e);
-                    vec![]
-                }
-            }
-        } else {
-            vec![]
-        };
-
-        let (members, role_counts) = if let Some(v) = member_resource.value()() {
-            match v {
-                Ok(d) => {
-                    (
-                        d.members
-                            .iter()
-                            .map(|mem| Member {
-                                member_id: mem.member.id.to_string(),
-                                profile: None,
-                                profile_name: Some(mem.member.name.clone()),
-                                email: mem.email.clone(),
-                                //FIXME: fix to group
-                                group: if mem.groups.len() == 0 {
-                                    "".to_string()
-                                } else {
-                                    mem.groups[0].name.clone()
-                                },
-                                role: if mem.member.role.is_none() {
-                                    "".to_string()
-                                } else {
-                                    mem.member.role.clone().unwrap().to_string()
-                                },
-                                projects: vec![],
-                            })
-                            .collect(),
-                        d.role_count,
-                    )
-                }
-                Err(_) => (vec![], vec![]),
-            }
-        } else {
-            (vec![], vec![])
-        };
-
-        ctrl.groups.set(groups);
-
-        ctrl.members.set(MemberSummary {
-            role_counts,
-            members,
-        });
-
-        ctrl
+        Ok(ctrl)
     }
 
-    pub fn get_members(&self) -> MemberSummary {
-        (self.members)()
-    }
-
-    pub fn get_groups(&self) -> Vec<GroupResponse> {
-        (self.groups)()
-    }
-
-    pub fn get_roles(&self) -> Vec<RoleField> {
-        (self.roles)()
-    }
-
-    pub async fn invite_member(&mut self, req: InviteMemberRequest) {
-        let api: MemberApi = use_context();
-        let _ = api.invite_member(req).await;
-        self.member_resource.restart();
-    }
-
-    pub async fn update_group(&mut self, index: usize, group_index: usize) {
-        let api: MemberApi = use_context();
-        let members = self.get_members().members;
-        let group = self.get_groups()[group_index].clone();
-        let member = members[index].clone();
-        let _ = api
-            .update_member(
-                member.member_id,
-                UpdateMemberRequest {
-                    name: member.profile_name,
-                    group: Some(GroupInfo {
-                        id: group.id,
-                        name: group.name,
-                    }), //FIXME: fix to real group
-                    role: if member.role != "" {
-                        Some(member.role)
-                    } else {
-                        None
-                    },
-                },
-            )
-            .await;
-        self.member_resource.restart();
-    }
-
-    pub async fn update_role(&mut self, index: usize, role_name: String) {
-        let api: MemberApi = use_context();
-        let members = self.get_members().members;
-        let member = members[index].clone();
-        let _ = api
-            .update_member(
-                member.member_id,
-                UpdateMemberRequest {
-                    name: member.profile_name,
-                    group: if member.group != "" {
-                        Some(GroupInfo {
-                            id: "group_id".to_string(),
-                            name: member.group.clone(),
-                        }) //FIXME: fix to real group
-                    } else {
-                        None
-                    },
-                    role: Some(role_name),
-                },
-            )
-            .await;
-        self.member_resource.restart();
-    }
-
-    pub async fn remove_member(&mut self, user_id: String) {
-        let api: MemberApi = use_context();
-        let _ = api.remove_member(user_id).await;
-        self.member_resource.restart();
-    }
-
-    pub async fn open_remove_member_modal(
-        &self,
-        lang: Language,
-        mut clicked_member_id: Signal<String>,
+    pub async fn invite_member(
+        &mut self,
+        InviteMemberRequest {
+            email, name, role, ..
+        }: InviteMemberRequest,
     ) {
-        let mut popup_service = (self.popup_service)().clone();
+        if let Err(e) = OrganizationMember::get_client(crate::config::get().api_url)
+            .create(self.user_service.org_id(), name, role, None, email)
+            .await
+        {
+            btracing::error!("{}", e.translate(&self.lang));
+        };
+
+        self.members.restart();
+    }
+
+    pub async fn update_group(&mut self, _id: i64, _group_index: usize) {
+        // TODO: implement update group
+        btracing::error!("update_group not implemented");
+    }
+
+    pub async fn update_role(&mut self, id: i64, role_name: String) {
+        let role = Role::from_str(&role_name).unwrap_or_default();
+        let endpoint = crate::config::get().api_url;
+        OrganizationMember::get_client(endpoint)
+            .update_role(self.user_service.org_id(), id, Some(role))
+            .await
+            .unwrap_or_default();
+
+        self.members.restart();
+    }
+
+    pub async fn remove_member(&mut self, member_id: i64) {
+        let endpoint = crate::config::get().api_url;
+        if let Err(e) = OrganizationMember::get_client(endpoint)
+            .delete(self.user_service.org_id(), member_id)
+            .await
+        {
+            btracing::error!("{}", e.translate(&self.lang));
+            return;
+        }
+
+        self.members.restart();
+    }
+
+    pub async fn open_remove_member_modal(&mut self, lang: Language, member_id: i64) {
         let translates: MemberTranslate = translate(&lang);
-        let api: MemberApi = self.member_api;
+        let mut ctrl = *self;
 
-        let mut member_resource = self.member_resource;
-
-        popup_service
+        self.popup_service
             .open(rsx! {
                 RemoveMemberModal {
                     lang,
                     remove_member: move |_e: MouseEvent| async move {
-                        let _ = api.remove_member(clicked_member_id()).await;
-                        member_resource.restart();
-                        clicked_member_id.set("".to_string());
-                        popup_service.close();
+                        ctrl.remove_member(member_id).await;
+                        ctrl.popup_service.close();
                     },
                     onclose: move |_e: MouseEvent| {
-                        clicked_member_id.set("".to_string());
-                        popup_service.close();
+                        ctrl.selected_member.set(None);
+                        ctrl.popup_service.close();
                     },
                 }
             })
@@ -251,28 +169,20 @@ impl Controller {
             .with_title(translates.remove_team_member);
     }
 
-    pub async fn open_add_member_modal(&self, lang: Language) {
-        let mut popup_service = (self.popup_service)().clone();
+    pub async fn open_add_member_modal(&mut self, lang: Language) {
         let translates: MemberTranslate = translate(&lang);
-        let api: MemberApi = self.member_api;
+        let mut ctrl = *self;
 
-        let mut member_resource = self.member_resource;
-        let groups = (self.groups)();
-        let roles = (self.roles)();
-
-        popup_service
+        self.popup_service
             .open(rsx! {
                 AddMemberModal {
                     lang,
-                    groups: groups.clone(),
-                    roles: roles.clone(),
-                    invite_member: move |req: InviteMemberRequest| async move {
-                        let _ = api.invite_member(req).await;
-                        member_resource.restart();
-                        popup_service.close();
+                    onsubmit: move |req: InviteMemberRequest| async move {
+                        ctrl.invite_member(req).await;
+                        ctrl.popup_service.close();
                     },
                     onclose: move |_e: MouseEvent| {
-                        popup_service.close();
+                        ctrl.popup_service.close();
                     },
                 }
             })

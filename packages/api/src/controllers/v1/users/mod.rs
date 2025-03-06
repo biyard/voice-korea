@@ -18,7 +18,7 @@ use verification::VerificationControllerV1;
 use crate::utils::hash::get_hash_string;
 
 #[derive(Clone, Debug)]
-pub struct UserControllerV1 {
+pub struct UserController {
     pool: sqlx::Pool<sqlx::Postgres>,
     repo: UserRepository,
     org: OrganizationRepository,
@@ -27,14 +27,14 @@ pub struct UserControllerV1 {
     invite: InvitationRepository,
 }
 
-impl UserControllerV1 {
+impl UserController {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         let repo = User::get_repository(pool.clone());
         let org = Organization::get_repository(pool.clone());
         let org_mem = OrganizationMember::get_repository(pool.clone());
         let group_mem: GroupMemberV2Repository = GroupMemberV2::get_repository(pool.clone());
         let invite = Invitation::get_repository(pool.clone());
-        let ctrl = UserControllerV1 {
+        let ctrl = UserController {
             pool: pool.clone(),
             repo,
             org,
@@ -55,7 +55,7 @@ impl UserControllerV1 {
     }
 
     pub async fn act_user(
-        State(ctrl): State<UserControllerV1>,
+        State(ctrl): State<UserController>,
         Extension(auth): Extension<Option<Authorization>>,
         Json(body): Json<UserAction>,
     ) -> Result<JsonWithHeaders<User>> {
@@ -73,7 +73,7 @@ impl UserControllerV1 {
     }
 
     pub async fn get_user(
-        State(_ctrl): State<UserControllerV1>,
+        State(_ctrl): State<UserController>,
         Extension(_auth): Extension<Option<Authorization>>,
         Path(id): Path<String>,
     ) -> Result<Json<User>> {
@@ -82,7 +82,7 @@ impl UserControllerV1 {
     }
 
     pub async fn list_user(
-        State(ctrl): State<UserControllerV1>,
+        State(ctrl): State<UserController>,
         Extension(auth): Extension<Option<Authorization>>,
         Query(q): Query<UserParam>,
     ) -> Result<Json<UserGetResponse>> {
@@ -103,7 +103,7 @@ impl UserControllerV1 {
     }
 }
 
-impl UserControllerV1 {
+impl UserController {
     pub fn generate_token(&self, user: &User) -> Result<String> {
         let mut claims = Claims {
             sub: user.id.to_string(),
