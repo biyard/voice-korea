@@ -1,4 +1,4 @@
-use std::fmt;
+use dioxus_translate::Translate;
 
 #[cfg(feature = "server")]
 use by_axum::{
@@ -14,25 +14,14 @@ use by_axum::{
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
-pub enum Error {
-    Unauthorized,
-    SignupFailed(String),
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Error::Unauthorized => write!(f, "Unauthorized access"),
-            Error::SignupFailed(v) => write!(f, "Signup Failed: {v}"),
-        }
-    }
-}
-
-#[derive(Debug, Serialize, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Serialize, PartialEq, Eq, Deserialize, Translate)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub enum ApiError {
+    #[translate(
+        ko = "회원가입에 실패했습니다. 다시 시도해주세요.",
+        en = "Sign-up failed. Please try again."
+    )]
+    SignupFailed(String),
     ApiCallError(String),
 
     DatabaseQueryError(String),
@@ -103,19 +92,19 @@ pub enum ApiError {
     SurveyResponseExcelPresigningError,
 }
 
-impl std::fmt::Display for ApiError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
+// impl std::fmt::Display for ApiError {
+//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+//         write!(f, "{:?}", self)
+//     }
+// }
 
-impl std::str::FromStr for ApiError {
-    type Err = String;
+// impl std::str::FromStr for ApiError {
+//     type Err = String;
 
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        Ok(ApiError::ApiCallError(s.to_string()))
-    }
-}
+//     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+//         Ok(ApiError::ApiCallError(s.to_string()))
+//     }
+// }
 
 impl From<reqwest::Error> for ApiError {
     fn from(e: reqwest::Error) -> Self {

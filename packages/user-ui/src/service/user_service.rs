@@ -4,8 +4,9 @@ use chrono::{DateTime, Utc};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_oauth::prelude::FirebaseService;
+use dioxus_translate::Language;
 use google_wallet::{drive_api::DriveApi, WalletEvent};
-use models::{ApiError, Error, User, UserClient};
+use models::{ApiError, User, UserClient};
 pub enum UserEvent {
     Signup(String, String, String),
     Login,
@@ -128,7 +129,12 @@ impl UserService {
         UserEvent::Logout
     }
 
-    pub async fn login_or_signup(&self, email: &str, nickname: &str) -> Result<(), Error> {
+    pub async fn login_or_signup(
+        &self,
+        lang: Language,
+        email: &str,
+        nickname: &str,
+    ) -> Result<(), ApiError> {
         tracing::debug!("UserService::signup: email={} nickname={}", email, nickname,);
 
         let cli = (self.cli)();
@@ -147,8 +153,9 @@ impl UserService {
                 v
             }
             Err(e) => {
+                btracing::error!("{}", e.translate(&lang).to_string());
                 tracing::error!("UserService::signup: error={:?}", e);
-                return Err(Error::SignupFailed(e.to_string()));
+                return Err(ApiError::SignupFailed(e.to_string()));
             }
         };
 
@@ -158,7 +165,7 @@ impl UserService {
 
     async fn request_to_firebase(
         &mut self,
-    ) -> Result<(google_wallet::WalletEvent, String, String, String, String), Error> {
+    ) -> Result<(google_wallet::WalletEvent, String, String, String, String), ApiError> {
         let (evt, token, email, name, profile_url) = match self.handle_google().await {
             Ok(evt) => {
                 tracing::debug!("UserService::login: cred={:?}", evt);
@@ -167,7 +174,7 @@ impl UserService {
             }
             Err(e) => {
                 tracing::error!("UserService::login: error={:?}", e);
-                return Err(Error::Unauthorized);
+                return Err(ApiError::Unauthorized);
             }
         };
 

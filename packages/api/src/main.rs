@@ -147,7 +147,6 @@ async fn main() -> Result<()> {
             crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
         )
         .nest("/v2", Version2Controller::route(pool.clone())?)
-        .layer(by_axum::axum::middleware::from_fn(authorization_middleware))
         .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
         .nest(
             "/institutions/m1",
@@ -156,7 +155,8 @@ async fn main() -> Result<()> {
         .nest(
             "/reviews/v1",
             ReviewControllerV1::route(pool.clone())?, //FIXME: fix to authorize
-        );
+        )
+        .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
     // .nest(
     //     "/attributes/v1",

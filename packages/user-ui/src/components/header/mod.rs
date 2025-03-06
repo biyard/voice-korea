@@ -62,7 +62,7 @@ pub fn CompletePopup(lang: Language, onclose: EventHandler<MouseEvent>) -> Eleme
     let tr: CompletePopupTranslate = translate(&lang);
     let mut popup_service: PopupService = use_context();
     rsx! {
-        div { class: "flex flex-col min-w-[420px] justify-center items-center gap-[35px]",
+        div { class: "flex flex-col min-w-[420px] max-[420px]:min-w-[300px] justify-center items-center gap-[35px]",
             div { class: "flex flex-col w-full justify-center items-center gap-[15px]",
                 div { class: "flex flex-row w-[88px] h-[88px] justify-center items-center bg-[#7C8292] rounded-[100px]",
                     Logo { width: "47", height: "47", class: "fill-[#ffffff]" }
@@ -95,7 +95,7 @@ pub fn SignupPopup(lang: Language, email: String, profile_url: String) -> Elemen
     let mut nickname_error = use_signal(|| "".to_string());
     let mut check_error = use_signal(|| "".to_string());
     rsx! {
-        div { class: "flex flex-col min-w-[420px] justify-between items-center gap-[25px]",
+        div { class: "flex flex-col min-w-[420px] max-[420px]:min-w-[300px] justify-between items-center gap-[25px]",
             div { class: "flex flex-col w-full justify-start items-start gap-[15px]",
                 div { class: "flex flex-col gap-[5px] w-full",
                     div { class: "flex flex-row w-full justify-start items-start gap-[3px]",
@@ -156,7 +156,7 @@ pub fn SignupPopup(lang: Language, email: String, profile_url: String) -> Elemen
                         }
                         nickname_error.set("".to_string());
                         check_error.set("".to_string());
-                        match user_service.login_or_signup(&email, &nickname()).await {
+                        match user_service.login_or_signup(lang, &email, &nickname()).await {
                             Ok(_) => {
                                 popup_service
                                     .open(rsx! {
@@ -189,7 +189,7 @@ pub fn GoogleLoginPopup(lang: Language, onclose: EventHandler<MouseEvent>) -> El
     let tr: GoogleLoginPopupTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col min-w-[420px] justify-between items-center",
+        div { class: "flex flex-col min-w-[420px] max-[420px]:min-w-[300px] justify-between items-center",
             div {
                 class: "cursor-pointer flex flex-row w-full bg-[#8095EA] rounded-[8px] p-[8px] gap-[15px] justify-start items-center",
                 onclick: move |e: Event<MouseData>| {

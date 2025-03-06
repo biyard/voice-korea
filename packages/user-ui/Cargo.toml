@@ -34,4 +34,4 @@ google-wallet = { workspace = true }
 default = []
 server = ["dioxus-aws/server"]
 lambda = ["dioxus-aws/lambda", "server"]
-web = ["dioxus-aws/web", "dioxus-translate/web", "models/web"]
+web = ["dioxus-aws/web", "dioxus-translate/web", "dioxus-oauth/web", "models/web"]

@@ -59,7 +59,7 @@ impl UserControllerV1 {
 
     pub async fn act_user(
         State(ctrl): State<UserControllerV1>,
-        Extension(_auth): Extension<Option<Authorization>>,
+        Extension(auth): Extension<Option<Authorization>>,
         Json(body): Json<UserAction>,
     ) -> Result<JsonWithHeaders<User>> {
         tracing::debug!("act_user {:?}", body);
@@ -70,8 +70,8 @@ impl UserControllerV1 {
             UserAction::Signup(params) => ctrl.signup(params).await,
             UserAction::Login(params) => ctrl.login(params).await,
             UserAction::Reset(params) => ctrl.reset(params).await,
-            UserAction::UserSignup(params) => ctrl.user_signup(params).await,
-            UserAction::UserLogin(params) => ctrl.user_login(params).await,
+            UserAction::UserSignup(params) => ctrl.user_signup(auth, params).await,
+            UserAction::UserLogin(params) => ctrl.user_login(auth, params).await,
         }
     }
 
@@ -218,7 +218,11 @@ impl UserControllerV1 {
         todo!()
     }
 
-    pub async fn user_login(&self, body: UserUserLoginRequest) -> Result<JsonWithHeaders<User>> {
+    pub async fn user_login(
+        &self,
+        _auth: Option<Authorization>,
+        body: UserUserLoginRequest,
+    ) -> Result<JsonWithHeaders<User>> {
         // TODO: authorize token
 
         let user = self
@@ -237,7 +241,11 @@ impl UserControllerV1 {
             .with_cookie(&jwt))
     }
 
-    pub async fn user_signup(&self, body: UserUserSignupRequest) -> Result<JsonWithHeaders<User>> {
+    pub async fn user_signup(
+        &self,
+        _auth: Option<Authorization>,
+        body: UserUserSignupRequest,
+    ) -> Result<JsonWithHeaders<User>> {
         // TODO: authorize token
 
         let user = match self
