@@ -20,11 +20,14 @@ license = "Apache-2.0"
 by-axum = { path = "deps/rust-sdk/packages/by-axum" }
 easy-dynamodb = { path = "deps/rust-sdk/packages/easy-dynamodb" }
 by-components = { path = "deps/rust-sdk/packages/by-components" }
+btracing = { path = "deps/rust-sdk/packages/btracing" }
 by-macros = { path = "deps/rust-sdk/packages/by-macros" }
 by-types = { path = "deps/rust-sdk/packages/by-types" }
 dioxus-translate = { path = "deps/rust-sdk/packages/dioxus-translate", features = [
     "ko",
 ] }
+dioxus-oauth = { path = "deps/rust-sdk/packages/dioxus-oauth" }
+google-wallet = { path = "deps/rust-sdk/packages/google-wallet" }
 dioxus-aws = { path = "deps/rust-sdk/packages/dioxus-aws" }
 rest-api = { path = "deps/rust-sdk/packages/rest-api" }
 
@@ -34,7 +37,8 @@ chrono = "0.4.38"
 serde = { version = "1.0.215", features = ["derive"] }
 serde_json = "1.0.137"
 reqwest = { version = "0.12.9", features = ["json"] }
-dioxus = { version = "0.6.3" }
+dioxus = { version = "0.6.3", git = "https://github.com/hackartists/dioxus.git" }
+dioxus-web = { version = "0.6.3", git = "https://github.com/hackartists/dioxus.git" }
 dioxus-logger = { version = "0.6.2" }
 sqlx = { version = "0.8.3", features = [
     "sqlite",

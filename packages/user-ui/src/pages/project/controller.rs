@@ -170,6 +170,7 @@ impl Controller {
                 attributes: vec![],
                 org_id: 1,
             }],
+            comments: vec![],
         }
     }
 }

@@ -59,7 +59,7 @@ impl UserControllerV1 {
 
     pub async fn act_user(
         State(ctrl): State<UserControllerV1>,
-        Extension(_auth): Extension<Option<Authorization>>,
+        Extension(auth): Extension<Option<Authorization>>,
         Json(body): Json<UserAction>,
     ) -> Result<JsonWithHeaders<User>> {
         tracing::debug!("act_user {:?}", body);
@@ -70,6 +70,8 @@ impl UserControllerV1 {
             UserAction::Signup(params) => ctrl.signup(params).await,
             UserAction::Login(params) => ctrl.login(params).await,
             UserAction::Reset(params) => ctrl.reset(params).await,
+            UserAction::UserSignup(params) => ctrl.user_signup(auth, params).await,
+            UserAction::UserLogin(params) => ctrl.user_login(auth, params).await,
         }
     }
 
@@ -160,7 +162,7 @@ impl UserControllerV1 {
 
         let user = self
             .repo
-            .insert(body.email.clone(), pw.clone())
+            .insert(body.email.clone(), pw.clone(), None)
             .await
             .map_err(|e| {
                 tracing::error!("Failed to insert user: {}", e);
@@ -214,6 +216,91 @@ impl UserControllerV1 {
         // TODO: update password
 
         todo!()
+    }
+
+    pub async fn user_login(
+        &self,
+        _auth: Option<Authorization>,
+        body: UserUserLoginRequest,
+    ) -> Result<JsonWithHeaders<User>> {
+        // TODO: authorize token
+
+        let user = self
+            .repo
+            .find_one(&UserReadAction::new().find_by_email(body.email))
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to find user: {}", e);
+                ApiError::AuthKeyNotMatch("check your email".to_string())
+            })?;
+
+        let jwt = self.generate_token(&user)?;
+
+        Ok(JsonWithHeaders::new(user)
+            .with_bearer_token(&jwt)
+            .with_cookie(&jwt))
+    }
+
+    pub async fn user_signup(
+        &self,
+        _auth: Option<Authorization>,
+        body: UserUserSignupRequest,
+    ) -> Result<JsonWithHeaders<User>> {
+        // TODO: authorize token
+
+        let user = match self
+            .repo
+            .find_one(&UserReadAction::new().find_by_email(body.email.clone()))
+            .await
+        {
+            //already exists => update
+            Ok(v) => {
+                let user = self
+                    .repo
+                    .update(
+                        v.id,
+                        UserRepositoryUpdateRequest {
+                            email: Some(body.email.clone()),
+                            password: Some(v.password),
+                            nickname: body.nickname,
+                        },
+                    )
+                    .await
+                    .map_err(|e| {
+                        tracing::error!("Failed to update user: {}", e);
+                        ApiError::PutObjectFailed
+                    })?;
+
+                user
+            }
+            //not exists => insert
+            Err(_) => {
+                let user = self
+                    .repo
+                    .insert(body.email.clone(), "".to_string(), body.nickname)
+                    .await
+                    .map_err(|e| {
+                        tracing::error!("Failed to insert user: {}", e);
+                        ApiError::DuplicateUser
+                    })?;
+
+                let org = self.org.insert(user.email.clone()).await?;
+
+                self.org_mem
+                    .insert(user.id, org.id, user.email.clone(), Some(Role::Admin), None)
+                    .await?;
+
+                self.invite_user(user.clone()).await?;
+
+                user
+            }
+        };
+
+        let jwt = self.generate_token(&user)?;
+
+        Ok(JsonWithHeaders::new(user)
+            .with_bearer_token(&jwt)
+            .with_cookie(&jwt))
     }
 
     async fn invite_user(&self, user: User) -> Result<()> {

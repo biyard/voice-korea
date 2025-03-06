@@ -7,6 +7,7 @@ pub mod pages;
 
 pub mod service {
     pub mod popup_service;
+    pub mod user_service;
 }
 
 pub mod utils {
@@ -16,11 +17,11 @@ pub mod utils {
 pub mod routes;
 
 use routes::Route;
-use service::popup_service::PopupService;
+use service::{popup_service::PopupService, user_service::UserService};
 
 const FAVICON: Asset = asset!("/public/favicon.png");
 const MAIN_CSS: Asset = asset!("/public/main.css");
-const TAILWIND_CSS: Asset = asset!("/public/tailwind.css");
+const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 
 fn main() {
     dioxus_logger::init(config::get().log_level).expect("failed to init logger");
@@ -31,10 +32,19 @@ fn main() {
 #[component]
 fn App() -> Element {
     PopupService::init();
+    UserService::init();
     rsx! {
+        btracing::ToastTracing {
+            img {
+                src: asset!("/public/logos/logo_symbol_white.png"),
+                width: "30px",
+            }
+        }
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+
+        document::Script { src: asset!("/public/dep.js") }
         load_tailwindcss {}
         Router::<Route> {}
     }

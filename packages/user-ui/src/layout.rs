@@ -6,6 +6,7 @@ use dioxus_translate::Language;
 use crate::routes::Route;
 
 use crate::components::{Footer, Header};
+use crate::service::popup_service::PopupZone;
 #[component]
 pub fn RootLayout(lang: Language) -> Element {
     rsx! {
@@ -15,6 +16,7 @@ pub fn RootLayout(lang: Language) -> Element {
                 Outlet::<Route> {}
             }
         }
+        PopupZone {}
     }
 }
 
@@ -30,5 +32,6 @@ pub fn RootLayoutWithFooter(lang: Language) -> Element {
                 Footer { lang: lang.clone() }
             }
         }
+        PopupZone {}
     }
 }
