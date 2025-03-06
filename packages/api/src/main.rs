@@ -1,4 +1,7 @@
-use by_axum::auth::{authorization_middleware, set_auth_config};
+use by_axum::{
+    auth::{authorization_middleware, set_auth_config},
+    axum::Router,
+};
 use by_types::DatabaseConfig;
 use controllers::{
     institutions::m1::InstitutionControllerM1, resources::v1::bucket::MetadataControllerV1,
@@ -109,8 +112,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     Ok(())
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+async fn make_app() -> Result<Router> {
     let app = by_axum::new();
     let conf = config::get();
     tracing::debug!("config: {:?}", conf);
@@ -153,6 +155,13 @@ async fn main() -> Result<()> {
         // NOTE: Deprecated
         .nest("/reviews/v1", ReviewControllerV1::route(pool.clone())?)
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
+
+    Ok(app)
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let app = make_app().await?;
 
     let port = option_env!("PORT").unwrap_or("3000");
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port))
@@ -221,11 +230,6 @@ pub mod tests {
 
     pub async fn setup() -> Result<TestContext> {
         let app = by_axum::new();
-        let id = uuid::Uuid::new_v4().to_string();
-        let now = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .unwrap()
-            .as_nanos() as u64;
 
         let conf = config::get();
         tracing::debug!("config: {:?}", conf);
@@ -269,27 +273,20 @@ pub mod tests {
         .execute(&pool)
         .await;
 
-        let _ = migration(&pool).await;
-
-        let app = app
-            .nest(
-                "/auth/v1",
-                controllers::auth::v1::UserControllerV1::route(pool.clone())?,
-            )
-            .nest(
-                "/organizations/v2",
-                controllers::organizations::v2::OrganizationController::route(pool.clone())?,
-            )
-            .nest("/v2", Version2Controller::route(pool.clone())?)
-            .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
-
+        let id = uuid::Uuid::new_v4().to_string();
         let user = setup_test_user(&id, &pool).await.unwrap();
         let (claims, admin_token) = setup_jwt_token(user.clone());
 
+        let app = make_app().await?;
         let app = by_axum::into_api_adapter(app);
+
         let app = Box::new(app);
         rest_api::set_api_service(app.clone());
         rest_api::add_authorization(&format!("Bearer {}", admin_token));
+        let now = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos() as u64;
 
         Ok(TestContext {
             pool,
