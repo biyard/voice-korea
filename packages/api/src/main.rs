@@ -1,9 +1,8 @@
 use by_axum::auth::{authorization_middleware, set_auth_config};
 use by_types::DatabaseConfig;
 use controllers::{
-    institutions::m1::InstitutionControllerM1, public_opinions::v2::OpinionControllerV2,
-    resources::v1::bucket::MetadataControllerV1, reviews::v1::ReviewControllerV1,
-    v2::Version2Controller,
+    institutions::m1::InstitutionControllerM1, resources::v1::bucket::MetadataControllerV1,
+    reviews::v1::ReviewControllerV1, v2::Version2Controller,
 };
 use models::{
     response::SurveyResponse,
@@ -46,10 +45,6 @@ mod controllers {
 
     pub mod reviews {
         pub mod v1;
-    }
-
-    pub mod public_opinions {
-        pub mod v2;
     }
 
     pub mod institutions {
@@ -161,10 +156,6 @@ async fn main() -> Result<()> {
         .nest(
             "/reviews/v1",
             ReviewControllerV1::route(pool.clone())?, //FIXME: fix to authorize
-        )
-        .nest(
-            "/opinions/v2",
-            OpinionControllerV2::route(pool.clone())?, //FIXME: fix to authorize
         );
 
     // .nest(

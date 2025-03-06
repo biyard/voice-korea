@@ -12,6 +12,7 @@ dioxus-translate.workspace = true
 dioxus-aws.workspace = true
 by-types.workspace = true
 rest-api.workspace = true
+btracing.workspace = true
 
 models.workspace = true
 dioxus-logger.workspace = true
