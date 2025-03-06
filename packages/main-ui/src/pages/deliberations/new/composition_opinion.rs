@@ -93,28 +93,11 @@ pub fn CompositionOpinion(props: CompositionOpinionProps) -> Element {
                 div {
                     class: "cursor-pointer flex flex-row w-[110px] h-[55px] rounded-[4px] justify-center items-center bg-[#2a60d3] font-semibold text-[16px] text-white",
                     onclick: {
-                        let sequences = opinion_sequences.clone();
                         move |_| {
-                            let mut check = true;
-                            for sequence in sequences.clone() {
-                                if sequence.start_date.is_none() || sequence.end_date.is_none() {
-                                    check = false;
-                                    tracing::error!("start date or end date field is empty");
-                                    break;
-                                }
-                                if let (Some(start), Some(end)) = (
-                                    sequence.start_date,
-                                    sequence.end_date,
-                                ) {
-                                    if start >= end {
-                                        check = false;
-                                        tracing::error!("start date must be befor end date");
-                                        break;
-                                    }
-                                }
-                            }
-                            if check {
+                            if ctrl.check_opinion_info() {
                                 ctrl.change_step(CurrentStep::InputInformation);
+                            } else {
+                                tracing::error!("opinion info is empty");
                             }
                         }
                     },
@@ -223,7 +206,9 @@ pub fn PeriodOpinionProcedure(
                                 move |timestamp: i64| {
                                     let mut value = sequence.clone();
                                     value.start_date = Some(timestamp as u64);
+                                    tracing::debug!("{:?}", value);
                                     spawn(async move {
+                                        tracing::debug!("{:?}", value);
                                         ctrl.update_opinion_info(clicked_index(), value);
                                     });
                                 }

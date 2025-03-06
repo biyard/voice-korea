@@ -1,7 +1,6 @@
 mod attribute;
 mod auth;
 pub mod error;
-mod field;
 mod group;
 mod metadata;
 mod organization;
@@ -29,7 +28,6 @@ pub mod prelude {
     pub use crate::auth::*;
     pub use crate::deliberation::*;
     pub use crate::error::*;
-    pub use crate::field::*;
     pub use crate::group::*;
     pub use crate::metadata::*;
     pub use crate::organization::*;

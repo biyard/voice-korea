@@ -5,7 +5,7 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
 use models::{
-    AccessLevel, File, ProjectArea, QueryResponse, ResourceCreateRequest, ResourceGetResponse,
+    AccessLevel, File, ProjectField, QueryResponse, ResourceCreateRequest, ResourceGetResponse,
     ResourceQuery, ResourceSummary, ResourceType, ResourceUpdateRequest, Source, UsagePurpose,
 };
 
@@ -27,7 +27,7 @@ use super::i18n::ResourceTranslate;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UpdateResource {
     ResourceType(Option<ResourceType>),
-    ProjectArea(Option<ProjectArea>),
+    ProjectField(Option<ProjectField>),
     UsagePurpose(Option<UsagePurpose>),
     Source(Option<Source>),
     AccessLevel(Option<AccessLevel>),
@@ -42,7 +42,7 @@ pub enum SortOrder {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum OrderBy {
     ResourceType,
-    ProjectArea,
+    ProjectField,
     UsagePurpose,
     Source,
     AccessLevel,
@@ -188,7 +188,7 @@ impl Controller {
 
         match field {
             UpdateResource::ResourceType(v) => resource.resource_type = v,
-            UpdateResource::ProjectArea(v) => resource.project_area = v,
+            UpdateResource::ProjectField(v) => resource.project_area = v,
             UpdateResource::UsagePurpose(v) => resource.usage_purpose = v,
             UpdateResource::Source(v) => resource.source = v,
             UpdateResource::AccessLevel(v) => resource.access_level = v,
@@ -231,7 +231,7 @@ impl Controller {
         &mut self,
         title: String,
         resource_type: Option<ResourceType>,
-        project_area: Option<ProjectArea>,
+        project_area: Option<ProjectField>,
         usage_purpose: Option<UsagePurpose>,
         source: Option<Source>,
         access_level: Option<AccessLevel>,

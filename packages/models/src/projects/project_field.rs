@@ -5,7 +5,7 @@ use dioxus_translate::Translate;
 
 #[derive(Debug, Clone, Eq, PartialEq, Default, ApiModel, Translate, Copy)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
-pub enum ProjectArea {
+pub enum ProjectField {
     #[default]
     #[translate(ko = "경제")]
     Economy = 1,
@@ -29,19 +29,19 @@ pub enum ProjectArea {
     Politics = 10,
 }
 
-impl ProjectArea {
-    pub fn all() -> Vec<ProjectArea> {
+impl ProjectField {
+    pub fn all() -> Vec<ProjectField> {
         vec![
-            ProjectArea::Economy,
-            ProjectArea::Society,
-            ProjectArea::Environment,
-            ProjectArea::Education,
-            ProjectArea::Culture,
-            ProjectArea::Labor,
-            ProjectArea::City,
-            ProjectArea::Technology,
-            ProjectArea::Health,
-            ProjectArea::Politics,
+            ProjectField::Economy,
+            ProjectField::Society,
+            ProjectField::Environment,
+            ProjectField::Education,
+            ProjectField::Culture,
+            ProjectField::Labor,
+            ProjectField::City,
+            ProjectField::Technology,
+            ProjectField::Health,
+            ProjectField::Politics,
         ]
     }
 }

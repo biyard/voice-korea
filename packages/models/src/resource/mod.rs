@@ -1,8 +1,8 @@
 #![allow(unused)]
 
+use crate::ProjectField;
 #[allow(unused)]
 use crate::Result;
-use crate::{Field, ProjectArea};
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::{api_model, ApiModel};
@@ -45,7 +45,7 @@ pub struct Resource {
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]
     pub resource_type: Option<ResourceType>,
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]
-    pub project_area: Option<ProjectArea>,
+    pub project_area: Option<ProjectField>,
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]
     pub usage_purpose: Option<UsagePurpose>,
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]

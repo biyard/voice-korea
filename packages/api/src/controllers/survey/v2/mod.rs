@@ -410,7 +410,7 @@ pub mod tests {
             .create(
                 org_id,
                 "test".to_string(),
-                ProjectArea::City,
+                ProjectField::City,
                 now,
                 now + 3600,
                 "test description".to_string(),

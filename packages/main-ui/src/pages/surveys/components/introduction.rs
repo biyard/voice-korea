@@ -3,7 +3,7 @@ use std::str::FromStr;
 use chrono::{Local, TimeZone};
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::ProjectArea;
+use models::ProjectField;
 
 use crate::{
     components::{calendar::Calendar, icons::CalendarIcon},
@@ -13,13 +13,13 @@ use crate::{
 #[component]
 pub fn InputIntroduction(
     lang: Language,
-    onchange_area: EventHandler<ProjectArea>,
+    onchange_area: EventHandler<ProjectField>,
     onchange_title: EventHandler<String>,
     onchange_start_date: EventHandler<i64>,
     onchange_end_date: EventHandler<i64>,
     onchange_description: EventHandler<String>,
 
-    #[props(default = None)] area: Option<ProjectArea>,
+    #[props(default = None)] area: Option<ProjectField>,
     #[props(default = Local::now().timestamp())] sd: i64,
     #[props(default = Local::now().timestamp())] ed: i64,
     #[props(default = "".to_string())] ti: String,
@@ -70,7 +70,7 @@ pub fn InputIntroduction(
                             None => "".to_string(),
                         },
                         onchange: move |e: Event<FormData>| {
-                            let v = match ProjectArea::from_str(e.value().as_str()) {
+                            let v = match ProjectField::from_str(e.value().as_str()) {
                                 Ok(v) => v,
                                 Err(_) => return,
                             };
@@ -83,7 +83,7 @@ pub fn InputIntroduction(
                             selected: select_field() == None,
                             "{translate.select_field}"
                         }
-                        for field in ProjectArea::all() {
+                        for field in ProjectField::all() {
                             option {
                                 value: format!("{}", field).as_str(),
                                 selected: Some(field) == select_field(),

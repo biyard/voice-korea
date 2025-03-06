@@ -1,7 +1,7 @@
 pub mod profile;
 pub mod v2;
 
-use crate::{field::Field, group::MemberInfo, ProjectStatus};
+use crate::{group::MemberInfo, projects::ProjectField, ProjectStatus};
 #[cfg(feature = "server")]
 use by_axum::aide;
 #[cfg(feature = "server")]
@@ -52,7 +52,7 @@ pub enum OpinionActionRequest {
 pub enum OpinionByIdActionRequest {
     Delete,
     Update(UpdateOpinionRequest),
-    UpdateProjectType(Field),
+    UpdateProjectType(ProjectField),
     UpdatePanels(Vec<PanelInfo>),
     UpdateStatus(ProjectStatus),
 }
@@ -154,7 +154,7 @@ pub enum AllocationMethod {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct OpinionInformation {
-    pub opinion_type: Option<Field>,
+    pub opinion_type: Option<ProjectField>,
     pub title: Option<String>,
     pub description: Option<String>,
     pub documents: Vec<Document>,
@@ -213,7 +213,7 @@ pub enum OpinionDraftStatus {
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct OpinionResponse {
     pub project_id: String,
-    pub opinion_type: Field,
+    pub opinion_type: ProjectField,
     pub project_name: String,
     pub total_response_count: u64,
     pub response_count: u64,

@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::{AccessLevel, File, FileExtension, ProjectArea, ResourceType, Source, UsagePurpose};
+use models::{AccessLevel, File, FileExtension, ProjectField, ResourceType, Source, UsagePurpose};
 
 use crate::{
     components::icons::{self, CloseWithBackGround, Docs, Jpg, Pdf, Png, Pptx, Xlsx, Zip},
@@ -16,7 +16,7 @@ pub fn CreateResourceModal(
     onupload: EventHandler<(
         String,
         Option<ResourceType>,
-        Option<ProjectArea>,
+        Option<ProjectField>,
         Option<UsagePurpose>,
         Option<Source>,
         Option<AccessLevel>,
@@ -48,7 +48,7 @@ pub fn CreateResourceModal(
         .collect::<Vec<_>>();
     resource_type_options.insert(0, no_selection_text.to_string());
 
-    let mut project_area_options = ProjectArea::VARIANTS
+    let mut project_area_options = ProjectField::VARIANTS
         .iter()
         .map(|v| v.translate(&lang).to_string())
         .collect::<Vec<_>>();
@@ -174,7 +174,7 @@ pub fn CreateResourceModal(
                         class: "flex flex-row h-[40px] justify-center items-center px-[14px] py-[8px] bg-[#2a60d3] rounded-[4px] gap-[5px]",
                         onclick: move |_| {
                             let resource_type = ResourceType::from_str(&selected_type()).ok();
-                            let project_area = ProjectArea::from_str(&selected_project_area()).ok();
+                            let project_area = ProjectField::from_str(&selected_project_area()).ok();
                             let purpose = UsagePurpose::from_str(&selected_purpose()).ok();
                             let source = Source::from_str(&selected_source()).ok();
                             let access_level = AccessLevel::from_str(&selected_access_level()).ok();

@@ -1,11 +1,9 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::prelude::{
-    AttributeItemInfo, AttributeResponse, Field, OpinionInfo, OpinionInformation, PublicOpinionType,
-};
+use models::*;
 
-use crate::service::popup_service::PopupService;
+use crate::service::{login_service::LoginService, popup_service::PopupService};
 
 use super::{
     composition_panel::{AddAttributeModal, CreateNewPanelModal},
@@ -213,6 +211,24 @@ impl Controller {
         self.public_opinion_sequences.set(sequences);
     }
 
+    pub fn check_opinion_info(&self) -> bool {
+        let sequences = &self.get_public_opinion_sequences();
+
+        for sequence in sequences {
+            if sequence.start_date.is_none() || sequence.end_date.is_none() {
+                return false;
+            }
+
+            if let (Some(start), Some(end)) = (sequence.start_date, sequence.end_date) {
+                if start >= end {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
     pub fn update_opinion_type_from_str(&self, opinion_type: String) -> Option<PublicOpinionType> {
         if opinion_type == "일반 게시글" {
             Some(PublicOpinionType::General)
@@ -284,13 +300,16 @@ impl Controller {
     pub fn opinion_field_type_translate(
         &self,
         lang: Language,
-        opinion_type: Field,
+        opinion_type: ProjectField,
     ) -> &'static str {
         opinion_type.translate(&lang)
     }
 
-    pub fn update_opinion_field_type_from_str(&self, opinion_field_type: String) -> Option<Field> {
-        let field = opinion_field_type.parse::<Field>();
+    pub fn update_opinion_field_type_from_str(
+        &self,
+        opinion_field_type: String,
+    ) -> Option<ProjectField> {
+        let field = opinion_field_type.parse::<ProjectField>();
 
         match field {
             Ok(v) => Some(v),
@@ -368,5 +387,71 @@ impl Controller {
             })
             .with_id("send_alert")
             .with_title(translates.send_alerm);
+    }
+
+    pub fn get_period(&self) -> (u64, u64) {
+        let sequences = self.get_public_opinion_sequences();
+        let mut start = sequences[0].start_date.unwrap_or(0);
+        let mut end = sequences[sequences.len() - 1].end_date.unwrap_or(0);
+        for sequence in sequences.iter() {
+            if let Some(start_date) = sequence.start_date {
+                if start_date < start {
+                    start = start_date;
+                }
+            }
+
+            if let Some(end_date) = sequence.end_date {
+                if end_date > end {
+                    end = end_date;
+                }
+            }
+        }
+
+        (start, end)
+    }
+
+    pub async fn create_deliberation(&self) -> Result<()> {
+        let user: LoginService = use_context();
+        let org = user.get_selected_org();
+        if org.is_none() {
+            return Err(models::ApiError::OrganizationNotFound);
+        }
+        let org_id = org.unwrap().id;
+        let opinion_informations = self.get_opinion_informations();
+        let public_opinion_sequences = self.get_public_opinion_sequences();
+        let total_attributes = self.get_total_attributes();
+        let total_fields = self.get_total_fields();
+
+        tracing::debug!("opinion_informations: {:?}", opinion_informations);
+        tracing::debug!("public_opinion_sequences: {:?}", public_opinion_sequences);
+        tracing::debug!("total_attributes: {:?}", total_attributes);
+        tracing::debug!("total_fields: {:?}", total_fields);
+
+        let client = Deliberation::get_client(&crate::config::get().api_url);
+
+        let (started_at, ended_at) = self.get_period();
+
+        match client
+            .create(
+                org_id,
+                started_at as i64,
+                ended_at as i64,
+                vec![], // TODO: public_opinion_sequences,
+                opinion_informations.opinion_type.unwrap_or_default(),
+                opinion_informations.title.unwrap_or_default(),
+                opinion_informations.description.unwrap_or_default(),
+                vec![], // TODO:
+                vec![], // TODO:
+                vec![], // TODO:
+                vec![], // TODO:
+            )
+            .await
+        {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                tracing::error!("Create Failed Reason: {:?}", e);
+                Err(models::ApiError::ReqwestFailed(e.to_string()))
+            }
+        }
     }
 }

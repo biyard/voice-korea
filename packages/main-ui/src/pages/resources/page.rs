@@ -6,7 +6,7 @@ use dioxus::prelude::*;
 use crate::components::icons::Search;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::{AccessLevel, ProjectArea, ResourceSummary, ResourceType, Source, UsagePurpose};
+use models::{AccessLevel, ProjectField, ResourceSummary, ResourceType, Source, UsagePurpose};
 
 use crate::{
     components::{
@@ -63,7 +63,7 @@ pub fn TableRow(
         Some(v) => v.translate(&lang),
         None => no_selection_text,
     };
-    let mut project_area_options = ProjectArea::VARIANTS
+    let mut project_area_options = ProjectField::VARIANTS
         .iter()
         .map(|v| v.translate(&lang).to_string())
         .collect::<Vec<_>>();
@@ -127,8 +127,8 @@ pub fn TableRow(
                 default_value: project_area,
                 options: project_area_options,
                 onchange: move |v: String| {
-                    let project_area = ProjectArea::from_str(&v).ok();
-                    onupdate.call(UpdateResource::ProjectArea(project_area));
+                    let project_area = ProjectField::from_str(&v).ok();
+                    onupdate.call(UpdateResource::ProjectField(project_area));
                 },
             }
             EditableTableBodyCell {
@@ -414,9 +414,9 @@ pub fn ResourcePage(props: ResourceProps) -> Element {
                         TableHeaderCell {
                             class: "min-w-[120px] w-[120px]",
                             value: translate.field,
-                            order: ctrl.is_sorted_by(OrderBy::ProjectArea),
+                            order: ctrl.is_sorted_by(OrderBy::ProjectField),
                             onclick: move |v| {
-                                ctrl.handle_sorting_order(OrderBy::ProjectArea);
+                                ctrl.handle_sorting_order(OrderBy::ProjectField);
                             },
                         }
                         TableHeaderCell {

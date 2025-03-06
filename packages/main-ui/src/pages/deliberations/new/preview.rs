@@ -68,7 +68,11 @@ pub fn SendAlertModal(onclose: EventHandler<MouseEvent>, lang: Language) -> Elem
                 "총 50명 선택 / 패널 4개 선택"
             }
             div { class: "flex flex-row w-full justify-center items-center gap-[20px]",
-                div { class: "flex flex-row w-[75px] h-[40px] justify-center items-center bg-[#2a60d3] rounded-[4px] font-semibold text-[16px] text-white",
+                div {
+                    class: "flex flex-row w-[75px] h-[40px] justify-center items-center bg-[#2a60d3] rounded-[4px] font-semibold text-[16px] text-white",
+                    onclick: move |e: MouseEvent| {
+                        onclose.call(e);
+                    },
                     "{translate.send}"
                 }
                 button {
