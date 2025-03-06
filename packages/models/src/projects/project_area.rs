@@ -5,7 +5,6 @@ use dioxus_translate::Translate;
 
 #[derive(Debug, Clone, Eq, PartialEq, Default, ApiModel, Translate, Copy)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
-#[serde(rename_all = "snake_case")]
 pub enum ProjectArea {
     #[default]
     #[translate(ko = "경제")]

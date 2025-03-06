@@ -33,7 +33,7 @@ impl DeliberationController {
         DeliberationCreateRequest {
             started_at,
             ended_at,
-            // steps,
+            steps,
             project_area,
             title,
             description,
@@ -61,6 +61,8 @@ impl DeliberationController {
                 description,
             )
             .await?;
+
+        // TODO: Add steps
 
         Ok(deliberation)
     }
