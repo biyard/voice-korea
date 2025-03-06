@@ -117,9 +117,7 @@ impl DeliberationController {
 
     pub async fn act_deliberation(
         State(ctrl): State<DeliberationController>,
-        // Path(OrganizationPath { org_id }): Path<OrganizationPath>,
-        // FIXME: missing field `org_id` error
-        Path(org_id): Path<i64>,
+        Path(OrganizationPath { org_id }): Path<OrganizationPath>,
         Extension(_auth): Extension<Option<Authorization>>,
         Json(body): Json<DeliberationAction>,
     ) -> Result<Json<Deliberation>> {
@@ -143,9 +141,7 @@ impl DeliberationController {
     pub async fn get_deliberation_by_id(
         State(ctrl): State<DeliberationController>,
         Extension(_auth): Extension<Option<Authorization>>,
-        // Path(DeliberationPath { org_id, id }): Path<DeliberationPath>,
-        // fixme: missing field `org_id` error
-        Path((org_id, id)): Path<(i64, i64)>,
+        Path(DeliberationPath { org_id, id }): Path<DeliberationPath>,
     ) -> Result<Json<Deliberation>> {
         tracing::debug!("get_deliberation {} {:?}", org_id, id);
         // FIXME: {"DatabaseQueryError": "error returned from database: relation \"f\" does not exist"
@@ -162,9 +158,7 @@ impl DeliberationController {
 
     pub async fn get_deliberation(
         State(ctrl): State<DeliberationController>,
-        // Path(OrganizationPath { org_id }): Path<OrganizationPath>,
-        // FIXME: missing field `org_id` error
-        Path(org_id): Path<i64>,
+        Path(OrganizationPath { org_id }): Path<OrganizationPath>,
         Extension(_auth): Extension<Option<Authorization>>,
         Query(param): Query<DeliberationParam>,
     ) -> Result<Json<DeliberationGetResponse>> {

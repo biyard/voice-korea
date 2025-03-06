@@ -1534,8 +1534,7 @@ source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baec
 [[package]]
 name = "dioxus-core"
 version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c03f451a119e47433c16e2d8eb5b15bf7d6e6734eb1a4c47574e6711dadff8d"
+source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
 dependencies = [
  "const_format",
  "dioxus-core-types",
@@ -1555,8 +1554,7 @@ dependencies = [
 [[package]]
 name = "dioxus-core-macro"
 version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "105c954caaaedf8cd10f3d1ba576b01e18aa8d33ad435182125eefe488cf0064"
+source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
 dependencies = [
  "convert_case 0.6.0",
  "dioxus-rsx",
@@ -1600,8 +1598,7 @@ dependencies = [
 [[package]]
 name = "dioxus-document"
 version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "802a2014d1662b6615eec0a275745822ee4fc66aacd9d0f2fb33d6c8da79b8f2"
+source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
 dependencies = [
  "dioxus-core",
  "dioxus-core-macro",
@@ -1685,8 +1682,7 @@ dependencies = [
 [[package]]
 name = "dioxus-html"
 version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59c9a40e6fee20ce7990095492dedb6a753eebe05e67d28271a249de74dc796d"
+source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
 dependencies = [
  "async-trait",
  "dioxus-core",
@@ -1786,10 +1782,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "dioxus-router"
+name = "dioxus-logger"
 version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7266a76fc9e4a91f56499d1d1aecfff7168952b6627a6008b4e9748d6bf863e4"
+source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
 dependencies = [
  "console_error_panic_hook",
  "dioxus-cli-config 0.6.3 (git+https://github.com/hackartists/dioxus.git)",
@@ -1832,8 +1827,7 @@ dependencies = [
 [[package]]
 name = "dioxus-router-macro"
 version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2743ffb79e9a7d33d779c87d6deea2a6c047d0736012f95d63b909b83f0a6fd2"
+source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
 dependencies = [
  "base16",
  "digest",
@@ -1858,8 +1852,7 @@ dependencies = [
 [[package]]
 name = "dioxus-signals"
 version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10e032dbb3a2c0386ec8b8ee59bc20b5aeb67038147c855801237b45b13d72ac"
+source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
 dependencies = [
  "dioxus-core",
  "futures-channel",
@@ -1912,8 +1905,7 @@ version = "0.1.1"
 [[package]]
 name = "dioxus-web"
 version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e7c12475c3d360058b8afe1b68eb6dfc9cbb7dcd760aed37c5f85c561c83ed1"
+source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
 dependencies = [
  "async-trait",
  "ciborium",

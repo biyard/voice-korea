@@ -27,28 +27,28 @@ impl OrganizationControllerV2 {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
             .nest(
-                "/:org-id/deliberations",
+                "/:org_id/deliberations",
                 crate::controllers::deliberations::v2::DeliberationController::new(pool.clone())
                     .route()?,
             )
             .nest(
-                "/:org-id/surveys",
+                "/:org_id/surveys",
                 crate::controllers::survey::v2::SurveyControllerV2::route(pool.clone())?,
             )
             .nest(
-                "/:org-id/panels",
+                "/:org_id/panels",
                 crate::controllers::panels::v2::PanelControllerV2::route(pool.clone())?,
             )
             .nest(
-                "/:org-id/resources",
+                "/:org_id/resources",
                 crate::controllers::resources::v1::ResourceControllerV1::route(pool.clone())?,
             )
             .nest(
-                "/:org-id/members",
+                "/:org_id/members",
                 crate::controllers::members::v2::MemberControllerV2::route(pool.clone())?,
             )
             .nest(
-                "/:org-id/groups",
+                "/:org_id/groups",
                 crate::controllers::groups::v2::GroupControllerV2::route(pool.clone())?,
             )
             .layer(middleware::from_fn(authorize_organization)))
