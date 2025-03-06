@@ -156,7 +156,7 @@ jobs:
         with:
           key: api-cache-builder
           path: |
-            target
+            packages/api/target
 
       - name: Deploy APIs
         env:
