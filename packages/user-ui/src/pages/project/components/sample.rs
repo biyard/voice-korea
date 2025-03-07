@@ -2,6 +2,7 @@ use crate::{
     components::icons::{
         left_arrow::LeftArrow,
         person::Person,
+        right_arrow::RightArrow,
         triangle::{TriangleDown, TriangleUp},
     },
     pages::project::{
@@ -253,9 +254,10 @@ pub fn SurveyInfo(
             }
 
             div {
-                class: "flex flex-col w-full gap-[20px]",
+                class: "flex flex-col w-full gap-[10px]",
                 display: if check_edit { "flex" } else { "none" },
-                div { "Hello" }
+                SampleLinkComponent { title: "내가 작성한 답변", onclick: move |_| {} }
+                SampleLinkComponent { title: "질문별 응답", onclick: move |_| {} }
             }
 
             div {
@@ -324,6 +326,25 @@ pub fn SurveyInfo(
             div {
                 class: "flex flex-col w-full gap-[10px]",
                 display: if check_edit { "flex" } else { "none" },
+            }
+        }
+    }
+}
+
+#[component]
+pub fn SampleLinkComponent(title: String, onclick: EventHandler<MouseEvent>) -> Element {
+    rsx! {
+        div { class: "flex flex-row w-full justify-between items-center px-[20px] py-[9px] bg-white rounded-[8px]",
+            div { class: "font-bold text-[16px] text-[#222222]", "{title}" }
+            div { class: "flex flex-row justify-start items-center gap-[5px]",
+                div {
+                    class: "cursor-pointer font-semibold text-[#2A60D3] text-[14px] underline",
+                    onclick: move |e: Event<MouseData>| {
+                        onclick.call(e);
+                    },
+                    "자세히 보기"
+                }
+                RightArrow { color: "#555462" }
             }
         }
     }
