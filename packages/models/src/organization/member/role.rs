@@ -20,16 +20,3 @@ pub enum Role {
     #[default]
     None = 5,
 }
-
-// impl std::fmt::Display for Role {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         match self {
-//             Role::Admin => write!(f, "admin"),
-//             Role::DeliberationAdmin => write!(f, "public_admin"),
-//             Role::Analyst => write!(f, "analyst"),
-//             Role::Moderator => write!(f, "mediator"),
-//             Role::Speaker => write!(f, "speaker"),
-//             Role::None => write!(f, "none"),
-//         }
-//     }
-// }
