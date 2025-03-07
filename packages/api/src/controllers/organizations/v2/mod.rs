@@ -21,9 +21,9 @@ pub struct OrganizationPath {
 }
 
 #[derive(Clone, Debug)]
-pub struct OrganizationControllerV2 {}
+pub struct OrganizationController {}
 
-impl OrganizationControllerV2 {
+impl OrganizationController {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
             .nest(
@@ -44,12 +44,17 @@ impl OrganizationControllerV2 {
                 crate::controllers::resources::v1::ResourceControllerV1::route(pool.clone())?,
             )
             .nest(
-                "/:org_id/members",
-                crate::controllers::members::v2::MemberControllerV2::route(pool.clone())?,
+                "/:org-id/members",
+                crate::controllers::v2::organizations::_id::members::OrganizationMemberController::new(pool.clone())
+                    .route(),
             )
             .nest(
                 "/:org_id/groups",
                 crate::controllers::groups::v2::GroupControllerV2::route(pool.clone())?,
+            )
+            .nest(
+                "/:org-id/invitations",
+                crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
             )
             .layer(middleware::from_fn(authorize_organization)))
     }

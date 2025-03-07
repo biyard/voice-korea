@@ -1,3 +1,4 @@
+pub mod custom_checkbox;
 pub mod footer;
 pub mod header;
 pub mod icons;

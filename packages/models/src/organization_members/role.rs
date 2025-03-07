@@ -6,17 +6,16 @@ use dioxus_translate::Translate;
 #[derive(Debug, Clone, PartialEq, Eq, ApiModel, Default, Translate)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 pub enum Role {
-    #[translate(ko = "관리자", en = "Admin")]
+    #[translate(ko = "관리자", en = "admin")]
     Admin = 0,
-    #[translate(ko = "공론관리자", en = "Deliberation Admin")]
+    #[translate(ko = "공론 관리자", en = "public_admin")]
     DeliberationAdmin = 1,
-    #[translate(ko = "분석가", en = "Analyst")]
+    #[translate(ko = "분석가", en = "analyst")]
     Analyst = 2,
-    #[translate(ko = "중계자", en = "Moderator")]
+    #[translate(ko = "중재자", en = "mediator")]
     Moderator = 3,
-    #[translate(ko = "강연자", en = "Speaker")]
+    #[translate(ko = "발언자", en = "speaker")]
     Speaker = 4,
-    #[translate(ko = "없음", en = "None")]
     #[default]
     None = 5,
 }

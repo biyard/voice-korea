@@ -35,3 +35,18 @@ pub fn formatted_timestamp(timestamp: i64) -> String {
 
     datetime.format("%-m월 %-d일 %Y년").to_string()
 }
+
+pub fn formatted_timestamp_to_sec(timestamp: i64) -> String {
+    let datetime = Utc
+        .timestamp_opt(timestamp, 0)
+        .single()
+        .map(|datetime| datetime.format("%Y년 %m월 %d일 %H:%M").to_string());
+
+    datetime.unwrap_or_default()
+}
+
+pub fn current_timestamp() -> i64 {
+    let now = Utc::now();
+    let timestamp_millis = now.timestamp();
+    timestamp_millis
+}

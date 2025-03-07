@@ -10,7 +10,7 @@ use crate::{
         right_arrow::RightArrow,
         triangle::{TriangleDown, TriangleUp},
     },
-    pages::project::controller,
+    pages::project::{components::sample::Sample, controller},
 };
 
 #[component]
@@ -21,7 +21,7 @@ pub fn ProjectPage(lang: Language, project_id: i64) -> Element {
     rsx! {
         div {
             ProjectProfile { lang }
-            ProjectDetailsMenu {}
+            ProjectDetailsMenu { lang }
         }
     }
 }
@@ -109,13 +109,12 @@ pub fn ProjectProfile(lang: Language) -> Element {
             div { class: "flex justify-center items-center",
                 img { class: "w-[540px] h-[300px] rounded-[12px]" }
             }
-        
         }
     }
 }
 
 #[component]
-pub fn ProjectDetailsMenu() -> Element {
+pub fn ProjectDetailsMenu(lang: Language) -> Element {
     let mut active_tab = use_signal(|| "기본정보".to_string());
     let mut set_active_tab = move |value: &str| active_tab.set(value.to_string());
     let active_tab_value = active_tab.read();
@@ -145,7 +144,7 @@ pub fn ProjectDetailsMenu() -> Element {
             div { class: "w-full h-[1px] bg-[#eee]" }
 
             // Tap contents
-            div { class: "w-full p-4",
+            div { class: "w-full px-4 pt-[28px] pb-[40px]",
                 match active_tab_value.as_str() {
                     "기본정보" => rsx! {
                         div { class: "w-full h-[32px] mb-[20px] flex flex-row justify-between items-center",
@@ -208,7 +207,6 @@ pub fn ProjectDetailsMenu() -> Element {
                                     }
                                 }
                             }
-                        
                             //public opinion committee
                             // TODO: when this section open, other section have to closed
                             div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
@@ -238,7 +236,6 @@ pub fn ProjectDetailsMenu() -> Element {
                                     }
                                 }
                             }
-                        
                             //Related Data
                             div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
                                 // title and button
@@ -257,7 +254,7 @@ pub fn ProjectDetailsMenu() -> Element {
                         }
                     },
                     "표본 조사" => rsx! {
-                        div { "여기에 표본 조사 페이지 내용을 넣으세요." }
+                        Sample { lang }
                     },
                     "숙의" => rsx! {
                         div { "여기에 숙의 페이지 내용을 넣으세요." }
