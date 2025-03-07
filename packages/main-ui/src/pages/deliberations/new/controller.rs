@@ -297,19 +297,11 @@ impl Controller {
         (self.opinion_informations)()
     }
 
-    pub fn opinion_field_type_translate(
-        &self,
-        lang: Language,
-        opinion_type: ProjectField,
-    ) -> &'static str {
-        opinion_type.translate(&lang)
-    }
-
     pub fn update_opinion_field_type_from_str(
         &self,
         opinion_field_type: String,
-    ) -> Option<ProjectField> {
-        let field = opinion_field_type.parse::<ProjectField>();
+    ) -> Option<ProjectArea> {
+        let field = opinion_field_type.parse::<ProjectArea>();
 
         match field {
             Ok(v) => Some(v),
@@ -391,6 +383,9 @@ impl Controller {
 
     pub fn get_period(&self) -> (u64, u64) {
         let sequences = self.get_public_opinion_sequences();
+        if sequences.is_empty() {
+            return (0, 0);
+        }
         let mut start = sequences[0].start_date.unwrap_or(0);
         let mut end = sequences[sequences.len() - 1].end_date.unwrap_or(0);
         for sequence in sequences.iter() {

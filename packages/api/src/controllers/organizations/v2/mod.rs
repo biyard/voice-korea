@@ -16,6 +16,7 @@ use sqlx::postgres::PgPoolOptions;
 #[derive(
     Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
 )]
+#[serde(rename_all = "kebab-case")]
 pub struct OrganizationPath {
     pub org_id: i64,
 }
@@ -27,20 +28,20 @@ impl OrganizationController {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
             .nest(
-                "/:org_id/deliberations",
+                "/:org-id/deliberations",
                 crate::controllers::deliberations::v2::DeliberationController::new(pool.clone())
                     .route()?,
             )
             .nest(
-                "/:org_id/surveys",
+                "/:org-id/surveys",
                 crate::controllers::survey::v2::SurveyControllerV2::route(pool.clone())?,
             )
             .nest(
-                "/:org_id/panels",
+                "/:org-id/panels",
                 crate::controllers::panels::v2::PanelControllerV2::route(pool.clone())?,
             )
             .nest(
-                "/:org_id/resources",
+                "/:org-id/resources",
                 crate::controllers::resources::v1::ResourceControllerV1::route(pool.clone())?,
             )
             .nest(
@@ -49,7 +50,7 @@ impl OrganizationController {
                     .route(),
             )
             .nest(
-                "/:org_id/groups",
+                "/:org-id/groups",
                 crate::controllers::groups::v2::GroupControllerV2::route(pool.clone())?,
             )
             .nest(

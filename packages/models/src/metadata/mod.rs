@@ -1,7 +1,7 @@
 #[cfg(feature = "server")]
 use by_axum::aide;
 // use by_macros::api_model;
-use crate::projects::ProjectField;
+use crate::projects::ProjectArea;
 use dioxus_translate::Language;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
@@ -34,7 +34,7 @@ pub struct CreateMetadataRequest {
     pub name: String,
     pub urls: Vec<String>,
     pub metadata_type: Option<MetadataType>,
-    pub metadata_field: Option<ProjectField>,
+    pub metadata_field: Option<ProjectArea>,
     pub metadata_purpose: Option<MetadataPurpose>,
     pub metadata_source: Option<MetadataSource>,
     pub metadata_authority: Option<MetadataAuthority>,
@@ -49,7 +49,7 @@ pub struct UpdateMetadataRequest {
     pub name: String,
     pub urls: Vec<String>,
     pub metadata_type: Option<MetadataType>,
-    pub metadata_field: Option<ProjectField>,
+    pub metadata_field: Option<ProjectArea>,
     pub metadata_purpose: Option<MetadataPurpose>,
     pub metadata_source: Option<MetadataSource>,
     pub metadata_authority: Option<MetadataAuthority>,
@@ -82,7 +82,7 @@ pub struct ResourceMetadata {
     pub name: String,
     pub urls: Vec<String>, // need to be divide table when postgre db implemented (resource url couldn't be name)
     pub metadata_type: Option<MetadataType>,
-    pub metadata_field: Option<ProjectField>,
+    pub metadata_field: Option<ProjectArea>,
     pub metadata_purpose: Option<MetadataPurpose>,
     pub metadata_source: Option<MetadataSource>,
     pub metadata_authority: Option<MetadataAuthority>,
@@ -102,7 +102,7 @@ impl ResourceMetadata {
         name: String,
         urls: Vec<String>,
         data_type: Option<MetadataType>,
-        field: Option<ProjectField>,
+        field: Option<ProjectArea>,
         purpose: Option<MetadataPurpose>,
         source: Option<MetadataSource>,
         authority: Option<MetadataAuthority>,

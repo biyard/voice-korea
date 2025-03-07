@@ -106,7 +106,7 @@ async fn test_survey_reponse() {
         .create(
             user.orgs[0].id,
             "name".to_string(),
-            ProjectField::City,
+            ProjectArea::City,
             now,
             now + 3600,
             "description".to_string(),

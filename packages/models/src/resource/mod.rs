@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use crate::ProjectField;
+use crate::ProjectArea;
 #[allow(unused)]
 use crate::Result;
 #[cfg(feature = "server")]
@@ -45,7 +45,7 @@ pub struct Resource {
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]
     pub resource_type: Option<ResourceType>,
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]
-    pub project_area: Option<ProjectField>,
+    pub project_area: Option<ProjectArea>,
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]
     pub usage_purpose: Option<UsagePurpose>,
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]

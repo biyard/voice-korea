@@ -12,7 +12,7 @@ use by_axum::aide;
 use by_macros::{api_model, ApiModel};
 use validator::Validate;
 
-use crate::{PanelV2, ProjectField, Resource, SurveyV2};
+use crate::{PanelV2, ProjectArea, Resource, SurveyV2};
 
 #[derive(Validate)]
 #[api_model(base = "/organizations/v2/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>)], table = deliberations)]
@@ -40,7 +40,7 @@ pub struct Deliberation {
 
     // Second page of creating a deliberation
     #[api_model(summary, type = INTEGER, action = create)]
-    pub project_area: ProjectField,
+    pub project_area: ProjectArea,
     #[api_model(action = create)]
     pub title: String,
     #[api_model(action = create)]

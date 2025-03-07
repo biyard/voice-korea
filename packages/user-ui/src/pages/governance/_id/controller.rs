@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use dioxus_translate::Language;
 use models::{
     v2::{InstitutionSummary, PublicOpinionProject, PublicOpinionProjectSummary},
-    ProjectField,
+    ProjectArea,
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -32,7 +32,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,
@@ -49,7 +49,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,
@@ -66,7 +66,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,
@@ -83,7 +83,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,
@@ -100,7 +100,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,
@@ -117,7 +117,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,
@@ -134,7 +134,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,
@@ -151,7 +151,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,
@@ -168,7 +168,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,
@@ -185,7 +185,7 @@ impl Controller {
                                 "The official server for the them. Welcome to our channel, Traveler! "
                                     .to_string(),
                             policy_making_institution: "정책 결정 기관".to_string(),
-                            project_area: Some(ProjectField::Health),
+                            project_area: Some(ProjectArea::Health),
                             org_id: 5,
                             num_of_participation: 9121,
                             num_of_vote: 1102,

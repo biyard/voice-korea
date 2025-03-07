@@ -7,7 +7,7 @@ use by_axum::aide;
 use by_macros::api_model;
 use by_types::QueryResponse;
 
-use crate::ProjectField;
+use crate::ProjectArea;
 
 //FIXME: fix to full public opinion model
 #[api_model(base = "/opinions/v2", table = opinions, iter_type=QueryResponse)]
@@ -26,7 +26,7 @@ pub struct PublicOpinionProject {
     #[api_model(summary, action = create, action_by_id = update)]
     pub policy_making_institution: String,
     #[api_model(summary, action = create, action_by_id = update, type = INTEGER, nullable)]
-    pub project_area: Option<ProjectField>,
+    pub project_area: Option<ProjectArea>,
     // FIXME: #[api_model(summary, many_to_one = organizations)]
     // FIXME: checking by org id
     #[api_model(summary, action = create, action_by_id = update)]

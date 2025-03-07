@@ -5,7 +5,7 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
 use models::{
-    AccessLevel, File, ProjectField, QueryResponse, ResourceCreateRequest, ResourceGetResponse,
+    AccessLevel, File, ProjectArea, QueryResponse, ResourceCreateRequest, ResourceGetResponse,
     ResourceQuery, ResourceSummary, ResourceType, ResourceUpdateRequest, Source, UsagePurpose,
 };
 
@@ -27,7 +27,7 @@ use super::i18n::ResourceTranslate;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UpdateResource {
     ResourceType(Option<ResourceType>),
-    ProjectField(Option<ProjectField>),
+    ProjectField(Option<ProjectArea>),
     UsagePurpose(Option<UsagePurpose>),
     Source(Option<Source>),
     AccessLevel(Option<AccessLevel>),
@@ -231,7 +231,7 @@ impl Controller {
         &mut self,
         title: String,
         resource_type: Option<ResourceType>,
-        project_area: Option<ProjectField>,
+        project_area: Option<ProjectArea>,
         usage_purpose: Option<UsagePurpose>,
         source: Option<Source>,
         access_level: Option<AccessLevel>,

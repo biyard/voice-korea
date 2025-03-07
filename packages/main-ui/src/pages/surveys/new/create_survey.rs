@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::{prelude::Question, ProjectField};
+use models::{prelude::Question, ProjectArea};
 
 use crate::pages::surveys::{
     components::{introduction::InputIntroduction, survey::QuestionListView},
@@ -14,7 +14,7 @@ pub struct CreateSurveyResponse {
     pub description: String,
     pub start_date: i64,
     pub end_date: i64,
-    pub area: ProjectField,
+    pub area: ProjectArea,
     pub questions: Vec<Question>,
 }
 
@@ -92,7 +92,7 @@ pub fn CreateSurvey(
                     area: area(),
                     onchange_area: {
                         let value = value.clone();
-                        move |field: ProjectField| {
+                        move |field: ProjectArea| {
                             area.set(field);
                             onchange
                                 .call(CreateSurveyResponse {

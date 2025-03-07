@@ -1,6 +1,6 @@
 #![allow(unused_variables, unused)]
 use crate::{
-    PanelCountSurveys, PanelCountsV2, PanelV2, ProjectField, ProjectStatus, ProjectType, Result,
+    PanelCountSurveys, PanelCountsV2, PanelV2, ProjectArea, ProjectStatus, ProjectType, Result,
 };
 #[cfg(feature = "server")]
 use by_axum::aide;
@@ -29,7 +29,7 @@ pub struct SurveyV2 {
     pub project_type: ProjectType,
 
     #[api_model(summary, action = create, type = INTEGER, action_by_id = update)]
-    pub project_area: ProjectField,
+    pub project_area: ProjectArea,
 
     #[api_model(summary, type = INTEGER, action_by_id = update)]
     pub status: ProjectStatus,

@@ -15,6 +15,7 @@ use models::*;
 #[derive(
     Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
 )]
+#[serde(rename_all = "kebab-case")]
 pub struct DeliberationPath {
     pub org_id: i64,
     pub id: i64,
@@ -73,7 +74,7 @@ impl DeliberationController {
         DeliberationQuery { size, bookmark }: DeliberationQuery,
     ) -> Result<QueryResponse<DeliberationSummary>> {
         let mut total_count: i64 = 0;
-        let query: Vec<DeliberationSummary> = Deliberation::query_builder()
+        let items: Vec<DeliberationSummary> = Deliberation::query_builder()
             .org_id_equals(org_id)
             .limit(size as i32)
             .page(bookmark.unwrap_or("1".to_string()).parse::<i32>().unwrap())
@@ -87,10 +88,7 @@ impl DeliberationController {
             .fetch_all(&self.pool)
             .await?;
 
-        Ok(QueryResponse {
-            total_count,
-            items: query,
-        })
+        Ok(QueryResponse { total_count, items })
     }
 }
 

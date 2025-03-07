@@ -6,7 +6,7 @@ use dioxus::prelude::*;
 use crate::components::icons::Search;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::{AccessLevel, ProjectField, ResourceSummary, ResourceType, Source, UsagePurpose};
+use models::{AccessLevel, ProjectArea, ResourceSummary, ResourceType, Source, UsagePurpose};
 
 use crate::{
     components::{
@@ -63,7 +63,7 @@ pub fn TableRow(
         Some(v) => v.translate(&lang),
         None => no_selection_text,
     };
-    let mut project_area_options = ProjectField::VARIANTS
+    let mut project_area_options = ProjectArea::VARIANTS
         .iter()
         .map(|v| v.translate(&lang).to_string())
         .collect::<Vec<_>>();
@@ -127,7 +127,7 @@ pub fn TableRow(
                 default_value: project_area,
                 options: project_area_options,
                 onchange: move |v: String| {
-                    let project_area = ProjectField::from_str(&v).ok();
+                    let project_area = ProjectArea::from_str(&v).ok();
                     onupdate.call(UpdateResource::ProjectField(project_area));
                 },
             }

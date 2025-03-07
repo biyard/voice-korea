@@ -2,7 +2,7 @@ use chrono::{TimeZone, Utc};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
-use models::prelude::{OpinionResponse, PanelInfo, ProjectField, ProjectStatus};
+use models::prelude::{OpinionResponse, PanelInfo, ProjectStatus};
 use serde::{Deserialize, Serialize};
 
 use crate::service::opinion_api::OpinionApi;
@@ -68,9 +68,7 @@ impl Controller {
                     for item in d.items {
                         items.push(Opinion {
                             project_id: item.project_id.clone(),
-                            opinion_type: ctrl
-                                .opinion_field_type_translate(lang.clone(), item.opinion_type)
-                                .to_string(),
+                            opinion_type: item.opinion_type.translate(&lang).to_string(),
                             project_name: item.project_name.clone(),
                             total_response_count: item.total_response_count,
                             response_count: item.response_count,
@@ -126,39 +124,6 @@ impl Controller {
                 ProjectStatus::Ready => "준비",
                 ProjectStatus::InProgress => "진행",
                 ProjectStatus::Finish => "마감",
-            },
-        }
-    }
-
-    pub fn opinion_field_type_translate(
-        &self,
-        lang: Language,
-        opinion_type: ProjectField,
-    ) -> &'static str {
-        match lang {
-            Language::En => match opinion_type {
-                ProjectField::Economy => "Economy",
-                ProjectField::Society => "Society",
-                ProjectField::Environment => "Environment",
-                ProjectField::Education => "Education",
-                ProjectField::Culture => "Culture",
-                ProjectField::Labor => "Labor",
-                ProjectField::City => "City",
-                ProjectField::Technology => "Technology",
-                ProjectField::Health => "Health",
-                ProjectField::Politics => "Politics",
-            },
-            Language::Ko => match opinion_type {
-                ProjectField::Economy => "경제",
-                ProjectField::Society => "사회",
-                ProjectField::Environment => "환경",
-                ProjectField::Education => "교육",
-                ProjectField::Culture => "문화",
-                ProjectField::Labor => "노동",
-                ProjectField::City => "도시",
-                ProjectField::Technology => "기술",
-                ProjectField::Health => "보건",
-                ProjectField::Politics => "정치",
             },
         }
     }
