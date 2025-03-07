@@ -128,7 +128,7 @@ pub fn TableRow(
                 options: project_area_options,
                 onchange: move |v: String| {
                     let project_area = ProjectArea::from_str(&v).ok();
-                    onupdate.call(UpdateResource::ProjectArea(project_area));
+                    onupdate.call(UpdateResource::ProjectField(project_area));
                 },
             }
             EditableTableBodyCell {
@@ -414,9 +414,9 @@ pub fn ResourcePage(props: ResourceProps) -> Element {
                         TableHeaderCell {
                             class: "min-w-[120px] w-[120px]",
                             value: translate.field,
-                            order: ctrl.is_sorted_by(OrderBy::ProjectArea),
+                            order: ctrl.is_sorted_by(OrderBy::ProjectField),
                             onclick: move |v| {
-                                ctrl.handle_sorting_order(OrderBy::ProjectArea);
+                                ctrl.handle_sorting_order(OrderBy::ProjectField);
                             },
                         }
                         TableHeaderCell {

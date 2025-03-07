@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::{field::Field, prelude::PanelInfo};
+use crate::{prelude::PanelInfo, projects::ProjectField};
 #[cfg(feature = "server")]
 use by_axum::aide;
 use dioxus_translate::Language;
@@ -44,7 +44,7 @@ pub enum SurveyByIdActionRequest {
 pub struct PublicSurveySummary {
     pub id: String,
     pub survey_type: SurveyType,
-    pub survey_field_type: Field,
+    pub survey_field_type: ProjectField,
     pub title: String,
     pub total_response: u64,
     pub survey_response: u64,
@@ -210,7 +210,7 @@ pub struct PublicSurveyMember {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct PublicSurveyIntroduction {
-    pub field: Field,
+    pub field: ProjectField,
     pub title: String,
     pub start_date: u64,
     pub end_date: u64,

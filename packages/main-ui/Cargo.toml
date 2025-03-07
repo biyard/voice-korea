@@ -40,8 +40,4 @@ tracing = "0.1.41"
 default = []
 server = ["dioxus-aws/server"]
 lambda = ["dioxus-aws/lambda", "server"]
-web = [
-  "dioxus-aws/web",
-  "dioxus-translate/web",
-  "models/web",
-]
+web = ["dioxus-aws/web", "dioxus-translate/web", "models/web"]

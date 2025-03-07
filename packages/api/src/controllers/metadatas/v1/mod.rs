@@ -109,7 +109,7 @@ impl MetadataControllerV1 {
                     .to_string(),
             ],
             metadata_type: Some(MetadataType::Report),
-            metadata_field: Some(Field::Economy),
+            metadata_field: Some(ProjectField::Economy),
             metadata_purpose: Some(MetadataPurpose::PublicDiscussion),
             metadata_source: Some(MetadataSource::Internal),
             metadata_authority: Some(MetadataAuthority::Public),

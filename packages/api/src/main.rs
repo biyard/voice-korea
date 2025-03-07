@@ -13,7 +13,7 @@ use models::{
     response::SurveyResponse,
     v2::{Institution, PublicOpinionProject},
 };
-use models::{v2::Review, *};
+use models::{step::Step, v2::Review, *};
 use sqlx::postgres::PgPoolOptions;
 // use by_types::DatabaseConfig;
 // use sqlx::postgres::PgPoolOptions;
@@ -47,6 +47,10 @@ mod controllers {
     pub mod institutions {
         pub mod m1;
     }
+
+    pub mod deliberations {
+        pub mod v2;
+    }
 }
 pub mod config;
 mod utils;
@@ -71,6 +75,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let institution = Institution::get_repository(pool.clone());
     let review = Review::get_repository(pool.clone());
     let opinions = PublicOpinionProject::get_repository(pool.clone());
+    let deliberation = Deliberation::get_repository(pool.clone());
+    let step = Step::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -91,6 +97,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     institution.create_this_table().await?;
     review.create_this_table().await?;
     opinions.create_this_table().await?;
+    deliberation.create_this_table().await?;
+    step.create_this_table().await?;
 
     v.create_related_tables().await?;
     o.create_related_tables().await?;
@@ -112,6 +120,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     institution.create_related_tables().await?;
     review.create_related_tables().await?;
     opinions.create_related_tables().await?;
+    deliberation.create_related_tables().await?;
+    step.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())

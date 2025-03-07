@@ -329,11 +329,7 @@ pub fn InputIntroduction(lang: Language) -> Element {
             div { class: "flex flex-row w-full justify-start items-center",
                 select {
                     class: "focus:outline-none w-[215px] h-[55px] justify-start items-start p-[15px] bg-[#f7f7f7] rounded-[4px] mr-[20px]",
-                    value: if information.opinion_type.is_none() { "".to_string() } else { ctrl.opinion_field_type_translate(
-                            lang.clone(),
-                            information.opinion_type.clone().unwrap(),
-                        )
-                        .to_string() },
+                    value: information.opinion_type.map_or("".to_string(), |v| v.translate(&lang).to_string()),
                     onchange: {
                         let information = information.clone();
                         move |e: Event<FormData>| {
@@ -352,12 +348,7 @@ pub fn InputIntroduction(lang: Language) -> Element {
                     for field in ctrl.get_total_fields() {
                         option {
                             value: field.clone(),
-                            selected: information.opinion_type.is_some()
-                                && ctrl
-                                    .opinion_field_type_translate(
-                                        lang.clone(),
-                                        information.opinion_type.clone().unwrap(),
-                                    ) == field,
+                            selected: information.opinion_type.map_or(false, |v| v.translate(&lang).to_string() == field),
                             "{field}"
                         }
                     }

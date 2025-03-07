@@ -346,7 +346,7 @@ impl PublicSurveyControllerV1 {
                 PublicSurveySummary {
                     id: "1".to_string(),
                     survey_type: SurveyType::Survey,
-                    survey_field_type: Field::Economy,
+                    survey_field_type: ProjectField::Economy,
                     title: "조사주제".to_string(),
                     total_response: 60,
                     survey_response: 40,
@@ -367,7 +367,7 @@ impl PublicSurveyControllerV1 {
                 PublicSurveySummary {
                     id: "2".to_string(),
                     survey_type: SurveyType::Survey,
-                    survey_field_type: Field::Economy,
+                    survey_field_type: ProjectField::Economy,
                     title: "조사주제".to_string(),
                     total_response: 60,
                     survey_response: 40,
@@ -389,7 +389,7 @@ impl PublicSurveyControllerV1 {
                 PublicSurveySummary {
                     id: "3".to_string(),
                     survey_type: SurveyType::Survey,
-                    survey_field_type: Field::Economy,
+                    survey_field_type: ProjectField::Economy,
                     title: "조사주제".to_string(),
                     total_response: 60,
                     survey_response: 40,
@@ -410,7 +410,7 @@ impl PublicSurveyControllerV1 {
                 PublicSurveySummary {
                     id: "4".to_string(),
                     survey_type: SurveyType::Survey,
-                    survey_field_type: Field::Economy,
+                    survey_field_type: ProjectField::Economy,
                     title: "조사주제".to_string(),
                     total_response: 60,
                     survey_response: 40,
@@ -431,7 +431,7 @@ impl PublicSurveyControllerV1 {
                 PublicSurveySummary {
                     id: "5".to_string(),
                     survey_type: SurveyType::Survey,
-                    survey_field_type: Field::Economy,
+                    survey_field_type: ProjectField::Economy,
                     title: "조사주제".to_string(),
                     total_response: 60,
                     survey_response: 40,
