@@ -71,7 +71,7 @@ pub struct Institution {
 
 #[api_model(base = "/reviews/v1", table = reviews, iter_type=QueryResponse)]
 pub struct Review {
-    #[api_model(summary, primary_key, action = delete )]
+    #[api_model(summary, primary_key, action = delete, read_action = find_by_id )]
     pub id: i64,
     #[api_model(summary, auto = insert)]
     pub created_at: i64,
