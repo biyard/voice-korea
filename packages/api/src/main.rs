@@ -8,6 +8,7 @@ use controllers::{
     reviews::v1::ReviewControllerV1, v2::Version2Controller,
 };
 use models::{
+    deliberation_responses::DeliberationResponse,
     response::SurveyResponse,
     v2::{Institution, PublicOpinionProject},
 };

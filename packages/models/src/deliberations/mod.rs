@@ -1,10 +1,6 @@
-pub mod deliberation_comments;
-pub mod deliberation_responses;
-pub mod deliberation_users;
-
-pub use deliberation_comments::*;
-pub use deliberation_responses::*;
-pub use deliberation_users::*;
+use crate::DeliberationComment;
+use crate::DeliberationUser;
+use crate::DeliberationUserCreateRequest;
 
 #[cfg(feature = "server")]
 use by_axum::aide;
