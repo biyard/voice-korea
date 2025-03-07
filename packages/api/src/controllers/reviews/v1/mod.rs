@@ -7,7 +7,7 @@ use by_axum::axum::{
 use models::{
     v2::{
         Review, ReviewAction, ReviewByIdAction, ReviewCreateRequest, ReviewGetResponse,
-        ReviewSummary,ReviewRepositoryUpdateRequest,ReviewReadAction,
+        ReviewSummary,ReviewRepositoryUpdateRequest,
         ReviewParam, ReviewQuery, ReviewQueryActionType, ReviewRepository, ReviewUpdateRequest,
     },
     *,
@@ -38,8 +38,9 @@ impl ReviewControllerV1 {
         let _repo = ctrl.review_repo;
         tracing::debug!("get_review: {:?}", id);
 
-        let fetched_review = _repo
-            .find_one(&ReviewReadAction::new().find_by_id(id))
+        let fetched_review = Review::query_builder().id_equals(id).query()
+            .map(|r: sqlx::postgres::PgRow| r.into())
+            .fetch_one(&ctrl.pool)
             .await?;
 
         Ok(Json(fetched_review))
