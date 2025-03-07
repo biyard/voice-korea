@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::*;
+use models::{deliberation::Deliberation, step_type::StepType, *};
 
 use crate::service::{login_service::LoginService, popup_service::PopupService};
 

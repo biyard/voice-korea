@@ -13,8 +13,9 @@ use by_types::QueryResponse;
 use models::{
     deliberation::{
         Deliberation, DeliberationAction, DeliberationCreateRequest, DeliberationGetResponse,
-        DeliberationParam, DeliberationQuery, DeliberationRepository,
+        DeliberationParam, DeliberationQuery, DeliberationRepository, DeliberationSummary,
     },
+    step::{Step, StepRepository},
     *,
 };
 

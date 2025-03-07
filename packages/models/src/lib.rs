@@ -20,6 +20,7 @@ mod group_members;
 mod organization_members;
 mod projects;
 mod search;
+pub mod steps;
 mod strings;
 mod survey;
 mod update_field;
@@ -53,6 +54,7 @@ pub mod prelude {
     pub use crate::group_members::*;
     pub use crate::organization_members::*;
     pub use crate::search::*;
+    pub use crate::steps::*;
     pub use crate::strings::*;
     pub use crate::survey::*;
     pub use crate::update_field::*;

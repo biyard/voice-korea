@@ -1,6 +1,6 @@
 pub mod profile;
 pub mod v2;
-use crate::deliberation::StepType;
+use crate::step_type::StepType;
 
 use crate::{group::MemberInfo, projects::ProjectArea, ProjectStatus};
 #[cfg(feature = "server")]

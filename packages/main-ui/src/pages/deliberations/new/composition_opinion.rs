@@ -12,7 +12,7 @@ use chrono::{TimeZone, Utc};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::prelude::{OpinionInfo, StepType};
+use models::prelude::{step_type::StepType, OpinionInfo};
 use std::str::FromStr;
 
 #[derive(Props, Clone, PartialEq)]

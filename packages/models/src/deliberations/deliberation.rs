@@ -1,16 +1,10 @@
-pub mod deliberation_comment;
-pub mod deliberation_response;
-pub mod deliberation_user;
-
-use crate::user::User;
-pub use deliberation_comment::*;
-pub use deliberation_response::*;
-pub use deliberation_user::*;
+use crate::deliberation_comment::DeliberationComment;
+use crate::deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
+use crate::step::Step;
 
 #[cfg(feature = "server")]
 use by_axum::aide;
-use by_macros::{api_model, ApiModel};
-use dioxus_translate::Translate;
+use by_macros::api_model;
 use validator::Validate;
 
 use crate::{OpinionInfo, PanelV2, ProjectArea, Resource, SurveyV2};
@@ -55,7 +49,7 @@ pub struct Deliberation {
     // Third page of creating a deliberation
     #[api_model(many_to_many = deliberations_users, table_name = users, foreign_primary_key = user_id, foreign_reference_key = deliberation_id)]
     #[serde(default)]
-    pub members: Vec<User>,
+    pub members: Vec<DeliberationUser>,
 
     #[api_model(summary, action = create, many_to_many = panel_deliberations, foreign_table_name = panels, foreign_primary_key = panel_id, foreign_reference_key = deliberation_id,)]
     #[serde(default)]
@@ -65,41 +59,4 @@ pub struct Deliberation {
     pub comments: Vec<DeliberationComment>,
     #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id, aggregator = count)]
     pub response_count: i64,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Default, ApiModel, Translate, Copy)]
-#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
-pub enum StepType {
-    #[default]
-    None = 0,
-    #[translate(ko = "일반 게시글", en = "General Post")]
-    GeneralPost = 1,
-    #[translate(ko = "화상 회의", en = "Video Conference")]
-    VideoConference = 2,
-    #[translate(ko = "포스트형 게시글", en = "Post")]
-    Post = 3,
-    #[translate(ko = "투표", en = "Vote")]
-    Vote = 4,
-    #[translate(ko = "보고서", en = "Report")]
-    Report = 5,
-}
-
-#[api_model(base = "/organizations/v2/:org-id/deliberations", table = deliberations_steps)]
-pub struct Step {
-    #[api_model(summary, primary_key)]
-    pub id: i64,
-    #[api_model(summary, auto = [insert])]
-    pub created_at: i64,
-    #[api_model(summary, auto = [insert, update])]
-    pub updated_at: i64,
-    #[api_model(summary, many_to_one = deliberations)]
-    pub deliberation_id: i64,
-    #[api_model(summary, type = INTEGER, action = create)]
-    pub step_type: StepType,
-    #[api_model(summary, action = create)]
-    pub name: String,
-    #[api_model(summary, action = create)]
-    pub started_at: i64,
-    #[api_model(summary, action = create)]
-    pub ended_at: i64,
 }
