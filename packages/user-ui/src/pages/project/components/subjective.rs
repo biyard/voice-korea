@@ -7,7 +7,7 @@ use crate::{components::input::InputBox, pages::project::i18n::SurveyTranslate};
 #[component]
 pub fn Subjective(
     lang: Language,
-    id: i64,
+    #[props(default = None)] id: Option<String>,
     question: SubjectiveQuestion,
     answer: String,
     onchange: EventHandler<String>,

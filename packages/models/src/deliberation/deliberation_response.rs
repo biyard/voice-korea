@@ -1,6 +1,7 @@
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::{api_model, ApiModel};
+use dioxus_translate::Translate;
 
 use crate::response::Answer;
 
@@ -24,10 +25,12 @@ pub struct DeliberationResponse {
     pub deliberation_type: DeliberationType,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Default, ApiModel)]
+#[derive(Debug, Clone, Eq, PartialEq, Default, ApiModel, Translate)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 pub enum DeliberationType {
     #[default]
+    #[translate(ko = "표본 조사", en = "Sample Survey")]
     Sample = 1,
+    #[translate(ko = "최종 설문", en = "Final Survey")]
     Survey = 2,
 }

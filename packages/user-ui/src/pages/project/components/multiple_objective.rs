@@ -5,7 +5,7 @@ use crate::components::custom_checkbox::CustomCheckbox;
 
 #[component]
 pub fn MultipleObjective(
-    id: i64,
+    #[props(default = None)] id: Option<String>,
     question: ChoiceQuestion,
     answer: Vec<i32>,
     onchange: EventHandler<Vec<i32>>,

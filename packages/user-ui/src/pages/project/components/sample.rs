@@ -120,7 +120,7 @@ pub fn Survey(
                         };
                         rsx! {
                             SingleObjective {
-                                id: i as i64,
+                                id: None,
                                 question: v.clone(),
                                 answer,
                                 onchange: move |e| { onchange.call((i, Answer::SingleChoice { answer: e })) },
@@ -135,7 +135,7 @@ pub fn Survey(
                         };
                         rsx! {
                             MultipleObjective {
-                                id: i as i64,
+                                id: None,
                                 question: v.clone(),
                                 answer,
                                 onchange: move |e| {
@@ -159,7 +159,7 @@ pub fn Survey(
                         rsx! {
                             Subjective {
                                 lang,
-                                id: i as i64,
+                                id: None,
                                 question: v.clone(),
                                 answer,
                                 onchange: move |e| {
@@ -177,7 +177,7 @@ pub fn Survey(
                         rsx! {
                             Subjective {
                                 lang,
-                                id: i as i64,
+                                id: None,
                                 question: v.clone(),
                                 answer,
                                 onchange: move |e| {
