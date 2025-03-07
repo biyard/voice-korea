@@ -3,6 +3,7 @@ use by_axum::aide;
 use by_macros::api_model;
 use validator::Validate;
 
+//FIXME: The comment model is not yet finalized and needs to be modified.
 #[derive(Validate)]
 #[api_model(base = "/", table = deliberation_comments)]
 pub struct DeliberationComment {

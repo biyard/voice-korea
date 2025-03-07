@@ -8,7 +8,7 @@ use by_axum::{
     },
 };
 use by_types::QueryResponse;
-use models::*;
+use models::{deliberation::Deliberation, *};
 use sqlx::postgres::PgRow;
 
 #[derive(Clone, Debug)]
