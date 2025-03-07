@@ -2,17 +2,22 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
+use indexmap::IndexMap;
 use models::{
     deliberation::{Deliberation, Step},
+    deliberation_response::{DeliberationResponse, DeliberationType},
     deliberation_user::DeliberationUser,
     response::Answer,
-    ChoiceQuestion, PanelCountsV2, PanelV2, Question, Resource, ResourceType, SubjectiveQuestion,
-    SurveyV2,
+    ChoiceQuestion, PanelCountsV2, PanelV2, ParsedQuestion, Question, Resource, ResourceType,
+    SubjectiveQuestion, SurveyV2,
 };
 
 use crate::{
-    pages::project::components::not_complete_survey_modal::NotCompleteSurveyModal,
-    service::popup_service::PopupService, utils::time::formatted_timestamp_to_sec,
+    pages::project::components::sample::{
+        not_complete_survey_modal::NotCompleteSurveyModal, remove_survey_modal::RemoveSurveyModal,
+    },
+    service::popup_service::{self, PopupService},
+    utils::time::formatted_timestamp_to_sec,
 };
 
 use super::i18n::ProjectTranslate;
@@ -196,12 +201,18 @@ impl Controller {
     }
 }
 
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct SurveyResponses {
+    pub answers: IndexMap<i64, (String, ParsedQuestion)>, // question_id, (title, response_count, <panel_id, answer>)
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct SampleController {
     answers: Signal<Vec<Answer>>,
     // NOTE: Whether I have ever filled out a survey
     // NOTE: In the future, it will be linked to the API and the relevant part should be checked.
     check_edit: Signal<bool>,
+    pub survey_responses: Signal<SurveyResponses>,
 }
 
 impl SampleController {
@@ -209,14 +220,17 @@ impl SampleController {
         let mut ctrl = Self {
             answers: use_signal(|| vec![]),
             check_edit: use_signal(|| false),
+            survey_responses: use_signal(|| SurveyResponses::default()),
         };
 
-        use_context_provider(|| ctrl);
+        use_context_provider(|| ctrl.clone());
 
-        let questions = ctrl.get_deliberation().surveys[0].questions.clone();
+        let questions = ctrl.clone().get_deliberation().surveys[0].questions.clone();
+        let responses = ctrl.clone().get_deliberation_responses();
 
         use_effect({
             let questions = questions.clone();
+            let responses = responses.clone();
             move || {
                 let mut answers = vec![];
 
@@ -241,12 +255,72 @@ impl SampleController {
                     }
                 }
 
+                let ans = ctrl
+                    .clone()
+                    .parsing_answers(questions.clone(), responses.clone());
+                tracing::debug!("answers: {:?}", ans);
+
+                let survey_responses = SurveyResponses {
+                    answers: ctrl
+                        .clone()
+                        .parsing_answers(questions.clone(), responses.clone()),
+                };
+
+                ctrl.survey_responses.set(survey_responses);
                 ctrl.answers.set(answers);
                 ctrl.check_edit.set(true); //FIXME: fix to check writable by connecting api.
             }
         });
 
         Ok(ctrl)
+    }
+
+    pub fn parsing_answers(
+        &self,
+        questions: Vec<Question>,
+        responses: Vec<DeliberationResponse>,
+    ) -> IndexMap<i64, (String, ParsedQuestion)> {
+        let mut survey_maps: IndexMap<i64, (String, ParsedQuestion)> = IndexMap::new();
+
+        for response in responses {
+            for (i, answer) in response.answers.iter().enumerate() {
+                let questions = questions.clone();
+                let question = &questions[i];
+                let title = question.title();
+
+                let parsed_question: ParsedQuestion = (question, answer).into();
+
+                survey_maps
+                    .entry(i as i64)
+                    .and_modify(|survey_data| match &mut survey_data.1 {
+                        ParsedQuestion::SingleChoice { response_count, .. } => {
+                            if let Answer::SingleChoice { answer } = answer {
+                                response_count[(answer - 1) as usize] += 1;
+                            }
+                        }
+                        ParsedQuestion::MultipleChoice { response_count, .. } => {
+                            if let Answer::MultipleChoice { answer } = answer {
+                                for ans in answer {
+                                    response_count[(ans - 1) as usize] += 1;
+                                }
+                            }
+                        }
+                        ParsedQuestion::ShortAnswer { answers } => {
+                            if let Answer::ShortAnswer { answer } = answer {
+                                answers.push(answer.clone());
+                            }
+                        }
+                        ParsedQuestion::Subjective { answers } => {
+                            if let Answer::Subjective { answer } = answer {
+                                answers.push(answer.clone());
+                            }
+                        }
+                    })
+                    .or_insert_with(|| (title, parsed_question.clone()));
+            }
+        }
+
+        survey_maps
     }
 
     pub fn change_answer(&mut self, index: usize, answer: Answer) {
@@ -261,6 +335,37 @@ impl SampleController {
 
     pub fn answers(&self) -> Vec<Answer> {
         (self.answers)()
+    }
+
+    pub fn remove_sample_survey(&self, lang: Language) {
+        let tr: ProjectTranslate = translate(&lang);
+        let mut popup_service: PopupService = use_context();
+        let survey_id = self.get_deliberation().id;
+
+        popup_service
+            .open(rsx! {
+                RemoveSurveyModal {
+                    lang,
+                    onclose: move |_| {
+                        popup_service.close();
+                    },
+                    onremove: move |_| {
+                        tracing::debug!("remove survey answer");
+                        popup_service.close();
+                    },
+                }
+            })
+            .with_id("remove_survey")
+            .with_title(tr.remove_modal_title);
+
+        tracing::debug!("remove survey answer: {}", survey_id);
+    }
+
+    pub fn update_sample_survey(&self, lang: Language) {
+        //TODO: update survey answer value to use API
+        let answers = self.answers();
+        let survey_id = self.get_deliberation().id;
+        tracing::debug!("update survey answer: {} {:?}", survey_id, answers);
     }
 
     pub fn send_sample_survey(&self, lang: Language) {
@@ -329,6 +434,68 @@ impl SampleController {
             Language::Ko => format!("모든 질문 항목에 응답하지 않으면, 보상 대상에서 제외됩니다.\n이번 조사는 [{ended_at} (UTC 기준)]까지 다시 참여할 수 있습니다.\n조사를 계속하시겠습니까?"),
             Language::En => format!("If you do not answer all the questions, you will not be eligible for rewards.\nYou can re-take this survey until [{ended_at} (UTC)].\nDo you want to continue taking the survey?"),
         }
+    }
+
+    pub fn get_deliberation_responses(&self) -> Vec<DeliberationResponse> {
+        vec![
+            DeliberationResponse {
+                id: 1,
+                created_at: 1741103145,
+                updated_at: 1741103145,
+                deliberation_id: 1,
+                user_id: 1,
+                answers: vec![
+                    Answer::SingleChoice { answer: 1 },
+                    Answer::SingleChoice { answer: 1 },
+                    Answer::MultipleChoice { answer: vec![1, 2] },
+                    Answer::Subjective {
+                        answer: "subjective answer 1".to_string(),
+                    },
+                    Answer::ShortAnswer {
+                        answer: "short answer 1".to_string(),
+                    },
+                ],
+                deliberation_type: DeliberationType::Sample,
+            },
+            DeliberationResponse {
+                id: 2,
+                created_at: 1741103145,
+                updated_at: 1741103145,
+                deliberation_id: 1,
+                user_id: 2,
+                answers: vec![
+                    Answer::SingleChoice { answer: 1 },
+                    Answer::SingleChoice { answer: 1 },
+                    Answer::MultipleChoice { answer: vec![1] },
+                    Answer::Subjective {
+                        answer: "subjective answer 2".to_string(),
+                    },
+                    Answer::ShortAnswer {
+                        answer: "short answer 2".to_string(),
+                    },
+                ],
+                deliberation_type: DeliberationType::Sample,
+            },
+            DeliberationResponse {
+                id: 3,
+                created_at: 1741103145,
+                updated_at: 1741103145,
+                deliberation_id: 1,
+                user_id: 3,
+                answers: vec![
+                    Answer::SingleChoice { answer: 1 },
+                    Answer::SingleChoice { answer: 1 },
+                    Answer::MultipleChoice { answer: vec![1, 3] },
+                    Answer::Subjective {
+                        answer: "subjective answer 3".to_string(),
+                    },
+                    Answer::ShortAnswer {
+                        answer: "short answer 3".to_string(),
+                    },
+                ],
+                deliberation_type: DeliberationType::Sample,
+            },
+        ]
     }
 
     pub fn get_deliberation(&self) -> Deliberation {
