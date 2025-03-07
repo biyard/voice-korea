@@ -96,7 +96,7 @@ impl UserService {
                 );
                 let cli = (self.cli)();
 
-                let _ = match cli.user_login(email.clone(), token.clone()).await {
+                let _ = match cli.user_login(email.clone()).await {
                     // Login
                     Ok(v) => {
                         self.email.set(email.clone());
@@ -139,10 +139,9 @@ impl UserService {
 
         let cli = (self.cli)();
         let mut ctrl = self.clone();
-        let token = (self.auth_token)();
 
         let res: User = match cli
-            .user_signup(email.to_string(), Some(nickname.to_string()), token)
+            .user_signup(email.to_string(), Some(nickname.to_string()))
             .await
         {
             Ok(v) => {
