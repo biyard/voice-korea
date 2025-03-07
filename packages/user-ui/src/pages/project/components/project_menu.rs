@@ -1,8 +1,10 @@
 use dioxus::prelude::*;
 use dioxus_translate::Language;
 
-use crate::components::icons::right_arrow::RightArrow;
 use models::Tab;
+
+use crate::components::icons::right_arrow::RightArrow;
+
 #[component]
 pub fn ProjectMenu(lang: Language) -> Element {
     let mut active_tab = use_signal(|| Tab::Details);

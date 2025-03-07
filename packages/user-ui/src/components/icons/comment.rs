@@ -1,7 +1,11 @@
 use dioxus::prelude::*;
 
 #[component]
-pub fn CommentIcon(#[props(default = "#FFFFFF".to_string())] color: String) -> Element {
+pub fn CommentIcon(
+    #[props(default = "24".to_string())] width: String,
+    #[props(default = "24".to_string())] height: String,
+    #[props(default = "#FFFFFF".to_string())] color: String,
+) -> Element {
     rsx! {
         svg {
             width: "25",
