@@ -220,7 +220,7 @@ impl Controller {
             }
 
             if let (Some(start), Some(end)) = (sequence.start_date, sequence.end_date) {
-                if start >= end {
+                if start > end {
                     return false;
                 }
             }
@@ -368,12 +368,25 @@ impl Controller {
     pub fn open_send_alerm_modal(&self, lang: Language) {
         let translates: PreviewTranslate = translate(&lang);
         let mut popup_service = (self.popup_service)().clone();
+        let ctrl = self.clone();
         popup_service
             .open(rsx! {
                 SendAlertModal {
                     lang,
                     onclose: move |_e: MouseEvent| {
                         popup_service.close();
+                    },
+                    onclick: move |_| {
+                        async move {
+                            match ctrl.create_deliberation().await {
+                                Ok(_) => {
+                                    popup_service.close();
+                                }
+                                Err(e) => {
+                                    tracing::error!("Create Deliberation Failed Reason: {:?}", e);
+                                }
+                            }
+                        }
                     },
                 }
             })
