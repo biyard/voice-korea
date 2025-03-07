@@ -11,7 +11,6 @@ pub mod config;
 pub mod pages;
 
 pub mod service {
-    pub mod attribute_api;
     pub mod login_service;
     pub mod metadata_api;
     pub mod opinion_api;
