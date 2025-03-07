@@ -120,8 +120,8 @@ impl ReviewControllerV1 {
         tracing::debug!("find query");
 
         let items: Vec<ReviewSummary> = sqlx::query(&query)
-            .bind(_size as i64)
-            .bind(_size as i64 * (_bookmark.unwrap_or("1".to_string()).parse::<i64>().unwrap() - 1))
+            .bind(_size)
+            .bind(_size * (_bookmark.unwrap_or("1".to_string()).parse::<i64>().unwrap() - 1))
             .map(|r: PgRow| {
                 use sqlx::Row;
                 total_count = r.get("total_count");
@@ -154,8 +154,8 @@ impl ReviewControllerV1 {
 
         let items: Vec<ReviewSummary> = sqlx::query(&query)
             .bind(format!("%{}%", _name.unwrap()))
-            .bind(size as i64)
-            .bind(size as i64 * (_bookmark.unwrap_or("1".to_string()).parse::<i64>().unwrap() - 1))
+            .bind(_size)
+            .bind(_size * (_bookmark.unwrap_or("1".to_string()).parse::<i64>().unwrap() - 1))
             .map(|r: PgRow| {
                 use sqlx::Row;
 
