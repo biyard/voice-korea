@@ -18,28 +18,25 @@ use verification::VerificationControllerV1;
 use crate::utils::hash::get_hash_string;
 
 #[derive(Clone, Debug)]
-pub struct UserControllerV1 {
+pub struct UserController {
     pool: sqlx::Pool<sqlx::Postgres>,
     repo: UserRepository,
-    verification: VerificationRepository,
     org: OrganizationRepository,
     org_mem: OrganizationMemberRepository,
     group_mem: GroupMemberV2Repository,
     invite: InvitationRepository,
 }
 
-impl UserControllerV1 {
+impl UserController {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         let repo = User::get_repository(pool.clone());
-        let verification = Verification::get_repository(pool.clone());
         let org = Organization::get_repository(pool.clone());
         let org_mem = OrganizationMember::get_repository(pool.clone());
         let group_mem: GroupMemberV2Repository = GroupMemberV2::get_repository(pool.clone());
         let invite = Invitation::get_repository(pool.clone());
-        let ctrl = UserControllerV1 {
+        let ctrl = UserController {
             pool: pool.clone(),
             repo,
-            verification,
             org,
             org_mem,
             group_mem,
@@ -58,7 +55,7 @@ impl UserControllerV1 {
     }
 
     pub async fn act_user(
-        State(ctrl): State<UserControllerV1>,
+        State(ctrl): State<UserController>,
         Extension(auth): Extension<Option<Authorization>>,
         Json(body): Json<UserAction>,
     ) -> Result<JsonWithHeaders<User>> {
@@ -76,7 +73,7 @@ impl UserControllerV1 {
     }
 
     pub async fn get_user(
-        State(_ctrl): State<UserControllerV1>,
+        State(_ctrl): State<UserController>,
         Extension(_auth): Extension<Option<Authorization>>,
         Path(id): Path<String>,
     ) -> Result<Json<User>> {
@@ -85,7 +82,7 @@ impl UserControllerV1 {
     }
 
     pub async fn list_user(
-        State(ctrl): State<UserControllerV1>,
+        State(ctrl): State<UserController>,
         Extension(auth): Extension<Option<Authorization>>,
         Query(q): Query<UserParam>,
     ) -> Result<Json<UserGetResponse>> {
@@ -106,7 +103,7 @@ impl UserControllerV1 {
     }
 }
 
-impl UserControllerV1 {
+impl UserController {
     pub fn generate_token(&self, user: &User) -> Result<String> {
         let mut claims = Claims {
             sub: user.id.to_string(),
@@ -135,50 +132,65 @@ impl UserControllerV1 {
         }
     }
 
-    pub async fn verify_code(&self, email: String, code: String) -> Result<()> {
-        let req = VerificationReadAction::new().get_verification_code(email.clone(), code.clone());
-        let res = self.verification.find_one(&req).await?;
+    pub async fn signup(
+        &self,
+        UserSignupRequest {
+            email,
+            password,
+            code,
+        }: UserSignupRequest,
+    ) -> Result<JsonWithHeaders<User>> {
+        let mut tx = self.pool.begin().await?;
 
-        if res.value != code
-            || res.email != email
-            || res.expired_at < chrono::Utc::now().timestamp()
-        {
-            tracing::error!(
-                "Invalid verification code: {:?} at {}",
-                res,
-                chrono::Utc::now().timestamp()
-            );
-            return Err(ApiError::InvalidVerificationCode);
-        } else {
-            Ok(())
-        }
-    }
-
-    pub async fn signup(&self, body: UserSignupRequest) -> Result<JsonWithHeaders<User>> {
-        self.verify_code(body.email.clone(), body.code.clone())
-            .await?;
-
-        let pw = get_hash_string(body.password.as_bytes());
-
-        let user = self
-            .repo
-            .insert(body.email.clone(), pw.clone(), None)
+        Verification::query_builder()
+            .email_equals(email.clone())
+            .value_equals(code.clone())
+            .expired_at_greater_than_equals(chrono::Utc::now().timestamp())
+            .query()
+            .map(Verification::from)
+            .fetch_optional(&mut *tx)
             .await
             .map_err(|e| {
-                tracing::error!("Failed to insert user: {}", e);
-                ApiError::DuplicateUser
-            })?;
+                tracing::error!("Verification Error: {:?}", e);
+                ApiError::InvalidVerificationCode
+            })?
+            .ok_or(ApiError::InvalidVerificationCode)?;
 
-        let org = self.org.insert(user.email.clone()).await?;
-
-        self.org_mem
-            .insert(user.id, org.id, user.email.clone(), Some(Role::Admin), None)
-            .await?;
+        let pw = get_hash_string(password.as_bytes());
 
         let user = self
             .repo
-            .find_one(&UserReadAction::new().get_user(body.email, pw))
-            .await?;
+            .insert_with_tx(&mut *tx, email.clone(), pw.clone(), None)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        let org = self
+            .org
+            .insert_with_tx(&mut *tx, user.email.clone())
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        self.org_mem
+            .insert_with_tx(
+                &mut *tx,
+                user.id,
+                org.id,
+                user.email.clone(),
+                Some(Role::Admin),
+                None,
+            )
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        let user = User::query_builder()
+            .id_equals(user.id)
+            .query()
+            .map(User::from)
+            .fetch_optional(&mut *tx)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        tx.commit().await?;
 
         let jwt = self.generate_token(&user)?;
 
@@ -209,13 +221,49 @@ impl UserControllerV1 {
             .with_cookie(&jwt))
     }
 
-    pub async fn reset(&self, body: UserResetRequest) -> Result<JsonWithHeaders<User>> {
-        self.verify_code(body.email.clone(), body.code.clone())
+    pub async fn reset(
+        &self,
+        UserResetRequest {
+            email,
+            password,
+            code,
+        }: UserResetRequest,
+    ) -> Result<JsonWithHeaders<User>> {
+        let mut tx = self.pool.begin().await?;
+
+        Verification::query_builder()
+            .email_equals(email.clone())
+            .value_equals(code.clone())
+            .expired_at_greater_than_equals(chrono::Utc::now().timestamp())
+            .query()
+            .map(Verification::from)
+            .fetch_optional(&mut *tx)
+            .await?
+            .ok_or(ApiError::InvalidVerificationCode)?;
+
+        let pw = get_hash_string(password.as_bytes());
+
+        sqlx::query("update users set password = $1 where email = $2")
+            .bind(pw)
+            .bind(&email)
+            .execute(&mut *tx)
             .await?;
 
-        // TODO: update password
+        let user = User::query_builder()
+            .email_equals(email)
+            .query()
+            .map(User::from)
+            .fetch_optional(&mut *tx)
+            .await?
+            .ok_or(ApiError::NotFound)?;
 
-        todo!()
+        tx.commit().await?;
+
+        let jwt = self.generate_token(&user)?;
+
+        Ok(JsonWithHeaders::new(user)
+            .with_bearer_token(&jwt)
+            .with_cookie(&jwt))
     }
 
     pub async fn user_login(

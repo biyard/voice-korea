@@ -1,6 +1,4 @@
-use crate::user::User;
-#[allow(unused)]
-use crate::Result;
+use crate::User;
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::api_model;
@@ -9,8 +7,6 @@ use by_types::QueryResponse;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-mod member;
-pub use member::*;
 mod invitation;
 pub use invitation::*;
 

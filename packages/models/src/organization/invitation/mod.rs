@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
-use crate::organization::member::Role;
 #[allow(unused)]
 use crate::Result;
+use crate::Role;
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::api_model;

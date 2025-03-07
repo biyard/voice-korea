@@ -2,9 +2,9 @@ use dioxus::prelude::*;
 
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::prelude::{CreateGroupRequest, ListMemberResponse, MemberSummary, TeamMemberRequest};
+use models::prelude::{CreateGroupRequest, MemberSummary, TeamMemberRequest};
 
-use crate::service::{group_api::GroupApi, member_api::MemberApi, popup_service::PopupService};
+use crate::service::{group_api::GroupApi, popup_service::PopupService};
 
 use super::{
     i18n::GroupTranslate,
@@ -46,7 +46,6 @@ pub struct Controller {
             ServerFnError,
         >,
     >,
-    pub member_resource: Resource<Result<ListMemberResponse, ServerFnError>>,
     popup_service: Signal<PopupService>,
     group_api: GroupApi,
 }
@@ -64,59 +63,42 @@ impl Controller {
             async move { api.list_groups(Some(100), None).await }
         });
 
-        let member_api: MemberApi = use_context();
-        let member_resource: Resource<Result<ListMemberResponse, ServerFnError>> =
-            use_resource(move || {
-                let api = member_api.clone();
-                async move { api.list_members(Some(100), None).await }
-            });
-
-        let mut ctrl = Self {
+        let ctrl = Self {
             groups: use_signal(|| vec![]),
             group_resource,
             popup_service: use_signal(|| popup_service),
             group_api: api,
 
             members: use_signal(|| vec![]),
-            member_resource,
         };
 
-        let groups = if let Some(v) = group_resource.value()() {
-            match v {
-                Ok(d) => d
-                    .items
-                    .iter()
-                    .map(|group| GroupSummary {
-                        group_id: group.id.clone(),
-                        group_name: group.name.clone(),
-                        member_count: group.members.len() as u64,
-                        member_list: group
-                            .members
-                            .iter()
-                            .map(|v: &models::prelude::GroupMemberResponse| v.into())
-                            .collect(),
-                    })
-                    .collect(),
-                Err(e) => {
-                    tracing::error!("Failed to fetch groups: {:?}", e);
-                    vec![]
-                }
-            }
-        } else {
-            vec![]
-        };
+        // let groups = if let Some(v) = group_resource.value()() {
+        //     match v {
+        //         Ok(d) => d
+        //             .items
+        //             .iter()
+        //             .map(|group| GroupSummary {
+        //                 group_id: group.id.clone(),
+        //                 group_name: group.name.clone(),
+        //                 member_count: group.members.len() as u64,
+        //                 member_list: group
+        //                     .members
+        //                     .iter()
+        //                     .map(|v: &models::prelude::GroupMemberResponse| v.into())
+        //                     .collect(),
+        //             })
+        //             .collect(),
+        //         Err(e) => {
+        //             tracing::error!("Failed to fetch groups: {:?}", e);
+        //             vec![]
+        //         }
+        //     }
+        // } else {
+        //     vec![]
+        // };
 
-        let members = if let Some(v) = member_resource.value()() {
-            match v {
-                Ok(d) => d.members,
-                Err(_) => vec![],
-            }
-        } else {
-            vec![]
-        };
-
-        ctrl.groups.set(groups);
-        ctrl.members.set(members);
+        // ctrl.groups.set(groups);
+        // ctrl.members.set(members);
         use_context_provider(|| ctrl);
 
         ctrl
@@ -177,7 +159,7 @@ impl Controller {
         {
             Ok(_) => {
                 self.group_resource.restart();
-                self.member_resource.restart()
+                // self.member_resource.restart()
             }
             Err(e) => {
                 tracing::error!("failed to invite team member: {e}");

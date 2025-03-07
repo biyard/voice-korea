@@ -18,7 +18,9 @@ mod search;
 mod strings;
 mod survey;
 mod update_field;
-mod user;
+mod users;
+mod verifications;
+mod organization_members;
 
 pub use crate::prelude::*;
 pub use by_types::QueryResponse;
@@ -44,7 +46,9 @@ pub mod prelude {
     pub use crate::strings::*;
     pub use crate::survey::*;
     pub use crate::update_field::*;
-    pub use crate::user::*;
+    pub use crate::users::*;
+    pub use crate::verifications::*;
+    pub use crate::organization_members::*;
 }
 
 pub type Result<T> = std::result::Result<T, crate::error::ApiError>;
