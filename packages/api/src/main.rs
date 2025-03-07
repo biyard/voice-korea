@@ -39,9 +39,6 @@ mod controllers {
     pub mod invitations {
         pub mod v2;
     }
-    pub mod groups {
-        pub mod v2;
-    }
 
     pub mod reviews {
         pub mod v1;
@@ -68,7 +65,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let sr = SurveyResponse::get_repository(pool.clone());
     let d = Deliberation::get_repository(pool.clone());
     let dr = DeliberationResponse::get_repository(pool.clone());
-    let g = GroupV2::get_repository(pool.clone());
+    let g = Group::get_repository(pool.clone());
     let gm = GroupMemberV2::get_repository(pool.clone());
     let iv = Invitation::get_repository(pool.clone());
     let institution = Institution::get_repository(pool.clone());

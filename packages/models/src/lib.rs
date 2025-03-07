@@ -3,6 +3,7 @@ mod auth;
 pub mod error;
 mod field;
 mod group;
+mod groups;
 mod metadata;
 mod organization;
 mod pagination;
@@ -16,6 +17,7 @@ pub mod deliberation_comments;
 pub mod deliberation_responses;
 pub mod deliberation_users;
 pub mod deliberations;
+mod group_members;
 mod organization_members;
 mod projects;
 mod search;
@@ -38,6 +40,7 @@ pub mod prelude {
     pub use crate::error::*;
     pub use crate::field::*;
     pub use crate::group::*;
+    pub use crate::groups::*;
     pub use crate::metadata::*;
     pub use crate::organization::*;
     pub use crate::pagination::*;
@@ -48,6 +51,8 @@ pub mod prelude {
     pub use crate::public_opinion::*;
     pub use crate::resource::*;
     // pub use crate::public_survey::*;
+
+    pub use crate::group_members::*;
     pub use crate::organization_members::*;
     pub use crate::search::*;
     pub use crate::strings::*;
