@@ -3,8 +3,11 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use models::{
-    response::Answer, ChoiceQuestion, Deliberation, DeliberationUser, PanelCountsV2, PanelV2,
-    Question, Resource, ResourceType, Step, SubjectiveQuestion, SurveyV2,
+    deliberation::{Deliberation, Step},
+    deliberation_user::DeliberationUser,
+    response::Answer,
+    ChoiceQuestion, PanelCountsV2, PanelV2, Question, Resource, ResourceType, SubjectiveQuestion,
+    SurveyV2,
 };
 
 use crate::{
