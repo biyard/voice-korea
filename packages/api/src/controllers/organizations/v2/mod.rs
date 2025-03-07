@@ -51,7 +51,7 @@ impl OrganizationController {
             )
             .nest(
                 "/:org-id/groups",
-                crate::controllers::groups::v2::GroupControllerV2::route(pool.clone())?,
+                crate::controllers::v2::organizations::_id::groups::GroupController::route(pool.clone())?,
             )
             .nest(
                 "/:org-id/invitations",

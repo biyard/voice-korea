@@ -16,7 +16,7 @@ use crate::{
 };
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language, Translate};
-use models::{response::Answer, DeliberationUser, Question, SurveyV2};
+use models::{deliberation_user::DeliberationUser, response::Answer, Question, SurveyV2};
 
 #[derive(Translate, PartialEq)]
 pub enum SurveyStatus {
@@ -53,6 +53,8 @@ pub fn Sample(lang: Language) -> Element {
     let members = deliberation.members;
     let answers = ctrl.answers();
 
+    let check_edit = ctrl.check_edit();
+
     rsx! {
         div { class: "flex flex-col w-full",
             //FIXME: fix to use div display attribute
@@ -76,6 +78,7 @@ pub fn Sample(lang: Language) -> Element {
                     lang,
                     survey: survey.clone(),
                     members,
+                    check_edit,
                     survey_clicked: survey_clicked(),
                     onchange: move |v: bool| {
                         survey_clicked.set(v);
@@ -207,7 +210,10 @@ pub fn SurveyInfo(
     lang: Language,
     survey: SurveyV2,
     members: Vec<DeliberationUser>,
+
+    check_edit: bool,
     survey_clicked: bool,
+
     onchange: EventHandler<bool>,
 ) -> Element {
     let editor = 4; //FIXME: fix to connect model data
@@ -246,38 +252,42 @@ pub fn SurveyInfo(
                 }
             }
 
-            div { class: "flex flex-col w-full rounded-[8px] bg-[#ffffff] justify-start items-start py-[14px] px-[20px] gap-[10px]",
-                div {
-                    class: "flex flex-col w-full  justify-start items-center text-[16px] font-bold cursor-pointer",
-                    onclick: move |_| clicked.set(!clicked()),
-                    div { class: "w-full flex flex-row justify-between items-center",
-                        div { class: "font-bold text-[#222222] text-[16px]", "{survey.name}" }
-                        if clicked() {
-                            TriangleUp {}
-                        } else {
-                            TriangleDown {}
-                        }
-                    }
-
+            div {
+                class: "flex flex-col w-full gap-[20px]",
+                display: if check_edit { "none" } else { "flex" },
+                div { class: "flex flex-col w-full rounded-[8px] bg-[#ffffff] justify-start items-start py-[14px] px-[20px] gap-[10px]",
                     div {
-                        class: "flex flex-col w-full",
-                        display: if clicked() { "flex" } else { "none" },
-                        div { class: "w-full h-[1px] bg-[#eeeeee] my-[12px]" }
-                        div { class: "flex flex-col w-full gap-[20px]",
-                            div { class: "font-bold text-[18px] text-black", "{survey.description}" }
-                            div { class: "flex flex-col w-full",
-                                for (i , question) in survey.questions.iter().enumerate() {
-                                    div { class: "font-normal text-[15px] text-black",
-                                        "{i + 1}. {question.title()}"
+                        class: "flex flex-col w-full  justify-start items-center text-[16px] font-bold cursor-pointer",
+                        onclick: move |_| clicked.set(!clicked()),
+                        div { class: "w-full flex flex-row justify-between items-center",
+                            div { class: "font-bold text-[#222222] text-[16px]", "{survey.name}" }
+                            if clicked() {
+                                TriangleUp {}
+                            } else {
+                                TriangleDown {}
+                            }
+                        }
+
+                        div {
+                            class: "flex flex-col w-full",
+                            display: if clicked() { "flex" } else { "none" },
+                            div { class: "w-full h-[1px] bg-[#eeeeee] my-[12px]" }
+                            div { class: "flex flex-col w-full gap-[20px]",
+                                div { class: "font-bold text-[18px] text-black", "{survey.description}" }
+                                div { class: "flex flex-col w-full",
+                                    for (i , question) in survey.questions.iter().enumerate() {
+                                        div { class: "font-normal text-[15px] text-black",
+                                            "{i + 1}. {question.title()}"
+                                        }
                                     }
                                 }
-                            }
-                            div { class: "flex flex-wrap w-full gap-[40px]",
-                                for member in members {
-                                    div { class: "flex flex-row gap-[8px] justify-start items-center",
-                                        div { class: "w-[40px] h-[40px] rounded-[100px] bg-[#d9d9d9]" }
-                                        div { class: "font-semibold text-[12px] text-[#222222]",
-                                            {member.role.translate(&lang)}
+                                div { class: "flex flex-wrap w-full gap-[40px]",
+                                    for member in members {
+                                        div { class: "flex flex-row gap-[8px] justify-start items-center",
+                                            div { class: "w-[40px] h-[40px] rounded-[100px] bg-[#d9d9d9]" }
+                                            div { class: "font-semibold text-[12px] text-[#222222]",
+                                                {member.role.translate(&lang)}
+                                            }
                                         }
                                     }
                                 }
@@ -285,23 +295,23 @@ pub fn SurveyInfo(
                         }
                     }
                 }
-            }
-            div { class: "flex flex-row w-fit",
-                div {
-                    class: format!(
-                        "flex flex-row px-[15px] py-[13px] {} rounded-[8px] font-bold text-white text-[16px]",
-                        if status == SurveyStatus::InProgress {
-                            "bg-[#8095EA] cursor-pointer"
-                        } else {
-                            "bg-[#B4B4B4]"
+                div { class: "flex flex-row w-full justify-center",
+                    div {
+                        class: format!(
+                            "flex flex-row px-[15px] py-[13px] {} rounded-[8px] font-bold text-white text-[16px]",
+                            if status == SurveyStatus::InProgress {
+                                "bg-[#8095EA] cursor-pointer"
+                            } else {
+                                "bg-[#B4B4B4]"
+                            },
+                        ),
+                        onclick: move |_| {
+                            if status == SurveyStatus::InProgress {
+                                onchange.call(true);
+                            }
                         },
-                    ),
-                    onclick: move |_| {
-                        if status == SurveyStatus::InProgress {
-                            onchange.call(true);
-                        }
-                    },
-                    {status.translate(&lang)}
+                        {status.translate(&lang)}
+                    }
                 }
             }
         }

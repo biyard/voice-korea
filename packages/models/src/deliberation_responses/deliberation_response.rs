@@ -16,12 +16,12 @@ pub struct DeliberationResponse {
 
     #[api_model(many_to_one = deliberations)]
     pub deliberation_id: i64,
-    #[api_model(summary, auto = [insert, update])]
+    #[api_model(many_to_one = users, action = respond_answer, summary)]
     pub user_id: i64,
 
     #[api_model(summary, action = respond_answer, type = JSONB)]
     pub answers: Vec<Answer>,
-    #[api_model(summary, action = [respond_answer], type = INTEGER, nullable)]
+    #[api_model(summary, action = [respond_answer], type = INTEGER)]
     pub deliberation_type: DeliberationType,
 }
 

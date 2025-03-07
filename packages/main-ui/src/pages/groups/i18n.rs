@@ -45,15 +45,6 @@ translate! {
         en: "Remove Group",
     },
 
-    update_group_name_li: {
-        ko: "그룹명 수정하기",
-        en: "Update Group Name",
-    },
-    remove_group_li: {
-        ko: "그룹 삭제하기",
-        en: "Remove Group",
-    },
-
     update_group_name_info: {
         ko: "그룹명은 한 번 수정하면 되돌릴 수 없습니다.",
         en: "Once the group name is modified, it cannot be undone.",
@@ -165,55 +156,6 @@ translate! {
     update: {
         ko: "수정하기",
         en: "Edit",
-    },
-    cancel: {
-        ko: "취소하기",
-        en: "Cancel",
-    },
-}
-
-translate! {
-    CreateGroupModalTranslate;
-
-    input_name_hint: {
-        ko: "이름을 검색하세요.",
-        en: "Please Input the Name",
-    },
-    group_name: {
-        ko: "그룹명",
-        en: "Group Name"
-    },
-    input_contents: {
-        ko: "내용 입력",
-        en: "Input Contents"
-    },
-    create_group_description: {
-        ko: "중복 입력은 허용되지 않으며, 최소 2글자 이상 입력해야 합니다.",
-        en: "Duplicate entries are not allowed, and you must enter at least 2 characters."
-    },
-    add_team_member: {
-        ko: "팀원 추가",
-        en: "Add Team Member"
-    },
-    team_member: {
-        ko: "팀원",
-        en: "Team Member",
-    },
-    invite_project: {
-        ko: "프로젝트 초대",
-        en: "Invite Project"
-    },
-    public_opinion: {
-        ko: "공론",
-        en: "Public Opinion"
-    },
-    investigation: {
-        ko: "조사",
-        en: "Investigation"
-    },
-    create: {
-        ko: "만들기",
-        en: "Create"
     },
     cancel: {
         ko: "취소하기",

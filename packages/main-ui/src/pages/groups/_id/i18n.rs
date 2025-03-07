@@ -41,6 +41,7 @@ translate! {
         en: "Register Date",
     },
 
+    // GroupParticipantTranslate
     group_team_member: {
         ko: "그룹 팀원",
         en: "Group Team Member",
@@ -78,6 +79,7 @@ translate! {
         en: "Remove Team Member"
     }
 
+    // CommonProjectTranslate;
     common_project: {
         ko: "공통 프로젝트",
         en: "Common Project",
@@ -127,6 +129,7 @@ translate! {
         en: "Exclude From Project"
     },
 
+    // RemoveProjectTranslate;
     remove_project_modal_title: {
         ko: "정말 삭제하시겠습니까?",
         en: "Are you sure you want to delete it?"
@@ -144,6 +147,7 @@ translate! {
         en: "Cancel"
     },
 
+    // RemoveMemberTranslate
     remove_member_modal_title: {
         ko: "정말 삭제하시겠습니까?",
         en: "Are you sure you want to delete it?"
@@ -240,158 +244,4 @@ translate! {
         ko: "강연자",
         en: "Speaker"
     }
-}
-
-translate! {
-    AddDetailMemberModalTranslate;
-
-    necessary: {
-        ko: "*[필수]",
-        en: "*[essential]"
-    },
-    input_email_address: {
-        ko: "이메일 주소 입력하기",
-        en: "Enter your email address"
-    },
-    input_email_address_hint: {
-        ko: "이메일 주소 입력",
-        en: "Enter your email address"
-    },
-    input_email_address_info: {
-        ko: "이메일 형식은 e.g voicekorea@company.com 으로 입력해주세요.",
-        en: "Please enter the email format e.g voicekorea@company.com."
-    },
-    privacy: {
-        ko: "개인정보",
-        en: "Privacy"
-    },
-    required_input: {
-        ko: "필수 입력",
-        en: "Required Input"
-    },
-    select_role: {
-        ko: "역할 선택",
-        en: "Select Role"
-    },
-    invite_project: {
-        ko: "프로젝트 초대",
-        en: "Invite Project"
-    },
-    invite: {
-        ko: "초대하기",
-        en: "Invite"
-    },
-    cancel: {
-        ko: "취소하기",
-        en: "Cancel"
-    },
-
-    name: {
-        ko: "이름",
-        en: "Name",
-    },
-    role: {
-        ko: "역할",
-        en: "Role",
-    },
-    investigation: {
-        ko: "조사",
-        en: "Investigation"
-    },
-    public_opinion: {
-        ko: "공론",
-        en: "Public Opinion"
-    },
-}
-
-translate! {
-    RemoveDetailProjectModalTranslate;
-
-    remove_project_modal_title: {
-        ko: "정말 삭제하시겠습니까?",
-        en: "Are you sure you want to delete it?"
-    },
-    remove_project_modal_info: {
-        ko: "삭제된 프로젝트는 복원할 수 없습니다. 삭제 전에 다시 한번 확인해주세요.",
-        en: "Deleted projects cannot be restored. Please check again before deleting."
-    },
-    remove: {
-        ko: "삭제하기",
-        en: "Remove"
-    },
-    cancel: {
-        ko: "취소하기",
-        en: "Cancel"
-    },
-}
-
-translate! {
-    RemoveDetailGroupMemberModalTranslate;
-
-    remove_member_modal_title: {
-        ko: "정말 삭제하시겠습니까?",
-        en: "Are you sure you want to delete it?"
-    },
-    remove_member_modal_info: {
-        ko: "삭제된 팀원은 복원할 수 없습니다. 삭제 전에 다시 한번 확인해주세요.",
-        en: "Deleted team members cannot be restored. Please check again before deleting."
-    },
-    remove: {
-        ko: "삭제하기",
-        en: "Remove"
-    },
-    cancel: {
-        ko: "취소하기",
-        en: "Cancel"
-    },
-}
-
-translate! {
-    RemoveDetailGroupModalTranslate;
-
-    remove_group_modal_title: {
-        ko: "정말 삭제하시겠습니까?",
-        en: "Are you sure you want to delete it?"
-    },
-    remove_group_modal_info: {
-        ko: "그룹을 삭제해도 팀원들은 유지되지만, 팀원들의 그룹 설정을 다시 해야합니다.",
-        en: "Even if you delete a group, team members will remain, but you will need to set up the team members' groups again."
-    },
-    remove: {
-        ko: "삭제하기",
-        en: "Remove"
-    },
-    cancel: {
-        ko: "취소하기",
-        en: "Cancel"
-    },
-}
-
-translate! {
-    UpdateDetailGroupNameModalTranslate;
-
-    update_group_name_modal_info: {
-        ko: "그룹명은 한 번 수정하면 되돌릴 수 없습니다.",
-        en: "Once the group name is modified, it cannot be undone."
-    },
-    group_name: {
-        ko: "그룹명",
-        en: "Group Name"
-    },
-    update_group_name_hint: {
-        ko: "그룹명을 입력해주세요.",
-        en: "Please enter the group name."
-    },
-    update_group_name_warning: {
-        ko: "중복 입력은 허용되지 않으며, 최소 2글자 이상 입력해야 합니다.",
-        en: "Duplicate entries are not allowed, and you must enter at least 2 characters."
-    },
-    update: {
-        ko: "수정하기",
-        en: "Update"
-    },
-    cancel: {
-        ko: "취소하기",
-        en: "Cancel"
-    },
 }

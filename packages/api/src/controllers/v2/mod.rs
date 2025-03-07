@@ -1,3 +1,4 @@
+use deliberations::_id::responses::DeliberationResponseController;
 use models::*;
 use surveys::_id::responses::SurveyResponseController;
 
@@ -11,6 +12,12 @@ pub mod surveys {
 
 pub mod organizations {
     pub mod _id;
+}
+
+pub mod deliberations {
+    pub mod _id {
+        pub mod responses;
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -28,6 +35,10 @@ impl Version2Controller {
                 crate::controllers::organizations::v2::OrganizationController::route(pool.clone())?,
             )
             .nest("/reviews", ReviewControllerV1::route(pool.clone())?)
-            .nest("/metadata", MetadataControllerV1::route(pool.clone())?))
+            .nest("/metadata", MetadataControllerV1::route(pool.clone())?)
+            .nest(
+                "/deliberations/:deliberation-id/responses",
+                DeliberationResponseController::route(pool.clone())?,
+            ))
     }
 }
