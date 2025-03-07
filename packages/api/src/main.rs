@@ -102,7 +102,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     p.create_related_tables().await?;
     ps.create_related_tables().await?;
     sr.create_related_tables().await?;
-    dr.create_related_tables().await?;
+    // dr.create_related_tables().await?;
     g.create_related_tables().await?;
     gm.create_related_tables().await?;
 
