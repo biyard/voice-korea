@@ -8,6 +8,8 @@ use controllers::{
     reviews::v1::ReviewControllerV1, v2::Version2Controller,
 };
 use models::{
+    deliberation::Deliberation,
+    deliberation_response::DeliberationResponse,
     response::SurveyResponse,
     v2::{Institution, PublicOpinionProject},
 };
@@ -64,6 +66,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let om = OrganizationMember::get_repository(pool.clone());
     let ps = PanelSurveys::get_repository(pool.clone());
     let sr = SurveyResponse::get_repository(pool.clone());
+    let d = Deliberation::get_repository(pool.clone());
     let dr = DeliberationResponse::get_repository(pool.clone());
     let g = GroupV2::get_repository(pool.clone());
     let gm = GroupMemberV2::get_repository(pool.clone());
@@ -82,6 +85,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     p.create_this_table().await?;
     ps.create_this_table().await?;
     sr.create_this_table().await?;
+    d.create_this_table().await?;
     dr.create_this_table().await?;
     g.create_this_table().await?;
     gm.create_this_table().await?;
@@ -102,6 +106,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     p.create_related_tables().await?;
     ps.create_related_tables().await?;
     sr.create_related_tables().await?;
+    d.create_related_tables().await?;
     dr.create_related_tables().await?;
     g.create_related_tables().await?;
     gm.create_related_tables().await?;

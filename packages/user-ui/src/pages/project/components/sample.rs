@@ -17,7 +17,7 @@ use crate::{
 };
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language, Translate};
-use models::{response::Answer, DeliberationUser, Question, SurveyV2};
+use models::{deliberation_user::DeliberationUser, response::Answer, Question, SurveyV2};
 
 #[derive(Translate, PartialEq)]
 pub enum SurveyStatus {
