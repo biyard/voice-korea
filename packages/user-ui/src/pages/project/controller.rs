@@ -196,12 +196,16 @@ impl Controller {
 #[derive(Debug, Clone, Copy)]
 pub struct SampleController {
     answers: Signal<Vec<Answer>>,
+    // NOTE: Whether I have ever filled out a survey
+    // NOTE: In the future, it will be linked to the API and the relevant part should be checked.
+    check_edit: Signal<bool>,
 }
 
 impl SampleController {
     pub fn init(lang: Language) -> std::result::Result<Self, RenderError> {
         let mut ctrl = Self {
             answers: use_signal(|| vec![]),
+            check_edit: use_signal(|| false),
         };
 
         use_context_provider(|| ctrl);
@@ -235,6 +239,7 @@ impl SampleController {
                 }
 
                 ctrl.answers.set(answers);
+                ctrl.check_edit.set(true); //FIXME: fix to check writable by connecting api.
             }
         });
 
@@ -245,6 +250,10 @@ impl SampleController {
         let mut answers = self.answers();
         answers[index] = answer;
         self.answers.set(answers.clone());
+    }
+
+    pub fn check_edit(&self) -> bool {
+        (self.check_edit)()
     }
 
     pub fn answers(&self) -> Vec<Answer> {

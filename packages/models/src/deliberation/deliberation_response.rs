@@ -5,7 +5,7 @@ use dioxus_translate::Translate;
 
 use crate::response::Answer;
 
-#[api_model(base = "/v2/deliberations/:deliberation-id/responses", table = deliberation_responses)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/users/:user-id/responses", table = deliberation_responses)]
 pub struct DeliberationResponse {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -16,7 +16,7 @@ pub struct DeliberationResponse {
 
     #[api_model(many_to_one = deliberations)]
     pub deliberation_id: i64,
-    #[api_model(summary, auto = [insert, update])]
+    #[api_model(summary)]
     pub user_id: i64,
 
     #[api_model(summary, action = respond_answer, type = JSONB)]
