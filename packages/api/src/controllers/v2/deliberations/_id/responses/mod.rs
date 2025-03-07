@@ -47,6 +47,7 @@ impl DeliberationResponseController {
         Extension(_auth): Extension<Option<Authorization>>,
         Path((deliberation_id, user_id, id)): Path<(i64, i64, i64)>,
     ) -> Result<Json<DeliberationResponse>> {
+        //TODO: implement get_deliberation_response
         tracing::debug!(
             "get_deliberation_response {} {} {}",
             deliberation_id,
@@ -62,6 +63,7 @@ impl DeliberationResponseController {
         Extension(_auth): Extension<Option<Authorization>>,
         Query(q): Query<DeliberationResponseParam>,
     ) -> Result<Json<DeliberationResponseGetResponse>> {
+        //TODO: implement list_deliberation_response
         tracing::debug!("list_deliberation_response {} {}", deliberation_id, user_id);
 
         match q {
