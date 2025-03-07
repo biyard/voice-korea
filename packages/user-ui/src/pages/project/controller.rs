@@ -11,8 +11,11 @@ use models::{
 };
 
 use crate::{
-    pages::project::components::not_complete_survey_modal::NotCompleteSurveyModal,
-    service::popup_service::PopupService, utils::time::formatted_timestamp_to_sec,
+    pages::project::components::sample::{
+        not_complete_survey_modal::NotCompleteSurveyModal, remove_survey_modal::RemoveSurveyModal,
+    },
+    service::popup_service::{self, PopupService},
+    utils::time::formatted_timestamp_to_sec,
 };
 
 use super::i18n::ProjectTranslate;
@@ -261,6 +264,37 @@ impl SampleController {
 
     pub fn answers(&self) -> Vec<Answer> {
         (self.answers)()
+    }
+
+    pub fn remove_sample_survey(&self, lang: Language) {
+        let tr: ProjectTranslate = translate(&lang);
+        let mut popup_service: PopupService = use_context();
+        let survey_id = self.get_deliberation().id;
+
+        popup_service
+            .open(rsx! {
+                RemoveSurveyModal {
+                    lang,
+                    onclose: move |_| {
+                        popup_service.close();
+                    },
+                    onremove: move |_| {
+                        tracing::debug!("remove survey answer");
+                        popup_service.close();
+                    },
+                }
+            })
+            .with_id("remove_survey")
+            .with_title(tr.remove_modal_title);
+
+        tracing::debug!("remove survey answer: {}", survey_id);
+    }
+
+    pub fn update_sample_survey(&self, lang: Language) {
+        //TODO: update survey answer value to use API
+        let answers = self.answers();
+        let survey_id = self.get_deliberation().id;
+        tracing::debug!("update survey answer: {} {:?}", survey_id, answers);
     }
 
     pub fn send_sample_survey(&self, lang: Language) {

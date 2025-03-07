@@ -10,7 +10,7 @@ use crate::{
         right_arrow::RightArrow,
         triangle::{TriangleDown, TriangleUp},
     },
-    pages::project::{components::sample::Sample, controller},
+    pages::project::{components::sample::sample::Sample, controller},
 };
 
 #[component]
