@@ -17,6 +17,7 @@ pub mod deliberation_responses;
 pub mod deliberation_users;
 pub mod deliberations;
 mod organization_members;
+mod parsed_question;
 mod projects;
 mod search;
 mod strings;
@@ -49,6 +50,7 @@ pub mod prelude {
     pub use crate::resource::*;
     // pub use crate::public_survey::*;
     pub use crate::organization_members::*;
+    pub use crate::parsed_question::*;
     pub use crate::search::*;
     pub use crate::strings::*;
     pub use crate::survey::*;

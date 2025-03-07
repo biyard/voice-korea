@@ -71,3 +71,28 @@ translate! {
         en: "Remove"
     }
 }
+
+translate! {
+    StatisticsTranslate;
+
+    necessary: {
+        ko: "[필수]",
+        en: "[Necessary]"
+    }
+    optional: {
+        ko: "[선택]",
+        en: "[Optional]"
+    }
+    unit: {
+        ko: "명",
+        en: "Unit"
+    }
+    subjective_answer: {
+        ko: "주관식 답변",
+        en: "Subjective Answer"
+    }
+    response: {
+        ko: "질문별 응답",
+        en: "Responses to each question"
+    }
+}

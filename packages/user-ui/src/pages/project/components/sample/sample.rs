@@ -1,7 +1,8 @@
 use crate::{
     pages::project::{
         components::sample::{
-            my_sample_survey::MySurvey, sample_survey::Survey, survey_info::SurveyInfo,
+            my_sample_survey::MySurvey, sample_statistics::SampleStatistics, sample_survey::Survey,
+            survey_info::SurveyInfo,
         },
         controller,
     },
@@ -52,6 +53,7 @@ pub fn Sample(lang: Language) -> Element {
     let survey = deliberation.surveys.get(0).unwrap().clone();
     let members = deliberation.members;
     let answers = ctrl.answers();
+    let responses = (ctrl.survey_responses)();
 
     let check_edit = ctrl.check_edit();
 
@@ -99,6 +101,14 @@ pub fn Sample(lang: Language) -> Element {
                     },
                     onremove: move |_| {
                         ctrl.remove_sample_survey(lang);
+                    },
+                }
+            } else {
+                SampleStatistics {
+                    lang,
+                    responses,
+                    onprev: move |_| {
+                        survey_clicked.set(SurveyStep::Display);
                     },
                 }
             }
