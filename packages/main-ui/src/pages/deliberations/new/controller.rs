@@ -16,7 +16,6 @@ pub struct Controller {
     popup_service: Signal<PopupService>,
     current_step: Signal<CurrentStep>,
     public_opinion_sequences: Signal<Vec<OpinionInfo>>,
-    total_option_types: Signal<Vec<String>>,
 
     //step 2
     total_fields: Signal<Vec<String>>,
@@ -43,51 +42,44 @@ impl Controller {
         let ctrl = Self {
             popup_service: use_signal(|| popup_service),
             current_step: use_signal(|| CurrentStep::PublicOpinionComposition),
-            total_option_types: use_signal(|| {
-                vec![
-                    translates.regular_post.to_string(),
-                    translates.video_conference.to_string(),
-                    translates.post.to_string(),
-                    translates.vote.to_string(),
-                    translates.report.to_string(),
-                ]
-            }),
             public_opinion_sequences: use_signal(|| {
+                // TODO: refactor this @henry
                 vec![
                     OpinionInfo {
                         name: translates.information_provided.to_string(),
                         start_date: None,
                         end_date: None,
-                        public_opinion_type: Some(PublicOpinionType::General),
+                        public_opinion_type: Some(StepType::GeneralPost),
                     },
                     OpinionInfo {
                         name: translates.discussion_and_deliberation.to_string(),
                         start_date: None,
                         end_date: None,
-                        public_opinion_type: Some(PublicOpinionType::Video),
+                        public_opinion_type: Some(StepType::VideoConference),
                     },
                     OpinionInfo {
                         name: translates.derive_opinions.to_string(),
                         start_date: None,
                         end_date: None,
-                        public_opinion_type: Some(PublicOpinionType::Post),
+                        public_opinion_type: Some(StepType::Post),
                     },
                     OpinionInfo {
                         name: translates.reach_consensus.to_string(),
                         start_date: None,
                         end_date: None,
-                        public_opinion_type: Some(PublicOpinionType::Vote),
+                        public_opinion_type: Some(StepType::Vote),
                     },
                     OpinionInfo {
                         name: translates.analysis_result.to_string(),
                         start_date: None,
                         end_date: None,
-                        public_opinion_type: Some(PublicOpinionType::Report),
+                        public_opinion_type: Some(StepType::Report),
                     },
                 ]
             }),
 
             // step 2
+            // TODO: refactor this @henry
             total_fields: use_signal(|| {
                 vec![
                     "경제".to_string(),
@@ -229,51 +221,8 @@ impl Controller {
         true
     }
 
-    pub fn update_opinion_type_from_str(&self, opinion_type: String) -> Option<PublicOpinionType> {
-        if opinion_type == "일반 게시글" {
-            Some(PublicOpinionType::General)
-        } else if opinion_type == "화상 회의" {
-            Some(PublicOpinionType::Video)
-        } else if opinion_type == "포스트형 게시글" {
-            Some(PublicOpinionType::Post)
-        } else if opinion_type == "투표" {
-            Some(PublicOpinionType::Vote)
-        } else if opinion_type == "보고서" {
-            Some(PublicOpinionType::Report)
-        } else {
-            None
-        }
-    }
-
-    pub fn project_opinion_type(
-        &self,
-        lang: Language,
-        opinion_type: PublicOpinionType,
-    ) -> &'static str {
-        match lang {
-            Language::En => match opinion_type {
-                PublicOpinionType::General => "General",
-                PublicOpinionType::Video => "Video",
-                PublicOpinionType::Post => "Post",
-                PublicOpinionType::Vote => "Vote",
-                PublicOpinionType::Report => "Report",
-            },
-            Language::Ko => match opinion_type {
-                PublicOpinionType::General => "일반 게시글",
-                PublicOpinionType::Video => "화상 회의",
-                PublicOpinionType::Post => "포스트형 게시글",
-                PublicOpinionType::Vote => "투표",
-                PublicOpinionType::Report => "보고서",
-            },
-        }
-    }
-
     pub fn change_step(&mut self, step: CurrentStep) {
         self.current_step.set(step);
-    }
-
-    pub fn get_total_option_types(&self) -> Vec<String> {
-        (self.total_option_types)()
     }
 
     pub fn get_public_opinion_sequences(&self) -> Vec<OpinionInfo> {
@@ -444,7 +393,6 @@ impl Controller {
                 org_id,
                 started_at as i64,
                 ended_at as i64,
-                vec![], // TODO: public_opinion_sequences,
                 opinion_informations.opinion_type.unwrap_or_default(),
                 opinion_informations.title.unwrap_or_default(),
                 opinion_informations.description.unwrap_or_default(),
@@ -452,6 +400,7 @@ impl Controller {
                 vec![], // TODO:
                 vec![], // TODO:
                 vec![], // TODO:
+                public_opinion_sequences,
             )
             .await
         {

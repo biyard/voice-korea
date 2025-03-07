@@ -23,8 +23,9 @@ pub struct DeliberationPath {
 
 #[derive(Clone, Debug)]
 pub struct DeliberationController {
-    repo: DeliberationRepository,
     pool: sqlx::Pool<sqlx::Postgres>,
+    repo: DeliberationRepository,
+    step: StepRepository,
 }
 
 impl DeliberationController {
@@ -63,7 +64,19 @@ impl DeliberationController {
             )
             .await?;
 
-        // TODO: Add steps
+        for step in steps {
+            self.step
+                .insert(
+                    deliberation.id,
+                    step.public_opinion_type.unwrap_or_default(),
+                    step.name,
+                    step.start_date.unwrap_or_default() as i64, // FIXME: this is right?
+                    step.end_date.unwrap_or_default() as i64,   // FIXME: this is right?
+                )
+                .await?;
+        }
+
+        //TODO: add roles
 
         Ok(deliberation)
     }
@@ -95,8 +108,8 @@ impl DeliberationController {
 impl DeliberationController {
     pub fn new(pool: sqlx::Pool<sqlx::Postgres>) -> Self {
         let repo = Deliberation::get_repository(pool.clone());
-
-        Self { repo, pool }
+        let step = Step::get_repository(pool.clone());
+        Self { pool, repo, step }
     }
 
     pub fn route(&self) -> Result<by_axum::axum::Router> {

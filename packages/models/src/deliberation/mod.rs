@@ -10,12 +10,13 @@ pub use deliberation_user::*;
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::{api_model, ApiModel};
+use dioxus_translate::Translate;
 use validator::Validate;
 
-use crate::{PanelV2, ProjectArea, Resource, SurveyV2};
+use crate::{OpinionInfo, PanelV2, ProjectArea, Resource, SurveyV2};
 
 #[derive(Validate)]
-#[api_model(base = "/organizations/v2/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>)], table = deliberations)]
+#[api_model(base = "/organizations/v2/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, steps = Vec<OpinionInfo>)], table = deliberations)]
 pub struct Deliberation {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -34,7 +35,7 @@ pub struct Deliberation {
     // ended_at indicates the end time of the deliberation.
     #[api_model(action = create)]
     pub ended_at: i64,
-    #[api_model(summary, one_to_many = deliberations_steps, foreign_key = deliberation_id, action = create)]
+    #[api_model(summary, one_to_many = deliberations_steps, foreign_key = deliberation_id)]
     #[serde(default)]
     pub steps: Vec<Step>,
 
@@ -66,16 +67,21 @@ pub struct Deliberation {
     pub response_count: i64,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Default, ApiModel, Copy)]
+#[derive(Debug, Clone, Eq, PartialEq, Default, ApiModel, Translate, Copy)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 pub enum StepType {
     #[default]
     None = 0,
-    GeneralBoard = 1,
+    #[translate(ko = "일반 게시글", en = "General Post")]
+    GeneralPost = 1,
+    #[translate(ko = "화상 회의", en = "Video Conference")]
     VideoConference = 2,
-    Survey = 3,
-    Report = 4,
-    PostBoard = 5,
+    #[translate(ko = "포스트형 게시글", en = "Post")]
+    Post = 3,
+    #[translate(ko = "투표", en = "Vote")]
+    Vote = 4,
+    #[translate(ko = "보고서", en = "Report")]
+    Report = 5,
 }
 
 #[api_model(base = "/organizations/v2/:org-id/deliberations", table = deliberations_steps)]

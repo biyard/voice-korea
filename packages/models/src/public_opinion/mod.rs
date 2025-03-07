@@ -1,5 +1,6 @@
 pub mod profile;
 pub mod v2;
+use crate::deliberation::StepType;
 
 use crate::{group::MemberInfo, projects::ProjectArea, ProjectStatus};
 #[cfg(feature = "server")]
@@ -176,24 +177,14 @@ pub struct ProjectInfo {
     pub name: String,
 }
 
+// TODO: refactor this @henry
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct OpinionInfo {
     pub name: String,
     pub start_date: Option<u64>,
     pub end_date: Option<u64>,
-    pub public_opinion_type: Option<PublicOpinionType>,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub enum PublicOpinionType {
-    #[default]
-    General,
-    Video,
-    Post,
-    Vote,
-    Report,
+    pub public_opinion_type: Option<StepType>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]

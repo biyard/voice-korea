@@ -12,7 +12,8 @@ use chrono::{TimeZone, Utc};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::prelude::OpinionInfo;
+use models::prelude::{OpinionInfo, StepType};
+use std::str::FromStr;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct CompositionOpinionProps {
@@ -325,16 +326,12 @@ pub fn OrganizationOpinionProcedure(
                                 }
                                 select {
                                     class: "focus:outline-none w-[200px] h-[55px] justify-start items-start p-[15px] bg-[#f7f7f7] rounded-[4px] mr-[10px]",
-                                    value: if sequence.public_opinion_type.is_none() { "".to_string() } else { ctrl.project_opinion_type(
-                                            lang.clone(),
-                                            sequence.public_opinion_type.clone().unwrap(),
-                                        )
-                                        .to_string() },
+                                    value: sequence.public_opinion_type.map_or("", |v| v.translate(&lang)),
                                     onchange: {
                                         let sequence = sequence.clone();
                                         move |e: Event<FormData>| {
                                             let mut value = sequence.clone();
-                                            let opinion_type = ctrl.update_opinion_type_from_str(e.value());
+                                            let opinion_type = StepType::from_str(e.value().as_str()).ok();
                                             value.public_opinion_type = opinion_type;
                                             ctrl.update_opinion_info(index, value);
                                         }
@@ -345,16 +342,11 @@ pub fn OrganizationOpinionProcedure(
                                         selected: sequence.public_opinion_type.is_none(),
                                         "{i18n.no_selection}"
                                     }
-                                    for option_type in ctrl.get_total_option_types() {
+                                    for option_type in StepType::VARIANTS.iter() {
                                         option {
-                                            value: option_type.clone(),
-                                            selected: sequence.public_opinion_type.is_some()
-                                                && ctrl
-                                                    .project_opinion_type(
-                                                        lang.clone(),
-                                                        sequence.public_opinion_type.clone().unwrap(),
-                                                    ) == option_type,
-                                            "{option_type}"
+                                            value: option_type.translate(&lang),
+                                            selected: sequence.public_opinion_type == Some(*option_type),
+                                            "{option_type.translate(&lang)}"
                                         }
                                     }
                                 }
