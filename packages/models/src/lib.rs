@@ -13,15 +13,12 @@ mod panel_survey;
 mod public_opinion;
 mod resource;
 // mod public_survey;
-<<<<<<< HEAD
+pub mod deliberation;
 pub mod deliberation_comments;
 pub mod deliberation_responses;
 pub mod deliberation_users;
 pub mod deliberations;
-=======
-pub mod deliberation;
 mod group_members;
->>>>>>> 56a5934 (*** refactor(groups): restructure group and member modules)
 mod organization_members;
 mod projects;
 mod search;
@@ -55,10 +52,8 @@ pub mod prelude {
     pub use crate::public_opinion::*;
     pub use crate::resource::*;
     // pub use crate::public_survey::*;
-<<<<<<< HEAD
-=======
+
     pub use crate::group_members::*;
->>>>>>> 56a5934 (*** refactor(groups): restructure group and member modules)
     pub use crate::organization_members::*;
     pub use crate::search::*;
     pub use crate::strings::*;
