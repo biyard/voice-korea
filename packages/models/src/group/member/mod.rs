@@ -4,9 +4,6 @@ use by_axum::aide;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-mod v2;
-pub use v2::*;
-
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct GroupMember {

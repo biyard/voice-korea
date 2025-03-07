@@ -3,6 +3,7 @@ mod auth;
 pub mod error;
 mod field;
 mod group;
+mod groups;
 mod metadata;
 mod organization;
 mod pagination;
@@ -12,10 +13,15 @@ mod panel_survey;
 mod public_opinion;
 mod resource;
 // mod public_survey;
+<<<<<<< HEAD
 pub mod deliberation_comments;
 pub mod deliberation_responses;
 pub mod deliberation_users;
 pub mod deliberations;
+=======
+pub mod deliberation;
+mod group_members;
+>>>>>>> 56a5934 (*** refactor(groups): restructure group and member modules)
 mod organization_members;
 mod projects;
 mod search;
@@ -38,6 +44,7 @@ pub mod prelude {
     pub use crate::error::*;
     pub use crate::field::*;
     pub use crate::group::*;
+    pub use crate::groups::*;
     pub use crate::metadata::*;
     pub use crate::organization::*;
     pub use crate::pagination::*;
@@ -48,6 +55,10 @@ pub mod prelude {
     pub use crate::public_opinion::*;
     pub use crate::resource::*;
     // pub use crate::public_survey::*;
+<<<<<<< HEAD
+=======
+    pub use crate::group_members::*;
+>>>>>>> 56a5934 (*** refactor(groups): restructure group and member modules)
     pub use crate::organization_members::*;
     pub use crate::search::*;
     pub use crate::strings::*;

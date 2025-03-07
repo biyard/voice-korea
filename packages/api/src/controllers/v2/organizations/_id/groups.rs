@@ -1,4 +1,5 @@
 use by_axum::{
+    aide,
     auth::Authorization,
     axum::{
         extract::{Path, Query, State},
@@ -9,24 +10,22 @@ use by_axum::{
 use models::*;
 
 #[derive(Clone, Debug)]
-pub struct GroupControllerV2 {
+pub struct GroupController {
     pool: sqlx::Pool<sqlx::Postgres>,
-    repo: GroupV2Repository,
-    group_mem: GroupMemberV2Repository,
+    repo: GroupRepository,
     user: UserRepository,
     org_mem: OrganizationMemberRepository,
 }
 
-impl GroupControllerV2 {
+impl GroupController {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
-        let repo = GroupV2::get_repository(pool.clone());
-        let group_mem = GroupMemberV2::get_repository(pool.clone());
+        let repo = Group::get_repository(pool.clone());
         let user = User::get_repository(pool.clone());
         let org_mem = OrganizationMember::get_repository(pool.clone());
-        let ctrl = GroupControllerV2 {
+
+        let ctrl = GroupController {
             pool,
             repo,
-            group_mem,
             user,
             org_mem,
         };
@@ -39,93 +38,81 @@ impl GroupControllerV2 {
     }
 
     pub async fn act_group(
-        State(ctrl): State<GroupControllerV2>,
+        State(ctrl): State<GroupController>,
         Extension(_auth): Extension<Option<Authorization>>,
-        Path(org_id): Path<i64>,
-        Json(body): Json<GroupV2Action>,
-    ) -> Result<Json<GroupV2>> {
+        Path(GroupParentPath { org_id }): Path<GroupParentPath>,
+        Json(body): Json<GroupAction>,
+    ) -> Result<Json<Group>> {
         tracing::debug!("act_group {:?}", body);
 
         match body {
-            GroupV2Action::Create(req) => ctrl.create_group(org_id, req).await,
-            GroupV2Action::Delete(req) => ctrl.delete_group(org_id, req).await,
+            GroupAction::Create(req) => ctrl.create_group(org_id, req).await,
         }
     }
 
     pub async fn act_group_by_id(
-        State(ctrl): State<GroupControllerV2>,
+        State(ctrl): State<GroupController>,
         Extension(_auth): Extension<Option<Authorization>>,
-        Path((org_id, id)): Path<(i64, i64)>,
-        Json(body): Json<GroupV2ByIdAction>,
-    ) -> Result<Json<GroupV2>> {
+        Path(GroupPath { org_id, id }): Path<GroupPath>,
+        Json(body): Json<GroupByIdAction>,
+    ) -> Result<Json<Group>> {
         tracing::debug!("act_group_by_id {:?} {:?}", id, body);
 
-        // TODO: need org - group relation validation
+        let res = match body {
+            GroupByIdAction::Update(req) => ctrl.update_group(id, req).await?,
+            GroupByIdAction::AddGroupMember(req) => ctrl.add_group_member(id, org_id, req).await?,
+            GroupByIdAction::RemoveGroupMember(req) => {
+                ctrl.remove_group_member(id, org_id, req).await?
+            }
+            GroupByIdAction::Delete(_) => ctrl.delete_group(id).await?,
+        };
 
-        match body {
-            GroupV2ByIdAction::Update(req) => Ok(Json(ctrl.update_group(id, req).await?)),
-            GroupV2ByIdAction::AddGroupMember(req) => {
-                Ok(Json(ctrl.add_group_member(id, org_id, req).await?))
-            }
-            GroupV2ByIdAction::RemoveGroupMember(req) => {
-                Ok(Json(ctrl.remove_group_member(id, org_id, req).await?))
-            }
-        }
+        Ok(Json(res))
     }
 
     pub async fn get_group(
-        State(ctrl): State<GroupControllerV2>,
+        State(ctrl): State<GroupController>,
         Extension(_auth): Extension<Option<Authorization>>,
-        Path((org_id, id)): Path<(i64, i64)>,
-    ) -> Result<Json<GroupV2>> {
+        Path(GroupPath { org_id, id }): Path<GroupPath>,
+    ) -> Result<Json<Group>> {
         tracing::debug!("get_group {:?}", id);
 
         Ok(Json(ctrl.find_group_by_id(org_id, id).await?))
     }
 
     pub async fn list_group(
-        State(ctrl): State<GroupControllerV2>,
+        State(ctrl): State<GroupController>,
         Extension(_auth): Extension<Option<Authorization>>,
-        Path(org_id): Path<i64>,
-        Query(param): Query<GroupV2Param>,
-    ) -> Result<Json<GroupV2GetResponse>> {
+        Path(GroupParentPath { org_id }): Path<GroupParentPath>,
+        Query(param): Query<GroupParam>,
+    ) -> Result<Json<GroupGetResponse>> {
         tracing::debug!("list_group {:?}", param);
         match param {
-            GroupV2Param::Query(q) => ctrl.list_groups_by_id(org_id, q).await,
+            GroupParam::Query(q) => ctrl.list_groups_by_id(org_id, q).await,
             // _ => Err(ApiError::InvalidAction),
         }
     }
 }
 
-impl GroupControllerV2 {
-    async fn create_group(&self, org_id: i64, req: GroupV2CreateRequest) -> Result<Json<GroupV2>> {
+impl GroupController {
+    async fn create_group(&self, org_id: i64, req: GroupCreateRequest) -> Result<Json<Group>> {
         let group = self.repo.insert(org_id, req.name).await?;
 
-        for user in req.users {
-            self.group_mem.insert(group.id, user.id).await?;
-        }
-
         Ok(Json(group))
     }
 
-    async fn delete_group(&self, org_id: i64, req: GroupV2DeleteRequest) -> Result<Json<GroupV2>> {
-        // let group = self
-        //     .repo
-        //     .find_one(&GroupV2ReadAction::new().find_group_by_id(req.id))
-        //     .await?;
-        let group = self.find_group_by_id(org_id, req.id).await?;
-        self.repo.delete(req.id).await?;
-        Ok(Json(group))
+    async fn delete_group(&self, id: i64) -> Result<Group> {
+        Ok(self.repo.delete(id).await?)
     }
 
-    async fn find_group_by_id(&self, org_id: i64, id: i64) -> Result<GroupV2> {
+    async fn find_group_by_id(&self, org_id: i64, id: i64) -> Result<Group> {
         // let group = self
         //     .repo
-        //     .find_one(&GroupV2ReadAction::new().find_group_by_id(id))
+        //     .find_one(&GroupReadAction::new().find_group_by_id(id))
         //     .await?;
 
-        let query = GroupV2Summary::base_sql_with("where id = $1 AND org_id = $2");
-        let group: GroupV2 = sqlx::query(&query)
+        let query = GroupSummary::base_sql_with("where id = $1 AND org_id = $2");
+        let group: Group = sqlx::query(&query)
             .bind(id)
             .bind(org_id)
             .map(|r: sqlx::postgres::PgRow| r.into())
@@ -145,9 +132,9 @@ impl GroupControllerV2 {
     async fn list_groups_by_id(
         &self,
         org_id: i64,
-        q: GroupV2Query,
-    ) -> Result<Json<GroupV2GetResponse>> {
-        let query = GroupV2Summary::base_sql_with("where org_id = $1 limit $2 offset $3 ");
+        q: GroupQuery,
+    ) -> Result<Json<GroupGetResponse>> {
+        let query = GroupSummary::base_sql_with("where org_id = $1 limit $2 offset $3 ");
         tracing::debug!("list_group_by_id query: {:?}", query);
 
         let mut total_count: i64 = 0;
@@ -170,13 +157,13 @@ impl GroupControllerV2 {
             .fetch_all(&self.pool)
             .await?;
 
-        Ok(Json(GroupV2GetResponse::Query(QueryResponse {
+        Ok(Json(GroupGetResponse::Query(QueryResponse {
             items,
             total_count,
         })))
     }
 
-    async fn update_group(&self, id: i64, req: GroupV2UpdateRequest) -> Result<GroupV2> {
+    async fn update_group(&self, id: i64, req: GroupUpdateRequest) -> Result<Group> {
         let group = self.repo.update(id, req.into()).await?;
         Ok(group)
     }
@@ -185,8 +172,8 @@ impl GroupControllerV2 {
         &self,
         id: i64,
         org_id: i64,
-        req: GroupV2AddGroupMemberRequest,
-    ) -> Result<GroupV2> {
+        req: GroupAddGroupMemberRequest,
+    ) -> Result<Group> {
         let group = match self.find_group_by_id(org_id, id).await {
             Ok(g) => g,
             Err(e) => {
@@ -223,44 +210,32 @@ impl GroupControllerV2 {
             }
         }
 
-        self.group_mem.insert(id, user.id).await?;
-
         Ok(group)
     }
 
     async fn remove_group_member(
         &self,
-        id: i64,
-        org_id: i64,
-        req: GroupV2RemoveGroupMemberRequest,
-    ) -> Result<GroupV2> {
-        let group = match self.find_group_by_id(org_id, id).await {
-            Ok(g) => g,
-            Err(e) => {
-                tracing::error!("remove_group_member: {:?}", e);
-                return Err(ApiError::NotFound.into());
-            }
-        };
-
-        let query = GroupMemberV2Summary::base_sql_with("where group_id = $1 AND user_id = $2");
-        tracing::debug!("remove_group_member query: {:?}", query);
-
-        let item: GroupMemberV2 = match sqlx::query(&query)
-            .bind(id)
-            .bind(req.user_id)
-            .map(|r: sqlx::postgres::PgRow| r.into())
-            .fetch_one(&self.pool)
-            .await
-        {
-            Ok(i) => i,
-            Err(e) => {
-                tracing::error!("remove_group_member: {:?}", e);
-                return Err(ApiError::NotFound.into());
-            }
-        };
-
-        self.group_mem.delete(item.id).await?;
-
-        Ok(group)
+        _id: i64,
+        _org_id: i64,
+        _req: GroupRemoveGroupMemberRequest,
+    ) -> Result<Group> {
+        unimplemented!()
     }
+}
+
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
+)]
+#[serde(rename_all = "kebab-case")]
+pub struct GroupPath {
+    pub org_id: i64,
+    pub id: i64,
+}
+
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
+)]
+#[serde(rename_all = "kebab-case")]
+pub struct GroupParentPath {
+    pub org_id: i64,
 }

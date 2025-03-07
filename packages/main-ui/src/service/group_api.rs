@@ -49,7 +49,7 @@ impl GroupApi {
         Ok(())
     }
 
-    pub async fn add_team_member(&self, group_id: String, req: TeamMemberRequest) -> Result<()> {
+    pub async fn add_team_member(&self, group_id: i64, req: TeamMemberRequest) -> Result<()> {
         let token = self.get_token();
         let id = self.get_organization_id();
         let client = ReqwestClient::new()?;

@@ -41,6 +41,7 @@ translate! {
         en: "Register Date",
     },
 
+    // GroupParticipantTranslate
     group_team_member: {
         ko: "그룹 팀원",
         en: "Group Team Member",
@@ -78,6 +79,7 @@ translate! {
         en: "Remove Team Member"
     }
 
+    // CommonProjectTranslate;
     common_project: {
         ko: "공통 프로젝트",
         en: "Common Project",
@@ -127,6 +129,7 @@ translate! {
         en: "Exclude From Project"
     },
 
+    // RemoveProjectTranslate;
     remove_project_modal_title: {
         ko: "정말 삭제하시겠습니까?",
         en: "Are you sure you want to delete it?"
@@ -144,6 +147,7 @@ translate! {
         en: "Cancel"
     },
 
+    // RemoveMemberTranslate
     remove_member_modal_title: {
         ko: "정말 삭제하시겠습니까?",
         en: "Are you sure you want to delete it?"
@@ -152,6 +156,8 @@ translate! {
         ko: "삭제된 팀원은 복원할 수 없습니다. 삭제 전에 다시 한번 확인해주세요.",
         en: "Deleted team members cannot be restored. Please check again before deleting."
     },
+
+
 
     update_group_name_modal_info: {
         ko: "그룹명은 한 번 수정하면 되돌릴 수 없습니다.",
@@ -243,68 +249,6 @@ translate! {
 }
 
 translate! {
-    AddDetailMemberModalTranslate;
-
-    necessary: {
-        ko: "*[필수]",
-        en: "*[essential]"
-    },
-    input_email_address: {
-        ko: "이메일 주소 입력하기",
-        en: "Enter your email address"
-    },
-    input_email_address_hint: {
-        ko: "이메일 주소 입력",
-        en: "Enter your email address"
-    },
-    input_email_address_info: {
-        ko: "이메일 형식은 e.g voicekorea@company.com 으로 입력해주세요.",
-        en: "Please enter the email format e.g voicekorea@company.com."
-    },
-    privacy: {
-        ko: "개인정보",
-        en: "Privacy"
-    },
-    required_input: {
-        ko: "필수 입력",
-        en: "Required Input"
-    },
-    select_role: {
-        ko: "역할 선택",
-        en: "Select Role"
-    },
-    invite_project: {
-        ko: "프로젝트 초대",
-        en: "Invite Project"
-    },
-    invite: {
-        ko: "초대하기",
-        en: "Invite"
-    },
-    cancel: {
-        ko: "취소하기",
-        en: "Cancel"
-    },
-
-    name: {
-        ko: "이름",
-        en: "Name",
-    },
-    role: {
-        ko: "역할",
-        en: "Role",
-    },
-    investigation: {
-        ko: "조사",
-        en: "Investigation"
-    },
-    public_opinion: {
-        ko: "공론",
-        en: "Public Opinion"
-    },
-}
-
-translate! {
     RemoveDetailProjectModalTranslate;
 
     remove_project_modal_title: {
@@ -393,5 +337,100 @@ translate! {
     cancel: {
         ko: "취소하기",
         en: "Cancel"
+    },
+}
+
+translate! {
+   GroupParticipantTranslate;
+
+   group_team_member: {
+       ko: "그룹 팀원",
+       en: "Group Team Member",
+   },
+   add_member: {
+       ko: "팀원 추가하기",
+       en: "Add Member",
+   },
+   name: {
+       ko: "이름",
+       en: "Name",
+   },
+   group: {
+       ko: "그룹",
+       en: "Group",
+   },
+   role: {
+       ko: "역할",
+       en: "Role",
+   },
+   project: {
+       ko: "프로젝트",
+       en: "Project",
+   },
+   no_group: {
+       ko: "그룹 없음",
+       en: "No Group"
+   },
+   no_role: {
+       ko: "역할 없음",
+       en: "No Role"
+   },
+   remove_team_member_li: {
+       ko: "팀원 삭제하기",
+       en: "Remove Team Member"
+   }
+
+}
+
+translate! {
+    CommonProjectTranslate;
+
+    common_project: {
+        ko: "공통 프로젝트",
+        en: "Common Project",
+    },
+    add_project: {
+        ko: "프로젝트 추가하기",
+        en: "Create Project",
+    },
+    item: {
+        ko: "항목",
+        en: "Item",
+    },
+    panel: {
+        ko: "패널",
+        en: "Panel",
+    },
+    period: {
+        ko: "기간",
+        en: "Period",
+    },
+    status: {
+        ko: "상태",
+        en: "Status",
+    },
+    investigation: {
+        ko: "조사",
+        en: "Investigation"
+    },
+    public_opinion: {
+        ko: "공론",
+        en: "Public Opinion"
+    },
+    ready: {
+        ko: "준비",
+        en: "Ready"
+    },
+    in_progress: {
+        ko: "진행",
+        en: "In Progress"
+    },
+    finish: {
+        ko: "마감",
+        en: "Finish"
+    },
+    exclude_from_project: {
+        ko: "프로젝트에서 제외하기",
+        en: "Exclude From Project"
     },
 }
