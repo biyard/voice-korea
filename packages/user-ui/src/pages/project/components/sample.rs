@@ -254,6 +254,12 @@ pub fn SurveyInfo(
 
             div {
                 class: "flex flex-col w-full gap-[20px]",
+                display: if check_edit { "flex" } else { "none" },
+                div { "Hello" }
+            }
+
+            div {
+                class: "flex flex-col w-full gap-[20px]",
                 display: if check_edit { "none" } else { "flex" },
                 div { class: "flex flex-col w-full rounded-[8px] bg-[#ffffff] justify-start items-start py-[14px] px-[20px] gap-[10px]",
                     div {
@@ -313,6 +319,11 @@ pub fn SurveyInfo(
                         {status.translate(&lang)}
                     }
                 }
+            }
+
+            div {
+                class: "flex flex-col w-full gap-[10px]",
+                display: if check_edit { "flex" } else { "none" },
             }
         }
     }
