@@ -37,7 +37,7 @@ impl Version2Controller {
             .nest("/reviews", ReviewControllerV1::route(pool.clone())?)
             .nest("/metadata", MetadataControllerV1::route(pool.clone())?)
             .nest(
-                "/deliberations/:deliberation-id/users/:user-id/responses",
+                "/deliberations/:deliberation-id/responses",
                 DeliberationResponseController::route(pool.clone())?,
             ))
     }

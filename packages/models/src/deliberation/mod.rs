@@ -1,10 +1,10 @@
-pub mod deliberation_comment;
-pub mod deliberation_response;
-pub mod deliberation_user;
+pub mod deliberation_comments;
+pub mod deliberation_responses;
+pub mod deliberation_users;
 
-pub use deliberation_comment::*;
-pub use deliberation_response::*;
-pub use deliberation_user::*;
+pub use deliberation_comments::*;
+pub use deliberation_responses::*;
+pub use deliberation_users::*;
 
 #[cfg(feature = "server")]
 use by_axum::aide;

@@ -45,26 +45,21 @@ impl DeliberationResponseController {
     pub async fn get_deliberation_response(
         State(_ctrl): State<DeliberationResponseController>,
         Extension(_auth): Extension<Option<Authorization>>,
-        Path((deliberation_id, user_id, id)): Path<(i64, i64, i64)>,
+        Path((deliberation_id, id)): Path<(i64, i64)>,
     ) -> Result<Json<DeliberationResponse>> {
         //TODO: implement get_deliberation_response
-        tracing::debug!(
-            "get_deliberation_response {} {} {}",
-            deliberation_id,
-            user_id,
-            id
-        );
+        tracing::debug!("get_deliberation_response {} {}", deliberation_id, id);
         Ok(Json(DeliberationResponse::default()))
     }
 
     pub async fn list_deliberation_response(
         State(_ctrl): State<DeliberationResponseController>,
-        Path((deliberation_id, user_id)): Path<(i64, i64)>,
+        Path(deliberation_id): Path<i64>,
         Extension(_auth): Extension<Option<Authorization>>,
         Query(q): Query<DeliberationResponseParam>,
     ) -> Result<Json<DeliberationResponseGetResponse>> {
         //TODO: implement list_deliberation_response
-        tracing::debug!("list_deliberation_response {} {}", deliberation_id, user_id);
+        tracing::debug!("list_deliberation_response {} {:?}", deliberation_id, q);
 
         match q {
             DeliberationResponseParam::Query(_q) => Ok(Json(
@@ -78,22 +73,16 @@ impl DeliberationResponseController {
 
     pub async fn act_deliberation_response(
         State(ctrl): State<DeliberationResponseController>,
-        Path((deliberation_id, user_id)): Path<(i64, i64)>,
+        Path(deliberation_id): Path<i64>,
         Extension(auth): Extension<Option<Authorization>>,
         Json(body): Json<DeliberationResponseAction>,
     ) -> Result<Json<DeliberationResponse>> {
         //TODO: implement act_deliberation_response
-        tracing::debug!(
-            "act_deliberation_response {} {} {:?}",
-            deliberation_id,
-            user_id,
-            body
-        );
+        tracing::debug!("act_deliberation_response {} {:?}", deliberation_id, body);
 
         match body {
             DeliberationResponseAction::RespondAnswer(req) => {
-                ctrl.respond_answer(deliberation_id, user_id, auth, req)
-                    .await
+                ctrl.respond_answer(deliberation_id, auth, req).await
             }
         }
     }
@@ -103,9 +92,9 @@ impl DeliberationResponseController {
     pub async fn respond_answer(
         &self,
         deliberation_id: i64,
-        user_id: i64,
         _auth: Option<Authorization>,
         DeliberationResponseRespondAnswerRequest {
+            user_id,
             answers,
             deliberation_type,
         }: DeliberationResponseRespondAnswerRequest,
