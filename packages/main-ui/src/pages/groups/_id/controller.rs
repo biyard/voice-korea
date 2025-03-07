@@ -94,7 +94,7 @@ impl Controller {
                 }
             }
             Err(e) => {
-                btracing::error!("{}", e.translate(&self.lang()));
+                btracing::error!("{}", e.translate(&self.lang));
             }
         };
     }
@@ -175,7 +175,7 @@ impl Controller {
                     onremove: move |_e: MouseEvent| async move {
                         let endpoint = crate::config::get().api_url;
                         match GroupMemberV2::get_client(endpoint)
-                            .remove_member(org_id, self.id(), user_id)
+                            .remove_member(org_id, ctrl.id(), user_id)
                             .await
                         {
                             Ok(_) => {

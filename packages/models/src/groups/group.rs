@@ -17,6 +17,6 @@ pub struct Group {
     #[api_model(summary, action_by_id = update, action = create)]
     pub name: String,
 
-    #[api_model(summary, many_to_many = group_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = group_id, type JSONB, unique)]
+    #[api_model(summary, many_to_many = group_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = group_id, type = JSONB, unique)]
     pub members: Vec<User>,
 }

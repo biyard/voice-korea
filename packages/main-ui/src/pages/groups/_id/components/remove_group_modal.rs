@@ -34,3 +34,24 @@ pub fn RemoveGroupModal(
         }
     }
 }
+
+translate! {
+    RemoveDetailGroupModalTranslate;
+
+    remove_group_modal_title: {
+        ko: "정말 삭제하시겠습니까?",
+        en: "Are you sure you want to delete it?"
+    },
+    remove_group_modal_info: {
+        ko: "그룹을 삭제해도 팀원들은 유지되지만, 팀원들의 그룹 설정을 다시 해야합니다.",
+        en: "Even if you delete a group, team members will remain, but you will need to set up the team members' groups again."
+    },
+    remove: {
+        ko: "삭제하기",
+        en: "Remove"
+    },
+    cancel: {
+        ko: "취소하기",
+        en: "Cancel"
+    },
+}

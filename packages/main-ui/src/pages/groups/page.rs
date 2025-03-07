@@ -24,21 +24,6 @@ pub fn GroupPage(props: GroupPageProps) -> Element {
     let mut is_focused = use_signal(|| false);
     let translates: GroupTranslate = translate(&props.lang);
 
-    let mut clicked_group_id = use_signal(|| 0);
-    let mut clicked_group_name = use_signal(|| "".to_string());
-
-    let group = ctrl.groups();
-
-    let mut member_clicked = use_signal(|| vec![]);
-    let mut member_extended = use_signal(|| vec![]);
-    let mut member_add_extended = use_signal(|| vec![]);
-
-    use_effect(use_reactive(&group_len, move |group_len| {
-        member_clicked.set(vec![false; group_len]);
-        member_extended.set(vec![false; group_len]);
-        member_add_extended.set(vec![false; group_len]);
-    }));
-
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
             div { class: "text-[#9b9b9b] font-medium text-[14px] mb-[10px]",
@@ -120,6 +105,7 @@ pub fn GroupPage(props: GroupPageProps) -> Element {
                     if let Ok(groups) = ctrl.groups() {
                         for group in groups.items.iter() {
                             GroupItem {
+                                class: "w-full",
                                 lang: props.lang,
                                 group: group.clone(),
                                 onremove_member: move |(group_id, member_id)| async move {
@@ -128,8 +114,8 @@ pub fn GroupPage(props: GroupPageProps) -> Element {
                                 onremove: move |group_id| async move {
                                     ctrl.open_remove_group_modal(group_id).await;
                                 },
-                                onupdate: move |_| async move {
-                                    ctrl.open_update_group_name_modal(id).await;
+                                onupdate: move |group_id| async move {
+                                    ctrl.open_update_group_name_modal(group_id).await;
                                 },
                             }
                         }

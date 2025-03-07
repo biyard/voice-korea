@@ -16,10 +16,7 @@ pub fn AddMemberModal(
     let i18n: AddDetailMemberModalTranslate = translate(&lang);
 
     let mut email = use_signal(|| "".to_string());
-
     let mut name = use_signal(|| "".to_string());
-
-    let mut select_role = use_signal(|| "".to_string());
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -114,12 +111,8 @@ pub fn AddMemberModal(
             div { class: "flex flex-row w-full justify-start items-start mt-[40px] gap-[20px]",
                 div {
                     class: "flex flex-row w-[120px] h-[40px] bg-[#2a60d3] rounded-md px-[14px] py-[8px] gap-[5px] cursor-pointer",
-                    onclick: {
-                        let group_id = group_id.clone();
-                        let group_name = group_name.clone();
-                        move |_| {
-                            onadd.call(0);
-                        }
+                    onclick: move |_| {
+                        onadd.call(0);
                     },
                     AddUser { width: "24", height: "24" }
                     div { class: "text-white font-bold text-[16px]", {i18n.invite} }

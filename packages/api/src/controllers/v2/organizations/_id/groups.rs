@@ -8,6 +8,7 @@ use by_axum::{
     },
 };
 use models::*;
+use sqlx::postgres::PgRow;
 
 #[derive(Clone, Debug)]
 pub struct GroupController {
@@ -73,11 +74,18 @@ impl GroupController {
     pub async fn get_group(
         State(ctrl): State<GroupController>,
         Extension(_auth): Extension<Option<Authorization>>,
-        Path(GroupPath { org_id, id }): Path<GroupPath>,
+        Path(GroupPath { id, org_id }): Path<GroupPath>,
     ) -> Result<Json<Group>> {
         tracing::debug!("get_group {:?}", id);
 
-        Ok(Json(ctrl.find_group_by_id(org_id, id).await?))
+        let res = Group::query_builder()
+            .id_equals(id)
+            .org_id_equals(org_id)
+            .query()
+            .map(Group::from)
+            .fetch_one(&ctrl.pool)
+            .await?;
+        Ok(Json(res))
     }
 
     pub async fn list_group(
@@ -88,7 +96,9 @@ impl GroupController {
     ) -> Result<Json<GroupGetResponse>> {
         tracing::debug!("list_group {:?}", param);
         match param {
-            GroupParam::Query(q) => ctrl.list_groups_by_id(org_id, q).await,
+            GroupParam::Query(q) => Ok(Json(GroupGetResponse::Query(
+                ctrl.list_groups_by_id(org_id, q).await?,
+            ))),
             // _ => Err(ApiError::InvalidAction),
         }
     }
@@ -133,34 +143,24 @@ impl GroupController {
         &self,
         org_id: i64,
         q: GroupQuery,
-    ) -> Result<Json<GroupGetResponse>> {
-        let query = GroupSummary::base_sql_with("where org_id = $1 limit $2 offset $3 ");
-        tracing::debug!("list_group_by_id query: {:?}", query);
-
-        let mut total_count: i64 = 0;
-        let items = sqlx::query(&query)
-            .bind(org_id)
-            .bind(q.size as i64)
-            .bind(
-                q.size as i64
-                    * (q.bookmark
-                        .unwrap_or("1".to_string())
-                        .parse::<i64>()
-                        .unwrap()
-                        - 1),
-            )
-            .map(|r: sqlx::postgres::PgRow| {
+    ) -> Result<QueryResponse<GroupSummary>> {
+        let mut total_count = 0;
+        let items = GroupSummary::query_builder()
+            .org_id_equals(org_id)
+            .with_count()
+            .limit(q.size())
+            .page(q.page())
+            .query()
+            .map(|row: PgRow| {
                 use sqlx::Row;
-                total_count = r.get("total_count");
-                r.into()
+
+                total_count = row.get("total_count");
+                row.into()
             })
             .fetch_all(&self.pool)
             .await?;
 
-        Ok(Json(GroupGetResponse::Query(QueryResponse {
-            items,
-            total_count,
-        })))
+        Ok(QueryResponse { items, total_count })
     }
 
     async fn update_group(&self, id: i64, req: GroupUpdateRequest) -> Result<Group> {
@@ -174,6 +174,7 @@ impl GroupController {
         org_id: i64,
         req: GroupAddGroupMemberRequest,
     ) -> Result<Group> {
+        // FIXME: use transaction
         let group = match self.find_group_by_id(org_id, id).await {
             Ok(g) => g,
             Err(e) => {

@@ -50,3 +50,32 @@ pub fn UpdateGroupNameModal(
         }
     }
 }
+
+translate! {
+    UpdateDetailGroupNameModalTranslate;
+
+    update_group_name_modal_info: {
+        ko: "그룹명은 한 번 수정하면 되돌릴 수 없습니다.",
+        en: "Once the group name is modified, it cannot be undone."
+    },
+    group_name: {
+        ko: "그룹명",
+        en: "Group Name"
+    },
+    update_group_name_hint: {
+        ko: "그룹명을 입력해주세요.",
+        en: "Please enter the group name."
+    },
+    update_group_name_warning: {
+        ko: "중복 입력은 허용되지 않으며, 최소 2글자 이상 입력해야 합니다.",
+        en: "Duplicate entries are not allowed, and you must enter at least 2 characters."
+    },
+    update: {
+        ko: "수정하기",
+        en: "Update"
+    },
+    cancel: {
+        ko: "취소하기",
+        en: "Cancel"
+    },
+}

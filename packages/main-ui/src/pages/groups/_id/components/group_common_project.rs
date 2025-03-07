@@ -2,15 +2,14 @@
 use dioxus::prelude::*;
 use dioxus_translate::*;
 
+use crate::components::icons::*;
+
 #[component]
-pub fn GroupCommonProject(
-    projects: Vec<GroupProject>,
-    lang: Language,
-    change_popup_state: EventHandler<MouseEvent>,
-) -> Element {
+pub fn GroupCommonProject(lang: Language, change_popup_state: EventHandler<MouseEvent>) -> Element {
     let mut name = use_signal(|| "".to_string());
     let mut is_focused = use_signal(|| false);
     let i18n: CommonProjectTranslate = translate(&lang);
+
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
             div { class: "font-bold text-[#3a3a3a] text-[16px] mb-[10px]", {i18n.common_project} }
@@ -53,7 +52,6 @@ pub fn GroupCommonProject(
                         }
                     }
                 }
-                //테이블 섹션
                 div { class: "flex flex-col w-full h-full justify-start items-start bg-white border rounded-lg border-[#bfc8d9]",
                     div { class: "flex flex-row w-full h-[55px] justify-start items-center",
                         div { class: "flex flex-row w-[120px] min-w-[120px] h-full justify-center items-center gap-[10px]",
@@ -90,66 +88,124 @@ pub fn GroupCommonProject(
                         }
                         div { class: "flex flex-row w-[90px] min-w-[90px] h-full justify-center items-center gap-[10px]" }
                     }
-                    for project in projects {
-                        div { class: "flex flex-col w-full justify-start items-start",
-                            div { class: "flex flex-row w-full h-[1px] bg-[#bfc8d9]" }
-                            div { class: "flex flex-row w-full h-[55px] justify-start items-center text-[#35343f] font-semibold text-[14px]",
-                                div { class: "flex flex-row w-[120px] min-w-[120px] h-full justify-center items-center gap-[10px]",
-                                    match project.project_type {
-                                        ProjectType::Investigation => i18n.investigation.clone(),
-                                        _ => i18n.public_opinion.clone(),
-                                    }
-                                }
-                                div { class: "flex flex-row flex-1 h-full justify-center items-center gap-[10px]",
-                                    {project.project_subject.clone()}
-                                }
-                                div { class: "flex flex-row flex-1 h-full justify-center items-center gap-[10px]",
-                                    if project.panels.len() > 0 {
-                                        Label {
-                                            label_name: project.panels[0].clone(),
-                                            label_color: "bg-[#35343f]",
-                                            is_delete: false,
-                                            //FIXME: implement onremove logic
-                                            onremove: move |_| {},
-                                        }
-                                    }
-                                    Expand { width: "18", height: "18" }
-                                }
-                                div { class: "flex flex-row flex-1 h-full justify-center items-center gap-[10px]",
-                                    {project.periods.clone()}
-                                }
-                                div { class: "flex flex-row w-[120px] min-w-[120px] h-full justify-center items-center gap-[10px]",
-                                    match project.project_status {
-                                        ProjectStatus::Ready => i18n.ready.clone(),
-                                        ProjectStatus::InProgress => i18n.in_progress.clone(),
-                                        _ => i18n.finish.clone(),
-                                    }
-                                }
-                                div { class: "group relative w-[90px] min-w-[90px] h-full justify-center items-center",
-                                    button {
-                                        class: "flex flex-row w-full h-full justify-center items-center",
-                                        onclick: move |_| {},
-                                        RowOption { width: 24, height: 24 }
-                                    }
-                                    nav {
-                                        tabindex: "0",
-                                        class: "border-2 bg-white invisible border-none shadow-lg rounded w-60 absolute right-0 top-full transition-all opacity-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-1 group-focus-within:z-20",
-                                        ul { class: "py-1",
-                                            li {
-                                                class: "p-3 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer",
-                                                onclick: move |e: MouseEvent| {
-                                                    change_popup_state.call(e);
-                                                },
-                                                {i18n.exclude_from_project.clone()}
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                                // for project in projects {
+                // div { class: "flex flex-col w-full justify-start items-start",
+                //       div { class: "flex flex-row w-full h-[1px] bg-[#bfc8d9]" }
+                //       div { class: "flex flex-row w-full h-[55px] justify-start items-center text-[#35343f] font-semibold text-[14px]",
+                //           div { class: "flex flex-row w-[120px] min-w-[120px] h-full justify-center items-center gap-[10px]",
+                //               match project.project_type {
+                //                   _ => i18n.public_opinion.clone(),
+                //               }
+                //           }
+                //           div { class: "flex flex-row flex-1 h-full justify-center items-center gap-[10px]",
+                //               {project.project_subject.clone()}
+                //           }
+                //           div { class: "flex flex-row flex-1 h-full justify-center items-center gap-[10px]",
+                //               if project.panels.len() > 0 {
+                //                   Label {
+                //                       label_name: project.panels[0].clone(),
+                //                       label_color: "bg-[#35343f]",
+                //                       is_delete: false,
+                //                       //FIXME: implement onremove logic
+                //                       onremove: move |_| {},
+                //                   }
+                //               }
+                //               Expand { width: "18", height: "18" }
+                //           }
+                //           div { class: "flex flex-row flex-1 h-full justify-center items-center gap-[10px]",
+                //               {project.periods.clone()}
+                //           }
+                //           div { class: "flex flex-row w-[120px] min-w-[120px] h-full justify-center items-center gap-[10px]",
+                //               match project.project_status {
+                //                   ProjectStatus::Ready => i18n.ready.clone(),
+                //                   ProjectStatus::InProgress => i18n.in_progress.clone(),
+                //                   _ => i18n.finish.clone(),
+                //               }
+                //           }
+                //           div { class: "group relative w-[90px] min-w-[90px] h-full justify-center items-center",
+                //               button {
+                //                   class: "flex flex-row w-full h-full justify-center items-center",
+                //                   onclick: move |_| {},
+                //                   RowOption { width: 24, height: 24 }
+                //               }
+                //               nav {
+                //                   tabindex: "0",
+                //                   class: "border-2 bg-white invisible border-none shadow-lg rounded w-60 absolute right-0 top-full transition-all opacity-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-1 group-focus-within:z-20",
+                //                   ul { class: "py-1",
+                //                       li {
+                //                           class: "p-3 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer",
+                //                           onclick: move |e: MouseEvent| {
+                //                               change_popup_state.call(e);
+                //                           },
+                //                           {i18n.exclude_from_project.clone()}
+                //                       }
+                //                   }
+                //               }
+                //           }
+                //       }
+                //   }
+
+                // }
                 }
             }
         }
     }
+}
+
+translate! {
+    CommonProjectTranslate;
+
+    common_project: {
+        ko: "공통 프로젝트",
+        en: "Common Project",
+    },
+    add_project: {
+        ko: "프로젝트 추가하기",
+        en: "Create Project",
+    },
+    item: {
+        ko: "항목",
+        en: "Item",
+    },
+    panel: {
+        ko: "패널",
+        en: "Panel",
+    },
+    period: {
+        ko: "기간",
+        en: "Period",
+    },
+    status: {
+        ko: "상태",
+        en: "Status",
+    },
+    investigation: {
+        ko: "조사",
+        en: "Investigation"
+    },
+    public_opinion: {
+        ko: "공론",
+        en: "Public Opinion"
+    },
+    ready: {
+        ko: "준비",
+        en: "Ready"
+    },
+    in_progress: {
+        ko: "진행",
+        en: "In Progress"
+    },
+    finish: {
+        ko: "마감",
+        en: "Finish"
+    },
+    exclude_from_project: {
+        ko: "프로젝트에서 제외하기",
+        en: "Exclude From Project"
+    },
+    project: {
+        ko: "프로젝트",
+        en: "Project",
+    },
+
 }
