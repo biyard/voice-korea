@@ -24,8 +24,12 @@ pub fn InstitutionBox(lang: Language, institution: OrganizationSummary) -> Eleme
             div { class: "flex flex-col w-full justify-start items-start pt-[40px] pb-[12px] px-[16px] gap-[48px]",
                 div { class: "flex flex-col w-full gap-[10px]",
                     div { class: "flex flex-row w-full gap-[6px]",
-                        div { class: "font-bold text-[16px] text-[#222222] ", "{institution.name}" }
-                        Auth { width: "24", height: "24" }
+                        div { class: "font-bold text-[16px] text-[#222222] h-[25px] truncate",
+                            "{institution.name}"
+                        }
+                        div { class: "w-[24px] h-[24px]",
+                            Auth { width: "24", height: "24" }
+                        }
                     }
                     if institution.description.is_some() {
                         div { class: "font-normal text-[14px] text-[#555462] leading-[22.4px] line-clamp-4",
