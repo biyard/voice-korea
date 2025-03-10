@@ -28,8 +28,10 @@ pub struct Organization {
     #[api_model(summary, version = v0.1)]
     pub description: Option<String>,
     #[api_model(summary, one_to_many = deliberations, foreign_key = org_id, aggregator = count)]
+    #[serde(default)]
     pub projects: i64,
     #[api_model(summary, one_to_many = deliberation_votes, foreign_key = org_id, aggregator = count)]
+    #[serde(default)]
     pub votes: i64,
 
     #[api_model(many_to_many = organization_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = org_id, unique)]
