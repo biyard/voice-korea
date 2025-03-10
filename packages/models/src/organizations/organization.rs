@@ -1,3 +1,4 @@
+#![allow(unused_variables, unused)]
 use crate::User;
 #[cfg(feature = "server")]
 use by_axum::aide;
@@ -31,7 +32,6 @@ pub struct Organization {
     pub projects: i64,
     #[api_model(summary, one_to_many = deliberation_votes, foreign_key = org_id, aggregator = count)]
     pub votes: i64,
-
     #[api_model(many_to_many = organization_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = org_id, unique)]
     #[serde(default)]
     pub users: Vec<User>,

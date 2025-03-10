@@ -5,11 +5,13 @@ use by_axum::{
 use by_types::DatabaseConfig;
 use controllers::{
     institutions::m1::InstitutionControllerM1, resources::v1::bucket::MetadataControllerV1,
-    reviews::v1::ReviewControllerV1, v2::Version2Controller,
+    v2::Version2Controller,
 };
 use models::{
     deliberation::Deliberation,
     deliberation_response::DeliberationResponse,
+    deliberation_user::DeliberationUser,
+    deliberation_vote::DeliberationVote,
     invitation::Invitation,
     response::SurveyResponse,
     review::Review,
@@ -43,10 +45,6 @@ mod controllers {
         pub mod v2;
     }
 
-    pub mod reviews {
-        pub mod v1;
-    }
-
     pub mod institutions {
         pub mod m1;
     }
@@ -74,6 +72,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let institution = Institution::get_repository(pool.clone());
     let review = Review::get_repository(pool.clone());
     let opinions = PublicOpinionProject::get_repository(pool.clone());
+    let du = DeliberationUser::get_repository(pool.clone());
+    let dv = DeliberationVote::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -89,6 +89,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     dr.create_this_table().await?;
     g.create_this_table().await?;
     gm.create_this_table().await?;
+
+    du.create_this_table().await?;
+    dv.create_this_table().await?;
 
     iv.create_this_table().await?;
     institution.create_this_table().await?;
@@ -115,6 +118,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     institution.create_related_tables().await?;
     review.create_related_tables().await?;
     opinions.create_related_tables().await?;
+
+    du.create_related_tables().await?;
+    dv.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())
@@ -164,8 +170,6 @@ async fn make_app() -> Result<Router> {
             "/institutions/m1",
             InstitutionControllerM1::route(pool.clone())?,
         )
-        // NOTE: Deprecated
-        .nest("/reviews/v1", ReviewControllerV1::route(pool.clone())?)
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
     Ok(app)
@@ -216,7 +220,8 @@ pub mod tests {
         let u = user.insert(email.clone(), password.clone(), None).await?;
         tracing::debug!("{:?}", u);
 
-        org.insert_with_dependency(u.id, email.clone()).await?;
+        org.insert_with_dependency(u.id, email.clone(), None)
+            .await?;
 
         let user = user
             .find_one(&UserReadAction::new().get_user(email, password))

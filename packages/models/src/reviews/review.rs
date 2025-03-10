@@ -16,9 +16,9 @@ pub struct Review {
     #[api_model(auto = [insert, update], summary)]
     pub updated_at: i64,
 
-    #[api_model(summary, many_to_one = deliberations)]
+    #[api_model(summary, action = create, many_to_one = deliberations)]
     pub deliberation_id: i64,
-    #[api_model(summary, many_to_one = users)]
+    #[api_model(summary, action = create, many_to_one = users)]
     pub user_id: i64,
 
     #[api_model(summary, action = create, action_by_id = update, query_action = search_by)]
