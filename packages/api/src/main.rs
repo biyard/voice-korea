@@ -3,10 +3,7 @@ use by_axum::{
     axum::Router,
 };
 use by_types::DatabaseConfig;
-use controllers::{
-    institutions::m1::InstitutionControllerM1, resources::v1::bucket::MetadataControllerV1,
-    reviews::v1::ReviewControllerV1, v2::Version2Controller,
-};
+use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Controller};
 use models::{
     deliberation::Deliberation,
     deliberation_response::DeliberationResponse,
@@ -17,28 +14,12 @@ use models::{
 };
 use models::{organization::Organization, *};
 use sqlx::postgres::PgPoolOptions;
-// use by_types::DatabaseConfig;
-// use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
 mod common;
 mod controllers {
     pub mod v1;
     pub mod v2;
-
-    // pub mod panels {
-    //     pub mod v2;
-    // }
-    pub mod resources {
-        pub mod v1;
-    }
-    // pub mod invitations {
-    //     pub mod v2;
-    // }
-
-    pub mod reviews {
-        pub mod v1;
-    }
 
     pub mod institutions {
         pub mod m1;
@@ -150,13 +131,19 @@ async fn make_app() -> Result<Router> {
             )?,
         )
         // NOTE: Deprecated
-        .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
+        .nest(
+            "/metadata/v2",
+            controllers::v2::metadata::MetadataControllerV1::route(pool.clone())?,
+        )
         .nest(
             "/institutions/m1",
             InstitutionControllerM1::route(pool.clone())?,
         )
         // NOTE: Deprecated
-        .nest("/reviews/v1", ReviewControllerV1::route(pool.clone())?)
+        .nest(
+            "/reviews/v1",
+            controllers::v2::reviews::ReviewControllerV1::route(pool.clone())?,
+        )
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
     Ok(app)
