@@ -21,14 +21,14 @@ use models::{
 };
 
 #[derive(Clone, Debug)]
-pub struct DeliberationControllerV2 {
+pub struct ProjectControllerV2 {
     deliberation_repo: DeliberationContentRepository,
 }
 
-impl DeliberationControllerV2 {
+impl ProjectControllerV2 {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         let deliberation_repo = DeliberationContent::get_repository(pool.clone());
-        let ctrl = DeliberationControllerV2 { deliberation_repo };
+        let ctrl = ProjectControllerV2 { deliberation_repo };
 
         Ok(by_axum::axum::Router::new()
             .route("/", get(Self::list_deliberations))
@@ -37,7 +37,7 @@ impl DeliberationControllerV2 {
     }
 
     pub async fn get_deliberation(
-        State(ctrl): State<DeliberationControllerV2>,
+        State(ctrl): State<ProjectControllerV2>,
         Extension(_auth): Extension<Option<Authorization>>,
         Path(id): Path<i64>,
     ) -> Result<Json<DeliberationContent>> {
@@ -59,7 +59,7 @@ impl DeliberationControllerV2 {
     }
 
     pub async fn list_deliberations(
-        State(ctrl): State<DeliberationControllerV2>,
+        State(ctrl): State<ProjectControllerV2>,
         Extension(_auth): Extension<Option<Authorization>>,
         Query(params): Query<DeliberationContentParam>,
     ) -> Result<Json<DeliberationContentGetResponse>> {
@@ -73,7 +73,7 @@ impl DeliberationControllerV2 {
     }
 }
 
-impl DeliberationControllerV2 {
+impl ProjectControllerV2 {
     pub async fn find(
         &self,
         DeliberationContentQuery { size, bookmark, .. }: DeliberationContentQuery,

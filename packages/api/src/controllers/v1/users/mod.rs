@@ -170,7 +170,7 @@ impl UserController {
 
         let org = self
             .org
-            .insert_with_tx(&mut *tx, user.email.clone())
+            .insert_with_tx(&mut *tx, user.email.clone(), None)
             .await?
             .ok_or(ApiError::DuplicateUser)?;
 
@@ -336,7 +336,7 @@ impl UserController {
                         ApiError::DuplicateUser
                     })?;
 
-                let org = self.org.insert(user.email.clone()).await?;
+                let org = self.org.insert(user.email.clone(), None).await?;
 
                 self.org_mem
                     .insert(user.id, org.id, user.email.clone(), Some(Role::Admin), None)

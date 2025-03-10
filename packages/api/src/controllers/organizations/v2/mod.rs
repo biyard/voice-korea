@@ -1,5 +1,5 @@
-pub mod contents;
 pub mod deliberations;
+pub mod projects;
 
 use by_axum::{
     auth::Authorization,
@@ -13,6 +13,7 @@ use by_axum::{
 use by_types::DatabaseConfig;
 use deliberations::DeliberationController;
 use models::*;
+use projects::OrganizationProjectController;
 use reqwest::StatusCode;
 use sqlx::postgres::PgPoolOptions;
 
@@ -51,7 +52,9 @@ impl OrganizationController {
                 "/:org-id/invitations",
                 crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
             )
-            .layer(middleware::from_fn(authorize_organization)))
+            .layer(middleware::from_fn(authorize_organization))
+            .merge(OrganizationProjectController::route(pool.clone())?)
+        )
     }
 }
 

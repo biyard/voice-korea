@@ -6,7 +6,7 @@ use validator::Validate;
 use crate::ProjectArea;
 
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberations", table = deliberations)]
+#[api_model(base = "/v2/projects", table = deliberations)]
 pub struct DeliberationContent {
     #[api_model(summary, primary_key)]
     pub id: i64,

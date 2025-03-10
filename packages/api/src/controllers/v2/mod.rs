@@ -1,11 +1,9 @@
-use deliberations::{DeliberationControllerV2, _id::responses::DeliberationResponseController};
+use deliberations::{ProjectControllerV2, _id::responses::DeliberationResponseController};
 use models::*;
 use reviews::ReviewControllerV2;
 use surveys::_id::responses::SurveyResponseController;
 
-use super::{
-    organizations::v2::contents::ContentControllerV2, resources::v1::bucket::MetadataControllerV1,
-};
+use super::resources::v1::bucket::MetadataControllerV1;
 
 pub mod reviews;
 
@@ -32,10 +30,6 @@ impl Version2Controller {
                 SurveyResponseController::route(pool.clone())?,
             )
             .nest(
-                "/organizations/contents",
-                ContentControllerV2::route(pool.clone())?,
-            )
-            .nest(
                 "/organizations",
                 crate::controllers::organizations::v2::OrganizationController::route(pool.clone())?,
             )
@@ -45,9 +39,6 @@ impl Version2Controller {
                 "/deliberations/:deliberation-id/responses",
                 DeliberationResponseController::route(pool.clone())?,
             )
-            .nest(
-                "/deliberations",
-                DeliberationControllerV2::route(pool.clone())?,
-            ))
+            .nest("/projects", ProjectControllerV2::route(pool.clone())?))
     }
 }

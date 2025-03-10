@@ -24,6 +24,8 @@ pub struct Organization {
 
     #[api_model(summary)]
     pub name: String,
+    #[api_model(summary)]
+    pub description: Option<String>,
     #[api_model(many_to_many = organization_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = org_id, unique)]
     #[serde(default)]
     pub users: Vec<User>,
