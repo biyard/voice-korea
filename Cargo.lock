@@ -5601,6 +5601,7 @@ version = "0.1.0"
 dependencies = [
  "btracing",
  "by-components",
+ "by-macros",
  "by-types",
  "chrono",
  "dioxus",

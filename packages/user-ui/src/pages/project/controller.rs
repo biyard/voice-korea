@@ -29,6 +29,7 @@ impl Controller {
         Ok(ctrl)
     }
 
+    //FIXME: fix to query deliberation data
     pub fn get_deliberation(&self) -> Deliberation {
         Deliberation {
             id: 1,
@@ -163,6 +164,7 @@ impl Controller {
                     user_id: 1,
                     deliveration_id: 1,
                     role: models::Role::Analyst,
+                    organization_id: 1,
                 },
                 DeliberationUser {
                     id: 2,
@@ -171,6 +173,7 @@ impl Controller {
                     user_id: 2,
                     deliveration_id: 1,
                     role: models::Role::Admin,
+                    organization_id: 1,
                 },
                 DeliberationUser {
                     id: 3,
@@ -179,6 +182,7 @@ impl Controller {
                     user_id: 3,
                     deliveration_id: 1,
                     role: models::Role::DeliberationAdmin,
+                    organization_id: 1,
                 },
             ],
             panels: vec![PanelV2 {
@@ -192,6 +196,7 @@ impl Controller {
             }],
             comments: vec![],
             response_count: 10,
+            votes: vec![],
         }
     }
 }
@@ -474,6 +479,7 @@ impl SampleController {
                     user_id: 1,
                     deliveration_id: 1,
                     role: models::Role::Analyst,
+                    organization_id: 1,
                 },
                 DeliberationUser {
                     id: 2,
@@ -482,6 +488,7 @@ impl SampleController {
                     user_id: 2,
                     deliveration_id: 1,
                     role: models::Role::Admin,
+                    organization_id: 1,
                 },
                 DeliberationUser {
                     id: 3,
@@ -490,6 +497,7 @@ impl SampleController {
                     user_id: 3,
                     deliveration_id: 1,
                     role: models::Role::DeliberationAdmin,
+                    organization_id: 1,
                 },
             ],
             panels: vec![PanelV2 {
@@ -503,6 +511,7 @@ impl SampleController {
             }],
             comments: vec![],
             response_count: 10,
+            votes: vec![],
         }
     }
 }
