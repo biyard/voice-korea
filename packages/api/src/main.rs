@@ -193,19 +193,39 @@ pub mod tests {
         let password = format!("password-{id}");
         let password = get_hash_string(password.as_bytes());
 
-        let u = user.insert(email.clone(), password.clone(), None).await?;
-        tracing::debug!("{:?}", u);
-
-        let o = org
-            .insert_with_dependency(u.id, email.clone(), None)
-            .await?;
-        org_mem
-            .insert(u.id, o.id, u.email.clone(), Some(Role::Admin), None)
-            .await?;
+        let mut tx = pool.begin().await?;
 
         let user = user
-            .find_one(&UserReadAction::new().get_user(email, password))
-            .await?;
+            .insert_with_tx(&mut *tx, email, password, None)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        let org = org
+            .insert_with_tx(&mut *tx, user.email.clone(), None)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        org_mem
+            .insert_with_tx(
+                &mut *tx,
+                user.id,
+                org.id,
+                user.email.clone(),
+                Some(Role::Admin),
+                None,
+            )
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        let user = User::query_builder()
+            .id_equals(user.id)
+            .query()
+            .map(User::from)
+            .fetch_optional(&mut *tx)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        tx.commit().await?;
 
         Ok(user)
     }

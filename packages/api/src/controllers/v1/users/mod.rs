@@ -198,6 +198,7 @@ impl UserController {
 
         let jwt = self.generate_token(&user)?;
 
+        // FIXME(api): it should be contained to above transaction
         self.invite_user(user.clone()).await?;
 
         Ok(JsonWithHeaders::new(user)
