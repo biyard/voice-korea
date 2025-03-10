@@ -31,7 +31,7 @@ pub struct GetObjectUriRequest {
 #[derive(validator::Validate)]
 ///FIXME: fix to filenames to type vector
 #[api_model(base = "/organizations/v2/:org_id/resources", table = resources, iter_type=QueryResponse)]
-pub struct Resource {
+pub struct ResourceFile {
     #[api_model(summary, primary_key, action = delete, read_action = find_by_id )]
     pub id: i64,
     #[api_model(auto = insert)]

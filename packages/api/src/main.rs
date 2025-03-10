@@ -59,7 +59,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let v = Verification::get_repository(pool.clone());
     let o = Organization::get_repository(pool.clone());
     let u = User::get_repository(pool.clone());
-    let resource = Resource::get_repository(pool.clone());
+    let resource = ResourceFile::get_repository(pool.clone());
     // let files = Files::get_repository(pool.clone());
     let p = PanelV2::get_repository(pool.clone());
     let s = SurveyV2::get_repository(pool.clone());

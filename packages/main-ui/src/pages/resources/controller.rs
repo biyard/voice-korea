@@ -81,7 +81,7 @@ impl Controller {
             let page = page();
             let keyword = search_keyword().clone();
             async move {
-                let client = models::Resource::get_client(&config::get().api_url);
+                let client = models::ResourceFile::get_client(&config::get().api_url);
                 let org_id = user.get_selected_org();
                 if org_id.is_none() {
                     tracing::error!("Organization ID is missing");
@@ -182,7 +182,7 @@ impl Controller {
         self.editing_row_index.set(next_index);
     }
     pub async fn handle_update_resource(&mut self, index: usize, field: UpdateResource) {
-        let client = models::Resource::get_client(&config::get().api_url);
+        let client = models::ResourceFile::get_client(&config::get().api_url);
         let mut ctrl = self.clone();
         let mut resource = (self.resources)()[index].clone();
 
@@ -242,7 +242,7 @@ impl Controller {
             return Err(models::ApiError::OrganizationNotFound);
         }
         let org_id = org.unwrap().id;
-        let client = models::Resource::get_client(&config::get().api_url);
+        let client = models::ResourceFile::get_client(&config::get().api_url);
         match client
             .create(
                 org_id,
@@ -304,7 +304,7 @@ impl Controller {
         files: Vec<File>,
     ) -> Result<(), models::ApiError> {
         let mut ctrl = self.clone();
-        let client = models::Resource::get_client(&config::get().api_url);
+        let client = models::ResourceFile::get_client(&config::get().api_url);
         let resource = self.resources.read()[index].clone();
         match client
             .update(
@@ -337,7 +337,7 @@ impl Controller {
             return Err(models::ApiError::OrganizationNotFound);
         }
         let org_id = org.unwrap().id;
-        let client = models::Resource::get_client(&config::get().api_url);
+        let client = models::ResourceFile::get_client(&config::get().api_url);
         match client.delete(org_id, id).await {
             Ok(_) => Ok(()),
             Err(e) => {

@@ -24,7 +24,7 @@ pub enum Route {
             GovernancePage { lang: Language, governance_id: i64 },
             #[route("/profile")]
             ProfilePage { lang: Language },
-            #[route("/project/:project_id")]
+            #[route("/projects/:project_id")]
             ProjectPage { lang: Language, project_id: i64 },
         #[end_layout]
     #[end_nest]

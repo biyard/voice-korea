@@ -1,3 +1,5 @@
+pub mod projects;
+
 use by_axum::{
     aide,
     auth::Authorization,

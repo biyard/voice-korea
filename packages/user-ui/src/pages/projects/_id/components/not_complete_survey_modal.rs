@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 
-use crate::pages::project::i18n::ProjectTranslate;
+use crate::pages::projects::_id::i18n::ProjectTranslate;
 
 #[component]
 pub fn NotCompleteSurveyModal(

@@ -17,32 +17,32 @@ use models::{
     GetObjectUriRequest,
     GetObjectUriResponse,
     QueryResponse,
-    Resource,
-    ResourceAction,
-    ResourceByIdAction,
-    ResourceCreateRequest,
-    ResourceGetResponse,
-    ResourceParam,
-    ResourceQuery,
-    ResourceQueryActionType,
-    ResourceReadAction,
-    ResourceRepository,
-    ResourceRepositoryUpdateRequest,
-    ResourceSummary,
-    ResourceUpdateRequest,
+    ResourceFile,
+    ResourceFileAction,
+    ResourceFileByIdAction,
+    ResourceFileCreateRequest,
+    ResourceFileGetResponse,
+    ResourceFileParam,
+    ResourceFileQuery,
+    ResourceFileQueryActionType,
+    ResourceFileReadAction,
+    ResourceFileRepository,
+    ResourceFileRepositoryUpdateRequest,
+    ResourceFileSummary,
+    ResourceFileUpdateRequest,
 };
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 
 #[derive(Clone, Debug)]
 pub struct ResourceControllerV1 {
-    repo: ResourceRepository,
+    repo: ResourceFileRepository,
     pool: sqlx::Pool<sqlx::Postgres>,
 }
 
 impl ResourceControllerV1 {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> models::Result<Router> {
-        let repo = Resource::get_repository(pool.clone());
+        let repo = ResourceFile::get_repository(pool.clone());
         let ctrl = Self { repo, pool };
 
         Ok(Router::new()
@@ -58,10 +58,10 @@ impl ResourceControllerV1 {
         State(ctrl): State<ResourceControllerV1>,
         Extension(_auth): Extension<Option<Authorization>>,
         Path((_org_id, id)): Path<(i64, i64)>,
-    ) -> models::Result<Json<Resource>> {
+    ) -> models::Result<Json<ResourceFile>> {
         let resource = ctrl
             .repo
-            .find_one(&ResourceReadAction::new().find_by_id(id))
+            .find_one(&ResourceFileReadAction::new().find_by_id(id))
             .await?;
         Ok(Json(resource))
     }
@@ -70,14 +70,18 @@ impl ResourceControllerV1 {
         State(ctrl): State<ResourceControllerV1>,
         Extension(_auth): Extension<Option<Authorization>>,
         Path(org_id): Path<i64>,
-        Query(params): Query<ResourceParam>,
-    ) -> models::Result<Json<ResourceGetResponse>> {
+        Query(params): Query<ResourceFileParam>,
+    ) -> models::Result<Json<ResourceFileGetResponse>> {
         match params {
-            ResourceParam::Query(q) => match q.action {
-                Some(ResourceQueryActionType::SearchBy) => Ok(ctrl.search_by(org_id, q).await?),
-                None => Ok(Json(ResourceGetResponse::Query(ctrl.repo.find(&q).await?))),
+            ResourceFileParam::Query(q) => match q.action {
+                Some(ResourceFileQueryActionType::SearchBy) => {
+                    Ok(ctrl.search_by(org_id, q).await?)
+                }
+                None => Ok(Json(ResourceFileGetResponse::Query(
+                    ctrl.repo.find(&q).await?,
+                ))),
             },
-            ResourceParam::Read(q) => Ok(Json(ResourceGetResponse::Read(
+            ResourceFileParam::Read(q) => Ok(Json(ResourceFileGetResponse::Read(
                 ctrl.repo.find_one(&q).await?,
             ))),
         }
@@ -87,14 +91,14 @@ impl ResourceControllerV1 {
         State(ctrl): State<ResourceControllerV1>,
         Extension(_auth): Extension<Option<Authorization>>,
         Path(org_id): Path<i64>,
-        Json(body): Json<ResourceAction>,
-    ) -> models::Result<Json<Resource>> {
+        Json(body): Json<ResourceFileAction>,
+    ) -> models::Result<Json<ResourceFile>> {
         match body {
-            ResourceAction::Create(req) => {
+            ResourceFileAction::Create(req) => {
                 let res = ctrl.create(org_id, req).await?;
                 Ok(Json(res))
             }
-            ResourceAction::Delete(req) => {
+            ResourceFileAction::Delete(req) => {
                 let res = ctrl.delete(req.id).await?;
                 Ok(Json(res))
             }
@@ -105,10 +109,10 @@ impl ResourceControllerV1 {
         State(ctrl): State<ResourceControllerV1>,
         Extension(_auth): Extension<Option<Authorization>>,
         Path((org_id, id)): Path<(i64, i64)>,
-        Json(body): Json<ResourceByIdAction>,
-    ) -> models::Result<Json<Resource>> {
+        Json(body): Json<ResourceFileByIdAction>,
+    ) -> models::Result<Json<ResourceFile>> {
         match body {
-            ResourceByIdAction::Update(req) => {
+            ResourceFileByIdAction::Update(req) => {
                 let res = ctrl.update(org_id, id, req).await?;
                 Ok(Json(res))
             }
@@ -120,20 +124,20 @@ impl ResourceControllerV1 {
     pub async fn search_by(
         &self,
         org_id: i64,
-        ResourceQuery {
+        ResourceFileQuery {
             size,
             bookmark,
             title,
             ..
-        }: ResourceQuery,
-    ) -> models::Result<Json<ResourceGetResponse>> {
+        }: ResourceFileQuery,
+    ) -> models::Result<Json<ResourceFileGetResponse>> {
         let mut total_count: i64 = 0;
 
-        let query = ResourceSummary::base_sql_with(
+        let query = ResourceFileSummary::base_sql_with(
             "where org_id = $1 and title ilike $2 limit $3 offset $4",
         );
 
-        let items: Vec<ResourceSummary> = sqlx::query(&query)
+        let items: Vec<ResourceFileSummary> = sqlx::query(&query)
             .bind(org_id)
             .bind(format!("%{}%", title.unwrap()))
             .bind(size as i64)
@@ -147,7 +151,7 @@ impl ResourceControllerV1 {
             .fetch_all(&self.pool)
             .await?;
 
-        Ok(Json(ResourceGetResponse::Query(QueryResponse {
+        Ok(Json(ResourceFileGetResponse::Query(QueryResponse {
             items,
             total_count,
         })))
@@ -155,7 +159,11 @@ impl ResourceControllerV1 {
 }
 
 impl ResourceControllerV1 {
-    async fn create(&self, org_id: i64, req: ResourceCreateRequest) -> models::Result<Resource> {
+    async fn create(
+        &self,
+        org_id: i64,
+        req: ResourceFileCreateRequest,
+    ) -> models::Result<ResourceFile> {
         tracing::debug!("create_resource: {:?}", req);
         let resource = self
             .repo
@@ -176,15 +184,15 @@ impl ResourceControllerV1 {
         &self,
         org_id: i64,
         id: i64,
-        req: ResourceUpdateRequest,
-    ) -> models::Result<Resource> {
+        req: ResourceFileUpdateRequest,
+    ) -> models::Result<ResourceFile> {
         tracing::debug!("update_resource: {:?}", req);
 
         let resource = self
             .repo
             .update(
                 id,
-                ResourceRepositoryUpdateRequest {
+                ResourceFileRepositoryUpdateRequest {
                     title: Some(req.title),
                     resource_type: req.resource_type,
                     project_area: req.project_area,
@@ -199,11 +207,11 @@ impl ResourceControllerV1 {
         Ok(resource)
     }
     #[allow(unused)]
-    async fn delete(&self, id: i64) -> models::Result<Resource> {
+    async fn delete(&self, id: i64) -> models::Result<ResourceFile> {
         tracing::debug!("delete_resource: {:?}", id);
 
         let _ = self.repo.delete(id).await?;
 
-        Ok(Resource::default())
+        Ok(ResourceFile::default())
     }
 }
