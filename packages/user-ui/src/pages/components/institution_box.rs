@@ -5,7 +5,7 @@ use num_format::{Locale, ToFormattedString};
 
 use crate::{
     components::icons::{auth::Auth, project::ProjectIcon, vote::Vote},
-    pages::main::i18n::InstitutionBoxTranslate,
+    pages::i18n::InstitutionBoxTranslate,
 };
 
 #[component]
