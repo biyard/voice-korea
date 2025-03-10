@@ -21,7 +21,6 @@ pub struct DeliberationProjectPath {
 
 #[derive(Clone, Debug)]
 pub struct DeliberationProjectController {
-    repo: DeliberationProjectRepository,
     pool: sqlx::Pool<sqlx::Postgres>,
 }
 
@@ -52,9 +51,7 @@ impl DeliberationProjectController {
 
 impl DeliberationProjectController {
     pub fn new(pool: sqlx::Pool<sqlx::Postgres>) -> Self {
-        let repo = DeliberationProject::get_repository(pool.clone());
-
-        Self { repo, pool }
+        Self { pool }
     }
 
     pub fn route(&self) -> Result<by_axum::axum::Router> {

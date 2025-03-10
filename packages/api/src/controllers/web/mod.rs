@@ -11,6 +11,7 @@ use by_axum::{
 };
 use dto::{LandingData, LandingDataGetResponse, LandingDataParam, LandingDataReadActionType};
 use models::*;
+use projects::DeliberationProjectController;
 
 #[derive(
     Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
@@ -39,7 +40,11 @@ impl WebController {
     pub fn route(&self) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
             .route("/", get(Self::get_web))
-            .with_state(self.clone()))
+            .with_state(self.clone())
+            .nest(
+                "/projects",
+                DeliberationProjectController::new(self.pool.clone()).route()?,
+            ))
     }
 
     pub async fn get_web(
