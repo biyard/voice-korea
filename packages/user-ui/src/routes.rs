@@ -4,12 +4,7 @@ use dioxus_translate::Language;
 #[allow(unused)]
 use crate::layout::{RootLayout, RootLayoutWithFooter};
 
-use crate::pages::governance::_id::GovernancePage;
-use crate::pages::profile::page::ProfilePage;
-use crate::pages::project::page::ProjectPage;
-use crate::pages::users::login::UserLoginPage;
-use crate::pages::MainPage;
-use crate::pages::NotFoundPage;
+use crate::pages::*;
 
 #[derive(Clone, Routable)]
 #[rustfmt::skip]
@@ -32,7 +27,6 @@ pub enum Route {
             #[route("/project/:project_id")]
             ProjectPage { lang: Language, project_id: i64 },
         #[end_layout]
-        
     #[end_nest]
     #[redirect("/", || Route::MainPage { lang: Language::Ko })]
     #[route("/:..route")]

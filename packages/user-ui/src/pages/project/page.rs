@@ -11,6 +11,7 @@ use crate::{
         triangle::{TriangleDown, TriangleUp},
     },
     pages::project::{components::sample::Sample, controller},
+    routes::Route,
 };
 
 #[component]
@@ -22,6 +23,7 @@ pub fn ProjectPage(lang: Language, project_id: i64) -> Element {
         div {
             ProjectProfile { lang }
             ProjectDetailsMenu { lang }
+            Outlet::<Route> {}
         }
     }
 }

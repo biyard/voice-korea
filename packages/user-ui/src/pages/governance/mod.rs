@@ -1,1 +1,3 @@
-pub mod _id;
+mod _id;
+
+pub use _id::*;
