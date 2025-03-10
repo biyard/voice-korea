@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::deliberation_content::DeliberationContentSummary;
+use models::deliberation_project::DeliberationProject;
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[component]
-pub fn ProjectBox(lang: Language, deliberation: DeliberationContentSummary) -> Element {
+pub fn ProjectBox(lang: Language, deliberation: DeliberationProject) -> Element {
     let project_url = asset!("/public/images/project.png").to_string();
     let institution_badge_url = asset!("/public/images/institution_badge.png").to_string();
     let tr: ProjectBoxTranslate = translate(&lang);

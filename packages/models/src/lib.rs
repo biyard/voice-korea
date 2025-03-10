@@ -18,6 +18,7 @@ pub mod deliberation_responses;
 pub mod deliberation_users;
 pub mod deliberation_votes;
 pub mod deliberations;
+pub mod dto;
 mod group_members;
 pub mod invitations;
 mod organization_members;
