@@ -4,10 +4,7 @@ use chrono::{TimeZone, Utc};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
-use models::{
-    AccessLevel, File, ProjectArea, QueryResponse, ResourceCreateRequest, ResourceGetResponse,
-    ResourceQuery, ResourceSummary, ResourceType, ResourceUpdateRequest, Source, UsagePurpose,
-};
+use models::*;
 
 use crate::{
     api, config,
@@ -62,19 +59,19 @@ pub struct Controller {
     pub page: Signal<usize>,
     pub size: usize,
     pub search_keyword: Signal<String>,
-    resources: Signal<Vec<ResourceSummary>>,
-    metadata_resources: Resource<QueryResponse<ResourceSummary>>,
+    resources: Signal<Vec<ResourceFileSummary>>,
+    metadata_resources: Resource<QueryResponse<ResourceFileSummary>>,
 }
 
 impl Controller {
-    pub fn new(lang: dioxus_translate::Language) -> Result<Self, RenderError> {
+    pub fn new(lang: dioxus_translate::Language) -> std::result::Result<Self, RenderError> {
         let user: LoginService = use_context();
         let page = use_signal(|| 1);
         let size = 10;
         let search_keyword = use_signal(|| "".to_string());
 
         //FIXME:
-        let mut resources: Signal<Vec<ResourceSummary>> = use_signal(Vec::new);
+        let mut resources: Signal<Vec<ResourceFileSummary>> = use_signal(Vec::new);
         let mut total_count = use_signal(|| 0);
 
         let metadata_resources = use_server_future(move || {
@@ -89,7 +86,7 @@ impl Controller {
                 }
 
                 if keyword.is_empty() {
-                    let query = ResourceQuery::new(size).with_page(page);
+                    let query = ResourceFileQuery::new(size).with_page(page);
                     client
                         .query(org_id.unwrap().id, query)
                         .await
@@ -129,7 +126,7 @@ impl Controller {
     pub fn change_page(&mut self, page: usize) {
         self.page.set(page);
     }
-    pub fn get_resources(&self) -> Vec<ResourceSummary> {
+    pub fn get_resources(&self) -> Vec<ResourceFileSummary> {
         (self.resources)().clone()
     }
 
@@ -236,7 +233,7 @@ impl Controller {
         source: Option<Source>,
         access_level: Option<AccessLevel>,
         files: Vec<File>,
-    ) -> Result<(), models::ApiError> {
+    ) -> Result<()> {
         let org = self.user.get_selected_org();
         if org.is_none() {
             return Err(models::ApiError::OrganizationNotFound);
@@ -265,7 +262,7 @@ impl Controller {
     }
 
     pub fn download_files(&self, id: i64) {
-        let resources: Vec<ResourceSummary> = (self.resources)()
+        let resources: Vec<ResourceFileSummary> = (self.resources)()
             .iter()
             .filter(|d| d.id == id)
             .map(|v| v.clone())
@@ -302,7 +299,7 @@ impl Controller {
         index: usize,
         title: String,
         files: Vec<File>,
-    ) -> Result<(), models::ApiError> {
+    ) -> Result<()> {
         let mut ctrl = self.clone();
         let client = models::ResourceFile::get_client(&config::get().api_url);
         let resource = self.resources.read()[index].clone();
@@ -331,7 +328,7 @@ impl Controller {
         }
     }
 
-    pub async fn remove_resource(&self, id: i64) -> Result<(), models::ApiError> {
+    pub async fn remove_resource(&self, id: i64) -> Result<()> {
         let org = self.user.get_selected_org();
         if org.is_none() {
             return Err(models::ApiError::OrganizationNotFound);
