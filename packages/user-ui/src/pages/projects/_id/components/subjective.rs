@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::SubjectiveQuestion;
 
-use crate::{components::input::InputBox, pages::project::i18n::SurveyTranslate};
+use crate::{components::input::InputBox, pages::projects::_id::i18n::SurveyTranslate};
 
 #[component]
 pub fn Subjective(

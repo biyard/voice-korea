@@ -6,12 +6,12 @@ pub mod page;
 mod governance;
 mod not_found;
 mod profile;
-mod project;
+mod projects;
 mod users;
 
 pub use governance::*;
 pub use not_found::*;
 pub use page::*;
 pub use profile::*;
-pub use project::*;
+pub use projects::*;
 pub use users::*;

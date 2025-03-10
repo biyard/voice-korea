@@ -8,7 +8,7 @@ use by_macros::api_model;
 use validator::Validate;
 
 use crate::deliberation_vote::DeliberationVote;
-use crate::{PanelV2, ProjectArea, Resource, SurveyV2};
+use crate::{PanelV2, ProjectArea, ResourceFile, SurveyV2};
 
 #[derive(Validate)]
 #[api_model(base = "/organizations/v2/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>)], table = deliberations)]
@@ -42,7 +42,7 @@ pub struct Deliberation {
     pub description: String,
 
     #[api_model(many_to_many = deliberation_resources, table_name = resources, foreign_primary_key = resource_id, foreign_reference_key = deliberation_id)]
-    pub resources: Vec<Resource>,
+    pub resources: Vec<ResourceFile>,
 
     #[api_model(many_to_many = deliberation_surveys, table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = deliberation_id)]
     pub surveys: Vec<SurveyV2>,

@@ -6,7 +6,7 @@ use dioxus::prelude::*;
 use crate::components::icons::Search;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::{AccessLevel, ProjectArea, ResourceSummary, ResourceType, Source, UsagePurpose};
+use models::{AccessLevel, ProjectArea, ResourceFileSummary, ResourceType, Source, UsagePurpose};
 
 use crate::{
     components::{
@@ -40,7 +40,7 @@ pub fn Badge(value: String, #[props(default = "".to_string())] class: String) ->
 pub fn TableRow(
     resource_index: usize,
     lang: Language,
-    resource: ResourceSummary,
+    resource: ResourceFileSummary,
     is_editing: bool,
     onedit: EventHandler<bool>,
     onupdate: EventHandler<UpdateResource>,
