@@ -25,6 +25,7 @@ mod common;
 mod controllers {
     pub mod v1;
     pub mod v2;
+    pub mod web;
 
     pub mod panels {
         pub mod v2;
@@ -138,6 +139,10 @@ async fn make_app() -> Result<Router> {
     migration(&pool).await?;
 
     let app = app
+        .nest(
+            "/web",
+            crate::controllers::web::WebController::new(pool.clone()).route()?,
+        )
         .nest("/v2", Version2Controller::route(pool.clone())?)
         .nest(
             "/v1/users",
