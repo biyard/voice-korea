@@ -1,14 +1,17 @@
-mod controller;
-pub mod governance;
-mod i18n;
-pub mod not_found;
-pub mod profile;
-pub mod project;
-pub mod users;
-
-pub mod page;
-pub use page::MainPage;
-
 mod components;
+mod controller;
+mod i18n;
+pub mod page;
 
-pub use not_found::NotFoundPage;
+mod governance;
+mod not_found;
+mod profile;
+mod project;
+mod users;
+
+pub use governance::*;
+pub use not_found::*;
+pub use page::*;
+pub use profile::*;
+pub use project::*;
+pub use users::*;
