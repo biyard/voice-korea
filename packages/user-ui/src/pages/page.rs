@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::deliberation_content::DeliberationContentSummary;
+use models::deliberation_project::DeliberationContentSummary;
 use models::organization_content::OrganizationContentSummary;
 
 use crate::components::icons::check::Check;

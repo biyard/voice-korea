@@ -4,9 +4,10 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
 use models::{
-    deliberation_content::{
-        DeliberationContent, DeliberationContentQuery, DeliberationContentSummary,
+    deliberation_project::{
+        DeliberationContentQuery, DeliberationContentSummary, DeliberationProject,
     },
+    dto::LandingData,
     organization_content::{
         OrganizationContent, OrganizationContentQuery, OrganizationContentSummary,
     },
@@ -19,68 +20,19 @@ use models::{
 pub struct Controller {
     lang: Language,
 
-    reviews: Resource<QueryResponse<ReviewSummary>>,
-    deliberations: Resource<QueryResponse<DeliberationContentSummary>>,
-    organizations: Resource<QueryResponse<OrganizationContentSummary>>,
-
-    review_page: Signal<usize>,
-    deliberation_page: Signal<usize>,
-    organization_page: Signal<usize>,
+    data: Resource<LandingData>,
 }
 
 impl Controller {
     pub fn init(lang: Language) -> std::result::Result<Self, RenderError> {
-        let review_page = use_signal(|| 1);
-        let deliberation_page = use_signal(|| 1);
-        let organization_page = use_signal(|| 1);
-
-        let reviews = use_server_future(move || {
-            //FIXME: fix to implement pagenation
-            let page = review_page();
-            let size = 10;
-
-            async move {
-                let client = Review::get_client(&crate::config::get().api_url);
-                let query = ReviewQuery::new(size).with_page(page);
-                client.query(query).await.unwrap_or_default()
-            }
+        let data = use_server_future(move || async move {
+            LandingData::get_client(&crate::config::get().api_url)
+                .find_one()
+                .await
+                .unwrap_or_default()
         })?;
 
-        let deliberations = use_server_future(move || {
-            //FIXME: fix to implement pagenation
-            let page = deliberation_page();
-            let size = 6;
-
-            async move {
-                let client = DeliberationContent::get_client(&crate::config::get().api_url);
-                let query = DeliberationContentQuery::new(size).with_page(page);
-                client.query(query).await.unwrap_or_default()
-            }
-        })?;
-
-        let organizations = use_server_future(move || {
-            //FIXME: fix to implement pagenation
-            let page = organization_page();
-            let size = 10;
-
-            async move {
-                let client = OrganizationContent::get_client(&crate::config::get().api_url);
-                let query = OrganizationContentQuery::new(size).with_page(page);
-                client.query(query).await.unwrap_or_default()
-            }
-        })?;
-
-        let ctrl = Self {
-            lang,
-
-            reviews,
-            deliberations,
-            organizations,
-
-            review_page,
-            deliberation_page,
-            organization_page,
-        };
+        let ctrl = Self { lang, data };
 
         use_context_provider(|| ctrl);
         Ok(ctrl)

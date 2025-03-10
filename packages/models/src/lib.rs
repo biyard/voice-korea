@@ -18,6 +18,7 @@ pub mod deliberation_responses;
 pub mod deliberation_users;
 pub mod deliberation_votes;
 pub mod deliberations;
+pub mod dto;
 mod group_members;
 pub mod invitations;
 mod organization_members;
@@ -56,6 +57,7 @@ pub mod prelude {
     pub use crate::public_opinion::*;
     pub use crate::resource::*;
     pub use crate::reviews::*;
+    pub use dto;
     // pub use crate::public_survey::*;
 
     pub use crate::group_members::*;

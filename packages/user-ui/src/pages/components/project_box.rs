@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::deliberation_content::DeliberationContentSummary;
+use models::deliberation_project::DeliberationContentSummary;
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
