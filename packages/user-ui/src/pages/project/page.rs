@@ -14,14 +14,15 @@ use crate::pages::project::{
 pub fn ProjectPage(lang: Language, project_id: i64) -> Element {
     let ctrl = controller::Controller::init(lang)?;
     let deliberation = ctrl.get_deliberation();
+
     tracing::debug!("deliberation: {:?}", deliberation);
 
     rsx! {
         div {
-            ProjectProfile { lang }
+            ProjectProfile { lang, deliberation }
             ProjectMenu { lang }
             ProjectDetails { lang }
-            Comment {}
+            Comment { lang }
         }
     }
 }

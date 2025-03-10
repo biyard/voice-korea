@@ -1,8 +1,10 @@
 use dioxus::prelude::*;
 use dioxus_translate::Language;
 
+use models::deliberation::Deliberation;
+
 #[component]
-pub fn ProjectProfile(lang: Language) -> Element {
+pub fn ProjectProfile(lang: Language, deliberation: Deliberation) -> Element {
     rsx! {
         div { class: "max-w-[1300px] h-[300px] mb-[40px] flex flex- row justify-center items-center gap-[40px]",
             // TODO: connect to data and UI
