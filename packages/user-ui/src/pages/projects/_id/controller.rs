@@ -1,30 +1,46 @@
 #![allow(unused)]
+use super::components::not_complete_survey_modal::NotCompleteSurveyModal;
+use crate::{service::popup_service::PopupService, utils::time::formatted_timestamp_to_sec};
+use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use models::{
     deliberation::{Deliberation, Step},
+    deliberation_project::DeliberationProject,
     deliberation_user::DeliberationUser,
     response::Answer,
-    ChoiceQuestion, PanelCountsV2, PanelV2, Question, Resource, ResourceType, SubjectiveQuestion,
-    SurveyV2,
-};
-
-use crate::{
-    pages::project::components::not_complete_survey_modal::NotCompleteSurveyModal,
-    service::popup_service::PopupService, utils::time::formatted_timestamp_to_sec,
+    ChoiceQuestion, PanelCountsV2, PanelV2, Question, ResourceFile, ResourceType,
+    SubjectiveQuestion, SurveyV2,
 };
 
 use super::i18n::ProjectTranslate;
 
-#[derive(Debug, Clone, Copy)]
-pub struct Controller {}
+#[derive(Debug, Clone, Copy, DioxusController)]
+pub struct Controller {
+    #[allow(dead_code)]
+    lang: Language,
+    #[allow(dead_code)]
+    id: ReadOnlySignal<i64>,
+
+    #[allow(dead_code)]
+    summary: Resource<DeliberationProject>,
+}
 
 impl Controller {
-    pub fn init(lang: Language) -> std::result::Result<Self, RenderError> {
-        let mut ctrl = Self {};
+    pub fn init(lang: Language, id: ReadOnlySignal<i64>) -> std::result::Result<Self, RenderError> {
+        let summary = use_server_future(move || {
+            let id = id();
 
-        use_context_provider(|| ctrl);
+            async move {
+                let endpoint = crate::config::get().api_url;
+                DeliberationProject::get_client(endpoint)
+                    .get(id)
+                    .await
+                    .unwrap_or_default()
+            }
+        })?;
+        let ctrl = Self { lang, id, summary };
 
         Ok(ctrl)
     }
@@ -69,7 +85,7 @@ impl Controller {
             title: "지역사회 교통 개선 프로젝트".to_string(),
             description: "1. 공론조사의 목적 및 배경\n지역 주민들의 blah blah".to_string(),
             resources: vec![
-                Resource {
+                ResourceFile {
                     id: 1,
                     created_at: 1741103145,
                     updated_at: 1741103145,
@@ -82,7 +98,7 @@ impl Controller {
                     org_id: 1,
                     files: vec![],
                 },
-                Resource {
+                ResourceFile {
                     id: 2,
                     created_at: 1741103145,
                     updated_at: 1741103145,
@@ -375,7 +391,7 @@ impl SampleController {
             title: "지역사회 교통 개선 프로젝트".to_string(),
             description: "1. 공론조사의 목적 및 배경\n지역 주민들의 blah blah".to_string(),
             resources: vec![
-                Resource {
+                ResourceFile {
                     id: 1,
                     created_at: 1741103145,
                     updated_at: 1741103145,
@@ -388,7 +404,7 @@ impl SampleController {
                     org_id: 1,
                     files: vec![],
                 },
-                Resource {
+                ResourceFile {
                     id: 2,
                     created_at: 1741103145,
                     updated_at: 1741103145,

@@ -4,7 +4,7 @@ use crate::{
         person::Person,
         triangle::{TriangleDown, TriangleUp},
     },
-    pages::project::{
+    pages::projects::_id::{
         components::{
             multiple_objective::MultipleObjective, single_objective::SingleObjective,
             subjective::Subjective,

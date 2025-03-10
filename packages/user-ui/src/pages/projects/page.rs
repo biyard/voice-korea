@@ -2,15 +2,14 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
 
-use crate::{
-    components::icons::{
-        download::DownloadIcon,
-        pencil::Pencil,
-        person::Person,
-        right_arrow::RightArrow,
-        triangle::{TriangleDown, TriangleUp},
-    },
-    pages::project::{components::sample::Sample, controller},
+use super::{components::sample::Sample, controller};
+
+use crate::components::icons::{
+    download::DownloadIcon,
+    pencil::Pencil,
+    person::Person,
+    right_arrow::RightArrow,
+    triangle::{TriangleDown, TriangleUp},
 };
 
 #[component]

@@ -6,7 +6,7 @@ use validator::Validate;
 use crate::ProjectArea;
 
 #[derive(Validate)]
-#[api_model(table = deliberations)]
+#[api_model(base = "/web/projects", table = deliberations)]
 pub struct DeliberationProject {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -14,6 +14,9 @@ pub struct DeliberationProject {
     pub created_at: i64,
     #[api_model(summary, auto = [insert, update])]
     pub updated_at: i64,
+
+    pub started_at: i64,
+    pub ended_at: i64,
 
     #[api_model(summary)]
     pub title: String,
@@ -28,4 +31,12 @@ pub struct DeliberationProject {
     pub participants: i64,
     #[api_model(summary, one_to_many = deliberation_votes, foreign_key = deliberation_id, aggregator = count)]
     pub votes: i64,
+}
+
+impl DeliberationProject {
+    pub fn period(&self) -> String {
+        // TODO: (FE) returns Feb. 12, 2025 - Mar. 15, 2025
+
+        todo!()
+    }
 }

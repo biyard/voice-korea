@@ -1,3 +1,5 @@
+pub mod projects;
+
 use by_axum::{
     aide,
     auth::Authorization,
@@ -14,6 +16,7 @@ use models::{
     review::{Review, ReviewSummary},
     *,
 };
+use projects::DeliberationProjectController;
 use sqlx::postgres::PgRow;
 
 #[derive(
@@ -75,7 +78,11 @@ impl WebController {
     pub fn route(&self) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
             .route("/", get(Self::get_web))
-            .with_state(self.clone()))
+            .with_state(self.clone())
+            .nest(
+                "/projects",
+                DeliberationProjectController::new(self.pool.clone()).route()?,
+            ))
     }
 
     pub async fn get_web(
