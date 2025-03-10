@@ -4,7 +4,7 @@ use crate::{
             my_sample_survey::MySurvey, sample_statistics::SampleStatistics, sample_survey::Survey,
             survey_info::SurveyInfo,
         },
-        controller,
+        controller::Controller,
     },
     utils::time::current_timestamp,
 };
@@ -46,7 +46,7 @@ pub fn get_survey_status(started_at: i64, ended_at: i64) -> SurveyStatus {
 
 #[component]
 pub fn Sample(lang: Language) -> Element {
-    let mut ctrl = controller::SampleController::init(lang)?;
+    let mut ctrl: Controller = use_context();
     let mut survey_clicked: Signal<SurveyStep> = use_signal(|| SurveyStep::Display);
 
     let deliberation = ctrl.get_deliberation();
