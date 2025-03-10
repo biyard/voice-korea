@@ -1,4 +1,5 @@
-pub mod deliberations;
+pub mod _id;
+use _id::*;
 
 use by_axum::{
     auth::Authorization,
@@ -10,8 +11,7 @@ use by_axum::{
     },
 };
 use by_types::DatabaseConfig;
-use deliberations::DeliberationController;
-use models::*;
+use models::{User, UserReadAction};
 use reqwest::StatusCode;
 use sqlx::postgres::PgPoolOptions;
 
@@ -19,36 +19,35 @@ use sqlx::postgres::PgPoolOptions;
 pub struct OrganizationController {}
 
 impl OrganizationController {
-    pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
+    pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> models::Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
             .nest(
                 "/:org-id/deliberations",
-                DeliberationController::new(pool.clone()).route()?,
+                deliberations::DeliberationController::new(pool.clone()).route()?,
             )
             .nest(
                 "/:org-id/surveys",
-                crate::controllers::survey::v2::SurveyControllerV2::route(pool.clone())?,
+                surveys::SurveyControllerV2::route(pool.clone())?,
             )
             .nest(
                 "/:org-id/panels",
-                crate::controllers::panels::v2::PanelControllerV2::route(pool.clone())?,
+                panels::PanelControllerV2::route(pool.clone())?,
             )
             .nest(
                 "/:org-id/resources",
-                crate::controllers::resources::v1::ResourceControllerV1::route(pool.clone())?,
+                resources::ResourceControllerV1::route(pool.clone())?,
             )
             .nest(
                 "/:org-id/members",
-                crate::controllers::v2::organizations::_id::members::OrganizationMemberController::new(pool.clone())
-                    .route(),
+                members::OrganizationMemberController::new(pool.clone()).route(),
             )
             .nest(
                 "/:org-id/groups",
-                crate::controllers::v2::organizations::_id::groups::GroupController::route(pool.clone())?,
+                groups::GroupController::route(pool.clone())?,
             )
             .nest(
                 "/:org-id/invitations",
-                crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
+                invitations::InvitationControllerV2::route(pool.clone())?,
             )
             .layer(middleware::from_fn(authorize_organization)))
     }

@@ -12,7 +12,7 @@ use by_macros::api_model;
 use by_types::QueryResponse;
 
 #[derive(validator::Validate)]
-#[api_model(base = "/organizations/v2/:org-id/panels", table = panels, iter_type=QueryResponse)]
+#[api_model(base = "/v2/organizations/:org-id/panels", table = panels, iter_type=QueryResponse)]
 pub struct PanelV2 {
     #[api_model(summary, primary_key, action = delete, read_action = [get_panel, find_by_id])]
     pub id: i64,

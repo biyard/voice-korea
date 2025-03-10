@@ -1,12 +1,13 @@
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::api_model;
-use validator::Validate;
 
 use crate::ProjectArea;
 
-#[derive(Validate)]
-#[api_model(base = "/web/projects", table = deliberations)]
+// TODO(web): using resource for project.
+// TODO(api): implement Query of GET /v2/projects
+// TODO(api): implement GET /v2/projects/:id
+#[api_model(base = "/v2/projects", table = deliberations)]
 pub struct DeliberationProject {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -35,7 +36,7 @@ pub struct DeliberationProject {
 
 impl DeliberationProject {
     pub fn period(&self) -> String {
-        // TODO: (FE) returns Feb. 12, 2025 - Mar. 15, 2025
+        // TODO(web): returns Feb. 12, 2025 - Mar. 15, 2025
 
         todo!()
     }

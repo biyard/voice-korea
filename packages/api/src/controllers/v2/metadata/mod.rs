@@ -26,8 +26,6 @@ use models::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::ResourceControllerV1;
-
 #[derive(Clone, Debug)]
 pub struct MetadataControllerV1 {}
 

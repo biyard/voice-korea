@@ -9,8 +9,6 @@ use by_axum::{
     },
 };
 
-pub mod bucket;
-
 use models::{
     // ResourceDeleteRequest,
     ApiError,
