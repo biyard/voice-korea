@@ -5,7 +5,7 @@ use by_axum::{
 use by_types::DatabaseConfig;
 use controllers::{
     institutions::m1::InstitutionControllerM1, resources::v1::bucket::MetadataControllerV1,
-    reviews::v1::ReviewControllerV1, v2::Version2Controller,
+    v2::Version2Controller,
 };
 use models::{
     deliberation::Deliberation,
@@ -40,10 +40,6 @@ mod controllers {
     }
     pub mod invitations {
         pub mod v2;
-    }
-
-    pub mod reviews {
-        pub mod v1;
     }
 
     pub mod institutions {
@@ -159,8 +155,6 @@ async fn make_app() -> Result<Router> {
             "/institutions/m1",
             InstitutionControllerM1::route(pool.clone())?,
         )
-        // NOTE: Deprecated
-        .nest("/reviews/v1", ReviewControllerV1::route(pool.clone())?)
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
     Ok(app)

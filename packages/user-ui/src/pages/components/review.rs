@@ -19,7 +19,7 @@ pub fn ReviewSection(lang: Language, public_opinion_reviews: Vec<ReviewSummary>)
             div { class: "flex flex-row w-full justify-center items-center gap-[20px]",
                 div { class: "bg-[#8095ea] rounded-[8px] px-[10px] py-[8px]", LeftArrow {} }
                 div { class: "flex flex-row w-full max-w-[1300px]",
-                    div { class: "grid grid-cols-3 gap-[20px]",
+                    div { class: "grid grid-cols-3 gap-[20px] w-full",
                         for review in public_opinion_reviews {
                             Review { review }
                         }

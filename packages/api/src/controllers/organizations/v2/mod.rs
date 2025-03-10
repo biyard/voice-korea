@@ -1,3 +1,4 @@
+pub mod contents;
 pub mod deliberations;
 
 use by_axum::{
