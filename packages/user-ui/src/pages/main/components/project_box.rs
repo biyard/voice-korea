@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::v2::PublicOpinionProjectSummary;
+use models::deliberation_content::DeliberationContentSummary;
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[component]
-pub fn ProjectBox(lang: Language, project: PublicOpinionProjectSummary) -> Element {
+pub fn ProjectBox(lang: Language, deliberation: DeliberationContentSummary) -> Element {
     let project_url = asset!("/public/images/project.png").to_string();
     let institution_badge_url = asset!("/public/images/institution_badge.png").to_string();
     let tr: ProjectBoxTranslate = translate(&lang);
@@ -21,10 +21,10 @@ pub fn ProjectBox(lang: Language, project: PublicOpinionProjectSummary) -> Eleme
             div { class: "flex flex-col w-full justify-start items-start rounded-[20px] bg-white px-[16px] pt-[20px] pb-[12px]",
                 div { class: "flex flex-col gap-[16px]",
                     div { class: "flex flex-col gap-[8px]",
-                        div { class: "font-bold text-[18px] text-[#222222]", "{project.title}" }
+                        div { class: "font-bold text-[18px] text-[#222222]", "{deliberation.title}" }
                         div { class: "flex flex-col gap-[12px]",
                             div { class: "font-normal text-[#555462] text-[14px]",
-                                "{project.description}"
+                                "{deliberation.description}"
                             }
                             div { class: "flex flex-col gap-[8px]",
                                 div { class: "flex flex-row gap-[4px]",
@@ -34,13 +34,11 @@ pub fn ProjectBox(lang: Language, project: PublicOpinionProjectSummary) -> Eleme
                                         height: 24,
                                     }
                                     div { class: "font-semibold text-[#222222] text-[14px]",
-                                        "{project.policy_making_institution}"
+                                        "Organizations"
                                     }
                                 }
 
-                                if let Some(area) = project.project_area {
-                                    Label { name: area.to_string() }
-                                }
+                                Label { name: deliberation.project_area.to_string() }
                             }
                         }
                     }
@@ -53,7 +51,7 @@ pub fn ProjectBox(lang: Language, project: PublicOpinionProjectSummary) -> Eleme
                                     "{tr.participant}"
                                 }
                                 div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
-                                    {project.num_of_participation.to_formatted_string(&Locale::en)}
+                                    {deliberation.participants.to_formatted_string(&Locale::en)}
                                 }
                             }
                         }
@@ -65,7 +63,7 @@ pub fn ProjectBox(lang: Language, project: PublicOpinionProjectSummary) -> Eleme
                                     "{tr.vote}"
                                 }
                                 div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
-                                    {project.num_of_vote.to_formatted_string(&Locale::en)}
+                                    {deliberation.votes.to_formatted_string(&Locale::en)}
                                 }
                             }
                         }

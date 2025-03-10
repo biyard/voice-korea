@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::v2::{InstitutionSummary, PublicOpinionProjectSummary};
+use models::deliberation_content::DeliberationContentSummary;
+use models::organization_content::OrganizationContentSummary;
 
 use crate::components::icons::check::Check;
 use crate::pages::main::components::inquiry::InquirySection;
@@ -19,9 +20,9 @@ use super::controller;
 pub fn MainPage(lang: Language) -> Element {
     let ctrl = controller::Controller::init(lang.clone())?;
 
-    let public_opinions = ctrl.get_public_opinions();
-    let public_opinion_institutions = ctrl.get_public_opinion_institutions();
-    let public_opinion_reviews = ctrl.get_public_opinion_reviews();
+    let deliberations = ctrl.get_public_opinions();
+    let institutions = ctrl.get_institutions();
+    let public_opinion_reviews = ctrl.get_reviews();
 
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center gap-[100px]",
@@ -29,11 +30,7 @@ pub fn MainPage(lang: Language) -> Element {
                 div { class: "flex flex-col w-full justify-center items-center gap-[50px]",
                     MainBanner { lang }
 
-                    OpinionSection {
-                        lang,
-                        public_opinions,
-                        public_opinion_institutions,
-                    }
+                    OpinionSection { lang, deliberations, institutions }
 
                     PriceSection { lang }
                 }
@@ -187,19 +184,19 @@ pub fn InfoBox(label: String, description: String) -> Element {
 #[component]
 pub fn OpinionSection(
     lang: Language,
-    public_opinions: Vec<PublicOpinionProjectSummary>,
-    public_opinion_institutions: Vec<InstitutionSummary>,
+    deliberations: Vec<DeliberationContentSummary>,
+    institutions: Vec<OrganizationContentSummary>,
 ) -> Element {
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center gap-[120px]",
             div { class: "flex flex-col w-full max-w-[1300px] justify-center items-center px-[10px]",
                 div { class: "flex flex-col w-full justify-start items-start gap-[120px]",
                     OpinionFeature { lang }
-                    OpinionProject { lang, public_opinions }
+                    OpinionProject { lang, deliberations }
                 }
             }
 
-            OpinionInstitution { lang, public_opinion_institutions }
+            OpinionInstitution { lang, institutions }
         }
     }
 }
@@ -207,7 +204,7 @@ pub fn OpinionSection(
 #[component]
 pub fn OpinionInstitution(
     lang: Language,
-    public_opinion_institutions: Vec<InstitutionSummary>,
+    institutions: Vec<OrganizationContentSummary>,
 ) -> Element {
     let tr: OpinionInstitutionTranslate = translate(&lang);
     rsx! {
@@ -223,7 +220,7 @@ pub fn OpinionInstitution(
                 }
                 div { class: "flex flex-col w-full gap-[40px]",
                     div { class: "grid grid-cols-5 gap-[20px]",
-                        for institution in public_opinion_institutions {
+                        for institution in institutions {
                             Link {
                                 to: Route::GovernancePage {
                                     lang,
@@ -248,15 +245,12 @@ pub fn OpinionInstitution(
 }
 
 #[component]
-pub fn OpinionProject(
-    lang: Language,
-    public_opinions: Vec<PublicOpinionProjectSummary>,
-) -> Element {
+pub fn OpinionProject(lang: Language, deliberations: Vec<DeliberationContentSummary>) -> Element {
     let tr: OpinionProjectTranslate = translate(&lang);
     let nav = use_navigator();
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
-            div { class: "flex flex-col gap-[30px]",
+            div { class: "flex flex-col gap-[30px] w-full",
                 div { class: "flex flex-col gap-[10px]",
                     div { class: "font-bold text-[28px] text-[#555462] leading-[32px]",
                         "{tr.project}"
@@ -267,11 +261,11 @@ pub fn OpinionProject(
                 }
 
                 div { class: "grid grid-cols-3 gap-[20px]",
-                    for project in public_opinions.clone() {
+                    for deliberation in deliberations.clone() {
                         div {
                             class: "cursor-pointer",
                             onclick: {
-                                let project_id = project.clone().id.clone();
+                                let project_id = deliberation.clone().id.clone();
                                 move |_| {
                                     nav.push(Route::ProjectPage {
                                         lang,
@@ -279,7 +273,7 @@ pub fn OpinionProject(
                                     });
                                 }
                             },
-                            ProjectBox { lang, project: project.clone() }
+                            ProjectBox { lang, deliberation: deliberation.clone() }
                         }
                     }
                 }

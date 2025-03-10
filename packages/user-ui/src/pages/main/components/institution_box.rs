@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::v2::InstitutionSummary;
+use models::organization_content::OrganizationContentSummary;
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[component]
-pub fn InstitutionBox(lang: Language, institution: InstitutionSummary) -> Element {
+pub fn InstitutionBox(lang: Language, institution: OrganizationContentSummary) -> Element {
     let institution_badge_url = asset!("/public/images/institution_badge.png").to_string();
     let tr: InstitutionBoxTranslate = translate(&lang);
 
@@ -27,9 +27,12 @@ pub fn InstitutionBox(lang: Language, institution: InstitutionSummary) -> Elemen
                         div { class: "font-bold text-[16px] text-[#222222] ", "{institution.name}" }
                         Auth { width: "24", height: "24" }
                     }
-                    div { class: "font-normal text-[14px] text-[#555462] leading-[22.4px] line-clamp-4",
-                        "{institution.description}"
+                    if institution.description.is_some() {
+                        div { class: "font-normal text-[14px] text-[#555462] leading-[22.4px] line-clamp-4",
+                            "{institution.description.clone().unwrap_or_default()}"
+                        }
                     }
+
                 }
 
                 div { class: "flex flex-row w-full justify-between items-center",
@@ -41,7 +44,7 @@ pub fn InstitutionBox(lang: Language, institution: InstitutionSummary) -> Elemen
                                 "{tr.project}"
                             }
                             div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
-                                {institution.num_of_projects.to_formatted_string(&Locale::en)}
+                                {institution.projects.to_formatted_string(&Locale::en)}
                             }
                         }
                     }
@@ -54,7 +57,7 @@ pub fn InstitutionBox(lang: Language, institution: InstitutionSummary) -> Elemen
                                 "{tr.vote}"
                             }
                             div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
-                                {institution.num_of_vote.to_formatted_string(&Locale::en)}
+                                {institution.votes.to_formatted_string(&Locale::en)}
                             }
                         }
                     }

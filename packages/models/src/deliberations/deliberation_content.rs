@@ -22,6 +22,8 @@ pub struct DeliberationContent {
     #[api_model(summary)]
     pub project_area: ProjectArea,
 
+    #[api_model(summary, many_to_one = organizations)]
+    pub organization_id: i64,
     #[api_model(summary, one_to_many = deliberation_users, foreign_key = deliberation_id, aggregator = count)]
     pub participants: i64,
     #[api_model(summary, one_to_many = deliberation_votes, foreign_key = deliberation_id, aggregator = count)]
