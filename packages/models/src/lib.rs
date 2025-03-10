@@ -57,7 +57,6 @@ pub mod prelude {
     pub use crate::public_opinion::*;
     pub use crate::resource::*;
     pub use crate::reviews::*;
-    pub use dto;
     // pub use crate::public_survey::*;
 
     pub use crate::group_members::*;

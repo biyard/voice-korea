@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::organization_content::OrganizationContentSummary;
+use models::organization::OrganizationSummary;
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[component]
-pub fn InstitutionBox(lang: Language, institution: OrganizationContentSummary) -> Element {
+pub fn InstitutionBox(lang: Language, institution: OrganizationSummary) -> Element {
     let institution_badge_url = asset!("/public/images/institution_badge.png").to_string();
     let tr: InstitutionBoxTranslate = translate(&lang);
 

@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::deliberation_project::DeliberationContentSummary;
-use models::organization_content::OrganizationContentSummary;
+use models::deliberation_project::DeliberationProject;
+use models::organization::OrganizationSummary;
 
 use crate::components::icons::check::Check;
 use crate::pages::components::inquiry::InquirySection;
@@ -19,10 +19,10 @@ use super::controller;
 #[component]
 pub fn MainPage(lang: Language) -> Element {
     let ctrl = controller::Controller::init(lang.clone())?;
-
-    let deliberations = ctrl.deliberations()?.items;
-    let institutions = ctrl.organizations()?.items;
-    let public_opinion_reviews = ctrl.reviews()?.items;
+    let data = ctrl.data()?;
+    let deliberations = data.projects;
+    let institutions = data.organizations;
+    let public_opinion_reviews = data.reviews;
 
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center gap-[100px]",
@@ -184,8 +184,8 @@ pub fn InfoBox(label: String, description: String) -> Element {
 #[component]
 pub fn ContentSection(
     lang: Language,
-    deliberations: Vec<DeliberationContentSummary>,
-    institutions: Vec<OrganizationContentSummary>,
+    deliberations: Vec<DeliberationProject>,
+    institutions: Vec<OrganizationSummary>,
 ) -> Element {
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center gap-[120px]",
@@ -202,10 +202,7 @@ pub fn ContentSection(
 }
 
 #[component]
-pub fn OpinionInstitution(
-    lang: Language,
-    institutions: Vec<OrganizationContentSummary>,
-) -> Element {
+pub fn OpinionInstitution(lang: Language, institutions: Vec<OrganizationSummary>) -> Element {
     let tr: OpinionInstitutionTranslate = translate(&lang);
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center py-[120px] bg-gradient-to-b from-[#dbeae8] to-[#ffffff]",
@@ -245,7 +242,7 @@ pub fn OpinionInstitution(
 }
 
 #[component]
-pub fn OpinionProject(lang: Language, deliberations: Vec<DeliberationContentSummary>) -> Element {
+pub fn OpinionProject(lang: Language, deliberations: Vec<DeliberationProject>) -> Element {
     let tr: OpinionProjectTranslate = translate(&lang);
     let nav = use_navigator();
     rsx! {
