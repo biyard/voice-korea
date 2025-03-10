@@ -17,8 +17,8 @@ pub struct OrganizationContent {
     pub name: String,
     #[api_model(summary)]
     pub description: Option<String>,
-    #[api_model(summary, one_to_many = deliberations, foreign_key = organization_id, aggregator = count)]
+    #[api_model(summary, one_to_many = deliberations, foreign_key = org_id, aggregator = count)]
     pub projects: i64,
-    #[api_model(summary, one_to_many = deliberation_votes, foreign_key = organization_id, aggregator = count)]
+    #[api_model(summary, one_to_many = deliberation_votes, foreign_key = org_id, aggregator = count)]
     pub votes: i64,
 }

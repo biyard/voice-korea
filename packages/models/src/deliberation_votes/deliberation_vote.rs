@@ -19,7 +19,7 @@ pub struct DeliberationVote {
     #[api_model(summary, type = INTEGER, action = voting, action_by_id = update)]
     pub vote: VoteResult,
     #[api_model(summary, many_to_one = organizations)]
-    pub organization_id: i64,
+    pub org_id: i64,
     #[api_model(summary, many_to_one = deliberations)]
     pub deliberation_id: i64,
     #[api_model(summary, many_to_one = users)]
