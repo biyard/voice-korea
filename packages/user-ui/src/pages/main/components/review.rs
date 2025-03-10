@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::v2::ReviewSummary;
+use models::review::ReviewSummary;
 
 use crate::{
     components::icons::{left_arrow::LeftArrow, right_arrow::RightArrow},

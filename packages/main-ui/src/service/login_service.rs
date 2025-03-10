@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
-use models::*;
+use models::{organization::Organization, *};
 
 #[derive(Debug, Clone, Copy)]
 pub struct LoginService {

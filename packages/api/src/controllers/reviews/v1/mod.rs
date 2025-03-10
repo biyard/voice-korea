@@ -5,7 +5,7 @@ use by_axum::axum::{
     Json,
 };
 use models::{
-    v2::{
+    review::{
         Review, ReviewAction, ReviewByIdAction, ReviewCreateRequest, ReviewGetResponse,
         ReviewParam, ReviewQuery, ReviewQueryActionType, ReviewRepository, ReviewUpdateRequest,
     },

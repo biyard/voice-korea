@@ -7,9 +7,6 @@ use by_types::QueryResponse;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-mod invitation;
-pub use invitation::*;
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct OrganizationMiddlewareParams {

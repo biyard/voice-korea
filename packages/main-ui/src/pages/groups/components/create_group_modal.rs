@@ -2,7 +2,7 @@
 // use crate::{components::icons::Remove, pages::groups::components::MemberLabel};
 use dioxus::prelude::*;
 use dioxus_translate::*;
-use models::{Organization, User};
+use models::{organization::Organization, User};
 
 use crate::{
     components::icons::{Folder, Remove},
