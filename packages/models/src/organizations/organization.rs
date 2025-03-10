@@ -13,7 +13,7 @@ pub struct OrganizationMiddlewareParams {
     pub id: String,
 }
 
-#[api_model(base = "/organizations/v2", table = organizations, iter_type=QueryResponse)]
+#[api_model(base = "/v2/organizations", table = organizations, iter_type=QueryResponse)]
 pub struct Organization {
     #[api_model(summary, primary_key)]
     pub id: i64,

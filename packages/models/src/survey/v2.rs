@@ -13,7 +13,7 @@ use validator::ValidationError;
 use super::response::{Answer, SurveyResponse};
 
 // If you want to know how to use Y macro, refer to https://github.com/biyard/rust-sdk/tree/main/packages/by-macros
-#[api_model(base = "/organizations/v2/:org-id/surveys", table = surveys, action_by_id = start_survey, iter_type=QueryResponse)]
+#[api_model(base = "/v2/organizations/:org-id/surveys", table = surveys, action_by_id = start_survey, iter_type=QueryResponse)]
 pub struct SurveyV2 {
     #[api_model(summary, primary_key, action = delete, read_action = find_by_id)]
     pub id: i64,

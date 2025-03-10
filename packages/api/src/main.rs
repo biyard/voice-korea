@@ -25,23 +25,16 @@ mod common;
 mod controllers {
     pub mod v1;
     pub mod v2;
-    pub mod web;
 
-    pub mod panels {
-        pub mod v2;
-    }
+    // pub mod panels {
+    //     pub mod v2;
+    // }
     pub mod resources {
         pub mod v1;
     }
-    pub mod survey {
-        pub mod v2;
-    }
-    pub mod organizations {
-        pub mod v2;
-    }
-    pub mod invitations {
-        pub mod v2;
-    }
+    // pub mod invitations {
+    //     pub mod v2;
+    // }
 
     pub mod reviews {
         pub mod v1;
@@ -139,10 +132,6 @@ async fn make_app() -> Result<Router> {
     migration(&pool).await?;
 
     let app = app
-        .nest(
-            "/web",
-            crate::controllers::web::WebController::new(pool.clone()).route()?,
-        )
         .nest("/v2", Version2Controller::route(pool.clone())?)
         .nest(
             "/v1/users",
@@ -151,12 +140,14 @@ async fn make_app() -> Result<Router> {
         // NOTE: Deprecated
         .nest(
             "/organizations/v2",
-            controllers::organizations::v2::OrganizationController::route(pool.clone())?,
+            controllers::v2::organizations::OrganizationController::route(pool.clone())?,
         )
         // NOTE: Deprecated
         .nest(
             "/invitations/v2/:org-id",
-            crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
+            crate::controllers::v2::organizations::_id::invitations::InvitationControllerV2::route(
+                pool.clone(),
+            )?,
         )
         // NOTE: Deprecated
         .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
