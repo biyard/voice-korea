@@ -4,7 +4,7 @@ use models::v2::ReviewSummary;
 
 use crate::{
     components::icons::{left_arrow::LeftArrow, right_arrow::RightArrow},
-    pages::main::i18n::ReviewSectionTranslate,
+    pages::i18n::ReviewSectionTranslate,
     utils::time::format_prev_time,
 };
 

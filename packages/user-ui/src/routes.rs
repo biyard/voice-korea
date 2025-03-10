@@ -5,10 +5,10 @@ use dioxus_translate::Language;
 use crate::layout::{RootLayout, RootLayoutWithFooter};
 
 use crate::pages::governance::_id::GovernancePage;
-use crate::pages::main::MainPage;
 use crate::pages::profile::page::ProfilePage;
 use crate::pages::project::page::ProjectPage;
 use crate::pages::users::login::UserLoginPage;
+use crate::pages::MainPage;
 use crate::pages::NotFoundPage;
 
 #[derive(Clone, Routable)]

@@ -4,7 +4,7 @@ use regex::Regex;
 
 use crate::{
     components::{input::InputBox, textarea::TextArea},
-    pages::main::i18n::InquirySectionTranslate,
+    pages::i18n::InquirySectionTranslate,
 };
 
 #[component]
@@ -83,7 +83,6 @@ pub fn InquirySection(
                                     "{tr.email_error}"
                                 }
                             }
-                        
                         }
 
                         div { class: "flex flex-col w-full gap-[10px]",
@@ -104,7 +103,6 @@ pub fn InquirySection(
                                     "{tr.message_error}"
                                 }
                             }
-                        
                         }
                     }
 
