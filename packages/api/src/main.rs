@@ -194,7 +194,8 @@ pub mod tests {
         let u = user.insert(email.clone(), password.clone(), None).await?;
         tracing::debug!("{:?}", u);
 
-        org.insert_with_dependency(u.id, email.clone()).await?;
+        org.insert_with_dependency(u.id, email.clone(), None)
+            .await?;
 
         let user = user
             .find_one(&UserReadAction::new().get_user(email, password))
