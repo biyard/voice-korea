@@ -45,6 +45,7 @@ fn App() -> Element {
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
 
         document::Script { src: asset!("/public/dep.js") }
+        document::Script { src: "https://d3js.org/d3.v7.min.js" }
         load_tailwindcss {}
         Router::<Route> {}
     }
