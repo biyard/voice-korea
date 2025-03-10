@@ -187,6 +187,8 @@ pub mod tests {
     pub async fn setup_test_user(id: &str, pool: &sqlx::Pool<sqlx::Postgres>) -> Result<User> {
         let user = User::get_repository(pool.clone());
         let org = Organization::get_repository(pool.clone());
+        let org_mem = OrganizationMember::get_repository(pool.clone());
+
         let email = format!("user-{id}@test.com");
         let password = format!("password-{id}");
         let password = get_hash_string(password.as_bytes());
@@ -194,7 +196,11 @@ pub mod tests {
         let u = user.insert(email.clone(), password.clone(), None).await?;
         tracing::debug!("{:?}", u);
 
-        org.insert_with_dependency(u.id, email.clone(), None)
+        let o = org
+            .insert_with_dependency(u.id, email.clone(), None)
+            .await?;
+        org_mem
+            .insert(u.id, o.id, u.email.clone(), Some(Role::Admin), None)
             .await?;
 
         let user = user

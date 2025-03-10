@@ -275,8 +275,6 @@ impl UserController {
         _auth: Option<Authorization>,
         body: UserUserLoginRequest,
     ) -> Result<JsonWithHeaders<User>> {
-        // TODO: authorize token
-
         let user = self
             .repo
             .find_one(&UserReadAction::new().find_by_email(body.email))
@@ -298,8 +296,7 @@ impl UserController {
         _auth: Option<Authorization>,
         body: UserUserSignupRequest,
     ) -> Result<JsonWithHeaders<User>> {
-        // TODO: authorize token
-
+        // FIXME(api): it should be refactored to use transaction.
         let user = match self
             .repo
             .find_one(&UserReadAction::new().find_by_email(body.email.clone()))
