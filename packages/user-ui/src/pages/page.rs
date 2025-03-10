@@ -5,11 +5,11 @@ use models::deliberation_content::DeliberationContentSummary;
 use models::organization_content::OrganizationContentSummary;
 
 use crate::components::icons::check::Check;
-use crate::pages::main::components::inquiry::InquirySection;
-use crate::pages::main::components::institution_box::InstitutionBox;
-use crate::pages::main::components::project_box::ProjectBox;
-use crate::pages::main::components::review::ReviewSection;
-use crate::pages::main::i18n::{
+use crate::pages::components::inquiry::InquirySection;
+use crate::pages::components::institution_box::InstitutionBox;
+use crate::pages::components::project_box::ProjectBox;
+use crate::pages::components::review::ReviewSection;
+use crate::pages::i18n::{
     MainBannerTranslate, MoreButtonTranslate, OpinionFeatureTranslate, OpinionInstitutionTranslate,
     OpinionProjectTranslate, PriceSectionTranslate,
 };
