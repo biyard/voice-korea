@@ -1,5 +1,3 @@
-use dioxus_translate::Translate;
-
 #[cfg(feature = "server")]
 use by_axum::{
     aide,
@@ -9,7 +7,7 @@ use by_axum::{
         Json,
     },
 };
-
+use dioxus_translate::Translate;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -26,7 +24,26 @@ pub enum ApiError {
 
     DatabaseQueryError(String),
 
+    // User Errors
+    #[translate(ko = "인증코드가 잘못되었습니다.", en = "Invalid verification code.")]
     InvalidVerificationCode,
+    #[translate(
+        ko = "인증코드가 만료되었습니다.",
+        en = "Verification code is expired."
+    )]
+    VerificationCodeExpired,
+    #[translate(ko = "이미 가입한 사용자입니다.", en = "User already exists.")]
+    DuplicateUser,
+    #[translate(ko = "사용자를 찾을 수 없습니다.", en = "User not found.")]
+    NoUser,
+
+    // OrganizationMember
+    #[translate(
+        ko = "조직원을 만들 수 없습니다.",
+        en = "Cannot create organization member."
+    )]
+    CannotCreateOrganizationMember,
+
     InvalidAction,
     Unauthorized,
 
@@ -34,6 +51,7 @@ pub enum ApiError {
     Unknown(String),
     BadRequest,
 
+    #[translate(ko = "입력값이 잘못되었습니다.", en = "Invalid input value.")]
     ValidationError(String),
 
     DynamoCreateException(String),
@@ -51,8 +69,6 @@ pub enum ApiError {
     SESServiceError(String),
 
     AuthKeyNotMatch(String),
-
-    DuplicateUser,
 
     SetExpiredTimeFailed,
 
@@ -91,20 +107,6 @@ pub enum ApiError {
     SurveyResponseExcelUploadError,
     SurveyResponseExcelPresigningError,
 }
-
-// impl std::fmt::Display for ApiError {
-//     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-//         write!(f, "{:?}", self)
-//     }
-// }
-
-// impl std::str::FromStr for ApiError {
-//     type Err = String;
-
-//     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-//         Ok(ApiError::ApiCallError(s.to_string()))
-//     }
-// }
 
 impl From<reqwest::Error> for ApiError {
     fn from(e: reqwest::Error) -> Self {

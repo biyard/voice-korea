@@ -7,7 +7,7 @@ use crate::pages::project::{
         comments::Comment, project_details::ProjectDetails, project_menu::ProjectMenu,
         project_profile::ProjectProfile,
     },
-    controller,
+    {components::sample::Sample, controller},
 };
 
 #[component]

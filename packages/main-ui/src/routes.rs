@@ -28,7 +28,7 @@ pub enum Route {
             #[route("/groups")]
             GroupPage { lang: Language },
             #[route("/groups/:group_id")]
-            GroupDetailPage { lang: Language, group_id: String },
+            GroupDetailPage { lang: Language, group_id: i64 },
             #[route("/deliberations")]
             DeliberationPage { lang: Language },
             #[route("/deliberations/new")]

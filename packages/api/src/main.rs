@@ -1,10 +1,15 @@
-use by_axum::auth::{authorization_middleware, set_auth_config};
+use by_axum::{
+    auth::{authorization_middleware, set_auth_config},
+    axum::Router,
+};
 use by_types::DatabaseConfig;
 use controllers::{
     institutions::m1::InstitutionControllerM1, resources::v1::bucket::MetadataControllerV1,
     reviews::v1::ReviewControllerV1, v2::Version2Controller,
 };
 use models::{
+    deliberation::Deliberation,
+    deliberation_response::DeliberationResponse,
     response::SurveyResponse,
     v2::{Institution, PublicOpinionProject},
 };
@@ -16,13 +21,11 @@ use tokio::net::TcpListener;
 
 mod common;
 mod controllers {
+    pub mod v1;
     pub mod v2;
 
     pub mod panels {
         pub mod v2;
-    }
-    pub mod auth {
-        pub mod v1;
     }
     pub mod resources {
         pub mod v1;
@@ -33,13 +36,7 @@ mod controllers {
     pub mod organizations {
         pub mod v2;
     }
-    pub mod members {
-        pub mod v2;
-    }
     pub mod invitations {
-        pub mod v2;
-    }
-    pub mod groups {
         pub mod v2;
     }
 
@@ -66,7 +63,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let om = OrganizationMember::get_repository(pool.clone());
     let ps = PanelSurveys::get_repository(pool.clone());
     let sr = SurveyResponse::get_repository(pool.clone());
-    let g = GroupV2::get_repository(pool.clone());
+    let d = Deliberation::get_repository(pool.clone());
+    let dr = DeliberationResponse::get_repository(pool.clone());
+    let g = Group::get_repository(pool.clone());
     let gm = GroupMemberV2::get_repository(pool.clone());
     let iv = Invitation::get_repository(pool.clone());
     let institution = Institution::get_repository(pool.clone());
@@ -83,6 +82,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     p.create_this_table().await?;
     ps.create_this_table().await?;
     sr.create_this_table().await?;
+    d.create_this_table().await?;
+    dr.create_this_table().await?;
     g.create_this_table().await?;
     gm.create_this_table().await?;
 
@@ -102,6 +103,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     p.create_related_tables().await?;
     ps.create_related_tables().await?;
     sr.create_related_tables().await?;
+    d.create_related_tables().await?;
+    dr.create_related_tables().await?;
     g.create_related_tables().await?;
     gm.create_related_tables().await?;
 
@@ -114,8 +117,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     Ok(())
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+async fn make_app() -> Result<Router> {
     let app = by_axum::new();
     let conf = config::get();
     tracing::debug!("config: {:?}", conf);
@@ -134,59 +136,37 @@ async fn main() -> Result<()> {
     migration(&pool).await?;
 
     let app = app
+        .nest("/v2", Version2Controller::route(pool.clone())?)
         .nest(
-            "/auth/v1",
-            controllers::auth::v1::UserControllerV1::route(pool.clone())?,
+            "/v1/users",
+            controllers::v1::users::UserController::route(pool.clone())?,
         )
+        // NOTE: Deprecated
         .nest(
             "/organizations/v2",
-            controllers::organizations::v2::OrganizationControllerV2::route(pool.clone())?,
+            controllers::organizations::v2::OrganizationController::route(pool.clone())?,
         )
+        // NOTE: Deprecated
         .nest(
             "/invitations/v2/:org-id",
             crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
         )
-        .nest("/v2", Version2Controller::route(pool.clone())?)
+        // NOTE: Deprecated
         .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
         .nest(
             "/institutions/m1",
-            InstitutionControllerM1::route(pool.clone())?, //FIXME: fix to authorize
+            InstitutionControllerM1::route(pool.clone())?,
         )
-        .nest(
-            "/reviews/v1",
-            ReviewControllerV1::route(pool.clone())?, //FIXME: fix to authorize
-        )
+        // NOTE: Deprecated
+        .nest("/reviews/v1", ReviewControllerV1::route(pool.clone())?)
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
-    // .nest(
-    //     "/attributes/v1",
-    //     controllers::attributes::v1::AttributeControllerV1::router(),
-    // )
-    // .nest(
-    //     "/metadatas/v1",
-    //     controllers::metadatas::v1::MetadataControllerV1::router(),
-    // )
-    // .nest(
-    //     "/metadatas/v2",
-    //     controllers::metadatas::v2::MetadataControllerV2::route(pool.clone())
-    //         .await
-    //         .unwrap(),
-    // )
-    // .nest(
-    //     "/search/v1",
-    //     controllers::search::v1::SearchControllerV1::router(),
-    // )
+    Ok(app)
+}
 
-    // .nest(
-    //     "/public-opinions/v1",
-    //     controllers::public_deliberations::v1::PublicOpinionControllerV1::router(),
-    // )
-    // .nest(
-    //     "/public-surveys/v1",
-    //     controllers::public_surveys::v1::PublicSurveyControllerV1::router(),
-    // )
-    // .nest("/survey/v1", controllers::survey::v1::AxumState::router()) // FIXME: deprecated
-    // .nest("/survey/m1", controllers::survey::m1::AxumState::router()); // FIXME: deprecated
+#[tokio::main]
+async fn main() -> Result<()> {
+    let app = make_app().await?;
 
     let port = option_env!("PORT").unwrap_or("3000");
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port))
@@ -254,17 +234,7 @@ pub mod tests {
     }
 
     pub async fn setup() -> Result<TestContext> {
-        let app = by_axum::new();
-        let id = uuid::Uuid::new_v4().to_string();
-        let now = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .unwrap()
-            .as_nanos() as u64;
-
         let conf = config::get();
-        tracing::debug!("config: {:?}", conf);
-        set_auth_config(conf.auth.clone());
-
         let pool = if let DatabaseConfig::Postgres { url, pool_size } = conf.database {
             PgPoolOptions::new()
                 .max_connections(pool_size)
@@ -303,27 +273,20 @@ pub mod tests {
         .execute(&pool)
         .await;
 
-        let _ = migration(&pool).await;
+        let app = make_app().await?;
+        let app = by_axum::into_api_adapter(app);
 
-        let app = app
-            .nest(
-                "/auth/v1",
-                controllers::auth::v1::UserControllerV1::route(pool.clone())?,
-            )
-            .nest(
-                "/organizations/v2",
-                controllers::organizations::v2::OrganizationControllerV2::route(pool.clone())?,
-            )
-            .nest("/v2", Version2Controller::route(pool.clone())?)
-            .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
-
+        let id = uuid::Uuid::new_v4().to_string();
         let user = setup_test_user(&id, &pool).await.unwrap();
         let (claims, admin_token) = setup_jwt_token(user.clone());
 
-        let app = by_axum::into_api_adapter(app);
         let app = Box::new(app);
         rest_api::set_api_service(app.clone());
         rest_api::add_authorization(&format!("Bearer {}", admin_token));
+        let now = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos() as u64;
 
         Ok(TestContext {
             pool,

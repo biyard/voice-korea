@@ -11,17 +11,12 @@ pub mod config;
 pub mod pages;
 
 pub mod service {
-    pub mod attribute_api;
-    pub mod auth_api;
-    pub mod group_api;
     pub mod login_service;
-    pub mod member_api;
     pub mod metadata_api;
     pub mod opinion_api;
     pub mod organization_api;
     pub mod popup_service;
     pub mod theme;
-    pub mod user_api;
 }
 
 pub mod models {

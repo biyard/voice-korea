@@ -89,7 +89,7 @@ pub mod i18n;
 
 #[component]
 pub fn ResetPasswordPage(props: ResetPasswordPageProps) -> Element {
-    let ctrl = controller::Controller::init();
+    let ctrl = controller::Controller::init(props.lang);
     let translates: ResetPasswordTranslate = translate(&props.lang.clone());
 
     rsx! {
@@ -317,7 +317,9 @@ pub fn EmailAuthentication(props: EmailAuthenticationProps) -> Element {
                                     label: props.i18n.send_authentication,
                                     lang: props.lang,
                                     onclick: move |_| async move {
-                                        ctrl.set_click_send_authentication().await;
+                                        if let Err(e) = ctrl.send_verification_code().await {
+                                            btracing::error!("{}", e.translate(& props.lang));
+                                        }
                                     },
                                 }
                             }
@@ -418,7 +420,7 @@ pub fn EmailAuthentication(props: EmailAuthenticationProps) -> Element {
                 div {
                     class: "flex flex-row w-[300px] h-[60px] bg-[#2168c3] justify-center items-center text-white font-bold text-[24px]",
                     onclick: move |_| async move {
-                        ctrl.clicked_email_authentication().await;
+                        ctrl.verify_code().await;
                     },
                     "{props.i18n.reset_password}"
                 }
