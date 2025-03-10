@@ -8,7 +8,13 @@ use by_axum::{
     },
 };
 use dto::{LandingData, LandingDataGetResponse, LandingDataParam, LandingDataReadActionType};
-use models::*;
+use models::{
+    deliberation_project::{DeliberationProject, DeliberationProjectSummary},
+    organization::OrganizationSummary,
+    review::{Review, ReviewSummary},
+    *,
+};
+use sqlx::postgres::PgRow;
 
 #[derive(
     Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
@@ -25,7 +31,39 @@ pub struct WebController {
 
 impl WebController {
     async fn query(&self) -> Result<LandingData> {
-        todo!()
+        let project_query = DeliberationProjectSummary::query_builder()
+            .order_by_created_at_desc()
+            .limit(10);
+        let organization_query = OrganizationSummary::query_builder()
+            .order_by_created_at_desc()
+            .limit(10);
+        let review_query = ReviewSummary::query_builder()
+            .order_by_created_at_desc()
+            .limit(10);
+
+        let projects: Vec<DeliberationProject> = project_query
+            .query()
+            .map(|r: PgRow| r.into())
+            .fetch_all(&self.pool)
+            .await?;
+
+        let organizations: Vec<OrganizationSummary> = organization_query
+            .query()
+            .map(|r: PgRow| r.into())
+            .fetch_all(&self.pool)
+            .await?;
+
+        let reviews: Vec<Review> = review_query
+            .query()
+            .map(|r: PgRow| r.into())
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(LandingData {
+            projects,
+            organizations,
+            reviews,
+        })
     }
 }
 
