@@ -20,9 +20,9 @@ use super::controller;
 pub fn MainPage(lang: Language) -> Element {
     let ctrl = controller::Controller::init(lang.clone())?;
 
-    let deliberations = ctrl.get_public_opinions();
-    let institutions = ctrl.get_institutions();
-    let public_opinion_reviews = ctrl.get_reviews();
+    let deliberations = ctrl.deliberations()?.items;
+    let institutions = ctrl.organizations()?.items;
+    let public_opinion_reviews = ctrl.reviews()?.items;
 
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center gap-[100px]",
@@ -30,7 +30,7 @@ pub fn MainPage(lang: Language) -> Element {
                 div { class: "flex flex-col w-full justify-center items-center gap-[50px]",
                     MainBanner { lang }
 
-                    OpinionSection { lang, deliberations, institutions }
+                    ContentSection { lang, deliberations, institutions }
 
                     PriceSection { lang }
                 }
@@ -182,7 +182,7 @@ pub fn InfoBox(label: String, description: String) -> Element {
 }
 
 #[component]
-pub fn OpinionSection(
+pub fn ContentSection(
     lang: Language,
     deliberations: Vec<DeliberationContentSummary>,
     institutions: Vec<OrganizationContentSummary>,

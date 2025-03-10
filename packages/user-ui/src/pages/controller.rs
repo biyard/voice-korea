@@ -1,4 +1,5 @@
 #![allow(unused)]
+use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
@@ -14,22 +15,28 @@ use models::{
     ProjectArea, QueryResponse,
 };
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
     lang: Language,
 
-    review_resource: Resource<QueryResponse<ReviewSummary>>,
-    deliberation_resource: Resource<QueryResponse<DeliberationContentSummary>>,
-    organization_resource: Resource<QueryResponse<OrganizationContentSummary>>,
+    reviews: Resource<QueryResponse<ReviewSummary>>,
+    deliberations: Resource<QueryResponse<DeliberationContentSummary>>,
+    organizations: Resource<QueryResponse<OrganizationContentSummary>>,
+
+    review_page: Signal<usize>,
+    deliberation_page: Signal<usize>,
+    organization_page: Signal<usize>,
 }
 
 impl Controller {
     pub fn init(lang: Language) -> std::result::Result<Self, RenderError> {
-        let page = use_signal(|| 1);
+        let review_page = use_signal(|| 1);
+        let deliberation_page = use_signal(|| 1);
+        let organization_page = use_signal(|| 1);
 
-        let review_resource = use_server_future(move || {
+        let reviews = use_server_future(move || {
             //FIXME: fix to implement pagenation
-            let page = 1;
+            let page = review_page();
             let size = 10;
 
             async move {
@@ -39,9 +46,9 @@ impl Controller {
             }
         })?;
 
-        let deliberation_resource = use_server_future(move || {
+        let deliberations = use_server_future(move || {
             //FIXME: fix to implement pagenation
-            let page = 1;
+            let page = deliberation_page();
             let size = 6;
 
             async move {
@@ -51,9 +58,9 @@ impl Controller {
             }
         })?;
 
-        let organization_resource = use_server_future(move || {
+        let organizations = use_server_future(move || {
             //FIXME: fix to implement pagenation
-            let page = 1;
+            let page = organization_page();
             let size = 10;
 
             async move {
@@ -65,23 +72,18 @@ impl Controller {
 
         let ctrl = Self {
             lang,
-            review_resource,
-            deliberation_resource,
-            organization_resource,
+
+            reviews,
+            deliberations,
+            organizations,
+
+            review_page,
+            deliberation_page,
+            organization_page,
         };
 
         use_context_provider(|| ctrl);
         Ok(ctrl)
-    }
-
-    pub fn get_reviews(&self) -> Vec<ReviewSummary> {
-        self.review_resource.with(|v| {
-            if let Some(v) = v {
-                v.items.clone()
-            } else {
-                vec![]
-            }
-        })
     }
 
     pub fn send_inquiry(&self, name: String, email: String, message: String) {
@@ -91,25 +93,5 @@ impl Controller {
             email,
             message
         );
-    }
-
-    pub fn get_public_opinions(&self) -> Vec<DeliberationContentSummary> {
-        self.deliberation_resource.with(|v| {
-            if let Some(v) = v {
-                v.items.clone()
-            } else {
-                vec![]
-            }
-        })
-    }
-
-    pub fn get_institutions(&self) -> Vec<OrganizationContentSummary> {
-        self.organization_resource.with(|v| {
-            if let Some(v) = v {
-                v.items.clone()
-            } else {
-                vec![]
-            }
-        })
     }
 }
