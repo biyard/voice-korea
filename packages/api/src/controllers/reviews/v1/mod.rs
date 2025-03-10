@@ -7,20 +7,23 @@ use by_axum::axum::{
 use models::{
     v2::{
         Review, ReviewAction, ReviewByIdAction, ReviewCreateRequest, ReviewGetResponse,
+        ReviewSummary,ReviewRepositoryUpdateRequest,
         ReviewParam, ReviewQuery, ReviewQueryActionType, ReviewRepository, ReviewUpdateRequest,
     },
     *,
 };
 
+use sqlx::postgres::PgRow;
 #[derive(Clone, Debug)]
 pub struct ReviewControllerV1 {
     review_repo: ReviewRepository,
+    pool: sqlx::Pool<sqlx::Postgres>,
 }
 
 impl ReviewControllerV1 {
     pub fn route(pool: sqlx::Pool<sqlx::Postgres>) -> Result<by_axum::axum::Router> {
         let review_repo = Review::get_repository(pool.clone());
-        let ctrl = ReviewControllerV1 { review_repo };
+        let ctrl = ReviewControllerV1 { review_repo, pool };
 
         Ok(by_axum::axum::Router::new()
             .route("/", post(Self::act_review).get(Self::list_reviews))
@@ -32,11 +35,15 @@ impl ReviewControllerV1 {
         State(ctrl): State<ReviewControllerV1>,
         Path(id): Path<i64>,
     ) -> Result<Json<Review>> {
-        //TODO: implement get review
         let _repo = ctrl.review_repo;
         tracing::debug!("get_review: {:?}", id);
 
-        Ok(Json(Review::default()))
+        let fetched_review = Review::query_builder().id_equals(id).query()
+            .map(|r: sqlx::postgres::PgRow| r.into())
+            .fetch_one(&ctrl.pool)
+            .await?;
+
+        Ok(Json(fetched_review))
     }
 
     pub async fn act_by_id(
@@ -44,7 +51,6 @@ impl ReviewControllerV1 {
         Path(id): Path<i64>,
         Json(body): Json<ReviewByIdAction>,
     ) -> Result<Json<Review>> {
-        //TODO: implement act_by_id
         let _repo = ctrl.clone().review_repo;
         tracing::debug!("act_by_id: {:?} {:?}", id, body);
 
@@ -57,7 +63,6 @@ impl ReviewControllerV1 {
         State(ctrl): State<ReviewControllerV1>,
         Query(params): Query<ReviewParam>,
     ) -> Result<Json<ReviewGetResponse>> {
-        //TODO: implement list_reviews
         let _repo = ctrl.clone().review_repo;
         tracing::debug!("list_reviews: {:?}", params);
 
@@ -66,6 +71,7 @@ impl ReviewControllerV1 {
                 Some(ReviewQueryActionType::SearchBy) => ctrl.search_by(params).await,
                 _ => ctrl.find(params).await,
             },
+            _ => Err(ApiError::InvalidAction),
         }
     }
 
@@ -73,7 +79,6 @@ impl ReviewControllerV1 {
         State(ctrl): State<ReviewControllerV1>,
         Json(body): Json<ReviewAction>,
     ) -> Result<Json<Review>> {
-        //TODO: implement act_review
         let _repo = ctrl.clone().review_repo;
         tracing::debug!("act review {:?}", body);
 
@@ -88,21 +93,46 @@ impl ReviewControllerV1 {
     pub async fn update(&self, id: i64, params: ReviewUpdateRequest) -> Result<Json<Review>> {
         tracing::debug!("update review: {:?} {:?}", id, params);
 
-        Ok(Json(Review::default()))
+        let fetched_review = self.review_repo
+            .update(
+                id,
+                ReviewRepositoryUpdateRequest {
+                    name: Some(params.name),
+                    image: Some(params.image),
+                    review: Some(params.review),
+                },
+            )
+            .await?;
+
+        Ok(Json(fetched_review))
     }
 
     pub async fn find(
         &self,
         ReviewQuery { size, bookmark, .. }: ReviewQuery,
     ) -> Result<Json<ReviewGetResponse>> {
-        let _size = size;
+        let _size = size as i64;
         let _bookmark = bookmark;
+
+        let mut total_count: i64 = 0;
+        let query = ReviewSummary::base_sql_with("limit $2 offset $3");
 
         tracing::debug!("find query");
 
+        let items: Vec<ReviewSummary> = sqlx::query(&query)
+            .bind(_size)
+            .bind(_size * (_bookmark.unwrap_or("1".to_string()).parse::<i64>().unwrap() - 1))
+            .map(|r: PgRow| {
+                use sqlx::Row;
+                total_count = r.get("total_count");
+                r.into()
+            })
+            .fetch_all(&self.pool)
+            .await?;
+
         Ok(Json(ReviewGetResponse::Query(QueryResponse {
-            items: vec![],
-            total_count: 0,
+            items,
+            total_count,
         })))
     }
 
@@ -115,26 +145,45 @@ impl ReviewControllerV1 {
             ..
         }: ReviewQuery,
     ) -> Result<Json<ReviewGetResponse>> {
-        let _size = size;
+        let _size = size as i64;
         let _bookmark = bookmark;
         let _name = name;
-        tracing::debug!("search by");
+        let mut total_count: i64 = 0;
+        let query = ReviewSummary::base_sql_with("name ilike $1 limit $2 offset $3");
+        tracing::debug!("search_by query: {}", query);
 
-        Ok(Json(ReviewGetResponse::Query(QueryResponse {
-            items: vec![],
-            total_count: 0,
+        let items: Vec<ReviewSummary> = sqlx::query(&query)
+            .bind(format!("%{}%", _name.unwrap()))
+            .bind(_size)
+            .bind(_size * (_bookmark.unwrap_or("1".to_string()).parse::<i64>().unwrap() - 1))
+            .map(|r: PgRow| {
+                use sqlx::Row;
+
+                total_count = r.get("total_count");
+                r.into()
+            })
+            .fetch_all(&self.pool)
+            .await?;
+
+         Ok(Json(ReviewGetResponse::Query(QueryResponse {
+            items,
+            total_count,
         })))
     }
 
     pub async fn create(&self, params: ReviewCreateRequest) -> Result<Json<Review>> {
         tracing::debug!("create review: {:?}", params);
+        let new_review = self
+            .review_repo
+            .insert(params.name, params.image, params.review)
+            .await?;
 
-        Ok(Json(Review::default()))
+        Ok(Json(new_review))
     }
 
     pub async fn delete(&self, review_id: i64) -> Result<Json<Review>> {
         tracing::debug!("delete review: {:?}", review_id);
-
+        let _ = self.review_repo.delete(review_id).await?;
         Ok(Json(Review::default()))
     }
 }
