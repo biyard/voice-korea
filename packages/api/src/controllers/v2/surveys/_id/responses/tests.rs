@@ -1,3 +1,4 @@
+use excel::SurveyResponseExcel;
 use models::attribute_v2::{GenderV2, RegionV2, SalaryV2};
 
 use crate::tests::{setup, TestContext};
