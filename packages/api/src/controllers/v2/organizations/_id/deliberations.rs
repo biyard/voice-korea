@@ -69,7 +69,6 @@ impl DeliberationController {
             discussions,
         }: DeliberationCreateRequest,
     ) -> Result<Deliberation> {
-        // TODO(api): incompleted creating API
         if started_at >= ended_at {
             return Err(ApiError::ValidationError(
                 "started_at should be less than ended_at".to_string(),
@@ -190,8 +189,6 @@ impl DeliberationController {
         }
 
         tx.commit().await?;
-
-        //TODO: add roles
 
         Ok(deliberation)
     }
