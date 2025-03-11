@@ -4,6 +4,7 @@ use by_axum::{
 };
 use by_types::DatabaseConfig;
 use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Controller};
+use deliberation_comment::DeliberationComment;
 use deliberation_resources::deliberation_resource::DeliberationResource;
 use discussions::Discussion;
 use models::step::Step;
@@ -60,6 +61,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let discussion_repo = Discussion::get_repository(pool.clone());
 
     let d_resource = DeliberationResource::get_repository(pool.clone());
+    let d_comment = DeliberationComment::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -84,12 +86,12 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     step.create_this_table().await?;
     d_resource.create_this_table().await?;
     discussion_repo.create_this_table().await?;
+    d_comment.create_this_table().await?;
 
     v.create_related_tables().await?;
     o.create_related_tables().await?;
     u.create_related_tables().await?;
     om.create_related_tables().await?;
-
     resource.create_related_tables().await?;
     // files.create_related_tables().await?;
     s.create_related_tables().await?;
@@ -100,17 +102,16 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     dr.create_related_tables().await?;
     g.create_related_tables().await?;
     gm.create_related_tables().await?;
-
     iv.create_related_tables().await?;
     institution.create_related_tables().await?;
     review.create_related_tables().await?;
     opinions.create_related_tables().await?;
-
     du.create_related_tables().await?;
     dv.create_related_tables().await?;
     step.create_related_tables().await?;
     d_resource.create_related_tables().await?;
     discussion_repo.create_related_tables().await?;
+    d_comment.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())
