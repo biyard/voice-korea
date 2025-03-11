@@ -5611,6 +5611,7 @@ dependencies = [
  "dioxus-translate",
  "getrandom 0.2.15",
  "google-wallet",
+ "indexmap",
  "models",
  "num-format",
  "regex",
