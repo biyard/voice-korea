@@ -1,6 +1,5 @@
 use crate::deliberation_comment::DeliberationComment;
 use crate::deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
-use crate::step::Step;
 
 #[cfg(feature = "server")]
 use by_axum::aide;
@@ -11,6 +10,7 @@ use crate::step::StepCreateRequest;
 
 use crate::deliberation_vote::DeliberationVote;
 use crate::discussions::*;
+use crate::step::*;
 use crate::{PanelV2, ProjectArea, ResourceFile, SurveyV2};
 
 #[derive(Validate)]
