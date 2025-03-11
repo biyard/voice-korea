@@ -9,6 +9,7 @@ use by_axum::{
 };
 use by_types::QueryResponse;
 use deliberation_comment::*;
+use deliberation_comments_likes::DeliberationCommentLike;
 use models::*;
 use sqlx::postgres::PgRow;
 
@@ -89,6 +90,8 @@ impl DeliberationCommentController {
         if auth.is_none() {
             return Err(ApiError::Unauthorized);
         }
+
+        let repo = DeliberationCommentLike::get_repository(self.pool.clone());
 
         Ok(res)
     }
