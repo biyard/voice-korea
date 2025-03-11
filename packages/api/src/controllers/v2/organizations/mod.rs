@@ -2,6 +2,7 @@ pub mod _id;
 use _id::*;
 
 use by_axum::{
+    aide,
     auth::Authorization,
     axum::{
         body::Body,
@@ -14,6 +15,14 @@ use by_types::DatabaseConfig;
 use models::{User, UserReadAction};
 use reqwest::StatusCode;
 use sqlx::postgres::PgPoolOptions;
+
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
+)]
+#[serde(rename_all = "kebab-case")]
+pub struct OrganizationPath {
+    pub org_id: i64,
+}
 
 #[derive(Clone, Debug)]
 pub struct OrganizationController {}

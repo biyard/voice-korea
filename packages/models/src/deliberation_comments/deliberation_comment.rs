@@ -1,11 +1,17 @@
+#![allow(unused_variables, unused)]
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::api_model;
 use validator::Validate;
 
-//FIXME: The comment model is not yet finalized and needs to be modified.
+// TODO(web): using comments for all project view
+// TODO(api): below specs
+// - POST /v2/deliverations/:deliveration-id/comments (comment)
+// - POST /v2/deliverations/:deliveration-id/comments/:id (reply_to_comment)
+// - GET /v2/deliverations/:deliveration-id/comments (query, replies_of)
+// NOTE: now replies on a comment is not supported
 #[derive(Validate)]
-#[api_model(base = "/", table = deliberation_comments)]
+#[api_model(base = "/v2/deliverations/:deliveration-id/comments", table = deliberation_comments)]
 pub struct DeliberationComment {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -14,71 +20,25 @@ pub struct DeliberationComment {
     #[api_model(summary, auto = [insert, update])]
     pub updated_at: i64,
 
-    #[api_model(many_to_one = users, action = create)]
+    #[api_model(many_to_one = users)]
     pub user_id: i64,
     #[api_model(many_to_one = deliberations)]
     pub deliveration_id: i64,
-    #[api_model(summary, action = create)]
+    #[api_model(summary, action = comment, action_by_id = reply_to_comment)]
     pub comment: String,
 
-    #[api_model(summary, action = create, type = JSONB, version = v0.1, nullable)]
-    pub quota: Vec<CommentQuota>,
-    #[api_model(summary, one_to_many = deliberation_comment_reply)]
-    pub replies: Vec<CommentReply>,
-    #[api_model(summary, one_to_many = deliberation_comment_reply, foreign_key = comment_id, aggregator = count)]
-    pub num_of_replies: i64,
-    #[api_model(summary, one_to_many = deliberation_comment_likers, foreign_key = comment_id, aggregator = count)]
-    pub num_of_likers: i64,
-}
+    // parent_id is used for reply to a comment
+    #[api_model(summary, nullable, query_action = replies_of)]
+    pub parent_id: i64,
 
-#[derive(Validate)]
-#[api_model(base = "/", table = deliberation_comment_quotas)]
-pub struct CommentQuota {
-    #[api_model(summary, primary_key)]
-    pub id: i64,
-    #[api_model(summary, auto = [insert])]
-    pub created_at: i64,
-    #[api_model(summary, auto = [insert, update])]
-    pub updated_at: i64,
+    // num_of_replies is used for the number of replies on a comment.
+    // it means the number of comments that have the parent_id of this comment.
+    #[api_model(summary, skip)]
+    pub replies: i64,
 
-    #[api_model(many_to_one = users, action = create)]
-    pub user_id: i64,
-    #[api_model(many_to_one = deliberation_comments, action = create)]
-    pub comment_id: i64,
-    #[api_model(summary, action = create)]
-    pub comment: String,
-}
+    #[api_model(summary, one_to_many = deliberation_comments_likes, foreign_key = comment_id, aggregator = count)]
+    pub likes: i64,
 
-#[derive(Validate)]
-#[api_model(base = "/", table = deliberation_comment_likers)]
-pub struct CommentLikers {
-    #[api_model(summary, primary_key)]
-    pub id: i64,
-    #[api_model(summary, auto = [insert])]
-    pub created_at: i64,
-    #[api_model(summary, auto = [insert, update])]
-    pub updated_at: i64,
-
-    #[api_model(many_to_one = users, action = create)]
-    pub user_id: i64,
-    #[api_model(many_to_one = deliberation_comments, action = create)]
-    pub comment_id: i64,
-}
-
-#[derive(Validate)]
-#[api_model(base = "/", table = deliberation_comment_reply)]
-pub struct CommentReply {
-    #[api_model(summary, primary_key)]
-    pub id: i64,
-    #[api_model(summary, auto = [insert])]
-    pub created_at: i64,
-    #[api_model(summary, auto = [insert, update])]
-    pub updated_at: i64,
-
-    #[api_model(many_to_one = users, action = create)]
-    pub user_id: i64,
-    #[api_model(many_to_one = deliberation_comments, action = create)]
-    pub comment_id: i64,
-    #[api_model(summary, action = create)]
-    pub comment: String,
+    #[api_model(summary, many_to_many = deliberation_comments_likes, table_name = users, foreign_primary_key = user_id, foreign_reference_key = comment_id, aggregator = exist)]
+    pub liked: bool,
 }

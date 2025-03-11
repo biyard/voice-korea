@@ -1,7 +1,8 @@
 pub mod profile;
 pub mod v2;
+use crate::step_type::StepType;
 
-use crate::{field::Field, group::MemberInfo, ProjectStatus};
+use crate::{group::MemberInfo, projects::ProjectArea, ProjectStatus};
 #[cfg(feature = "server")]
 use by_axum::aide;
 #[cfg(feature = "server")]
@@ -52,7 +53,7 @@ pub enum OpinionActionRequest {
 pub enum OpinionByIdActionRequest {
     Delete,
     Update(UpdateOpinionRequest),
-    UpdateProjectType(Field),
+    UpdateProjectType(ProjectArea),
     UpdatePanels(Vec<PanelInfo>),
     UpdateStatus(ProjectStatus),
 }
@@ -154,7 +155,7 @@ pub enum AllocationMethod {
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct OpinionInformation {
-    pub opinion_type: Option<Field>,
+    pub opinion_type: Option<ProjectArea>,
     pub title: Option<String>,
     pub description: Option<String>,
     pub documents: Vec<Document>,
@@ -176,24 +177,14 @@ pub struct ProjectInfo {
     pub name: String,
 }
 
+// TODO: refactor this @henry
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct OpinionInfo {
     pub name: String,
     pub start_date: Option<u64>,
     pub end_date: Option<u64>,
-    pub public_opinion_type: Option<PublicOpinionType>,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub enum PublicOpinionType {
-    #[default]
-    General,
-    Video,
-    Post,
-    Vote,
-    Report,
+    pub public_opinion_type: Option<StepType>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
@@ -213,7 +204,7 @@ pub enum OpinionDraftStatus {
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct OpinionResponse {
     pub project_id: String,
-    pub opinion_type: Field,
+    pub opinion_type: ProjectArea,
     pub project_name: String,
     pub total_response_count: u64,
     pub response_count: u64,

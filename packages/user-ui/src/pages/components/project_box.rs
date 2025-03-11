@@ -19,11 +19,13 @@ pub fn ProjectBox(lang: Language, deliberation: DeliberationProject) -> Element 
             class: "flex flex-col justify-end items-end rounded-[30px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)]",
             style: "background-image: url('{project_url}'); background-size: cover; height: 450px; width: 100%;",
             div { class: "flex flex-col w-full justify-start items-start rounded-[20px] bg-white px-[16px] pt-[20px] pb-[12px]",
-                div { class: "flex flex-col gap-[16px]",
+                div { class: "flex flex-col gap-[16px] w-full",
                     div { class: "flex flex-col gap-[8px]",
-                        div { class: "font-bold text-[18px] text-[#222222]", "{deliberation.title}" }
+                        div { class: "font-bold text-[18px] text-[#222222] h-[30px] truncate",
+                            "{deliberation.title}"
+                        }
                         div { class: "flex flex-col gap-[12px]",
-                            div { class: "font-normal text-[#555462] text-[14px]",
+                            div { class: "font-normal text-[#555462] text-[14px] h-[20px] truncate",
                                 "{deliberation.description}"
                             }
                             div { class: "flex flex-col gap-[8px]",

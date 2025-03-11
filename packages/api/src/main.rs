@@ -4,13 +4,14 @@ use by_axum::{
 };
 use by_types::DatabaseConfig;
 use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Controller};
+use deliberation_comment::DeliberationComment;
+use deliberation_resources::deliberation_resource::DeliberationResource;
+use discussions::Discussion;
+use models::step::Step;
 use models::{
-    deliberation::Deliberation,
-    deliberation_response::DeliberationResponse,
-    invitation::Invitation,
-    response::SurveyResponse,
-    review::Review,
-    v2::{Institution, PublicOpinionProject},
+    deliberation::Deliberation, deliberation_response::DeliberationResponse,
+    deliberation_user::DeliberationUser, deliberation_vote::DeliberationVote,
+    invitation::Invitation, response::SurveyResponse, review::Review, v2::Institution,
 };
 use models::{organization::Organization, *};
 use sqlx::postgres::PgPoolOptions;
@@ -28,67 +29,48 @@ mod controllers {
 pub mod config;
 mod utils;
 
+macro_rules! migrate {
+    ($pool:ident, $($table:ident),* $(,)?) => {
+        {
+            $(
+                let t = $table::get_repository($pool.clone());
+                t.create_this_table().await?;
+            )*
+            $(
+                let t = $table::get_repository($pool.clone());
+                t.create_related_tables().await?;
+            )*
+        }
+    };
+}
+
 async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     tracing::info!("Running migration");
-    let v = Verification::get_repository(pool.clone());
-    let o = Organization::get_repository(pool.clone());
-    let u = User::get_repository(pool.clone());
-    let resource = ResourceFile::get_repository(pool.clone());
-    // let files = Files::get_repository(pool.clone());
-    let p = PanelV2::get_repository(pool.clone());
-    let s = SurveyV2::get_repository(pool.clone());
-    let om = OrganizationMember::get_repository(pool.clone());
-    let ps = PanelSurveys::get_repository(pool.clone());
-    let sr = SurveyResponse::get_repository(pool.clone());
-    let d = Deliberation::get_repository(pool.clone());
-    let dr = DeliberationResponse::get_repository(pool.clone());
-    let g = Group::get_repository(pool.clone());
-    let gm = GroupMemberV2::get_repository(pool.clone());
-    let iv = Invitation::get_repository(pool.clone());
-    let institution = Institution::get_repository(pool.clone());
-    let review = Review::get_repository(pool.clone());
-    let opinions = PublicOpinionProject::get_repository(pool.clone());
-
-    v.create_this_table().await?;
-    o.create_this_table().await?;
-    u.create_this_table().await?;
-    om.create_this_table().await?;
-    resource.create_this_table().await?;
-    // files.create_table().await?;
-    s.create_this_table().await?;
-    p.create_this_table().await?;
-    ps.create_this_table().await?;
-    sr.create_this_table().await?;
-    d.create_this_table().await?;
-    dr.create_this_table().await?;
-    g.create_this_table().await?;
-    gm.create_this_table().await?;
-
-    iv.create_this_table().await?;
-    institution.create_this_table().await?;
-    review.create_this_table().await?;
-    opinions.create_this_table().await?;
-
-    v.create_related_tables().await?;
-    o.create_related_tables().await?;
-    u.create_related_tables().await?;
-    om.create_related_tables().await?;
-
-    resource.create_related_tables().await?;
-    // files.create_related_tables().await?;
-    s.create_related_tables().await?;
-    p.create_related_tables().await?;
-    ps.create_related_tables().await?;
-    sr.create_related_tables().await?;
-    d.create_related_tables().await?;
-    dr.create_related_tables().await?;
-    g.create_related_tables().await?;
-    gm.create_related_tables().await?;
-
-    iv.create_related_tables().await?;
-    institution.create_related_tables().await?;
-    review.create_related_tables().await?;
-    opinions.create_related_tables().await?;
+    migrate!(
+        pool,
+        Verification,
+        Organization,
+        User,
+        ResourceFile,
+        PanelV2,
+        SurveyV2,
+        OrganizationMember,
+        PanelSurveys,
+        SurveyResponse,
+        Group,
+        GroupMemberV2,
+        Invitation,
+        Institution,
+        Deliberation,
+        Review,
+        DeliberationResponse,
+        DeliberationUser,
+        DeliberationVote,
+        Step,
+        Discussion,
+        DeliberationResource,
+        DeliberationComment,
+    );
 
     tracing::info!("Migration done");
     Ok(())
@@ -138,11 +120,6 @@ async fn make_app() -> Result<Router> {
         .nest(
             "/institutions/m1",
             InstitutionControllerM1::route(pool.clone())?,
-        )
-        // NOTE: Deprecated
-        .nest(
-            "/reviews/v1",
-            controllers::v2::reviews::ReviewControllerV1::route(pool.clone())?,
         )
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 

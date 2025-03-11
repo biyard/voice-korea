@@ -18,7 +18,6 @@ pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
     let ctrl = controller::Controller::init(lang, id())?;
     let deliberation = ctrl.get_deliberation();
     let active_tab = use_signal(|| Tab::BasicInfo);
-
     tracing::debug!("deliberation: {:?}", deliberation);
 
     rsx! {
