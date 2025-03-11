@@ -22,6 +22,7 @@ pub mod dto;
 mod group_members;
 pub mod invitations;
 mod organization_members;
+mod parsed_question;
 mod projects;
 mod reviews;
 mod search;
@@ -61,6 +62,7 @@ pub mod prelude {
 
     pub use crate::group_members::*;
     pub use crate::organization_members::*;
+    pub use crate::parsed_question::*;
     pub use crate::search::*;
     pub use crate::strings::*;
     pub use crate::survey::*;

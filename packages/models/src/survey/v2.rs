@@ -66,6 +66,27 @@ pub struct SurveyV2 {
     // pub attributes: Vec<Attribute>,
 }
 
+impl SurveyV2 {
+    pub fn period(&self, lang: Language) -> String {
+        let started_at = self.formatted_timestamp(lang, self.started_at);
+        let ended_at = self.formatted_timestamp(lang, self.ended_at);
+
+        format!("{} ~ {}", started_at, ended_at)
+    }
+
+    pub fn formatted_timestamp(&self, lang: Language, timestamp: i64) -> String {
+        let datetime = Utc
+            .timestamp_opt(timestamp, 0)
+            .single()
+            .expect("Invalid timestamp");
+
+        match lang {
+            Language::Ko => datetime.format("%-m월 %-d일 %Y년").to_string(),
+            Language::En => datetime.format("%-m. %-d. %Y").to_string(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 #[serde(rename_all = "snake_case", tag = "answer_type")]

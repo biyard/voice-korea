@@ -2,8 +2,6 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
 
-use super::{components::sample::Sample, controller};
-
 use crate::{
     components::icons::{
         download::DownloadIcon,
@@ -12,12 +10,15 @@ use crate::{
         right_arrow::RightArrow,
         triangle::{TriangleDown, TriangleUp},
     },
-    pages::projects::_id::components::basic_info::BasicInfo,
+    pages::projects::_id::{
+        components::{basic_info::BasicInfo, sample::sample::Sample},
+        controller::Controller,
+    },
 };
 
 #[component]
 pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
-    let ctrl = controller::Controller::init(lang, project_id)?;
+    let ctrl = Controller::init(lang, project_id)?;
     let deliberation = ctrl.get_deliberation();
     tracing::debug!("deliberation: {:?}", deliberation);
     rsx! {
