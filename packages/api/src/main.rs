@@ -31,14 +31,16 @@ mod utils;
 
 macro_rules! migrate {
     ($pool:ident, $($table:ident),* $(,)?) => {
-        $(
-            let t = $table::get_repository($pool.clone());
-            t.create_this_table().await?;
-        )*
+        {
+            $(
+                let t = $table::get_repository($pool.clone());
+                t.create_this_table().await?;
+            )*
             $(
                 let t = $table::get_repository($pool.clone());
                 t.create_related_tables().await?;
             )*
+        }
     };
 }
 
