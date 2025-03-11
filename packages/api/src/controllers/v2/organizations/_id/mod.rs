@@ -5,3 +5,6 @@ pub mod members;
 pub mod panels;
 pub mod resources;
 pub mod surveys;
+
+#[cfg(test)]
+mod tests;
