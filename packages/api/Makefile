@@ -35,7 +35,7 @@ run:
 	$(BUILD_ENV) cargo watch -w src -x "run --target-dir $(PWD)/target"
 
 test:
-	$(BUILD_ENV) RUSTFLAGS="-A warnings" cargo test --tests $(TESTFLAGS)
+	$(BUILD_ENV) RUSTFLAGS="-A warnings" RUST_TEST_THREADS=1 cargo test --tests $(TESTFLAGS)
 
 build:
 	$(BUILD_ENV) cargo build --release -p $(SERVICE) --features lambda
