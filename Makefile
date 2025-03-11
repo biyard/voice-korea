@@ -26,6 +26,9 @@ serve:
 clean:
 	rm -rf .build/$(SERVICE)
 
+test:
+	cd packages/$(SERVICE) && $(BUILD_ENV) RUSTFLAGS="-A warnings" RUST_TEST_THREADS=1 cargo test --tests $(TESTFLAGS)
+
 .PHONY: deploy-if-needed
 deploy-if-needed:
 	$(eval DEPLOYED_VERSION := $(shell curl https://$(DOMAIN)/version | tr -d \" | cut -d'-' -f1))

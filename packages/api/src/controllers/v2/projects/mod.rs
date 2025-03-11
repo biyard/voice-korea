@@ -9,7 +9,10 @@ use by_axum::{
 };
 use by_types::QueryResponse;
 use deliberation_project::*;
-use models::*;
+use models::{
+    deliberations::{deliberation::Deliberation, deliberation_basic_info::DeliberationBasicInfo},
+    *,
+};
 use sqlx::postgres::PgRow;
 
 #[derive(
@@ -56,9 +59,27 @@ impl DeliberationProjectController {
 
     pub fn route(&self) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
+            .route("/:id/basic-info", get(Self::get_deliberation_basic_info))
             .route("/:id", get(Self::get_deliberation_project_by_id))
             .route("/", get(Self::get_deliberation_project))
             .with_state(self.clone()))
+    }
+
+    pub async fn get_deliberation_basic_info(
+        State(ctrl): State<DeliberationProjectController>,
+        Extension(_auth): Extension<Option<Authorization>>,
+        Path(DeliberationProjectPath { id }): Path<DeliberationProjectPath>,
+    ) -> Result<Json<DeliberationBasicInfo>> {
+        tracing::debug!("get_deliberation_project {:?}", id);
+
+        Ok(Json(
+            Deliberation::query_builder()
+                .id_equals(id)
+                .query()
+                .map(DeliberationBasicInfo::from)
+                .fetch_one(&ctrl.pool)
+                .await?,
+        ))
     }
 
     pub async fn get_deliberation_project_by_id(
@@ -96,5 +117,74 @@ impl DeliberationProjectController {
             //     Ok(Json(DeliberationProjectGetResponse::Read(res)))
             // }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use by_axum::axum::body::{to_bytes, Body};
+    use by_axum::axum::http::{Request, Response, StatusCode};
+    use models::{
+        deliberations::{
+            deliberation::Deliberation, deliberation_basic_info::DeliberationBasicInfo,
+        },
+        ProjectArea,
+    };
+
+    use crate::tests::{setup, TestContext};
+    #[tokio::test]
+    async fn test_get_deliberation_basic_info() {
+        let TestContext {
+            user,
+            app,
+            now,
+            endpoint,
+            ..
+        } = setup().await.unwrap();
+        let org_id = user.orgs[0].id;
+
+        let cli = Deliberation::get_client(&endpoint);
+        let res = cli
+            .create(
+                org_id,
+                now,
+                now + 1000,
+                ProjectArea::City,
+                format!("title"),
+                format!("test description {now}"),
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+            )
+            .await;
+        assert!(res.is_ok());
+
+        let deliberation = res.unwrap();
+
+        let basic_info = deliberation.clone();
+
+        // TODO: complete this test code
+        // let request = Request::builder()
+        //     .method("GET")
+        //     .uri(format!(
+        //         "{}/v2/projects/{}/basic-info",
+        //         endpoint, created_deliberation.id
+        //     ))
+        //     .header("Content-Type", "application/json")
+        //     .body(Body::empty())
+        //     .unwrap();
+
+        // let response = app.handle(request).await.unwrap();
+        // assert_eq!(response.status(), StatusCode::OK);
+
+        // let body = to_bytes(response.into_body()).await.unwrap();
+        // let basic_info: DeliberationBasicInfo = serde_json::from_slice(&body).unwrap();
+
+        assert_eq!(basic_info.id, deliberation.id);
+        assert_eq!(basic_info.description, format!("test description {now}"));
     }
 }
