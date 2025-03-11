@@ -27,10 +27,6 @@ mod controllers {
     pub mod institutions {
         pub mod m1;
     }
-
-    pub mod deliberations {
-        pub mod v2;
-    }
 }
 pub mod config;
 mod utils;
