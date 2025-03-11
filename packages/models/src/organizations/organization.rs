@@ -1,4 +1,3 @@
-#![allow(unused_variables, unused)]
 use crate::User;
 #[cfg(feature = "server")]
 use by_axum::aide;
