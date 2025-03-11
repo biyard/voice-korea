@@ -8,6 +8,13 @@ use by_axum::{
     },
 };
 use by_types::QueryResponse;
+use deliberation_resources::deliberation_resource::{
+    DeliberationResource, DeliberationResourceType,
+};
+use deliberation_surveys::DeliberationSurvey;
+use deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
+use discussion_resources::DiscussionResource;
+use discussions::{Discussion, DiscussionCreateRequest};
 use models::{
     deliberation::{
         Deliberation, DeliberationAction, DeliberationCreateRequest, DeliberationGetResponse,
@@ -16,6 +23,7 @@ use models::{
     step::{Step, StepRepository},
     *,
 };
+use panel_deliberations::PanelDeliberation;
 use step::StepCreateRequest;
 
 use crate::controllers::v2::organizations::OrganizationPath;
@@ -69,6 +77,13 @@ impl DeliberationController {
             .into());
         }
 
+        let du = DeliberationUser::get_repository(self.pool.clone());
+        let dr = DeliberationResource::get_repository(self.pool.clone());
+        let ds = DeliberationSurvey::get_repository(self.pool.clone());
+        let d = Discussion::get_repository(self.pool.clone());
+        let discussion_resource_repo = DiscussionResource::get_repository(self.pool.clone());
+        let pd = PanelDeliberation::get_repository(self.pool.clone());
+
         let mut tx = self.pool.begin().await?;
 
         let deliberation = self
@@ -83,7 +98,41 @@ impl DeliberationController {
                 description,
             )
             .await?
-            .ok_or(ApiError::AlreadyExists)?;
+            .ok_or(ApiError::DeliberationException)?;
+
+        for DeliberationUserCreateRequest { user_id, role } in roles {
+            du.insert_with_tx(&mut *tx, user_id, org_id, deliberation.id, role)
+                .await?
+                .ok_or(ApiError::DeliberationUserException)?;
+        }
+
+        for resource_id in resource_ids {
+            dr.insert_with_tx(
+                &mut *tx,
+                deliberation.id,
+                resource_id,
+                DeliberationResourceType::Reference,
+            )
+            .await?
+            .ok_or(ApiError::DeliberationStepException)?;
+        }
+
+        for resource_id in elearning {
+            dr.insert_with_tx(
+                &mut *tx,
+                deliberation.id,
+                resource_id,
+                DeliberationResourceType::Elearning,
+            )
+            .await?
+            .ok_or(ApiError::DeliberationResourceException)?;
+        }
+
+        for survey_id in survey_ids {
+            ds.insert_with_tx(&mut *tx, deliberation.id, survey_id)
+                .await?
+                .ok_or(ApiError::DeliberationException)?;
+        }
 
         for StepCreateRequest {
             ended_at,
@@ -102,7 +151,42 @@ impl DeliberationController {
                     ended_at,
                 )
                 .await?
-                .ok_or(ApiError::AlreadyExists)?;
+                .ok_or(ApiError::DeliberationStepException)?;
+        }
+
+        for DiscussionCreateRequest {
+            description,
+            ended_at,
+            name,
+            resources,
+            started_at,
+        } in discussions
+        {
+            let discussion = d
+                .insert_with_tx(
+                    &mut *tx,
+                    deliberation.id,
+                    started_at,
+                    ended_at,
+                    name,
+                    description,
+                    None,
+                )
+                .await?
+                .ok_or(ApiError::DeliberationDiscussionException)?;
+
+            for resource_id in resources {
+                discussion_resource_repo
+                    .insert_with_tx(&mut *tx, discussion.id, resource_id)
+                    .await?
+                    .ok_or(ApiError::DeliberationDiscussionException)?;
+            }
+        }
+
+        for PanelV2 { id, .. } in panels {
+            pd.insert_with_tx(&mut *tx, id, deliberation.id)
+                .await?
+                .ok_or(ApiError::DeliberationDiscussionException)?;
         }
 
         tx.commit().await?;

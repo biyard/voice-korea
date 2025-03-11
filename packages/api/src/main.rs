@@ -4,6 +4,7 @@ use by_axum::{
 };
 use by_types::DatabaseConfig;
 use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Controller};
+use deliberation_resources::deliberation_resource::DeliberationResource;
 use models::step::Step;
 use models::{
     deliberation::Deliberation,
@@ -43,17 +44,20 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let om = OrganizationMember::get_repository(pool.clone());
     let ps = PanelSurveys::get_repository(pool.clone());
     let sr = SurveyResponse::get_repository(pool.clone());
-    let d = Deliberation::get_repository(pool.clone());
-    let dr = DeliberationResponse::get_repository(pool.clone());
     let g = Group::get_repository(pool.clone());
     let gm = GroupMemberV2::get_repository(pool.clone());
     let iv = Invitation::get_repository(pool.clone());
     let institution = Institution::get_repository(pool.clone());
     let review = Review::get_repository(pool.clone());
     let opinions = PublicOpinionProject::get_repository(pool.clone());
+
+    let d = Deliberation::get_repository(pool.clone());
+    let dr = DeliberationResponse::get_repository(pool.clone());
     let du = DeliberationUser::get_repository(pool.clone());
     let dv = DeliberationVote::get_repository(pool.clone());
     let step = Step::get_repository(pool.clone());
+
+    let d_resource = DeliberationResource::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -69,15 +73,14 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     dr.create_this_table().await?;
     g.create_this_table().await?;
     gm.create_this_table().await?;
-
     du.create_this_table().await?;
     dv.create_this_table().await?;
-
     iv.create_this_table().await?;
     institution.create_this_table().await?;
     review.create_this_table().await?;
     opinions.create_this_table().await?;
     step.create_this_table().await?;
+    d_resource.create_this_table().await?;
 
     v.create_related_tables().await?;
     o.create_related_tables().await?;
@@ -103,6 +106,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     du.create_related_tables().await?;
     dv.create_related_tables().await?;
     step.create_related_tables().await?;
+    d_resource.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())
