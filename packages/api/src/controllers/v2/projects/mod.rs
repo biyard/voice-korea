@@ -10,7 +10,10 @@ use by_axum::{
 use by_types::QueryResponse;
 use deliberation_project::*;
 use models::{
-    deliberations::{deliberation::Deliberation, deliberation_basic_info::DeliberationBasicInfo},
+    deliberations::{
+        deliberation::Deliberation, deliberation_basic_info::DeliberationBasicInfo,
+        deliberation_survey::DeliberationSurvey,
+    },
     *,
 };
 use sqlx::postgres::PgRow;
@@ -59,10 +62,28 @@ impl DeliberationProjectController {
 
     pub fn route(&self) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
+            .route("/:id/surveys", get(Self::get_deliberation_survey))
             .route("/:id/basic-info", get(Self::get_deliberation_basic_info))
             .route("/:id", get(Self::get_deliberation_project_by_id))
             .route("/", get(Self::get_deliberation_project))
             .with_state(self.clone()))
+    }
+
+    pub async fn get_deliberation_survey(
+        State(ctrl): State<DeliberationProjectController>,
+        Extension(_auth): Extension<Option<Authorization>>,
+        Path(DeliberationProjectPath { id }): Path<DeliberationProjectPath>,
+    ) -> Result<Json<DeliberationSurvey>> {
+        tracing::debug!("get_deliberation_survey {:?}", id);
+
+        Ok(Json(
+            Deliberation::query_builder()
+                .id_equals(id)
+                .query()
+                .map(DeliberationSurvey::from)
+                .fetch_one(&ctrl.pool)
+                .await?,
+        ))
     }
 
     pub async fn get_deliberation_basic_info(
@@ -70,7 +91,7 @@ impl DeliberationProjectController {
         Extension(_auth): Extension<Option<Authorization>>,
         Path(DeliberationProjectPath { id }): Path<DeliberationProjectPath>,
     ) -> Result<Json<DeliberationBasicInfo>> {
-        tracing::debug!("get_deliberation_project {:?}", id);
+        tracing::debug!("get_deliberation_basic_info {:?}", id);
 
         Ok(Json(
             Deliberation::query_builder()
@@ -123,14 +144,7 @@ impl DeliberationProjectController {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use by_axum::axum::body::{to_bytes, Body};
-    use by_axum::axum::http::{Request, Response, StatusCode};
-    use models::{
-        deliberations::{
-            deliberation::Deliberation, deliberation_basic_info::DeliberationBasicInfo,
-        },
-        ProjectArea,
-    };
+    use models::ProjectArea;
 
     use crate::tests::{setup, TestContext};
     #[tokio::test]
@@ -176,5 +190,49 @@ mod tests {
 
         assert_eq!(basic_info.id, deliberation.id);
         assert_eq!(basic_info.description, format!("test description {now}"));
+    }
+
+    #[tokio::test]
+    async fn test_get_deliberation_survey() {
+        let TestContext {
+            pool,
+            user,
+            app,
+            now,
+            endpoint,
+            ..
+        } = setup().await.unwrap();
+        let org_id = user.orgs[0].id;
+
+        let cli = Deliberation::get_client(&endpoint);
+        let res = cli
+            .create(
+                org_id,
+                now,
+                now + 1000,
+                ProjectArea::City,
+                format!("title"),
+                format!("test description {now}"),
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+            )
+            .await;
+        assert!(res.is_ok());
+
+        let deliberation = res.unwrap();
+        let id = deliberation.id;
+
+        let cli = DeliberationSurvey::get_client(&endpoint);
+        let res = cli.read(id).await;
+        assert!(res.is_ok());
+
+        let survey = res.unwrap();
+
+        assert_eq!(survey.id, deliberation.id);
     }
 }
