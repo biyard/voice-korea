@@ -83,10 +83,10 @@ pub fn InputIntroduction(
                             selected: select_field() == None,
                             "{translate.select_field}"
                         }
-                        for field in ProjectArea::all() {
+                        for field in ProjectArea::VARIANTS.iter() {
                             option {
                                 value: format!("{}", field).as_str(),
-                                selected: Some(field) == select_field(),
+                                selected: Some(field) == select_field().as_ref(),
                                 {field.translate(&lang)}
                             }
                         }

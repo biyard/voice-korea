@@ -1,7 +1,6 @@
 mod attribute;
 mod auth;
 pub mod error;
-mod field;
 mod group;
 mod groups;
 mod metadata;
@@ -26,6 +25,7 @@ mod parsed_question;
 mod projects;
 mod reviews;
 mod search;
+pub mod steps;
 mod strings;
 mod survey;
 mod update_field;
@@ -44,7 +44,6 @@ pub mod prelude {
     pub use crate::deliberation_votes::*;
     pub use crate::deliberations::*;
     pub use crate::error::*;
-    pub use crate::field::*;
     pub use crate::group::*;
     pub use crate::groups::*;
     pub use crate::invitations::*;
@@ -64,6 +63,7 @@ pub mod prelude {
     pub use crate::organization_members::*;
     pub use crate::parsed_question::*;
     pub use crate::search::*;
+    pub use crate::steps::*;
     pub use crate::strings::*;
     pub use crate::survey::*;
     pub use crate::update_field::*;

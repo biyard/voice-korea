@@ -4,6 +4,7 @@ use by_axum::{
 };
 use by_types::DatabaseConfig;
 use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Controller};
+use models::step::Step;
 use models::{
     deliberation::Deliberation,
     deliberation_response::DeliberationResponse,
@@ -25,6 +26,10 @@ mod controllers {
 
     pub mod institutions {
         pub mod m1;
+    }
+
+    pub mod deliberations {
+        pub mod v2;
     }
 }
 pub mod config;
@@ -52,6 +57,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let opinions = PublicOpinionProject::get_repository(pool.clone());
     let du = DeliberationUser::get_repository(pool.clone());
     let dv = DeliberationVote::get_repository(pool.clone());
+    let step = Step::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -75,6 +81,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     institution.create_this_table().await?;
     review.create_this_table().await?;
     opinions.create_this_table().await?;
+    step.create_this_table().await?;
 
     v.create_related_tables().await?;
     o.create_related_tables().await?;
@@ -99,6 +106,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
 
     du.create_related_tables().await?;
     dv.create_related_tables().await?;
+    step.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())

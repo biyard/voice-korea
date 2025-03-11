@@ -69,19 +69,21 @@ impl Controller {
                 get_hash_string(self.get_password().as_bytes()),
             )
             .await;
-
         match res {
             Ok(user) => {
+                btracing::debug!("{:?}", user);
                 let token = rest_api::get_authz_token().unwrap_or_default();
                 login_service.setup(self.get_email(), token).await;
                 login_service.set_orgs(user.orgs);
                 navigator.push(Route::SurveyPage { lang });
             }
             Err(e) => match e {
-                ApiError::AuthKeyNotMatch(_) => {
+                ApiError::AuthKeyNotMatch(e) => {
+                    btracing::debug!("{:?}", e);
                     self.not_matched_error.set(true);
                 }
                 _ => {
+                    btracing::debug!("{:?}", e);
                     self.login_failed_error.set(true);
                 }
             },

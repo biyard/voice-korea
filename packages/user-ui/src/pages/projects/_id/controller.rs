@@ -4,12 +4,14 @@ use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use indexmap::IndexMap;
 use models::{
-    deliberation::{Deliberation, Step},
+    deliberation::Deliberation,
     deliberation_project::DeliberationProject,
     deliberation_response::{DeliberationResponse, DeliberationType},
     deliberation_user::DeliberationUser,
     deliberation_vote::DeliberationVote,
     response::Answer,
+    step::Step,
+    step_type::StepType,
     ChoiceQuestion, PanelCountsV2, PanelV2, ParsedQuestion, Question, ResourceFile, ResourceType,
     SubjectiveQuestion, SurveyV2,
 };
@@ -353,27 +355,52 @@ impl Controller {
             ended_at: 1742399145,
             votes: vec![],
             steps: vec![
-                Step::GeneralBoard {
+                Step {
+                    id: 1,
+                    created_at: 1741103145,
+                    updated_at: 1741103145,
+                    deliberation_id: 1,
+                    step_type: StepType::GeneralPost,
                     name: "정보 제공".to_string(),
                     started_at: 1741103145,
                     ended_at: 1742399145,
                 },
-                Step::VideoConference {
+                Step {
+                    id: 2,
+                    created_at: 1741103145,
+                    updated_at: 1741103145,
+                    deliberation_id: 1,
+                    step_type: StepType::GeneralPost,
                     name: "토론 및 숙의".to_string(),
                     started_at: 1741103145,
                     ended_at: 1742399145,
                 },
-                Step::GeneralBoard {
+                Step {
+                    id: 3,
+                    created_at: 1741103145,
+                    updated_at: 1741103145,
+                    deliberation_id: 1,
+                    step_type: StepType::GeneralPost,
                     name: "의견 도출".to_string(),
                     started_at: 1741103145,
                     ended_at: 1742399145,
                 },
-                Step::GeneralBoard {
+                Step {
+                    id: 4,
+                    created_at: 1741103145,
+                    updated_at: 1741103145,
+                    deliberation_id: 1,
+                    step_type: StepType::GeneralPost,
                     name: "합의 도출".to_string(),
                     started_at: 1741103145,
                     ended_at: 1742399145,
                 },
-                Step::GeneralBoard {
+                Step {
+                    id: 5,
+                    created_at: 1741103145,
+                    updated_at: 1741103145,
+                    deliberation_id: 1,
+                    step_type: StepType::GeneralPost,
                     name: "결과 분석".to_string(),
                     started_at: 1741103145,
                     ended_at: 1742399145,

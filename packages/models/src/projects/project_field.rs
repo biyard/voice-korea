@@ -28,20 +28,3 @@ pub enum ProjectArea {
     #[translate(ko = "정치")]
     Politics = 10,
 }
-
-impl ProjectArea {
-    pub fn all() -> Vec<ProjectArea> {
-        vec![
-            ProjectArea::Economy,
-            ProjectArea::Society,
-            ProjectArea::Environment,
-            ProjectArea::Education,
-            ProjectArea::Culture,
-            ProjectArea::Labor,
-            ProjectArea::City,
-            ProjectArea::Technology,
-            ProjectArea::Health,
-            ProjectArea::Politics,
-        ]
-    }
-}

@@ -1,8 +1,8 @@
 #![allow(unused)]
 
+use crate::ProjectArea;
 #[allow(unused)]
 use crate::Result;
-use crate::{Field, ProjectArea};
 #[cfg(feature = "server")]
 use by_axum::aide;
 use by_macros::{api_model, ApiModel};

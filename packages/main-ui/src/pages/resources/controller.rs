@@ -24,7 +24,7 @@ use super::i18n::ResourceTranslate;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UpdateResource {
     ResourceType(Option<ResourceType>),
-    ProjectArea(Option<ProjectArea>),
+    ProjectField(Option<ProjectArea>),
     UsagePurpose(Option<UsagePurpose>),
     Source(Option<Source>),
     AccessLevel(Option<AccessLevel>),
@@ -39,7 +39,7 @@ pub enum SortOrder {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum OrderBy {
     ResourceType,
-    ProjectArea,
+    ProjectField,
     UsagePurpose,
     Source,
     AccessLevel,
@@ -185,7 +185,7 @@ impl Controller {
 
         match field {
             UpdateResource::ResourceType(v) => resource.resource_type = v,
-            UpdateResource::ProjectArea(v) => resource.project_area = v,
+            UpdateResource::ProjectField(v) => resource.project_area = v,
             UpdateResource::UsagePurpose(v) => resource.usage_purpose = v,
             UpdateResource::Source(v) => resource.source = v,
             UpdateResource::AccessLevel(v) => resource.access_level = v,
