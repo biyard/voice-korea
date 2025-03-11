@@ -106,6 +106,52 @@ pub enum ApiError {
     SurveyResponseExcelWritingError,
     SurveyResponseExcelUploadError,
     SurveyResponseExcelPresigningError,
+
+    // Deliberation Errors
+    #[translate(
+        ko = "중복된 공론이거나 분야를 확인해주세요.",
+        en = "Please check your deliberation or field."
+    )]
+    DeliberationException,
+    #[translate(
+        ko = "역할 설정을 확인해주세요.",
+        en = "Please check your role settings."
+    )]
+    DeliberationUserException,
+    #[translate(
+        ko = "단계설정을 확인해주세요.",
+        en = "Please check your step settings."
+    )]
+    DeliberationStepException,
+
+    #[translate(
+        ko = "첨부자료를 찾을 수 없습니다.",
+        en = "Cannot find the attached file."
+    )]
+    DeliberationResourceException,
+    #[translate(
+        ko = "연결된 여론조사를 찾을 수 없습니다.",
+        en = "Cannot find the connected survey."
+    )]
+    DeliberationSurveyException,
+    #[translate(
+        ko = "토론생성에 실패했습니다. 잠시후 다시 시도해주세요.",
+        en = "Failed to create deliberation. Please try again later."
+    )]
+    DeliberationDiscussionException,
+
+    #[translate(
+        ko = "설정된 패널정보를 확인해주세요.",
+        en = "Please check the set panel information."
+    )]
+    DeliberationPanelException,
+
+    // Discussion Errors
+    #[translate(
+        ko = "토론에 첨부된 자료를 확인해주세요.",
+        en = "Please check the attached file in the discussion."
+    )]
+    DiscussionResourceException,
 }
 
 impl From<reqwest::Error> for ApiError {

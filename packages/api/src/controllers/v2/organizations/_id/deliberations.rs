@@ -8,6 +8,13 @@ use by_axum::{
     },
 };
 use by_types::QueryResponse;
+use deliberation_resources::deliberation_resource::{
+    DeliberationResource, DeliberationResourceType,
+};
+use deliberation_surveys::DeliberationSurvey;
+use deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
+use discussion_resources::DiscussionResource;
+use discussions::{Discussion, DiscussionCreateRequest};
 use models::{
     deliberation::{
         Deliberation, DeliberationAction, DeliberationCreateRequest, DeliberationGetResponse,
@@ -16,6 +23,7 @@ use models::{
     step::{Step, StepRepository},
     *,
 };
+use panel_deliberations::PanelDeliberation;
 use step::StepCreateRequest;
 
 use crate::controllers::v2::organizations::OrganizationPath;
@@ -61,13 +69,19 @@ impl DeliberationController {
             discussions,
         }: DeliberationCreateRequest,
     ) -> Result<Deliberation> {
-        // TODO(api): incompleted creating API
         if started_at >= ended_at {
             return Err(ApiError::ValidationError(
                 "started_at should be less than ended_at".to_string(),
             )
             .into());
         }
+
+        let du = DeliberationUser::get_repository(self.pool.clone());
+        let dr = DeliberationResource::get_repository(self.pool.clone());
+        let ds = DeliberationSurvey::get_repository(self.pool.clone());
+        let d = Discussion::get_repository(self.pool.clone());
+        let discussion_resource_repo = DiscussionResource::get_repository(self.pool.clone());
+        let pd = PanelDeliberation::get_repository(self.pool.clone());
 
         let mut tx = self.pool.begin().await?;
 
@@ -83,7 +97,41 @@ impl DeliberationController {
                 description,
             )
             .await?
-            .ok_or(ApiError::AlreadyExists)?;
+            .ok_or(ApiError::DeliberationException)?;
+
+        for DeliberationUserCreateRequest { user_id, role } in roles {
+            du.insert_with_tx(&mut *tx, user_id, org_id, deliberation.id, role)
+                .await?
+                .ok_or(ApiError::DeliberationUserException)?;
+        }
+
+        for resource_id in resource_ids {
+            dr.insert_with_tx(
+                &mut *tx,
+                deliberation.id,
+                resource_id,
+                DeliberationResourceType::Reference,
+            )
+            .await?
+            .ok_or(ApiError::DeliberationResourceException)?;
+        }
+
+        for resource_id in elearning {
+            dr.insert_with_tx(
+                &mut *tx,
+                deliberation.id,
+                resource_id,
+                DeliberationResourceType::Elearning,
+            )
+            .await?
+            .ok_or(ApiError::DeliberationResourceException)?;
+        }
+
+        for survey_id in survey_ids {
+            ds.insert_with_tx(&mut *tx, deliberation.id, survey_id)
+                .await?
+                .ok_or(ApiError::DeliberationSurveyException)?;
+        }
 
         for StepCreateRequest {
             ended_at,
@@ -102,12 +150,45 @@ impl DeliberationController {
                     ended_at,
                 )
                 .await?
-                .ok_or(ApiError::AlreadyExists)?;
+                .ok_or(ApiError::DeliberationStepException)?;
+        }
+
+        for DiscussionCreateRequest {
+            description,
+            ended_at,
+            name,
+            resources,
+            started_at,
+        } in discussions
+        {
+            let discussion = d
+                .insert_with_tx(
+                    &mut *tx,
+                    deliberation.id,
+                    started_at,
+                    ended_at,
+                    name,
+                    description,
+                    None,
+                )
+                .await?
+                .ok_or(ApiError::DeliberationDiscussionException)?;
+
+            for resource_id in resources {
+                discussion_resource_repo
+                    .insert_with_tx(&mut *tx, discussion.id, resource_id)
+                    .await?
+                    .ok_or(ApiError::DiscussionResourceException)?;
+            }
+        }
+
+        for PanelV2 { id, .. } in panels {
+            pd.insert_with_tx(&mut *tx, id, deliberation.id)
+                .await?
+                .ok_or(ApiError::DeliberationPanelException)?;
         }
 
         tx.commit().await?;
-
-        //TODO: add roles
 
         Ok(deliberation)
     }
@@ -219,5 +300,50 @@ impl DeliberationController {
                 ctrl.query(org_id, q).await?,
             ))),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use models::{
+        deliberation::{Deliberation, DeliberationQuery},
+        ProjectArea,
+    };
+
+    use crate::tests::{setup, TestContext};
+
+    #[tokio::test]
+    async fn test_deliberation_empty() {
+        let TestContext {
+            user,
+            now,
+            endpoint,
+            ..
+        } = setup().await.unwrap();
+        let org_id = user.orgs[0].id;
+
+        let cli = Deliberation::get_client(&endpoint);
+        let res = cli
+            .create(
+                org_id,
+                now,
+                now + 1000,
+                ProjectArea::City,
+                format!("test deliberation {now}"),
+                "test description".to_string(),
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+            )
+            .await;
+        assert!(res.is_ok());
+
+        let res = cli.query(org_id, DeliberationQuery::new(10)).await.unwrap();
+
+        assert_eq!(res.items.len(), 1)
     }
 }
