@@ -18,4 +18,8 @@ pub enum StepType {
     Vote = 4,
     #[translate(ko = "보고서", en = "Report")]
     Report = 5,
+    #[translate(ko = "최종설문", en = "Final Survey")]
+    Survey = 6,
+    #[translate(ko = "표본조사", en = "Sample Survey")]
+    SampleSurvey = 7,
 }
