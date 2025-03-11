@@ -30,7 +30,8 @@ pub enum SurveyStatus {
     )]
     Finish,
 }
-
+// TODO : remove '#[allow(dead_code)]' when upload PR
+#[allow(dead_code)]
 pub fn get_survey_status(started_at: i64, ended_at: i64) -> SurveyStatus {
     let current = current_timestamp();
 

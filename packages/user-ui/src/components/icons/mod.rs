@@ -1,11 +1,13 @@
 pub mod adopted;
 pub mod auth;
 pub mod badge;
+pub mod bold;
 pub mod check;
 pub mod download;
 pub mod in_progress;
 pub mod left_arrow;
 pub mod logo;
+pub mod more;
 pub mod pencil;
 pub mod person;
 pub mod project;
