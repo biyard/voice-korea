@@ -67,20 +67,23 @@ pub struct SurveyV2 {
 }
 
 impl SurveyV2 {
-    pub fn period(&self) -> String {
-        let started_at = self.formatted_timestamp(self.started_at);
-        let ended_at = self.formatted_timestamp(self.ended_at);
+    pub fn period(&self, lang: Language) -> String {
+        let started_at = self.formatted_timestamp(lang, self.started_at);
+        let ended_at = self.formatted_timestamp(lang, self.ended_at);
 
         format!("{} ~ {}", started_at, ended_at)
     }
 
-    pub fn formatted_timestamp(&self, timestamp: i64) -> String {
+    pub fn formatted_timestamp(&self, lang: Language, timestamp: i64) -> String {
         let datetime = Utc
             .timestamp_opt(timestamp, 0)
             .single()
             .expect("Invalid timestamp");
 
-        datetime.format("%-m월 %-d일 %Y년").to_string()
+        match lang {
+            Language::Ko => datetime.format("%-m월 %-d일 %Y년").to_string(),
+            Language::En => datetime.format("%-m. %-d. %Y").to_string(),
+        }
     }
 }
 

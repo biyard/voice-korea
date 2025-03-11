@@ -49,6 +49,7 @@ impl Controller {
         let questions = ctrl.clone().get_deliberation().surveys[0].questions.clone();
         let responses = ctrl.clone().get_deliberation_responses();
 
+        //FIXME: After connecting the API, you need to check whether the relevant part is working properly.
         let memoized_answers = use_memo({
             let questions = questions.clone();
             move || {

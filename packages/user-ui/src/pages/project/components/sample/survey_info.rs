@@ -32,7 +32,7 @@ pub fn SurveyInfo(
             div { class: "flex flex-row w-full justify-between items-center",
                 div { class: "font-semibold text-[#222222] text-[20px]", "{tr.sample_survey}" }
                 div { class: "flex flex-row justify-start items-center gap-[80px]",
-                    div { class: "font-medium text-black text-[15px]", {survey.period()} }
+                    div { class: "font-medium text-black text-[15px]", {survey.period(lang)} }
                     div { class: "flex flex-row justify-center items-center gap-[20px]",
                         // FIXME: Remove comment after checking exact usage in figma
                         // div { class: "relative flex items-center",
