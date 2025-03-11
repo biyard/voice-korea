@@ -7,9 +7,9 @@ use by_axum::aide;
 use by_macros::api_model;
 use by_types::QueryResponse;
 
-#[api_model(base = "/v2/reviews", table = reviews, iter_type=QueryResponse)]
+#[api_model(base = "/v2/reviews", table = reviews, iter_type=QueryResponse, action_by_id = delete)]
 pub struct Review {
-    #[api_model(summary, primary_key, action = delete )]
+    #[api_model(summary, primary_key)]
     pub id: i64,
     #[api_model(summary, auto = insert)]
     pub created_at: i64,

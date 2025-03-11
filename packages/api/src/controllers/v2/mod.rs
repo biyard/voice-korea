@@ -1,6 +1,6 @@
 use deliberations::_id::responses::DeliberationResponseController;
 use models::*;
-use reviews::ReviewControllerV2;
+use reviews::ReviewController;
 use surveys::_id::responses::SurveyResponseController;
 
 use super::resources::v1::bucket::MetadataControllerV1;
@@ -37,7 +37,7 @@ impl Version2Controller {
                 "/organizations",
                 crate::controllers::organizations::v2::OrganizationController::route(pool.clone())?,
             )
-            .nest("/reviews", ReviewControllerV2::route(pool.clone())?)
+            .nest("/reviews", ReviewController::route(pool.clone())?)
             .nest("/metadata", MetadataControllerV1::route(pool.clone())?)
             .nest(
                 "/deliberations/:deliberation-id/responses",

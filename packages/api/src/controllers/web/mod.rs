@@ -11,10 +11,8 @@ use by_axum::{
 };
 use dto::{LandingData, LandingDataGetResponse, LandingDataParam, LandingDataReadActionType};
 use models::{
-    deliberation_project::{DeliberationProject, DeliberationProjectSummary},
-    organization::OrganizationSummary,
-    review::{Review, ReviewSummary},
-    *,
+    deliberation_project::DeliberationProjectSummary, organization::OrganizationSummary,
+    review::ReviewSummary, *,
 };
 use projects::DeliberationProjectController;
 use sqlx::postgres::PgRow;
@@ -44,23 +42,27 @@ impl WebController {
             .order_by_created_at_desc()
             .limit(10);
 
-        let projects: Vec<DeliberationProject> = project_query
+        let mut tx = self.pool.begin().await?;
+
+        let projects = project_query
             .query()
             .map(|r: PgRow| r.into())
-            .fetch_all(&self.pool)
+            .fetch_all(&mut *tx)
             .await?;
 
-        let organizations: Vec<OrganizationSummary> = organization_query
+        let organizations = organization_query
             .query()
             .map(|r: PgRow| r.into())
-            .fetch_all(&self.pool)
+            .fetch_all(&mut *tx)
             .await?;
 
-        let reviews: Vec<Review> = review_query
+        let reviews = review_query
             .query()
             .map(|r: PgRow| r.into())
-            .fetch_all(&self.pool)
+            .fetch_all(&mut *tx)
             .await?;
+
+        tx.commit().await?;
 
         Ok(LandingData {
             projects,
