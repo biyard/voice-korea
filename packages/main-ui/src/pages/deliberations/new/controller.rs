@@ -396,11 +396,13 @@ impl Controller {
                 opinion_informations.opinion_type.unwrap_or_default(),
                 opinion_informations.title.unwrap_or_default(),
                 opinion_informations.description.unwrap_or_default(),
-                vec![], // TODO:
-                vec![], // TODO:
-                vec![], // TODO:
-                vec![], // TODO:
+                vec![], // TODO: panels
+                vec![], // TODO: resources
+                vec![], // TODO: surveys
+                vec![], // roles
                 public_opinion_sequences,
+                vec![], // elearning
+                vec![], // discussions
             )
             .await
         {
