@@ -8,7 +8,7 @@ use by_macros::api_model;
 use validator::Validate;
 
 use crate::deliberation_vote::DeliberationVote;
-use crate::discussions::DiscussionCreateRequest;
+use crate::discussions::*;
 use crate::{OpinionInfo, PanelV2, ProjectArea, ResourceFile, SurveyV2};
 
 #[derive(Validate)]
@@ -58,7 +58,8 @@ pub struct Deliberation {
     #[api_model(summary, action = create, many_to_many = panel_deliberations, foreign_table_name = panels, foreign_primary_key = panel_id, foreign_reference_key = deliberation_id,)]
     #[serde(default)]
     pub panels: Vec<PanelV2>,
-    // TODO(api): discussion should be added
+    #[api_model(one_to_many = discussions)]
+    pub discussions: Vec<Discussion>,
     #[api_model(one_to_many = deliberation_comments)]
     pub comments: Vec<DeliberationComment>,
     #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id, aggregator = count)]
