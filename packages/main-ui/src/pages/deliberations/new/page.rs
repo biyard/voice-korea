@@ -28,10 +28,13 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let mut ctrl = Controller::new(props.lang)?;
     let surveys = ctrl.surveys()?;
     let metadatas = ctrl.metadatas()?;
+    let members = ctrl.members()?;
 
-    let step = ctrl.get_current_step();
     let resources = ctrl.resources();
+    let step = ctrl.get_current_step();
     let selected_surveys = ctrl.selected_surveys();
+
+    tracing::debug!("members: {:?}", members);
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",

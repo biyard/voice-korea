@@ -2,7 +2,10 @@ use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::{deliberation::Deliberation, step::StepCreateRequest, step_type::StepType, *};
+use models::{
+    deliberation::Deliberation, deliberation_user::DeliberationUserCreateRequest,
+    step::StepCreateRequest, step_type::StepType, *,
+};
 
 use crate::{
     config,
@@ -30,6 +33,10 @@ pub struct Controller {
     pub surveys: Resource<Vec<SurveyV2Summary>>,
     pub metadatas: Resource<Vec<ResourceFileSummary>>,
     pub search_keyword: Signal<String>,
+
+    //step 3
+    pub members: Resource<Vec<OrganizationMemberSummary>>,
+    pub committee_users: Signal<Vec<DeliberationUserCreateRequest>>,
 
     //step 4
     total_attributes: Signal<Vec<AttributeResponse>>,
@@ -107,6 +114,27 @@ impl Controller {
             }
         })?;
 
+        let members = use_server_future(move || {
+            let page = 1;
+            let size = 20;
+            async move {
+                let org_id = user.get_selected_org();
+                if org_id.is_none() {
+                    tracing::error!("Organization ID is missing");
+                    return vec![];
+                }
+                let endpoint = crate::config::get().api_url;
+                let res = OrganizationMember::get_client(endpoint)
+                    .query(
+                        org_id.unwrap().id,
+                        OrganizationMemberQuery::new(size).with_page(page),
+                    )
+                    .await;
+
+                res.unwrap_or_default().items
+            }
+        })?;
+
         let ctrl = Self {
             user,
             popup_service: use_signal(|| popup_service),
@@ -173,6 +201,8 @@ impl Controller {
             surveys,
             search_keyword,
             metadatas,
+            members,
+            committee_users: use_signal(|| vec![]),
             //FIXME: fix to connect api
             total_attributes: use_signal(|| {
                 vec![
@@ -389,7 +419,10 @@ impl Controller {
         (self.deliberation_informations)().projects
     }
 
-    //
+    //step 3
+    pub fn get_committee_users(&self) -> Vec<DeliberationUserCreateRequest> {
+        (self.committee_users)()
+    }
 
     pub fn open_create_panel_modal(&self, lang: Language, translates: CompositionPanelTranslate) {
         let mut popup_service = (self.popup_service)().clone();
