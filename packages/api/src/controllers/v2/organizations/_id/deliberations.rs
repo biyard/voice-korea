@@ -113,7 +113,7 @@ impl DeliberationController {
                 DeliberationResourceType::Reference,
             )
             .await?
-            .ok_or(ApiError::DeliberationStepException)?;
+            .ok_or(ApiError::DeliberationResourceException)?;
         }
 
         for resource_id in elearning {
@@ -178,7 +178,7 @@ impl DeliberationController {
                 discussion_resource_repo
                     .insert_with_tx(&mut *tx, discussion.id, resource_id)
                     .await?
-                    .ok_or(ApiError::DeliberationDiscussionException)?;
+                    .ok_or(ApiError::DiscussionResourceException)?;
             }
         }
 
