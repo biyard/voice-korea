@@ -42,10 +42,7 @@ impl Version2Controller {
                 "/organizations",
                 organizations::OrganizationController::route(pool.clone())?,
             )
-            .nest(
-                "/reviews",
-                reviews::ReviewControllerV1::route(pool.clone())?,
-            )
+            .nest("/reviews", reviews::ReviewController::route(pool.clone())?)
             .nest(
                 "/surveys/:survey-id/responses",
                 SurveyResponseController::route(pool.clone())?,

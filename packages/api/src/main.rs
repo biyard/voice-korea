@@ -7,6 +7,8 @@ use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Control
 use models::{
     deliberation::Deliberation,
     deliberation_response::DeliberationResponse,
+    deliberation_user::DeliberationUser,
+    deliberation_vote::DeliberationVote,
     invitation::Invitation,
     response::SurveyResponse,
     review::Review,
@@ -48,6 +50,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let institution = Institution::get_repository(pool.clone());
     let review = Review::get_repository(pool.clone());
     let opinions = PublicOpinionProject::get_repository(pool.clone());
+    let du = DeliberationUser::get_repository(pool.clone());
+    let dv = DeliberationVote::get_repository(pool.clone());
 
     v.create_this_table().await?;
     o.create_this_table().await?;
@@ -63,6 +67,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     dr.create_this_table().await?;
     g.create_this_table().await?;
     gm.create_this_table().await?;
+
+    du.create_this_table().await?;
+    dv.create_this_table().await?;
 
     iv.create_this_table().await?;
     institution.create_this_table().await?;
@@ -89,6 +96,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     institution.create_related_tables().await?;
     review.create_related_tables().await?;
     opinions.create_related_tables().await?;
+
+    du.create_related_tables().await?;
+    dv.create_related_tables().await?;
 
     tracing::info!("Migration done");
     Ok(())
@@ -138,11 +148,6 @@ async fn make_app() -> Result<Router> {
         .nest(
             "/institutions/m1",
             InstitutionControllerM1::route(pool.clone())?,
-        )
-        // NOTE: Deprecated
-        .nest(
-            "/reviews/v1",
-            controllers::v2::reviews::ReviewControllerV1::route(pool.clone())?,
         )
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
