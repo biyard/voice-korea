@@ -1,4 +1,3 @@
-use excel::SurveyResponseExcel;
 use models::attribute_v2::{GenderV2, RegionV2, SalaryV2};
 
 use crate::tests::{setup, TestContext};
@@ -384,6 +383,8 @@ async fn test_survey_reponse() {
 
     #[cfg(feature = "full-test")]
     {
+        use excel::SurveyResponseExcel;
+
         let cli = SurveyResponseExcel::get_client(&endpoint);
 
         let res = cli.download_excel(org_id, survey_id).await.unwrap();

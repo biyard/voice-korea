@@ -1,5 +1,5 @@
 use models::{
-    deliberation::{Deliberation, DeliberationParam, DeliberationQuery},
+    deliberation::{Deliberation, DeliberationQuery},
     ProjectArea,
 };
 
