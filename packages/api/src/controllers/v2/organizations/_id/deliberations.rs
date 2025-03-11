@@ -52,6 +52,7 @@ impl DeliberationController {
             resource_ids,
             survey_ids,
             roles,
+            ..
         }: DeliberationCreateRequest,
     ) -> Result<Deliberation> {
         // TODO: implement temporary and create
