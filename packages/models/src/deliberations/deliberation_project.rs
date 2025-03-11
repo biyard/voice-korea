@@ -5,8 +5,6 @@ use by_macros::api_model;
 use crate::ProjectArea;
 
 // TODO(web): using resource for project.
-// TODO(api): implement Query of GET /v2/projects
-// TODO(api): implement GET /v2/projects/:id
 #[api_model(base = "/v2/projects", table = deliberations)]
 pub struct DeliberationProject {
     #[api_model(summary, primary_key)]
