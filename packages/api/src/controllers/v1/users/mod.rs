@@ -108,20 +108,6 @@ impl UserController {
 }
 
 impl UserController {
-    pub fn generate_token(&self, user: &User) -> Result<String> {
-        let mut claims = Claims {
-            sub: user.id.to_string(),
-            role: by_types::Role::User,
-            custom: HashMap::from([("email".to_string(), user.email.clone())]),
-            ..Claims::default()
-        };
-
-        generate_jwt(&mut claims).map_err(|e| {
-            tracing::error!("Failed to generate JWT: {}", e);
-            ApiError::JWTGenerationFail(e.to_string())
-        })
-    }
-
     pub async fn refresh_user(&self, auth: Authorization) -> Result<Json<UserGetResponse>> {
         match auth {
             Authorization::Bearer { claims } => {
@@ -196,7 +182,7 @@ impl UserController {
 
         tx.commit().await?;
 
-        let jwt = self.generate_token(&user)?;
+        let jwt = crate::utils::app_claims::AppClaims::generate_token(&user)?;
 
         // FIXME(api): it should be contained to above transaction
         self.invite_user(user.clone()).await?;
@@ -219,7 +205,7 @@ impl UserController {
                 ApiError::AuthKeyNotMatch("check your password".to_string())
             })?;
 
-        let jwt = self.generate_token(&user)?;
+        let jwt = crate::utils::app_claims::AppClaims::generate_token(&user)?;
 
         Ok(JsonWithHeaders::new(user)
             .with_bearer_token(&jwt)
@@ -264,7 +250,7 @@ impl UserController {
 
         tx.commit().await?;
 
-        let jwt = self.generate_token(&user)?;
+        let jwt = crate::utils::app_claims::AppClaims::generate_token(&user)?;
 
         Ok(JsonWithHeaders::new(user)
             .with_bearer_token(&jwt)
@@ -285,7 +271,7 @@ impl UserController {
                 ApiError::AuthKeyNotMatch("check your email".to_string())
             })?;
 
-        let jwt = self.generate_token(&user)?;
+        let jwt = crate::utils::app_claims::AppClaims::generate_token(&user)?;
 
         Ok(JsonWithHeaders::new(user)
             .with_bearer_token(&jwt)
@@ -346,7 +332,7 @@ impl UserController {
             }
         };
 
-        let jwt = self.generate_token(&user)?;
+        let jwt = crate::utils::app_claims::AppClaims::generate_token(&user)?;
 
         Ok(JsonWithHeaders::new(user)
             .with_bearer_token(&jwt)
