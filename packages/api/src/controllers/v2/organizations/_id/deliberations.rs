@@ -16,6 +16,7 @@ use models::{
     step::{Step, StepRepository},
     *,
 };
+use step::StepCreateRequest;
 
 use crate::controllers::v2::organizations::OrganizationPath;
 
@@ -48,11 +49,16 @@ impl DeliberationController {
         DeliberationCreateRequest {
             started_at,
             ended_at,
-            steps,
             project_area,
             title,
             description,
-            ..
+            panels,
+            resource_ids,
+            survey_ids,
+            roles,
+            steps,
+            elearning,
+            discussions,
         }: DeliberationCreateRequest,
     ) -> Result<Deliberation> {
         // TODO(api): incompleted creating API
@@ -79,15 +85,21 @@ impl DeliberationController {
             .await?
             .ok_or(ApiError::AlreadyExists)?;
 
-        for step in steps {
+        for StepCreateRequest {
+            ended_at,
+            step_type,
+            started_at,
+            name,
+        } in steps
+        {
             self.step
                 .insert_with_tx(
                     &mut *tx,
                     deliberation.id,
-                    step.public_opinion_type.unwrap_or_default(),
-                    step.name,
-                    step.start_date.unwrap_or_default() as i64, // FIXME: this is right?
-                    step.end_date.unwrap_or_default() as i64,   // FIXME: this is right?
+                    step_type,
+                    name,
+                    started_at,
+                    ended_at,
                 )
                 .await?
                 .ok_or(ApiError::AlreadyExists)?;

@@ -1,6 +1,5 @@
 use crate::deliberation_comment::DeliberationComment;
 use crate::deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
-use crate::step::Step;
 
 #[cfg(feature = "server")]
 use by_axum::aide;
@@ -9,10 +8,11 @@ use validator::Validate;
 
 use crate::deliberation_vote::DeliberationVote;
 use crate::discussions::*;
-use crate::{OpinionInfo, PanelV2, ProjectArea, ResourceFile, SurveyV2};
+use crate::step::*;
+use crate::{PanelV2, ProjectArea, ResourceFile, SurveyV2};
 
 #[derive(Validate)]
-#[api_model(base = "/v2/organizations/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, steps = Vec<OpinionInfo>, elearning = Vec<i64>, discussions = Vec<DiscussionCreateRequest>)], table = deliberations)]
+#[api_model(base = "/v2/organizations/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, steps = Vec<StepCreateRequest>, elearning = Vec<i64>, discussions = Vec<DiscussionCreateRequest>)], table = deliberations)]
 pub struct Deliberation {
     #[api_model(summary, primary_key)]
     pub id: i64,
