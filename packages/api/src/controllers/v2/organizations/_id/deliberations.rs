@@ -185,7 +185,7 @@ impl DeliberationController {
         for PanelV2 { id, .. } in panels {
             pd.insert_with_tx(&mut *tx, id, deliberation.id)
                 .await?
-                .ok_or(ApiError::DeliberationDiscussionException)?;
+                .ok_or(ApiError::DeliberationPanelException)?;
         }
 
         tx.commit().await?;
