@@ -3,46 +3,26 @@ use by_axum::{
     axum::Router,
 };
 use by_types::DatabaseConfig;
-use controllers::{
-    institutions::m1::InstitutionControllerM1, resources::v1::bucket::MetadataControllerV1,
-    reviews::v1::ReviewControllerV1, v2::Version2Controller,
-};
+use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Controller};
+use models::step::Step;
 use models::{
     deliberation::Deliberation,
     deliberation_response::DeliberationResponse,
+    deliberation_user::DeliberationUser,
+    deliberation_vote::DeliberationVote,
+    invitation::Invitation,
     response::SurveyResponse,
+    review::Review,
     v2::{Institution, PublicOpinionProject},
 };
-use models::{step::Step, v2::Review, *};
+use models::{organization::Organization, *};
 use sqlx::postgres::PgPoolOptions;
-// use by_types::DatabaseConfig;
-// use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
 mod common;
 mod controllers {
     pub mod v1;
     pub mod v2;
-
-    pub mod panels {
-        pub mod v2;
-    }
-    pub mod resources {
-        pub mod v1;
-    }
-    pub mod survey {
-        pub mod v2;
-    }
-    pub mod organizations {
-        pub mod v2;
-    }
-    pub mod invitations {
-        pub mod v2;
-    }
-
-    pub mod reviews {
-        pub mod v1;
-    }
 
     pub mod institutions {
         pub mod m1;
@@ -60,7 +40,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let v = Verification::get_repository(pool.clone());
     let o = Organization::get_repository(pool.clone());
     let u = User::get_repository(pool.clone());
-    let resource = Resource::get_repository(pool.clone());
+    let resource = ResourceFile::get_repository(pool.clone());
     // let files = Files::get_repository(pool.clone());
     let p = PanelV2::get_repository(pool.clone());
     let s = SurveyV2::get_repository(pool.clone());
@@ -75,7 +55,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let institution = Institution::get_repository(pool.clone());
     let review = Review::get_repository(pool.clone());
     let opinions = PublicOpinionProject::get_repository(pool.clone());
-    let deliberation = Deliberation::get_repository(pool.clone());
+    let du = DeliberationUser::get_repository(pool.clone());
+    let dv = DeliberationVote::get_repository(pool.clone());
     let step = Step::get_repository(pool.clone());
 
     v.create_this_table().await?;
@@ -93,11 +74,13 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     g.create_this_table().await?;
     gm.create_this_table().await?;
 
+    du.create_this_table().await?;
+    dv.create_this_table().await?;
+
     iv.create_this_table().await?;
     institution.create_this_table().await?;
     review.create_this_table().await?;
     opinions.create_this_table().await?;
-    deliberation.create_this_table().await?;
     step.create_this_table().await?;
 
     v.create_related_tables().await?;
@@ -120,7 +103,9 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     institution.create_related_tables().await?;
     review.create_related_tables().await?;
     opinions.create_related_tables().await?;
-    deliberation.create_related_tables().await?;
+
+    du.create_related_tables().await?;
+    dv.create_related_tables().await?;
     step.create_related_tables().await?;
 
     tracing::info!("Migration done");
@@ -154,21 +139,24 @@ async fn make_app() -> Result<Router> {
         // NOTE: Deprecated
         .nest(
             "/organizations/v2",
-            controllers::organizations::v2::OrganizationController::route(pool.clone())?,
+            controllers::v2::organizations::OrganizationController::route(pool.clone())?,
         )
         // NOTE: Deprecated
         .nest(
             "/invitations/v2/:org-id",
-            crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
+            crate::controllers::v2::organizations::_id::invitations::InvitationControllerV2::route(
+                pool.clone(),
+            )?,
         )
         // NOTE: Deprecated
-        .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
+        .nest(
+            "/metadata/v2",
+            controllers::v2::metadata::MetadataControllerV1::route(pool.clone())?,
+        )
         .nest(
             "/institutions/m1",
             InstitutionControllerM1::route(pool.clone())?,
         )
-        // NOTE: Deprecated
-        .nest("/reviews/v1", ReviewControllerV1::route(pool.clone())?)
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
     Ok(app)
@@ -212,18 +200,45 @@ pub mod tests {
     pub async fn setup_test_user(id: &str, pool: &sqlx::Pool<sqlx::Postgres>) -> Result<User> {
         let user = User::get_repository(pool.clone());
         let org = Organization::get_repository(pool.clone());
+        let org_mem = OrganizationMember::get_repository(pool.clone());
+
         let email = format!("user-{id}@test.com");
         let password = format!("password-{id}");
         let password = get_hash_string(password.as_bytes());
 
-        let u = user.insert(email.clone(), password.clone(), None).await?;
-        tracing::debug!("{:?}", u);
-
-        org.insert_with_dependency(u.id, email.clone()).await?;
+        let mut tx = pool.begin().await?;
 
         let user = user
-            .find_one(&UserReadAction::new().get_user(email, password))
-            .await?;
+            .insert_with_tx(&mut *tx, email, password, None)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        let org = org
+            .insert_with_tx(&mut *tx, user.email.clone(), None)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        org_mem
+            .insert_with_tx(
+                &mut *tx,
+                user.id,
+                org.id,
+                user.email.clone(),
+                Some(Role::Admin),
+                None,
+            )
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        let user = User::query_builder()
+            .id_equals(user.id)
+            .query()
+            .map(User::from)
+            .fetch_optional(&mut *tx)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        tx.commit().await?;
 
         Ok(user)
     }

@@ -5621,6 +5621,7 @@ version = "0.1.0"
 dependencies = [
  "btracing",
  "by-components",
+ "by-macros",
  "by-types",
  "chrono",
  "dioxus",
@@ -5630,6 +5631,7 @@ dependencies = [
  "dioxus-translate",
  "getrandom 0.2.15",
  "google-wallet",
+ "indexmap",
  "models",
  "num-format",
  "regex",

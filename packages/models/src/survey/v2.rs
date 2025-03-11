@@ -13,7 +13,7 @@ use validator::ValidationError;
 use super::response::{Answer, SurveyResponse};
 
 // If you want to know how to use Y macro, refer to https://github.com/biyard/rust-sdk/tree/main/packages/by-macros
-#[api_model(base = "/organizations/v2/:org-id/surveys", table = surveys, action_by_id = start_survey, iter_type=QueryResponse)]
+#[api_model(base = "/v2/organizations/:org-id/surveys", table = surveys, action_by_id = start_survey, iter_type=QueryResponse)]
 pub struct SurveyV2 {
     #[api_model(summary, primary_key, action = delete, read_action = find_by_id)]
     pub id: i64,
@@ -64,6 +64,27 @@ pub struct SurveyV2 {
     pub response_count: i64,
     // #[api_model(summary, many_to_many = attrs, foreign_table_name = attributes, foreign_primary_key = attr_id, foreign_reference_key = survey_id)]
     // pub attributes: Vec<Attribute>,
+}
+
+impl SurveyV2 {
+    pub fn period(&self, lang: Language) -> String {
+        let started_at = self.formatted_timestamp(lang, self.started_at);
+        let ended_at = self.formatted_timestamp(lang, self.ended_at);
+
+        format!("{} ~ {}", started_at, ended_at)
+    }
+
+    pub fn formatted_timestamp(&self, lang: Language, timestamp: i64) -> String {
+        let datetime = Utc
+            .timestamp_opt(timestamp, 0)
+            .single()
+            .expect("Invalid timestamp");
+
+        match lang {
+            Language::Ko => datetime.format("%-m월 %-d일 %Y년").to_string(),
+            Language::En => datetime.format("%-m. %-d. %Y").to_string(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]

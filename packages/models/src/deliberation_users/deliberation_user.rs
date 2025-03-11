@@ -17,9 +17,10 @@ pub struct DeliberationUser {
 
     #[api_model(many_to_one = users, action = create)]
     pub user_id: i64,
-
+    #[api_model(many_to_one = organizations)]
+    pub organization_id: i64,
     #[api_model(many_to_one = deliberations)]
-    pub deliveration_id: i64,
+    pub deliberation_id: i64,
 
     #[api_model(action = create)]
     pub role: Role,

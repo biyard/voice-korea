@@ -1,5 +1,4 @@
 #![allow(unused)]
-use crate::controllers::organizations::v2::OrganizationPath;
 use by_axum::{
     aide,
     auth::Authorization,
@@ -19,19 +18,27 @@ use models::{
     *,
 };
 
+use crate::controllers::v2::organizations::OrganizationPath;
+
 #[derive(
     Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
 )]
-#[serde(rename_all = "kebab-case")]
 pub struct DeliberationPath {
     pub org_id: i64,
     pub id: i64,
 }
 
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
+)]
+pub struct DeliberationParentPath {
+    pub org_id: i64,
+}
+
 #[derive(Clone, Debug)]
 pub struct DeliberationController {
-    pool: sqlx::Pool<sqlx::Postgres>,
     repo: DeliberationRepository,
+    pool: sqlx::Pool<sqlx::Postgres>,
     step: StepRepository,
 }
 
@@ -146,16 +153,6 @@ impl DeliberationController {
         }
     }
 
-    // pub async fn act_deliberation_by_id(
-    //     State(_ctrl): State<DeliberationController>,
-    //     Extension(_auth): Extension<Option<Authorization>>,
-    //     Path(DeliberationPath { parent_id, id }): Path<DeliberationPath>,
-    //     Json(body): Json<DeliberationByIdAction>,
-    // ) -> Result<Json<Deliberation>> {
-    //     tracing::debug!("act_deliberation_by_id {} {:?} {:?}", parent_id, id, body);
-    //     Ok(Json(Deliberation::default()))
-    // }
-
     pub async fn get_deliberation_by_id(
         State(ctrl): State<DeliberationController>,
         Extension(_auth): Extension<Option<Authorization>>,
@@ -173,6 +170,23 @@ impl DeliberationController {
                 .await?,
         ))
     }
+
+    // pub async fn get_deliberation_by_id(
+    //     State(ctrl): State<DeliberationController>,
+    //     Extension(_auth): Extension<Option<Authorization>>,
+    //     Path(DeliberationPath { org_id, id }): Path<DeliberationPath>,
+    // ) -> Result<Json<Deliberation>> {
+    //     tracing::debug!("get_deliberation {} {:?}", org_id, id);
+    //     Ok(Json(
+    //         Deliberation::query_builder()
+    //             .id_equals(id)
+    //             .org_id_equals(org_id)
+    //             .query()
+    //             .map(Deliberation::from)
+    //             .fetch_one(&ctrl.pool)
+    //             .await?,
+    //     ))
+    // }
 
     pub async fn get_deliberation(
         State(ctrl): State<DeliberationController>,
