@@ -25,7 +25,6 @@ pub mod dto;
 mod group_members;
 pub mod invitations;
 mod organization_members;
-pub mod paenl_deliberations;
 pub mod panel_deliberations;
 mod parsed_question;
 mod projects;
