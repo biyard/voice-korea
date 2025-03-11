@@ -130,7 +130,7 @@ impl DeliberationController {
         for survey_id in survey_ids {
             ds.insert_with_tx(&mut *tx, deliberation.id, survey_id)
                 .await?
-                .ok_or(ApiError::DeliberationException)?;
+                .ok_or(ApiError::DeliberationSurveyException)?;
         }
 
         for StepCreateRequest {
