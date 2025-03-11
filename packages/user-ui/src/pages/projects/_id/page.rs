@@ -4,12 +4,15 @@ use dioxus_translate::Language;
 
 use super::{components::sample::Sample, controller};
 
-use crate::components::icons::{
-    download::DownloadIcon,
-    pencil::Pencil,
-    person::Person,
-    right_arrow::RightArrow,
-    triangle::{TriangleDown, TriangleUp},
+use crate::{
+    components::icons::{
+        download::DownloadIcon,
+        pencil::Pencil,
+        person::Person,
+        right_arrow::RightArrow,
+        triangle::{TriangleDown, TriangleUp},
+    },
+    pages::projects::_id::components::basic_info::BasicInfo,
 };
 
 #[component]
@@ -21,6 +24,12 @@ pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
         div {
             ProjectProfile { lang }
             ProjectDetailsMenu { lang }
+
+            // TODO: Specific view for tabs
+            // Use sliding tabs when changing selected tab
+            BasicInfo { lang, project_id }
+
+        // TODO: Comments
         }
     }
 }
