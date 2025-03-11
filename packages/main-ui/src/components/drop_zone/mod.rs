@@ -3,6 +3,7 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
+use i18n::DropZoneTranslate;
 use models::{File, MetadataRequest};
 
 use crate::{
@@ -10,14 +11,13 @@ use crate::{
     service::metadata_api::MetadataApi,
 };
 
+pub mod i18n;
+
 #[cfg(feature = "web")]
 use dioxus::html::{FileEngine, HasFileData};
 
 #[cfg(feature = "web")]
 use std::sync::Arc;
-
-mod i18n;
-use i18n::DropZoneTranslate;
 
 fn human_readable_size(bytes: usize) -> String {
     let sizes = ["B", "KB", "MB", "GB", "TB"];

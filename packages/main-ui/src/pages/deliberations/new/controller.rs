@@ -1,9 +1,13 @@
+use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use models::{deliberation::Deliberation, step::StepCreateRequest, step_type::StepType, *};
 
-use crate::service::{login_service::LoginService, popup_service::PopupService};
+use crate::{
+    config,
+    service::{login_service::LoginService, popup_service::PopupService},
+};
 
 use super::{
     composition_panel::{AddAttributeModal, CreateNewPanelModal},
@@ -11,10 +15,11 @@ use super::{
     preview::SendAlertModal,
 };
 
-#[derive(Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
     popup_service: Signal<PopupService>,
     current_step: Signal<CurrentStep>,
+    user: LoginService,
 
     //step 1
     deliberation_sequences: Signal<Vec<StepCreateRequest>>,
@@ -22,6 +27,7 @@ pub struct Controller {
     //step 2
     total_fields: Signal<Vec<String>>,
     deliberation_informations: Signal<DeliberationInformation>,
+    pub surveys: Resource<Vec<SurveyV2Summary>>,
 
     //step 4
     total_attributes: Signal<Vec<AttributeResponse>>,
@@ -38,10 +44,39 @@ pub enum CurrentStep {
 }
 
 impl Controller {
-    pub fn new(lang: dioxus_translate::Language) -> Self {
+    pub fn new(lang: dioxus_translate::Language) -> std::result::Result<Self, RenderError> {
+        let user: LoginService = use_context();
         let popup_service: PopupService = use_context();
         let translates: OpinionNewTranslate = translate(&lang.clone());
+
+        let client = SurveyV2::get_client(&crate::config::get().api_url);
+        let surveys = use_server_future(move || {
+            let page = 1;
+            let size = 20;
+            let client = client.clone();
+
+            async move {
+                let org_id = user.get_selected_org();
+                if org_id.is_none() {
+                    tracing::error!("Organization ID is missing");
+                    return vec![];
+                }
+
+                match client
+                    .query(org_id.unwrap().id, SurveyV2Query::new(size).with_page(page))
+                    .await
+                {
+                    Ok(res) => res.items,
+                    Err(e) => {
+                        tracing::error!("Failed to list surveys: {:?}", e);
+                        vec![]
+                    }
+                }
+            }
+        })?;
+
         let ctrl = Self {
+            user,
             popup_service: use_signal(|| popup_service),
             current_step: use_signal(|| CurrentStep::PublicOpinionComposition),
             deliberation_sequences: use_signal(|| {
@@ -103,6 +138,7 @@ impl Controller {
                 documents: vec![],
                 projects: vec![],
             }),
+            surveys,
             //FIXME: fix to connect api
             total_attributes: use_signal(|| {
                 vec![
@@ -176,7 +212,7 @@ impl Controller {
             }),
         };
         use_context_provider(|| ctrl);
-        ctrl
+        Ok(ctrl)
     }
 
     pub fn get_total_attributes(&self) -> Vec<AttributeResponse> {
@@ -409,5 +445,55 @@ impl Controller {
                 Err(models::ApiError::ReqwestFailed(e.to_string()))
             }
         }
+    }
+
+    //step 2
+    pub async fn create_resource(&self, file: File) -> Result<()> {
+        let org = self.user.get_selected_org();
+        if org.is_none() {
+            return Err(models::ApiError::OrganizationNotFound);
+        }
+        let org_id = org.unwrap().id;
+        let client = models::ResourceFile::get_client(&config::get().api_url);
+        let mut ctrl = self.clone();
+
+        match client
+            .create(
+                org_id,
+                file.name.clone(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                vec![file],
+            )
+            .await
+        {
+            Ok(v) => {
+                let mut info = (ctrl.deliberation_informations)();
+                let mut documents = info.documents;
+                documents.push(v);
+                info.documents = documents;
+                ctrl.deliberation_informations.set(info);
+                Ok(())
+            }
+            Err(e) => {
+                tracing::error!("Create Failed Reason: {:?}", e);
+                Err(models::ApiError::ReqwestFailed(e.to_string()))
+            }
+        }
+    }
+
+    pub fn delete_resource(&mut self, id: i64) {
+        let mut info = (self.deliberation_informations)();
+        let mut documents = info.documents;
+        documents.retain(|doc| doc.id != id);
+        info.documents = documents;
+        self.deliberation_informations.set(info);
+    }
+
+    pub fn resources(&self) -> Vec<ResourceFile> {
+        (self.deliberation_informations)().documents
     }
 }

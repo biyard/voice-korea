@@ -2,6 +2,7 @@ pub mod profile;
 pub mod v2;
 use crate::step_type::StepType;
 
+use crate::ResourceFile;
 use crate::{group::MemberInfo, projects::ProjectArea, ProjectStatus};
 #[cfg(feature = "server")]
 use by_axum::aide;
@@ -9,7 +10,7 @@ use by_axum::aide;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct CreateOpinionRequest {
     pub status: Option<OpinionDraftStatus>,
@@ -20,7 +21,7 @@ pub struct CreateOpinionRequest {
     pub discussions: Option<DiscussionInfo>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct UpdateOpinionRequest {
     pub status: Option<OpinionDraftStatus>,
@@ -40,14 +41,14 @@ pub struct DiscussionInfo {
     pub documents: Vec<Document>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub enum OpinionActionRequest {
     Create(CreateOpinionRequest),
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub enum OpinionByIdActionRequest {
@@ -152,13 +153,13 @@ pub enum AllocationMethod {
     ProportionalAllocation,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct DeliberationInformation {
     pub deliberation_type: Option<ProjectArea>,
     pub title: Option<String>,
     pub description: Option<String>,
-    pub documents: Vec<Document>,
+    pub documents: Vec<ResourceFile>,
     pub projects: Vec<ProjectInfo>,
 }
 

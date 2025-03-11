@@ -1,23 +1,23 @@
+#[cfg(feature = "web")]
+use crate::components::outside_hook::eventhook::use_outside_click;
+
+use crate::components::{
+    close_label::CloseLabel, drop_zone::DropZone, file_list::FileList, icons::Remove,
+};
 use dioxus::prelude::*;
-use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
+use models::{File, ResourceFile, SurveyV2Summary};
 
 use crate::{
-    components::{
-        icons::{Search, Switch, UploadFile},
-        upload_button::UploadButton,
-    },
+    components::icons::{Search, Switch},
     pages::deliberations::new::{
         controller::Controller,
         i18n::{
-            ConnectProjectTranslate, DirectUploadTranslate, ImportDocumentTranslate,
-            InputIntroductionTranslate, InputOpinionTranslate, UploadDocumentTranslate,
+            ConnectProjectTranslate, ImportDocumentTranslate, InputIntroductionTranslate,
+            InputOpinionTranslate, UploadDocumentTranslate,
         },
     },
 };
-
-#[cfg(feature = "web")]
-use dioxus::html::HasFileData;
 
 use super::controller::CurrentStep;
 
@@ -28,23 +28,45 @@ pub enum DocumentTabType {
 }
 
 #[component]
-pub fn InputOpinion(lang: Language) -> Element {
+pub fn InputOpinion(
+    lang: Language,
+    resources: Vec<ResourceFile>,
+    surveys: Vec<SurveyV2Summary>,
+    oncreate: EventHandler<File>,
+    onremove: EventHandler<i64>,
+    onstep: EventHandler<CurrentStep>,
+) -> Element {
     let translates: InputOpinionTranslate = translate(&lang);
-    let mut ctrl: Controller = use_context();
+    let mut files = use_signal(|| vec![]);
+
+    tracing::debug!("resources: {:?}", resources);
+
+    use_effect(use_reactive(&resources, move |resources| {
+        let all_files: Vec<File> = resources.iter().flat_map(|r| &r.files).cloned().collect();
+
+        files.set(all_files);
+    }));
+
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
             div { class: "font-medium text-[16px] text-[#000000] mb-[10px]",
                 "{translates.essential_information}"
             }
             InputIntroduction { lang }
-            UploadDocument { lang }
-            ConnectProject { lang }
+            UploadDocument {
+                lang,
+                resources,
+                files: files(),
+                oncreate,
+                onremove,
+            }
+            ConnectProject { lang, surveys }
 
             div { class: "flex flex-row w-full justify-end items-end mt-[40px] mb-[50px]",
                 div {
                     class: "cursor-pointer flex flex-row w-[70px] h-[55px] rounded-[4px] justify-center items-center bg-white border border-[#bfc8d9] font-semibold text-[16px] text-[#555462] mr-[20px]",
                     onclick: move |_| {
-                        ctrl.change_step(CurrentStep::PublicOpinionComposition);
+                        onstep.call(CurrentStep::PublicOpinionComposition);
                     },
                     "{translates.backward}"
                 }
@@ -56,7 +78,7 @@ pub fn InputOpinion(lang: Language) -> Element {
                 div {
                     class: "cursor-pointer flex flex-row w-[110px] h-[55px] rounded-[4px] justify-center items-center bg-[#2a60d3] font-semibold text-[16px] text-white",
                     onclick: move |_| {
-                        ctrl.change_step(CurrentStep::CommitteeComposition);
+                        onstep.call(CurrentStep::CommitteeComposition);
                     },
                     "{translates.next}"
                 }
@@ -66,8 +88,10 @@ pub fn InputOpinion(lang: Language) -> Element {
 }
 
 #[component]
-pub fn ConnectProject(lang: Language) -> Element {
+pub fn ConnectProject(lang: Language, surveys: Vec<SurveyV2Summary>) -> Element {
     let i18n: ConnectProjectTranslate = translate(&lang);
+    let mut selected_surveys = use_signal(|| vec![]);
+
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white px-[40px] py-[24px] mb-[100px]",
             div { class: "flex flex-col w-full mb-[10px]",
@@ -76,19 +100,27 @@ pub fn ConnectProject(lang: Language) -> Element {
                     "{i18n.research_project_linkage_description}"
                 }
             }
-            div { class: "flex flex-row w-full h-[55px] justify-start items-center p-[15px] font-medium text-[15px] text-[#b4b4b4] bg-[#f7f7f7] rounded-[4px]",
-                option { onchange: move |_| {},
-                    "{i18n.research_selection}"
-                    option { value: "" }
-                                // TODO: Need connect button to data
-                }
+
+            Dropdown {
+                id: "deliberation connect project",
+                options: surveys,
+                hint: i18n.research_selection,
+                onchange: move |v| {
+                    selected_surveys.set(v);
+                },
             }
         }
     }
 }
 
 #[component]
-pub fn UploadDocument(lang: Language) -> Element {
+pub fn UploadDocument(
+    lang: Language,
+    resources: Vec<ResourceFile>,
+    files: Vec<File>,
+    oncreate: EventHandler<File>,
+    onremove: EventHandler<i64>,
+) -> Element {
     let mut tab_type = use_signal(|| DocumentTabType::DirectUpload);
     let i18n: UploadDocumentTranslate = translate(&lang);
 
@@ -134,9 +166,24 @@ pub fn UploadDocument(lang: Language) -> Element {
                 }
 
                 if tab_type() == DocumentTabType::DirectUpload {
-                    DirectUpload { lang }
+                    DirectUpload {
+                        lang,
+                        oncreate: move |file: File| {
+                            oncreate.call(file);
+                        },
+                    }
                 } else {
                     ImportDocument { lang }
+                }
+
+                div { class: "mt-[10px]" }
+
+                FileList {
+                    items: files,
+                    onremove: move |index: usize| {
+                        let id = resources[index].id;
+                        onremove.call(id);
+                    },
                 }
             }
         }
@@ -235,70 +282,19 @@ pub fn ImportDocument(lang: Language) -> Element {
             }
 
             //info
-            div { class: "font-normal text-[#6d6d6d] text-[14px]", "{i18n.upload_file_warning}" }
+            div { class: "font-normal text-[#222222] text-[13px]", "{i18n.upload_file_warning}" }
         }
     }
 }
 
 #[component]
-pub fn DirectUpload(lang: Language) -> Element {
-    let i18n: DirectUploadTranslate = translate(&lang);
-    let mut indragzone = use_signal(|| false);
-
+pub fn DirectUpload(lang: Language, oncreate: EventHandler<File>) -> Element {
     rsx! {
-        div {
-            class: "flex flex-col w-full",
-            ondrop: move |ev: Event<DragData>| async move {
-                tracing::debug!("drop files in div");
-                ev.prevent_default();
-                ev.stop_propagation();
+        DropZone {
+            lang,
+            onchange: move |v: Vec<File>| {
+                oncreate.call(v[0].clone());
             },
-            div {
-                class: format!(
-                    "flex flex-col w-full justify-center items-center p-[24px] rounded-[8px] border-[2px] border-dashed border-[#2a60d3] mb-[10px] {}",
-                    if indragzone() { "bg-[#afc9ff] opacity-50" } else { "" },
-                ),
-                ondragover: move |e| {
-                    e.prevent_default();
-                    e.stop_propagation();
-                    tracing::debug!("files in drop zone");
-                    indragzone.set(true);
-                },
-                ondragleave: move |e| {
-                    e.prevent_default();
-                    e.stop_propagation();
-                    tracing::debug!("leave drop zone");
-                    indragzone.set(false);
-                },
-                ondrop: move |ev: Event<DragData>| async move {
-                    tracing::debug!("drop files");
-                    ev.prevent_default();
-                    ev.stop_propagation();
-                    #[cfg(feature = "web")]
-                    if let Some(file_engine) = ev.files() {
-                        tracing::debug!("got file_engine {:?}", file_engine.files());
-                    }
-                    indragzone.set(false);
-                },
-                div { class: "mb-[12px] w-[42px] h-[42px]",
-                    UploadFile { width: "42", height: "42" }
-                }
-                div { class: "font-normal text-[#222222] text-sm mb-[8px]",
-                    "{i18n.upload_file_description}"
-                }
-                div { class: "flex flex-row w-full justify-center items-center mb-[8px]",
-                    div { class: "w-[80px] h-[1px] bg-[#e7e7e7] mr-[12px]" }
-                    div { class: "font-normal text-[#6d6d6d] text-sm mr-[12px]", "OR" }
-                    div { class: "w-[80px] h-[1px] bg-[#e7e7e7] mr-[12px]" }
-                }
-                UploadButton {
-                    class: "flex flex-row w-[100px] h-[30px] justify-center items-center bg-white border border-[#1849d6] rounded-[4px] font-semibold text-[#1849d6] text-sm",
-                    text: "{i18n.load_file}",
-                    onuploaded: move |_| {},
-                }
-            }
-
-            div { class: "font-normal text-[#6d6d6d] text-[14px]", "{i18n.upload_file_warning}" }
         }
     }
 }
@@ -389,6 +385,96 @@ pub fn InputIntroduction(lang: Language) -> Element {
                             ctrl.update_deliberation_information(value);
                         }
                     },
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn Dropdown(
+    id: String,
+    hint: String,
+    options: Vec<SurveyV2Summary>,
+    onchange: EventHandler<Vec<SurveyV2Summary>>,
+) -> Element {
+    let mut is_focused = use_signal(|| false);
+    let mut selected_option: Signal<Vec<SurveyV2Summary>> = use_signal(|| vec![]);
+
+    #[cfg(feature = "web")]
+    use_outside_click(&id, move |_| is_focused.set(false));
+
+    rsx! {
+        div {
+            id,
+            class: "cursor-pointer relative flex flex-row w-full h-[55px] justify-center items-center bg-[#f7f7f7] rounded-md",
+            onclick: move |_| {
+                let prev = is_focused();
+                is_focused.set(!prev);
+            },
+
+            div { class: "flex flex-row w-full items-center px-[15px] py-[10px] gap-[10px] justify-between",
+
+                if selected_option().len() != 0 {
+                    div {
+                        class: "flex flex-wrap flex-1 gap-[10px]",
+                        visibility: if selected_option().len() != 0 { "flex" } else { "hidden" },
+                        for (i , option) in selected_option.iter().enumerate() {
+                            CloseLabel {
+                                label: option.name.clone(),
+                                onremove: move |event: Event<MouseData>| {
+                                    event.stop_propagation();
+                                    event.prevent_default();
+                                    let mut so = selected_option();
+                                    so.remove(i);
+                                    selected_option.set(so);
+                                    onchange.call(selected_option());
+                                },
+                            }
+                        }
+                    }
+
+                    button {
+                        onclick: move |event: Event<MouseData>| {
+                            event.stop_propagation();
+                            event.prevent_default();
+                            selected_option.set(vec![]);
+                            onchange.call(selected_option());
+                        },
+                        Remove { width: "20", height: "20", fill: "#555462" }
+                    }
+                } else {
+                    div { class: "font-medium text-[15px] text-[#b4b4b4] bg-[#f7f7f7]",
+                        "{hint}"
+                    }
+                }
+            }
+            if is_focused() {
+                div {
+                    class: "absolute top-full bg-white border border-[#bfc8d9] shadow-lg rounded-lg w-full h-[150px] overflow-y-scroll z-50",
+                    onclick: move |event| {
+                        event.stop_propagation();
+                        event.prevent_default();
+                    },
+                    div { class: "flex flex-col w-full justify-start items-start",
+                        div { class: format!("flex flex-col w-full justify-start items-center bg-white"),
+                            for survey in options {
+                                button {
+                                    class: "flex flex-col w-full justify-start items-start px-[12px] py-[10px] hover:bg-[#f7f7f7] hover:border-l-2 hover:border-[#2a60d3]",
+                                    onclick: move |event: Event<MouseData>| {
+                                        event.stop_propagation();
+                                        event.prevent_default();
+                                        selected_option.push(survey.clone());
+                                        is_focused.set(false);
+                                        onchange.call(selected_option());
+                                    },
+                                    div { class: "font-bold text-[#222222] text-[15px] mb-[5px]",
+                                        "{survey.name}"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
