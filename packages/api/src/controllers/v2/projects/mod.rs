@@ -122,6 +122,7 @@ impl DeliberationProjectController {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use by_axum::axum::body::{to_bytes, Body};
     use by_axum::axum::http::{Request, Response, StatusCode};
     use models::{
@@ -135,6 +136,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_deliberation_basic_info() {
         let TestContext {
+            pool,
             user,
             app,
             now,
@@ -164,25 +166,13 @@ mod tests {
         assert!(res.is_ok());
 
         let deliberation = res.unwrap();
+        let id = deliberation.id;
 
-        let basic_info = deliberation.clone();
+        let cli = DeliberationBasicInfo::get_client(&endpoint);
+        let res = cli.read(id).await;
+        assert!(res.is_ok());
 
-        // TODO: complete this test code
-        // let request = Request::builder()
-        //     .method("GET")
-        //     .uri(format!(
-        //         "{}/v2/projects/{}/basic-info",
-        //         endpoint, created_deliberation.id
-        //     ))
-        //     .header("Content-Type", "application/json")
-        //     .body(Body::empty())
-        //     .unwrap();
-
-        // let response = app.handle(request).await.unwrap();
-        // assert_eq!(response.status(), StatusCode::OK);
-
-        // let body = to_bytes(response.into_body()).await.unwrap();
-        // let basic_info: DeliberationBasicInfo = serde_json::from_slice(&body).unwrap();
+        let basic_info = res.unwrap();
 
         assert_eq!(basic_info.id, deliberation.id);
         assert_eq!(basic_info.description, format!("test description {now}"));
