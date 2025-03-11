@@ -3,49 +3,23 @@ use by_axum::{
     axum::Router,
 };
 use by_types::DatabaseConfig;
-use controllers::{
-    institutions::m1::InstitutionControllerM1, resources::v1::bucket::MetadataControllerV1,
-    reviews::v1::ReviewControllerV1, v2::Version2Controller,
-};
+use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Controller};
 use models::{
     deliberation::Deliberation,
     deliberation_response::DeliberationResponse,
+    invitation::Invitation,
     response::SurveyResponse,
+    review::Review,
     v2::{Institution, PublicOpinionProject},
 };
-use models::{v2::Review, *};
+use models::{organization::Organization, *};
 use sqlx::postgres::PgPoolOptions;
-// use by_types::DatabaseConfig;
-// use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
 mod common;
 mod controllers {
     pub mod v1;
     pub mod v2;
-
-    pub mod panels {
-        pub mod v2;
-    }
-    pub mod resources {
-        pub mod v1;
-    }
-    pub mod survey {
-        pub mod v2;
-    }
-    pub mod organizations {
-        pub mod v2;
-    }
-    pub mod invitations {
-        pub mod v2;
-    }
-    pub mod groups {
-        pub mod v2;
-    }
-
-    pub mod reviews {
-        pub mod v1;
-    }
 
     pub mod institutions {
         pub mod m1;
@@ -59,7 +33,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let v = Verification::get_repository(pool.clone());
     let o = Organization::get_repository(pool.clone());
     let u = User::get_repository(pool.clone());
-    let resource = Resource::get_repository(pool.clone());
+    let resource = ResourceFile::get_repository(pool.clone());
     // let files = Files::get_repository(pool.clone());
     let p = PanelV2::get_repository(pool.clone());
     let s = SurveyV2::get_repository(pool.clone());
@@ -68,7 +42,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
     let sr = SurveyResponse::get_repository(pool.clone());
     let d = Deliberation::get_repository(pool.clone());
     let dr = DeliberationResponse::get_repository(pool.clone());
-    let g = GroupV2::get_repository(pool.clone());
+    let g = Group::get_repository(pool.clone());
     let gm = GroupMemberV2::get_repository(pool.clone());
     let iv = Invitation::get_repository(pool.clone());
     let institution = Institution::get_repository(pool.clone());
@@ -147,21 +121,29 @@ async fn make_app() -> Result<Router> {
         // NOTE: Deprecated
         .nest(
             "/organizations/v2",
-            controllers::organizations::v2::OrganizationController::route(pool.clone())?,
+            controllers::v2::organizations::OrganizationController::route(pool.clone())?,
         )
         // NOTE: Deprecated
         .nest(
             "/invitations/v2/:org-id",
-            crate::controllers::invitations::v2::InvitationControllerV2::route(pool.clone())?,
+            crate::controllers::v2::organizations::_id::invitations::InvitationControllerV2::route(
+                pool.clone(),
+            )?,
         )
         // NOTE: Deprecated
-        .nest("/metadata/v2", MetadataControllerV1::route(pool.clone())?)
+        .nest(
+            "/metadata/v2",
+            controllers::v2::metadata::MetadataControllerV1::route(pool.clone())?,
+        )
         .nest(
             "/institutions/m1",
             InstitutionControllerM1::route(pool.clone())?,
         )
         // NOTE: Deprecated
-        .nest("/reviews/v1", ReviewControllerV1::route(pool.clone())?)
+        .nest(
+            "/reviews/v1",
+            controllers::v2::reviews::ReviewControllerV1::route(pool.clone())?,
+        )
         .layer(by_axum::axum::middleware::from_fn(authorization_middleware));
 
     Ok(app)
@@ -205,18 +187,45 @@ pub mod tests {
     pub async fn setup_test_user(id: &str, pool: &sqlx::Pool<sqlx::Postgres>) -> Result<User> {
         let user = User::get_repository(pool.clone());
         let org = Organization::get_repository(pool.clone());
+        let org_mem = OrganizationMember::get_repository(pool.clone());
+
         let email = format!("user-{id}@test.com");
         let password = format!("password-{id}");
         let password = get_hash_string(password.as_bytes());
 
-        let u = user.insert(email.clone(), password.clone(), None).await?;
-        tracing::debug!("{:?}", u);
-
-        org.insert_with_dependency(u.id, email.clone()).await?;
+        let mut tx = pool.begin().await?;
 
         let user = user
-            .find_one(&UserReadAction::new().get_user(email, password))
-            .await?;
+            .insert_with_tx(&mut *tx, email, password, None)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        let org = org
+            .insert_with_tx(&mut *tx, user.email.clone(), None)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        org_mem
+            .insert_with_tx(
+                &mut *tx,
+                user.id,
+                org.id,
+                user.email.clone(),
+                Some(Role::Admin),
+                None,
+            )
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        let user = User::query_builder()
+            .id_equals(user.id)
+            .query()
+            .map(User::from)
+            .fetch_optional(&mut *tx)
+            .await?
+            .ok_or(ApiError::DuplicateUser)?;
+
+        tx.commit().await?;
 
         Ok(user)
     }

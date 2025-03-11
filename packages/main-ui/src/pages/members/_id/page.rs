@@ -393,7 +393,7 @@ pub fn ProfileInfo(
         move |(profile_name, group, role)| {
             name.set(profile_name.unwrap_or_default());
             select_group.set(GroupInfo {
-                id: group.id.clone(),
+                id: group.id,
                 name: group.name.clone(),
             });
             select_role.set(role);
@@ -431,7 +431,7 @@ pub fn ProfileInfo(
                                 let value = evt.value();
                                 let parts: Vec<&str> = value.split('|').collect();
                                 if parts.len() == 2 {
-                                    let id = parts[0].to_string();
+                                    let id = parts[0].to_string().parse::<i64>().unwrap_or_default();
                                     let name = parts[1].to_string();
                                     select_group.set(GroupInfo { id, name });
                                     tracing::debug!(
@@ -442,7 +442,7 @@ pub fn ProfileInfo(
                             option {
                                 value: "|",
                                 disabled: true,
-                                selected: select_group().id == "",
+                                selected: select_group().id == 0,
                                 {i18n.no_group}
                             }
                             for group in total_groups.clone() {
@@ -490,7 +490,7 @@ pub fn ProfileInfo(
                                 update_member
                                     .call(UpdateMemberRequest {
                                         name: Some(name()),
-                                        group: if select_group().id == "" { None } else { Some(select_group()) },
+                                        group: if select_group().id == 0 { None } else { Some(select_group()) },
                                         role: if select_role() == "" { None } else { Some(select_role()) },
                                     });
                             },

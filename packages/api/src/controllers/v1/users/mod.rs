@@ -11,7 +11,11 @@ use by_axum::{
     },
 };
 use by_types::{Claims, JsonWithHeaders};
-use models::*;
+use models::{
+    invitation::{Invitation, InvitationRepository, InvitationSummary},
+    organization::{Organization, OrganizationRepository},
+    *,
+};
 use validator::Validate;
 use verification::VerificationControllerV1;
 
@@ -166,7 +170,7 @@ impl UserController {
 
         let org = self
             .org
-            .insert_with_tx(&mut *tx, user.email.clone())
+            .insert_with_tx(&mut *tx, user.email.clone(), None)
             .await?
             .ok_or(ApiError::DuplicateUser)?;
 
@@ -194,6 +198,7 @@ impl UserController {
 
         let jwt = self.generate_token(&user)?;
 
+        // FIXME(api): it should be contained to above transaction
         self.invite_user(user.clone()).await?;
 
         Ok(JsonWithHeaders::new(user)
@@ -271,8 +276,6 @@ impl UserController {
         _auth: Option<Authorization>,
         body: UserUserLoginRequest,
     ) -> Result<JsonWithHeaders<User>> {
-        // TODO: authorize token
-
         let user = self
             .repo
             .find_one(&UserReadAction::new().find_by_email(body.email))
@@ -294,8 +297,7 @@ impl UserController {
         _auth: Option<Authorization>,
         body: UserUserSignupRequest,
     ) -> Result<JsonWithHeaders<User>> {
-        // TODO: authorize token
-
+        // FIXME(api): it should be refactored to use transaction.
         let user = match self
             .repo
             .find_one(&UserReadAction::new().find_by_email(body.email.clone()))
@@ -332,7 +334,7 @@ impl UserController {
                         ApiError::DuplicateUser
                     })?;
 
-                let org = self.org.insert(user.email.clone()).await?;
+                let org = self.org.insert(user.email.clone(), None).await?;
 
                 self.org_mem
                     .insert(user.id, org.id, user.email.clone(), Some(Role::Admin), None)

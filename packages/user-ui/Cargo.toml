@@ -11,6 +11,7 @@ by-components.workspace = true
 dioxus-translate.workspace = true
 dioxus-aws.workspace = true
 by-types.workspace = true
+by-macros.workspace = true
 rest-api.workspace = true
 btracing.workspace = true
 

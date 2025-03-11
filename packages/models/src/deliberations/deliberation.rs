@@ -7,10 +7,11 @@ use by_axum::aide;
 use by_macros::api_model;
 use validator::Validate;
 
-use crate::{PanelV2, ProjectArea, Resource, SurveyV2};
+use crate::deliberation_vote::DeliberationVote;
+use crate::{PanelV2, ProjectArea, ResourceFile, SurveyV2};
 
 #[derive(Validate)]
-#[api_model(base = "/organizations/v2/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>)], table = deliberations)]
+#[api_model(base = "/v2/organizations/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>)], table = deliberations)]
 pub struct Deliberation {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -40,19 +41,20 @@ pub struct Deliberation {
     #[api_model(action = create)]
     pub description: String,
 
-    #[api_model(many_to_many = deliberation_resources, table_name = resources foreign_primary_key = resource_id, foreign_reference_key = deliberation_id)]
-    pub resources: Vec<Resource>,
+    #[api_model(many_to_many = deliberation_resources, table_name = resources, foreign_primary_key = resource_id, foreign_reference_key = deliberation_id)]
+    pub resources: Vec<ResourceFile>,
 
     #[api_model(many_to_many = deliberation_surveys, table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = deliberation_id)]
     pub surveys: Vec<SurveyV2>,
     // Third page of creating a deliberation
     #[api_model(one_to_many = deliberation_users)]
     pub members: Vec<DeliberationUser>,
-
+    #[api_model(one_to_many = deliberation_votes)]
+    pub votes: Vec<DeliberationVote>,
     #[api_model(summary, action = create, many_to_many = panel_deliberations, foreign_table_name = panels, foreign_primary_key = panel_id, foreign_reference_key = deliberation_id,)]
     #[serde(default)]
     pub panels: Vec<PanelV2>,
-    // TODO: discussion should be added
+    // TODO(api): discussion should be added
     #[api_model(one_to_many = deliberation_comments)]
     pub comments: Vec<DeliberationComment>,
     #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id, aggregator = count)]
