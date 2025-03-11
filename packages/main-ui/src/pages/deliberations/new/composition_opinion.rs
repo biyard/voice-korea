@@ -41,6 +41,7 @@ pub struct PeriodOpinionProcedureTranslate {
 
 #[component]
 pub fn CompositionOpinion(props: CompositionOpinionProps) -> Element {
+    //FIXME: fix to get params
     let mut ctrl: Controller = use_context();
     let translates: OpinionNewTranslate = translate(&props.lang.clone());
     let deliberation_sequences = ctrl.get_deliberation_sequences();

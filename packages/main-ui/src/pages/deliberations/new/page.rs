@@ -15,7 +15,7 @@ use crate::{
 use super::i18n::OpinionNewTranslate;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::File;
+use models::{File, ResourceFileSummary, SurveyV2Summary};
 
 #[derive(Props, Clone, PartialEq)]
 pub struct OpinionProps {
@@ -27,9 +27,11 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let translates: OpinionNewTranslate = translate(&props.lang.clone());
     let mut ctrl = Controller::new(props.lang)?;
     let surveys = ctrl.surveys()?;
+    let metadatas = ctrl.metadatas()?;
 
     let step = ctrl.get_current_step();
     let resources = ctrl.resources();
+    let selected_surveys = ctrl.selected_surveys();
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -72,14 +74,28 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                     lang: props.lang.clone(),
                     resources,
                     surveys,
+                    selected_surveys,
+                    metadatas,
+                    fields: ctrl.get_total_fields(),
+                    information: ctrl.get_deliberation_informations(),
+
                     oncreate: move |file: File| async move {
                         let _ = ctrl.create_resource(file).await;
                     },
                     onremove: move |id: i64| {
                         let _ = ctrl.delete_resource(id);
                     },
+                    onadd: move |resource: ResourceFileSummary| {
+                        let _ = ctrl.add_resource(resource.into());
+                    },
                     onstep: move |step: CurrentStep| {
                         ctrl.change_step(step);
+                    },
+                    update_projects: move |surveys: Vec<SurveyV2Summary>| {
+                        ctrl.set_projects(surveys);
+                    },
+                    change_information: move |information| {
+                        ctrl.update_deliberation_information(information);
                     },
                 }
             } else if step == CurrentStep::CommitteeComposition {

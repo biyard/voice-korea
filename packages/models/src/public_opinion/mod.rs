@@ -2,8 +2,8 @@ pub mod profile;
 pub mod v2;
 use crate::step_type::StepType;
 
-use crate::ResourceFile;
 use crate::{group::MemberInfo, projects::ProjectArea, ProjectStatus};
+use crate::{ResourceFile, SurveyV2Summary};
 #[cfg(feature = "server")]
 use by_axum::aide;
 #[cfg(feature = "server")]
@@ -160,7 +160,7 @@ pub struct DeliberationInformation {
     pub title: Option<String>,
     pub description: Option<String>,
     pub documents: Vec<ResourceFile>,
-    pub projects: Vec<ProjectInfo>,
+    pub projects: Vec<SurveyV2Summary>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]

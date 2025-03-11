@@ -28,6 +28,8 @@ pub struct Controller {
     total_fields: Signal<Vec<String>>,
     deliberation_informations: Signal<DeliberationInformation>,
     pub surveys: Resource<Vec<SurveyV2Summary>>,
+    pub metadatas: Resource<Vec<ResourceFileSummary>>,
+    pub search_keyword: Signal<String>,
 
     //step 4
     total_attributes: Signal<Vec<AttributeResponse>>,
@@ -48,6 +50,7 @@ impl Controller {
         let user: LoginService = use_context();
         let popup_service: PopupService = use_context();
         let translates: OpinionNewTranslate = translate(&lang.clone());
+        let search_keyword = use_signal(|| "".to_string());
 
         let client = SurveyV2::get_client(&crate::config::get().api_url);
         let surveys = use_server_future(move || {
@@ -71,6 +74,35 @@ impl Controller {
                         tracing::error!("Failed to list surveys: {:?}", e);
                         vec![]
                     }
+                }
+            }
+        })?;
+
+        let metadatas = use_server_future(move || {
+            let page = 1;
+            let size = 20;
+            let keyword = search_keyword().clone();
+            async move {
+                let client = ResourceFile::get_client(&config::get().api_url);
+                let org_id = user.get_selected_org();
+                if org_id.is_none() {
+                    tracing::error!("Organization ID is missing");
+                    return vec![];
+                }
+
+                if keyword.is_empty() {
+                    let query = ResourceFileQuery::new(size).with_page(page);
+                    client
+                        .query(org_id.unwrap().id, query)
+                        .await
+                        .unwrap_or_default()
+                        .items
+                } else {
+                    client
+                        .search_by(size, Some(page.to_string()), org_id.unwrap().id, keyword)
+                        .await
+                        .unwrap_or_default()
+                        .items
                 }
             }
         })?;
@@ -139,6 +171,8 @@ impl Controller {
                 projects: vec![],
             }),
             surveys,
+            search_keyword,
+            metadatas,
             //FIXME: fix to connect api
             total_attributes: use_signal(|| {
                 vec![
@@ -259,6 +293,7 @@ impl Controller {
     }
 
     pub fn change_step(&mut self, step: CurrentStep) {
+        tracing::debug!("informations: {:?}", self.deliberation_informations());
         self.current_step.set(step);
     }
 
@@ -283,21 +318,78 @@ impl Controller {
         (self.deliberation_informations)()
     }
 
-    pub fn update_opinion_field_type_from_str(
-        &self,
-        opinion_field_type: String,
-    ) -> Option<ProjectArea> {
-        let field = opinion_field_type.parse::<ProjectArea>();
-
-        match field {
-            Ok(v) => Some(v),
-            Err(_) => None,
-        }
-    }
-
     pub fn update_deliberation_information(&mut self, information: DeliberationInformation) {
         self.deliberation_informations.set(information);
     }
+
+    pub async fn create_resource(&self, file: File) -> Result<()> {
+        let org = self.user.get_selected_org();
+        if org.is_none() {
+            return Err(models::ApiError::OrganizationNotFound);
+        }
+        let org_id = org.unwrap().id;
+        let client = models::ResourceFile::get_client(&config::get().api_url);
+        let mut ctrl = self.clone();
+
+        match client
+            .create(
+                org_id,
+                file.name.clone(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                vec![file],
+            )
+            .await
+        {
+            Ok(v) => {
+                let mut info = (ctrl.deliberation_informations)();
+                let mut documents = info.documents;
+                documents.push(v);
+                info.documents = documents;
+                ctrl.deliberation_informations.set(info);
+                Ok(())
+            }
+            Err(e) => {
+                tracing::error!("Create Failed Reason: {:?}", e);
+                Err(models::ApiError::ReqwestFailed(e.to_string()))
+            }
+        }
+    }
+
+    pub fn add_resource(&mut self, resource: ResourceFile) {
+        let mut info = (self.deliberation_informations)();
+        let mut documents = info.documents;
+        documents.push(resource);
+        info.documents = documents;
+        self.deliberation_informations.set(info);
+    }
+
+    pub fn delete_resource(&mut self, id: i64) {
+        let mut info = (self.deliberation_informations)();
+        let mut documents = info.documents;
+        documents.retain(|doc| doc.id != id);
+        info.documents = documents;
+        self.deliberation_informations.set(info);
+    }
+
+    pub fn set_projects(&mut self, surveys: Vec<SurveyV2Summary>) {
+        let mut info = (self.deliberation_informations)();
+        info.projects = surveys;
+        self.deliberation_informations.set(info);
+    }
+
+    pub fn resources(&self) -> Vec<ResourceFile> {
+        (self.deliberation_informations)().documents
+    }
+
+    pub fn selected_surveys(&self) -> Vec<SurveyV2Summary> {
+        (self.deliberation_informations)().projects
+    }
+
+    //
 
     pub fn open_create_panel_modal(&self, lang: Language, translates: CompositionPanelTranslate) {
         let mut popup_service = (self.popup_service)().clone();
@@ -445,55 +537,5 @@ impl Controller {
                 Err(models::ApiError::ReqwestFailed(e.to_string()))
             }
         }
-    }
-
-    //step 2
-    pub async fn create_resource(&self, file: File) -> Result<()> {
-        let org = self.user.get_selected_org();
-        if org.is_none() {
-            return Err(models::ApiError::OrganizationNotFound);
-        }
-        let org_id = org.unwrap().id;
-        let client = models::ResourceFile::get_client(&config::get().api_url);
-        let mut ctrl = self.clone();
-
-        match client
-            .create(
-                org_id,
-                file.name.clone(),
-                None,
-                None,
-                None,
-                None,
-                None,
-                vec![file],
-            )
-            .await
-        {
-            Ok(v) => {
-                let mut info = (ctrl.deliberation_informations)();
-                let mut documents = info.documents;
-                documents.push(v);
-                info.documents = documents;
-                ctrl.deliberation_informations.set(info);
-                Ok(())
-            }
-            Err(e) => {
-                tracing::error!("Create Failed Reason: {:?}", e);
-                Err(models::ApiError::ReqwestFailed(e.to_string()))
-            }
-        }
-    }
-
-    pub fn delete_resource(&mut self, id: i64) {
-        let mut info = (self.deliberation_informations)();
-        let mut documents = info.documents;
-        documents.retain(|doc| doc.id != id);
-        info.documents = documents;
-        self.deliberation_informations.set(info);
-    }
-
-    pub fn resources(&self) -> Vec<ResourceFile> {
-        (self.deliberation_informations)().documents
     }
 }
