@@ -8,10 +8,11 @@ use by_macros::api_model;
 use validator::Validate;
 
 use crate::deliberation_vote::DeliberationVote;
+use crate::discussions::DiscussionCreateRequest;
 use crate::{OpinionInfo, PanelV2, ProjectArea, ResourceFile, SurveyV2};
 
 #[derive(Validate)]
-#[api_model(base = "/v2/organizations/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, steps = Vec<OpinionInfo>)], table = deliberations)]
+#[api_model(base = "/v2/organizations/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, steps = Vec<OpinionInfo>, elearning = Vec<i64>, discussions = Vec<DiscussionCreateRequest>)], table = deliberations)]
 pub struct Deliberation {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -42,6 +43,7 @@ pub struct Deliberation {
     #[api_model(action = create)]
     pub description: String,
 
+    // Relation fields
     #[api_model(many_to_many = deliberation_resources, table_name = resources, foreign_primary_key = resource_id, foreign_reference_key = deliberation_id)]
     pub resources: Vec<ResourceFile>,
 
