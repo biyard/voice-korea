@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::{deliberation::Deliberation, step_type::StepType, *};
+use models::{deliberation::Deliberation, step::StepCreateRequest, step_type::StepType, *};
 
 use crate::service::{login_service::LoginService, popup_service::PopupService};
 
@@ -15,11 +15,13 @@ use super::{
 pub struct Controller {
     popup_service: Signal<PopupService>,
     current_step: Signal<CurrentStep>,
-    public_opinion_sequences: Signal<Vec<OpinionInfo>>,
+
+    //step 1
+    deliberation_sequences: Signal<Vec<StepCreateRequest>>,
 
     //step 2
     total_fields: Signal<Vec<String>>,
-    opinion_informations: Signal<OpinionInformation>,
+    deliberation_informations: Signal<DeliberationInformation>,
 
     //step 4
     total_attributes: Signal<Vec<AttributeResponse>>,
@@ -42,38 +44,38 @@ impl Controller {
         let ctrl = Self {
             popup_service: use_signal(|| popup_service),
             current_step: use_signal(|| CurrentStep::PublicOpinionComposition),
-            public_opinion_sequences: use_signal(|| {
+            deliberation_sequences: use_signal(|| {
                 // TODO: refactor this @henry
                 vec![
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::GeneralPost,
                         name: translates.information_provided.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::GeneralPost),
+                        started_at: 0,
+                        ended_at: 0,
                     },
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::VideoConference,
                         name: translates.discussion_and_deliberation.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::VideoConference),
+                        started_at: 0,
+                        ended_at: 0,
                     },
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::Post,
                         name: translates.derive_opinions.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::Post),
+                        started_at: 0,
+                        ended_at: 0,
                     },
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::Vote,
                         name: translates.reach_consensus.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::Vote),
+                        started_at: 0,
+                        ended_at: 0,
                     },
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::Report,
                         name: translates.analysis_result.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::Report),
+                        started_at: 0,
+                        ended_at: 0,
                     },
                 ]
             }),
@@ -94,11 +96,12 @@ impl Controller {
                     "정치".to_string(),
                 ]
             }),
-            opinion_informations: use_signal(|| OpinionInformation {
-                opinion_type: None,
+            deliberation_informations: use_signal(|| DeliberationInformation {
+                deliberation_type: None,
                 title: None,
                 description: None,
                 documents: vec![],
+                projects: vec![],
             }),
             //FIXME: fix to connect api
             total_attributes: use_signal(|| {
@@ -180,41 +183,39 @@ impl Controller {
         (self.total_attributes)()
     }
 
-    pub fn update_opinion_info(&mut self, index: usize, opinion: OpinionInfo) {
-        let mut sequences = self.get_public_opinion_sequences();
+    pub fn update_opinion_info(&mut self, index: usize, opinion: StepCreateRequest) {
+        let mut sequences = self.get_deliberation_sequences();
         sequences[index] = opinion;
-        self.public_opinion_sequences.set(sequences);
+        self.deliberation_sequences.set(sequences);
     }
 
     pub fn delete_opinion_info(&mut self, index: usize) {
-        let mut sequences = self.get_public_opinion_sequences();
+        let mut sequences = self.get_deliberation_sequences();
         sequences.remove(index);
-        self.public_opinion_sequences.set(sequences);
+        self.deliberation_sequences.set(sequences);
     }
 
     pub fn add_opinion_info(&mut self) {
-        let mut sequences = self.get_public_opinion_sequences();
-        sequences.push(OpinionInfo {
+        let mut sequences = self.get_deliberation_sequences();
+        sequences.push(StepCreateRequest {
+            step_type: StepType::GeneralPost,
             name: "".to_string(),
-            start_date: None,
-            end_date: None,
-            public_opinion_type: None,
+            started_at: 0,
+            ended_at: 0,
         });
-        self.public_opinion_sequences.set(sequences);
+        self.deliberation_sequences.set(sequences);
     }
 
     pub fn check_opinion_info(&self) -> bool {
-        let sequences = &self.get_public_opinion_sequences();
+        let sequences = &self.get_deliberation_sequences();
 
         for sequence in sequences {
-            if sequence.start_date.is_none() || sequence.end_date.is_none() {
+            if sequence.started_at == 0 || sequence.ended_at == 0 {
                 return false;
             }
 
-            if let (Some(start), Some(end)) = (sequence.start_date, sequence.end_date) {
-                if start > end {
-                    return false;
-                }
+            if sequence.started_at > sequence.ended_at {
+                return false;
             }
         }
 
@@ -225,8 +226,8 @@ impl Controller {
         self.current_step.set(step);
     }
 
-    pub fn get_public_opinion_sequences(&self) -> Vec<OpinionInfo> {
-        (self.public_opinion_sequences)()
+    pub fn get_deliberation_sequences(&self) -> Vec<StepCreateRequest> {
+        (self.deliberation_sequences)()
     }
 
     pub fn get_current_step(&self) -> CurrentStep {
@@ -242,8 +243,8 @@ impl Controller {
         (self.total_fields)()
     }
 
-    pub fn get_opinion_informations(&self) -> OpinionInformation {
-        (self.opinion_informations)()
+    pub fn get_deliberation_informations(&self) -> DeliberationInformation {
+        (self.deliberation_informations)()
     }
 
     pub fn update_opinion_field_type_from_str(
@@ -258,8 +259,8 @@ impl Controller {
         }
     }
 
-    pub fn update_opinion_information(&mut self, information: OpinionInformation) {
-        self.opinion_informations.set(information);
+    pub fn update_deliberation_information(&mut self, information: DeliberationInformation) {
+        self.deliberation_informations.set(information);
     }
 
     pub fn open_create_panel_modal(&self, lang: Language, translates: CompositionPanelTranslate) {
@@ -344,27 +345,23 @@ impl Controller {
     }
 
     pub fn get_period(&self) -> (u64, u64) {
-        let sequences = self.get_public_opinion_sequences();
+        let sequences = self.get_deliberation_sequences();
         if sequences.is_empty() {
             return (0, 0);
         }
-        let mut start = sequences[0].start_date.unwrap_or(0);
-        let mut end = sequences[sequences.len() - 1].end_date.unwrap_or(0);
+        let mut start = sequences[0].started_at;
+        let mut end = sequences[sequences.len() - 1].ended_at;
         for sequence in sequences.iter() {
-            if let Some(start_date) = sequence.start_date {
-                if start_date < start {
-                    start = start_date;
-                }
+            if sequence.started_at < start {
+                start = sequence.started_at;
             }
 
-            if let Some(end_date) = sequence.end_date {
-                if end_date > end {
-                    end = end_date;
-                }
+            if sequence.ended_at > end {
+                end = sequence.ended_at;
             }
         }
 
-        (start, end)
+        (start as u64, end as u64)
     }
 
     pub async fn create_deliberation(&self) -> Result<()> {
@@ -374,13 +371,13 @@ impl Controller {
             return Err(models::ApiError::OrganizationNotFound);
         }
         let org_id = org.unwrap().id;
-        let opinion_informations = self.get_opinion_informations();
-        let public_opinion_sequences = self.get_public_opinion_sequences();
+        let opinion_informations = self.get_deliberation_informations();
+        let deliberation_sequences = self.get_deliberation_sequences();
         let total_attributes = self.get_total_attributes();
         let total_fields = self.get_total_fields();
 
         tracing::debug!("opinion_informations: {:?}", opinion_informations);
-        tracing::debug!("public_opinion_sequences: {:?}", public_opinion_sequences);
+        tracing::debug!("deliberation_sequences: {:?}", deliberation_sequences);
         tracing::debug!("total_attributes: {:?}", total_attributes);
         tracing::debug!("total_fields: {:?}", total_fields);
 
@@ -393,14 +390,14 @@ impl Controller {
                 org_id,
                 started_at as i64,
                 ended_at as i64,
-                opinion_informations.opinion_type.unwrap_or_default(),
+                opinion_informations.deliberation_type.unwrap_or_default(),
                 opinion_informations.title.unwrap_or_default(),
                 opinion_informations.description.unwrap_or_default(),
                 vec![], // TODO: panels
                 vec![], // TODO: resources
                 vec![], // TODO: surveys
                 vec![], // roles
-                public_opinion_sequences,
+                deliberation_sequences,
                 vec![], // elearning
                 vec![], // discussions
             )

@@ -21,11 +21,6 @@ use dioxus::html::HasFileData;
 
 use super::controller::CurrentStep;
 
-#[derive(Props, Clone, PartialEq)]
-pub struct InputOpinionProps {
-    lang: Language,
-}
-
 #[derive(Clone, PartialEq)]
 pub enum DocumentTabType {
     DirectUpload,
@@ -33,17 +28,17 @@ pub enum DocumentTabType {
 }
 
 #[component]
-pub fn InputOpinion(props: InputOpinionProps) -> Element {
-    let translates: InputOpinionTranslate = translate(&props.lang);
+pub fn InputOpinion(lang: Language) -> Element {
+    let translates: InputOpinionTranslate = translate(&lang);
     let mut ctrl: Controller = use_context();
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
             div { class: "font-medium text-[16px] text-[#000000] mb-[10px]",
                 "{translates.essential_information}"
             }
-            InputIntroduction { lang: props.lang }
-            UploadDocument { lang: props.lang }
-            ConnectProject { lang: props.lang }
+            InputIntroduction { lang }
+            UploadDocument { lang }
+            ConnectProject { lang }
 
             div { class: "flex flex-row w-full justify-end items-end mt-[40px] mb-[50px]",
                 div {
@@ -313,7 +308,7 @@ pub fn InputIntroduction(lang: Language) -> Element {
     let mut ctrl: Controller = use_context();
     let i18n: InputIntroductionTranslate = translate(&lang);
 
-    let information = ctrl.get_opinion_informations();
+    let information = ctrl.get_deliberation_informations();
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white px-[40px] py-[24px] mb-[20px]",
             div { class: "flex flex-row w-full justify-start items-start",
@@ -329,26 +324,30 @@ pub fn InputIntroduction(lang: Language) -> Element {
             div { class: "flex flex-row w-full justify-start items-center",
                 select {
                     class: "focus:outline-none w-[215px] h-[55px] justify-start items-start p-[15px] bg-[#f7f7f7] rounded-[4px] mr-[20px]",
-                    value: information.opinion_type.map_or("".to_string(), |v| v.translate(&lang).to_string()),
+                    value: information
+                        .deliberation_type
+                        .map_or("".to_string(), |v| v.translate(&lang).to_string()),
                     onchange: {
                         let information = information.clone();
                         move |e: Event<FormData>| {
                             let mut value = information.clone();
                             let opinion_field_type = ctrl.update_opinion_field_type_from_str(e.value());
-                            value.opinion_type = opinion_field_type;
-                            ctrl.update_opinion_information(value);
+                            value.deliberation_type = opinion_field_type;
+                            ctrl.update_deliberation_information(value);
                         }
                     },
                     option {
                         value: "",
                         disabled: true,
-                        selected: information.opinion_type.is_none(),
+                        selected: information.deliberation_type.is_none(),
                         "{i18n.select_field}"
                     }
                     for field in ctrl.get_total_fields() {
                         option {
                             value: field.clone(),
-                            selected: information.opinion_type.map_or(false, |v| v.translate(&lang).to_string() == field),
+                            selected: information
+                                .deliberation_type
+                                .map_or(false, |v| v.translate(&lang).to_string() == field),
                             "{field}"
                         }
                     }
@@ -365,7 +364,7 @@ pub fn InputIntroduction(lang: Language) -> Element {
                             move |e: FormEvent| {
                                 let mut value = information.clone();
                                 value.title = Some(e.value());
-                                ctrl.update_opinion_information(value);
+                                ctrl.update_deliberation_information(value);
                             }
                         },
                     }
@@ -387,7 +386,7 @@ pub fn InputIntroduction(lang: Language) -> Element {
                         move |e: FormEvent| {
                             let mut value = information.clone();
                             value.description = Some(e.value());
-                            ctrl.update_opinion_information(value);
+                            ctrl.update_deliberation_information(value);
                         }
                     },
                 }

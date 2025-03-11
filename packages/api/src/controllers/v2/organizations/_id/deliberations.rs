@@ -84,10 +84,10 @@ impl DeliberationController {
                 .insert_with_tx(
                     &mut *tx,
                     deliberation.id,
-                    step.public_opinion_type.unwrap_or_default(),
+                    step.step_type,
                     step.name,
-                    step.start_date.unwrap_or_default() as i64, // FIXME: this is right?
-                    step.end_date.unwrap_or_default() as i64,   // FIXME: this is right?
+                    step.started_at,
+                    step.ended_at,
                 )
                 .await?
                 .ok_or(ApiError::AlreadyExists)?;
