@@ -15,6 +15,7 @@ use crate::{
 use super::i18n::OpinionNewTranslate;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
+use models::{File, ResourceFileSummary, SurveyV2Summary};
 
 #[derive(Props, Clone, PartialEq)]
 pub struct OpinionProps {
@@ -24,9 +25,17 @@ pub struct OpinionProps {
 #[component]
 pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let translates: OpinionNewTranslate = translate(&props.lang.clone());
-    let ctrl = Controller::new(props.lang);
+    let mut ctrl = Controller::new(props.lang)?;
+    let surveys = ctrl.surveys()?;
+    let metadatas = ctrl.metadatas()?;
+    let members = ctrl.members()?;
 
+    let resources = ctrl.resources();
     let step = ctrl.get_current_step();
+    let selected_surveys = ctrl.selected_surveys();
+
+    tracing::debug!("members: {:?}", members);
+
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
             div { class: "text-[#9b9b9b] font-medium text-[14px] mb-[10px]",
@@ -64,7 +73,34 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
             if step == CurrentStep::PublicOpinionComposition {
                 CompositionOpinion { lang: props.lang.clone() }
             } else if step == CurrentStep::InputInformation {
-                InputOpinion { lang: props.lang.clone() }
+                InputOpinion {
+                    lang: props.lang.clone(),
+                    resources,
+                    surveys,
+                    selected_surveys,
+                    metadatas,
+                    fields: ctrl.get_total_fields(),
+                    information: ctrl.get_deliberation_informations(),
+
+                    oncreate: move |file: File| async move {
+                        let _ = ctrl.create_resource(file).await;
+                    },
+                    onremove: move |id: i64| {
+                        let _ = ctrl.delete_resource(id);
+                    },
+                    onadd: move |resource: ResourceFileSummary| {
+                        let _ = ctrl.add_resource(resource.into());
+                    },
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                    update_projects: move |surveys: Vec<SurveyV2Summary>| {
+                        ctrl.set_projects(surveys);
+                    },
+                    change_information: move |information| {
+                        ctrl.update_deliberation_information(information);
+                    },
+                }
             } else if step == CurrentStep::CommitteeComposition {
                 CompositionCommitee { lang: props.lang.clone() }
             } else if step == CurrentStep::PanelComposition {

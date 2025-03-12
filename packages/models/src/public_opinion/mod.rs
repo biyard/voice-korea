@@ -3,29 +3,30 @@ pub mod v2;
 use crate::step_type::StepType;
 
 use crate::{group::MemberInfo, projects::ProjectArea, ProjectStatus};
+use crate::{ResourceFile, SurveyV2Summary};
 #[cfg(feature = "server")]
 use by_axum::aide;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct CreateOpinionRequest {
     pub status: Option<OpinionDraftStatus>,
-    pub opinions: Option<Vec<OpinionInfo>>,
-    pub informations: Option<OpinionInformation>,
+    pub opinions: Option<Vec<DeliberationSequence>>,
+    pub informations: Option<DeliberationInformation>,
     pub committees: Option<Vec<Vec<MemberInfo>>>,
     pub panels: Option<UpsertPanelInfo>,
     pub discussions: Option<DiscussionInfo>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct UpdateOpinionRequest {
     pub status: Option<OpinionDraftStatus>,
-    pub opinions: Option<Vec<OpinionInfo>>,
-    pub informations: Option<OpinionInformation>,
+    pub opinions: Option<Vec<DeliberationSequence>>,
+    pub informations: Option<DeliberationInformation>,
     pub committees: Option<Vec<Vec<MemberInfo>>>,
     pub panels: Option<UpsertPanelInfo>,
     pub discussions: Option<DiscussionInfo>,
@@ -40,14 +41,14 @@ pub struct DiscussionInfo {
     pub documents: Vec<Document>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub enum OpinionActionRequest {
     Create(CreateOpinionRequest),
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub enum OpinionByIdActionRequest {
@@ -152,18 +153,20 @@ pub enum AllocationMethod {
     ProportionalAllocation,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub struct OpinionInformation {
-    pub opinion_type: Option<ProjectArea>,
+pub struct DeliberationInformation {
+    pub deliberation_type: Option<ProjectArea>,
     pub title: Option<String>,
     pub description: Option<String>,
-    pub documents: Vec<Document>,
+    pub documents: Vec<ResourceFile>,
+    pub projects: Vec<SurveyV2Summary>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct Document {
+    pub id: i64,
     pub url: String,
     pub name: String,
     pub volume: Option<String>, //etc. 3.5 MB
@@ -180,11 +183,11 @@ pub struct ProjectInfo {
 // TODO: refactor this @henry
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub struct OpinionInfo {
+pub struct DeliberationSequence {
     pub name: String,
     pub start_date: Option<u64>,
     pub end_date: Option<u64>,
-    pub public_opinion_type: Option<StepType>,
+    pub step_type: Option<StepType>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
