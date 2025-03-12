@@ -5,8 +5,6 @@ use by_macros::api_model;
 use validator::Validate;
 
 // TODO(web): using comments for all project view
-// TODO(api): below specs
-// - GET /v2/deliverations/:deliveration-id/comments (query, replies_of)
 // NOTE: now replies on a comment is not supported
 #[derive(Validate)]
 #[api_model(base = "/v2/deliberations/:deliberation-id/comments", table = deliberation_comments, action_by_id = like)]
