@@ -1,4 +1,5 @@
 use by_axum::{
+    aide,
     auth::Authorization,
     axum::{
         extract::{Path, Query, State},
@@ -53,7 +54,10 @@ impl DeliberationResponseController {
     pub async fn get_deliberation_response(
         State(_ctrl): State<DeliberationResponseController>,
         Extension(_auth): Extension<Option<Authorization>>,
-        Path((deliberation_id, id)): Path<(i64, i64)>,
+        Path(DeliberationResponsePath {
+            deliberation_id,
+            id,
+        }): Path<DeliberationResponsePath>,
     ) -> Result<Json<DeliberationResponse>> {
         //TODO: implement get_deliberation_response
         tracing::debug!("get_deliberation_response {} {}", deliberation_id, id);
@@ -62,11 +66,13 @@ impl DeliberationResponseController {
 
     pub async fn list_deliberation_response(
         State(_ctrl): State<DeliberationResponseController>,
-        Path(deliberation_id): Path<i64>,
+        Path(DeliberationResponseParentPath { deliberation_id }): Path<
+            DeliberationResponseParentPath,
+        >,
         Extension(_auth): Extension<Option<Authorization>>,
         Query(q): Query<DeliberationResponseParam>,
     ) -> Result<Json<DeliberationResponseGetResponse>> {
-        //TODO: implement list_deliberation_response
+        //TODO(api): implement list_deliberation_response
         tracing::debug!("list_deliberation_response {} {:?}", deliberation_id, q);
 
         match q {
@@ -81,11 +87,13 @@ impl DeliberationResponseController {
 
     pub async fn act_deliberation_response(
         State(ctrl): State<DeliberationResponseController>,
-        Path(deliberation_id): Path<i64>,
+        Path(DeliberationResponseParentPath { deliberation_id }): Path<
+            DeliberationResponseParentPath,
+        >,
         Extension(auth): Extension<Option<Authorization>>,
         Json(body): Json<DeliberationResponseAction>,
     ) -> Result<Json<DeliberationResponse>> {
-        //TODO: implement act_deliberation_response
+        //TODO(api): implement act_deliberation_response
         tracing::debug!("act_deliberation_response {} {:?}", deliberation_id, body);
 
         match body {
@@ -115,4 +123,21 @@ impl DeliberationResponseController {
 
         Ok(Json(DeliberationResponse::default()))
     }
+}
+
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
+)]
+#[serde(rename_all = "kebab-case")]
+pub struct DeliberationResponsePath {
+    pub deliberation_id: i64,
+    pub id: i64,
+}
+
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
+)]
+#[serde(rename_all = "kebab-case")]
+pub struct DeliberationResponseParentPath {
+    pub deliberation_id: i64,
 }

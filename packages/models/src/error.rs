@@ -146,6 +146,27 @@ pub enum ApiError {
     )]
     DeliberationPanelException,
 
+    #[translate(
+        ko = "선택된 공론이 정상인지 확인해주세요.",
+        en = "Please check if the selected deliberation is normal."
+    )]
+    DeliberationNotFound,
+
+    #[translate(
+        ko = "댓글과 사용자 정보가 정확한지 확인해주세요.",
+        en = "Please check the comment and user information."
+    )]
+    DeliberationCommentLikeException,
+
+    #[translate(
+        ko = "댓글을 가져오는데 실패했습니다. 새로고침 후 다시 시도해주세요.",
+        en = "Failed to get comments. Please refresh and try again."
+    )]
+    DeliberationCommentException,
+
+    #[translate(ko = "댓글을 찾을 수 없습니다.", en = "Cannot find the comment.")]
+    DeliberationCommentNotFound,
+
     // Discussion Errors
     #[translate(
         ko = "토론에 첨부된 자료를 확인해주세요.",
