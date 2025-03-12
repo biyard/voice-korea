@@ -88,9 +88,20 @@ pub enum ApiError {
 
     OrganizationNotFound,
 
+    InvalidType,
+
+    // Resource Errors
+    #[translate(
+        ko = "참고자료 또는 파일을 찾을 수 없습니다.",
+        en = "Cannot find the reference or file."
+    )]
     ResourceNotFound,
 
-    InvalidType,
+    #[translate(
+        ko = "자료에 접근권한이 없습니다.",
+        en = "No access permission to the resource."
+    )]
+    ResourceNotPermitted,
 
     // Survey Errors
     SurveyAlreadyExists,
@@ -173,6 +184,15 @@ pub enum ApiError {
         en = "Please check the attached file in the discussion."
     )]
     DiscussionResourceException,
+
+    #[translate(
+        ko = "토론에 참여한 사용자를 확인해주세요.",
+        en = "Please check the users who participated in the discussion."
+    )]
+    DiscussionUserException,
+
+    #[translate(ko = "토론을 찾을 수 없습니다.", en = "Cannot find the discussion.")]
+    DiscussionNotFound,
 }
 
 impl From<reqwest::Error> for ApiError {
