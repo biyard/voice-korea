@@ -324,7 +324,7 @@ mod deliberation_comment_tests {
             .await
             .unwrap();
 
-        assert!(res.total_count > 1);
+        assert!(res.total_count == 1);
     }
 
     #[tokio::test]
