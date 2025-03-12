@@ -1,13 +1,11 @@
 #![allow(non_snake_case, dead_code, unused_variables)]
+use by_components::icons::upload_download::Download2;
 use by_macros::*;
 use dioxus::prelude::*;
 use dioxus_translate::*;
 use models::Tab;
 
-use crate::components::icons::{
-    download::DownloadIcon,
-    triangle::{TriangleDown, TriangleUp},
-};
+use crate::components::icons::triangle::{TriangleDown, TriangleUp};
 #[component]
 pub fn BasicInfo(lang: Language) -> Element {
     let tr: BasicInfoTranslate = translate(&lang);
@@ -349,8 +347,8 @@ pub fn BasicInfo(lang: Language) -> Element {
                         }
                         //file
                         div { class: "min-w-[195px] min-h-[26px] flex flex- row justify-center items-center rounded-[100px] bg-[#7C8292] gap-[4px] px-[12px] py-[4px]",
-                            // TODO: should be change DownloadIcon
-                            DownloadIcon {}
+                        // TODO: should be check DownloadIcon color
+                        Download2 { class: "[&>path]:stroke-[#ffffff] [&>path]:fill-[#ffffff]" }
                             div { class: "text-[14px] text-white",
                                 "지역사회 교통 개선 프로젝트"
                             }

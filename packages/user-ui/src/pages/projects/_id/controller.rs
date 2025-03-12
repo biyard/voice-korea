@@ -546,7 +546,7 @@ impl Controller {
             }],
             comments: vec![],
             response_count: 10,
-            discussions: todo!(),
+            discussions: vec![],
         }
     }
 }

@@ -1,4 +1,5 @@
 pub mod basic_info;
+pub mod comment_item;
 pub mod comments;
 pub mod deliberation;
 pub mod discussion;
@@ -6,6 +7,7 @@ pub mod final_draft;
 pub mod final_survey;
 pub mod multiple_objective;
 pub mod not_complete_survey_modal;
+pub mod progress_bar;
 pub mod project_header;
 pub mod sample;
 pub mod sample_survey;

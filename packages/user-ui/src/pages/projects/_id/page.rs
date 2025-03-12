@@ -14,8 +14,7 @@ use crate::pages::projects::_id::{
 
 #[component]
 pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
-    let id = use_signal(|| project_id);
-    let ctrl = controller::Controller::init(lang, id())?;
+    let ctrl = controller::Controller::init(lang, project_id)?;
     let deliberation = ctrl.get_deliberation();
     let active_tab = use_signal(|| Tab::BasicInfo);
     tracing::debug!("deliberation: {:?}", deliberation);
