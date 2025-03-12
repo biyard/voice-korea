@@ -5,10 +5,10 @@ use by_axum::auth::generate_jwt;
 use by_types::Claims;
 use models::{ApiError, User};
 
-pub struct AppClaims(pub Claims);
+pub struct AppClaims<'a>(pub &'a Claims);
 
-impl AppClaims {
-    pub fn new(claims: Claims) -> Self {
+impl<'a> AppClaims<'a> {
+    pub fn new(claims: &'a Claims) -> Self {
         Self(claims)
     }
 

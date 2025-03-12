@@ -6,12 +6,9 @@ use validator::Validate;
 use crate::{ResourceFile, User};
 
 // TODO(web): using resource for discussion tab on a project
-// TODO(api): implement Create action(create) of POST /v2/deliberations/:deliberation-id/discussions
-// TODO(api): implement query action(query) of GET /v2/deliberations/:deliberation-id/discussions
 // TODO(api): implement action_by_id action(start_meeting) of POST /v2/deliberations/:deliberation-id/discussions/:id
-// TODO(api): implement GET /v2/deliberations/:deliberation-id/discussions/:id
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberations/:deliberation-id/discussions", table = discussions, action = [create(resources = Vec<i64>)], action_by_id = start_meeting)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/discussions", table = discussions, action = [create(resources = Vec<i64>)], action_by_id = [start_meeting, delete])]
 pub struct Discussion {
     #[api_model(summary, primary_key)]
     pub id: i64,

@@ -15,6 +15,7 @@ pub mod surveys {
 pub mod deliberations {
     pub mod _id {
         pub mod comments;
+        pub mod discussions;
         pub mod responses;
     }
 }
@@ -45,6 +46,10 @@ impl Version2Controller {
             .nest(
                 "/surveys/:survey-id/responses",
                 surveys::_id::responses::SurveyResponseController::route(pool.clone())?,
+            )
+            .nest(
+                "/deliberations/:deliberation-id/discussions",
+                deliberations::_id::discussions::DiscussionController::new(pool.clone()).route(),
             )
             .nest(
                 "/deliberations/:deliberation-id/comments",

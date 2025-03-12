@@ -29,7 +29,7 @@ impl DeliberationCommentController {
         param: DeliberationCommentQuery,
     ) -> Result<QueryResponse<DeliberationCommentSummary>> {
         let user_id = match auth {
-            Some(Authorization::Bearer { claims }) => AppClaims(claims).get_user_id(),
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
             _ => 0,
         };
         let parent_id = param.parent_id.unwrap_or_default();
@@ -64,7 +64,7 @@ impl DeliberationCommentController {
         param: DeliberationCommentQuery,
     ) -> Result<QueryResponse<DeliberationCommentSummary>> {
         let user_id = match auth {
-            Some(Authorization::Bearer { claims }) => AppClaims(claims).get_user_id(),
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
             _ => 0,
         };
 
@@ -95,7 +95,7 @@ impl DeliberationCommentController {
         DeliberationCommentCommentRequest { comment }: DeliberationCommentCommentRequest,
     ) -> Result<DeliberationComment> {
         let user_id = match auth {
-            Some(Authorization::Bearer { claims }) => AppClaims(claims).get_user_id(),
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
             _ => return Err(ApiError::Unauthorized),
         };
 
@@ -115,7 +115,7 @@ impl DeliberationCommentController {
         DeliberationCommentReplyToCommentRequest { comment }: DeliberationCommentReplyToCommentRequest,
     ) -> Result<DeliberationComment> {
         let user_id = match auth {
-            Some(Authorization::Bearer { claims }) => AppClaims(claims).get_user_id(),
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
             _ => return Err(ApiError::Unauthorized),
         };
 
@@ -133,7 +133,7 @@ impl DeliberationCommentController {
         auth: Option<Authorization>,
     ) -> Result<DeliberationComment> {
         let user_id = match auth {
-            Some(Authorization::Bearer { claims }) => AppClaims(claims).get_user_id(),
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
             _ => return Err(ApiError::Unauthorized),
         };
 
