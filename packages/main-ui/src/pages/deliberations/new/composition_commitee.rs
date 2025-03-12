@@ -1,30 +1,32 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::prelude::PanelInfo;
+use models::{deliberation_user::DeliberationUserCreateRequest, OrganizationMemberSummary, Role};
 
-use crate::{
-    components::icons::{Clear, Remove},
-    pages::deliberations::new::{
-        controller::{Controller, CurrentStep},
-        i18n::CompositionCommitteeTranslate,
-    },
+use crate::pages::deliberations::new::{
+    components::role_dropdown::RoleDropdown, controller::CurrentStep,
+    i18n::CompositionCommitteeTranslate,
 };
 
-#[derive(Props, Clone, PartialEq)]
-pub struct CompositionCommitteeProps {
-    lang: Language,
-}
-
 #[component]
-pub fn CompositionCommitee(props: CompositionCommitteeProps) -> Element {
-    let translate: CompositionCommitteeTranslate = translate(&props.lang);
-    let mut ctrl: Controller = use_context();
+pub fn CompositionCommitee(
+    lang: Language,
+    members: Vec<OrganizationMemberSummary>,
+    committees: Vec<DeliberationUserCreateRequest>,
 
-    let opinion_designers = use_signal(|| vec![]);
-    let specific_opinion_designers = use_signal(|| vec![]);
-    let analysts = use_signal(|| vec![]);
-    let intermediaries = use_signal(|| vec![]);
-    let lecturers = use_signal(|| vec![]);
+    add_committee: EventHandler<DeliberationUserCreateRequest>,
+    remove_committee: EventHandler<(i64, Role)>,
+    clear_committee: EventHandler<Role>,
+
+    onstep: EventHandler<CurrentStep>,
+) -> Element {
+    let translate: CompositionCommitteeTranslate = translate(&lang);
+
+    let admins = get_role_list(members.clone(), committees.clone(), Role::Admin);
+    let deliberation_admins =
+        get_role_list(members.clone(), committees.clone(), Role::DeliberationAdmin);
+    let analysts = get_role_list(members.clone(), committees.clone(), Role::Analyst);
+    let moderators = get_role_list(members.clone(), committees.clone(), Role::Moderator);
+    let speakers = get_role_list(members.clone(), committees.clone(), Role::Speaker);
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -39,30 +41,110 @@ pub fn CompositionCommitee(props: CompositionCommitteeProps) -> Element {
                 }
                 // selection box
                 div { class: "flex flex-col w-full justify-start items-center mb-[40px]",
-                    RoleSelectionBox {
+                    RoleDropdown {
+                        id: "admin_dropdown",
                         label: translate.opinion_designer_label.to_string(),
                         hint: translate.opinion_designer_hint.to_string(),
-                        panels: opinion_designers,
+                        total_committees: committees.clone(),
+                        members: members.clone(),
+                        committees: admins.clone(),
+                        add_committee: move |user_id: i64| {
+                            add_committee
+                                .call(DeliberationUserCreateRequest {
+                                    user_id,
+                                    role: Role::Admin,
+                                });
+                        },
+                        remove_committee: move |user_id: i64| {
+                            remove_committee.call((user_id, Role::Admin));
+                        },
+                        clear_committee: move |_| {
+                            clear_committee.call(Role::Admin);
+                        },
                     }
-                    RoleSelectionBox {
+                    RoleDropdown {
+                        id: "deliberation_admin_dropdown",
                         label: translate.specific_opinion_designer_label.to_string(),
                         hint: translate.specific_opinion_designer_hint.to_string(),
-                        panels: specific_opinion_designers,
+                        total_committees: committees.clone(),
+                        members: members.clone(),
+                        committees: deliberation_admins.clone(),
+                        add_committee: move |user_id: i64| {
+                            add_committee
+                                .call(DeliberationUserCreateRequest {
+                                    user_id,
+                                    role: Role::DeliberationAdmin,
+                                });
+                        },
+                        remove_committee: move |user_id: i64| {
+                            remove_committee.call((user_id, Role::DeliberationAdmin));
+                        },
+                        clear_committee: move |_| {
+                            clear_committee.call(Role::DeliberationAdmin);
+                        },
                     }
-                    RoleSelectionBox {
+                    RoleDropdown {
+                        id: "analyst_admin_dropdown",
                         label: translate.analyst_label.to_string(),
                         hint: translate.analyst_hint.to_string(),
-                        panels: analysts,
+                        total_committees: committees.clone(),
+                        members: members.clone(),
+                        committees: analysts.clone(),
+                        add_committee: move |user_id: i64| {
+                            add_committee
+                                .call(DeliberationUserCreateRequest {
+                                    user_id,
+                                    role: Role::Analyst,
+                                });
+                        },
+                        remove_committee: move |user_id: i64| {
+                            remove_committee.call((user_id, Role::Analyst));
+                        },
+                        clear_committee: move |_| {
+                            clear_committee.call(Role::Analyst);
+                        },
                     }
-                    RoleSelectionBox {
+                    RoleDropdown {
+                        id: "moderator_admin_dropdown",
                         label: translate.intermediary_label.to_string(),
                         hint: translate.intermediary_hint.to_string(),
-                        panels: intermediaries,
+                        total_committees: committees.clone(),
+                        members: members.clone(),
+                        committees: moderators.clone(),
+                        add_committee: move |user_id: i64| {
+                            add_committee
+                                .call(DeliberationUserCreateRequest {
+                                    user_id,
+                                    role: Role::Moderator,
+                                });
+                        },
+                        remove_committee: move |user_id: i64| {
+                            remove_committee.call((user_id, Role::Moderator));
+                        },
+                        clear_committee: move |_| {
+                            clear_committee.call(Role::Moderator);
+                        },
                     }
-                    RoleSelectionBox {
+                    RoleDropdown {
+                        id: "speaker_admin_dropdown",
                         label: translate.lecturer_label.to_string(),
                         hint: translate.lecturer_hint.to_string(),
-                        panels: lecturers,
+                        total_committees: committees.clone(),
+                        members: members.clone(),
+                        committees: speakers.clone(),
+                        add_committee: move |user_id: i64| {
+                            add_committee
+                                .call(DeliberationUserCreateRequest {
+                                    user_id,
+                                    role: Role::Speaker,
+                                });
+                        },
+                        remove_committee: move |user_id: i64| {
+                            remove_committee.call((user_id, Role::Speaker));
+                        },
+                        clear_committee: move |_| {
+                            clear_committee.call(Role::Speaker);
+                        },
                     }
                 }
             }
@@ -71,13 +153,13 @@ pub fn CompositionCommitee(props: CompositionCommitteeProps) -> Element {
                 {
                     format!(
                         "총 {}명 / 공론 설계자 {}명, 특정 공론 설계자 {}명, 분석가 {}명, 중개자 {}명, 강연자 {}명",
-                        opinion_designers.len() + specific_opinion_designers.len() + analysts.len()
-                            + intermediaries.len() + lecturers.len(),
-                        opinion_designers.len(),
-                        specific_opinion_designers.len(),
+                        admins.len() + deliberation_admins.len() + analysts.len() + moderators.len()
+                            + speakers.len(),
+                        admins.len(),
+                        deliberation_admins.len(),
                         analysts.len(),
-                        intermediaries.len(),
-                        lecturers.len(),
+                        moderators.len(),
+                        speakers.len(),
                     )
                 }
             }
@@ -86,7 +168,7 @@ pub fn CompositionCommitee(props: CompositionCommitteeProps) -> Element {
                 div {
                     class: "flex flex-row w-[70px] h-[55px] rounded-[4px] justify-center items-center bg-white border border-[#bfc8d9] font-semibold text-[16px] text-[#555462] mr-[20px]",
                     onclick: move |_| {
-                        ctrl.change_step(CurrentStep::InputInformation);
+                        onstep.call(CurrentStep::InputInformation);
                     },
                     "{translate.backward}"
                 }
@@ -98,7 +180,7 @@ pub fn CompositionCommitee(props: CompositionCommitteeProps) -> Element {
                 div {
                     class: "cursor-pointer flex flex-row w-[110px] h-[55px] rounded-[4px] justify-center items-center bg-[#2a60d3] font-semibold text-[16px] text-white",
                     onclick: move |_| {
-                        ctrl.change_step(CurrentStep::PanelComposition);
+                        onstep.call(CurrentStep::PanelComposition);
                     },
                     "{translate.next}"
                 }
@@ -107,54 +189,21 @@ pub fn CompositionCommitee(props: CompositionCommitteeProps) -> Element {
     }
 }
 
-#[component]
-pub fn RoleSelectionBox(label: String, hint: String, panels: Signal<Vec<PanelInfo>>) -> Element {
-    rsx! {
-        div { class: "flex flex-row w-full justify-start items-center mb-[10px]",
-            div { class: "w-[180px] mr-[50px] text-[#222222] font-medium text-[15px]",
-                {label}
-            }
-            div { class: "flex flex-between w-full h-[55px] justify-start items-center px-[15px] bg-[#f7f7f7] rounded-[4px]",
-                if panels.len() == 0 {
-                    div { class: "font-medium text-[15px] text-[#9b9b9b]", {hint} }
-                } else {
-                    div { class: "flex flex-wrap w-full justify-start items-center gap-[5px]",
-                        for (i , panel) in panels().iter().enumerate() {
-                            div {
-                                Label {
-                                    label: panel.name.clone(),
-                                    clicked_label: move |_e: MouseEvent| {
-                                        let mut ps = panels();
-                                        ps.remove(i);
-                                        panels.set(ps);
-                                    },
-                                }
-                            }
-                        }
-                    }
-                    button {
-                        onclick: move |_| {
-                            panels.set(vec![]);
-                        },
-                        Remove { width: "20", height: "20", fill: "#555462" }
-                    }
-                }
-            }
-        }
-    }
-}
+pub fn get_role_list(
+    members: Vec<OrganizationMemberSummary>,
+    committees: Vec<DeliberationUserCreateRequest>,
+    role: Role,
+) -> Vec<OrganizationMemberSummary> {
+    let user_ids: Vec<i64> = committees
+        .iter()
+        .filter(|committee| committee.role == role)
+        .map(|committee| committee.user_id)
+        .collect();
 
-#[component]
-pub fn Label(label: String, clicked_label: EventHandler<MouseEvent>) -> Element {
-    rsx! {
-        div { class: "flex flex-row w-[80px] h-[25px] justify-between items-center pl-[8px] bg-[#35343f] rounded-[4px]",
-            div { class: "font-semibold text-[14px] text-white", {label} }
-            button {
-                onclick: move |e: MouseEvent| {
-                    clicked_label.call(e);
-                },
-                Clear { width: "24", height: "24" }
-            }
-        }
-    }
+    let members = members
+        .into_iter()
+        .filter(|member| user_ids.contains(&member.user_id))
+        .collect();
+
+    members
 }

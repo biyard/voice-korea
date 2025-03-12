@@ -36,7 +36,7 @@ pub struct Controller {
 
     //step 3
     pub members: Resource<Vec<OrganizationMemberSummary>>,
-    pub committee_users: Signal<Vec<DeliberationUserCreateRequest>>,
+    pub committees: Signal<Vec<DeliberationUserCreateRequest>>,
 
     //step 4
     total_attributes: Signal<Vec<AttributeResponse>>,
@@ -202,7 +202,7 @@ impl Controller {
             search_keyword,
             metadatas,
             members,
-            committee_users: use_signal(|| vec![]),
+            committees: use_signal(|| vec![]),
             //FIXME: fix to connect api
             total_attributes: use_signal(|| {
                 vec![
@@ -420,8 +420,22 @@ impl Controller {
     }
 
     //step 3
-    pub fn get_committee_users(&self) -> Vec<DeliberationUserCreateRequest> {
-        (self.committee_users)()
+    pub fn get_committees(&self) -> Vec<DeliberationUserCreateRequest> {
+        (self.committees)()
+    }
+
+    pub fn add_committee(&mut self, committee: DeliberationUserCreateRequest) {
+        self.committees.push(committee);
+    }
+
+    pub fn remove_committee(&mut self, user_id: i64, role: Role) {
+        self.committees
+            .retain(|committee| !(committee.user_id == user_id && committee.role == role));
+    }
+
+    pub fn clear_committee(&mut self, role: Role) {
+        self.committees
+            .retain(|committee| !(committee.role == role));
     }
 
     pub fn open_create_panel_modal(&self, lang: Language, translates: CompositionPanelTranslate) {

@@ -11,7 +11,7 @@ use validator::Validate;
 // - GET /v2/deliverations/:deliveration-id/comments (query, replies_of)
 // NOTE: now replies on a comment is not supported
 #[derive(Validate)]
-#[api_model(base = "/v2/deliverations/:deliveration-id/comments", table = deliberation_comments)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/comments", table = deliberation_comments)]
 pub struct DeliberationComment {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -23,7 +23,7 @@ pub struct DeliberationComment {
     #[api_model(many_to_one = users)]
     pub user_id: i64,
     #[api_model(many_to_one = deliberations)]
-    pub deliveration_id: i64,
+    pub deliberation_id: i64,
     #[api_model(summary, action = comment, action_by_id = reply_to_comment)]
     pub comment: String,
 

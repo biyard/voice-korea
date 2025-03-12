@@ -7,3 +7,5 @@ pub mod input_opinion;
 pub mod page;
 pub mod preview;
 pub mod setting_discussion;
+
+pub mod components;

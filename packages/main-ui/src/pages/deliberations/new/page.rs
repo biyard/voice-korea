@@ -15,7 +15,8 @@ use crate::{
 use super::i18n::OpinionNewTranslate;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::{File, ResourceFileSummary, SurveyV2Summary};
+use models::deliberation_user::DeliberationUserCreateRequest;
+use models::{File, ResourceFileSummary, Role, SurveyV2Summary};
 
 #[derive(Props, Clone, PartialEq)]
 pub struct OpinionProps {
@@ -33,8 +34,7 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let resources = ctrl.resources();
     let step = ctrl.get_current_step();
     let selected_surveys = ctrl.selected_surveys();
-
-    tracing::debug!("members: {:?}", members);
+    let committees = ctrl.get_committees();
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -102,7 +102,23 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                     },
                 }
             } else if step == CurrentStep::CommitteeComposition {
-                CompositionCommitee { lang: props.lang.clone() }
+                CompositionCommitee {
+                    lang: props.lang.clone(),
+                    members,
+                    committees,
+                    add_committee: move |committee: DeliberationUserCreateRequest| {
+                        ctrl.add_committee(committee);
+                    },
+                    remove_committee: move |(user_id, role): (i64, Role)| {
+                        ctrl.remove_committee(user_id, role);
+                    },
+                    clear_committee: move |role: Role| {
+                        ctrl.clear_committee(role);
+                    },
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                }
             } else if step == CurrentStep::PanelComposition {
                 CompositionPanel { lang: props.lang.clone() }
             } else if step == CurrentStep::DiscussionSetting {
