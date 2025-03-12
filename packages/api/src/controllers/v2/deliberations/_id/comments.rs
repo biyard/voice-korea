@@ -375,9 +375,10 @@ mod deliberation_comment_tests {
         assert!(replies.total_count == 2);
 
         let res = cli
-            .comment(deliberation_id, "test reply comment".to_string())
+            .query(deliberation_id, DeliberationCommentQuery::new(10))
             .await
             .unwrap();
-        assert!(res.replies == 2);
+        assert!(res.total_count == 1);
+        assert_eq!(res.items[0].replies, 2);
     }
 }
