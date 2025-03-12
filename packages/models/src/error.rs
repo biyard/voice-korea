@@ -164,6 +164,9 @@ pub enum ApiError {
     )]
     DeliberationCommentException,
 
+    #[translate(ko = "댓글을 찾을 수 없습니다.", en = "Cannot find the comment.")]
+    DeliberationCommentNotFound,
+
     // Discussion Errors
     #[translate(
         ko = "토론에 첨부된 자료를 확인해주세요.",

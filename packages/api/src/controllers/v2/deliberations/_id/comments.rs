@@ -32,6 +32,10 @@ impl DeliberationCommentController {
             Some(Authorization::Bearer { claims }) => AppClaims(claims).get_user_id(),
             _ => 0,
         };
+        let parent_id = param.parent_id.unwrap_or_default();
+        if parent_id == 0 {
+            return Err(ApiError::DeliberationCommentNotFound);
+        }
 
         let mut total_count = 0;
         let items: Vec<DeliberationCommentSummary> =
@@ -70,6 +74,7 @@ impl DeliberationCommentController {
                 .limit(param.size())
                 .page(param.page())
                 .deliberation_id_equals(deliberation_id)
+                .parent_id_equals(0)
                 .query()
                 .map(|row: PgRow| {
                     use sqlx::Row;
@@ -373,12 +378,13 @@ mod deliberation_comment_tests {
             .unwrap();
 
         assert!(replies.total_count == 2);
-
+        let req = DeliberationCommentQuery::new(10);
+        tracing::info!("req {:?}", req);
         let res = cli
             .query(deliberation_id, DeliberationCommentQuery::new(10))
             .await
             .unwrap();
-        assert!(res.total_count == 1);
+        assert!(res.total_count == 1, "total_count: {:?}", res);
         assert_eq!(res.items[0].replies, 2);
     }
 }
