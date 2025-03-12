@@ -23,7 +23,7 @@ pub struct DeliberationComment {
     #[api_model(many_to_one = users)]
     pub user_id: i64,
     #[api_model(many_to_one = deliberations)]
-    pub deliveration_id: i64,
+    pub deliberation_id: i64,
     #[api_model(summary, action = comment, action_by_id = reply_to_comment)]
     pub comment: String,
 
