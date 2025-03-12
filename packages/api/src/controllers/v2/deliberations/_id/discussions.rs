@@ -48,6 +48,7 @@ impl DiscussionController {
     }
 
     async fn start_meeting(&self, _id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
+        // TODO(api): implement using AWS chime and media pipeline.
         todo!()
     }
 
@@ -100,8 +101,8 @@ impl DiscussionController {
                 .ok_or(ApiError::ResourceNotFound)?;
 
             if rsc.org_id != org_id {
-                tracing::error!("It seems to try abusing system: {auth:?}. It used invalid resource: {resource_id} {org_id}");
-                return Err(ApiError::ResourceNotPermitted)?;
+                tracing::error!("It seems to try abusing system: user_id: {user_id}. It used invalid resource: {resource_id} {org_id}");
+                return Err(ApiError::ResourceNotPermitted);
             }
 
             repo.insert_with_tx(&mut *tx, res.id, resource_id)
