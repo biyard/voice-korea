@@ -17,7 +17,9 @@ use super::i18n::OpinionNewTranslate;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::deliberation_user::DeliberationUserCreateRequest;
-use models::{File, PanelV2Summary, ResourceFileSummary, Role, SurveyV2Summary};
+use models::{
+    File, OrganizationMemberSummary, PanelV2Summary, ResourceFileSummary, Role, SurveyV2Summary,
+};
 
 #[derive(Props, Clone, PartialEq)]
 pub struct OpinionProps {
@@ -33,6 +35,8 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let members = ctrl.members()?;
     let panels = ctrl.panels()?;
 
+    let sequences = ctrl.get_deliberation_sequences();
+    let informations = ctrl.get_deliberation_informations();
     let resources = ctrl.resources();
     let step = ctrl.get_current_step();
     let selected_surveys = ctrl.selected_surveys();
@@ -40,6 +44,8 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let committees = ctrl.get_committees();
     let discussions = ctrl.get_discussions();
     let discussion_resources = ctrl.get_discussion_resources();
+
+    let committee_users = get_committee_users(members.clone(), committees.clone());
     tracing::debug!("panels: {:?}", panels);
 
     rsx! {
@@ -175,8 +181,35 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                     },
                 }
             } else {
-                Preview { lang: props.lang.clone() }
+                Preview {
+                    lang: props.lang.clone(),
+                    sequences,
+                    informations,
+                    committee_users,
+                    selected_panels,
+
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                }
             }
         }
     }
+}
+
+pub fn get_committee_users(
+    members: Vec<OrganizationMemberSummary>,
+    committees: Vec<DeliberationUserCreateRequest>,
+) -> Vec<OrganizationMemberSummary> {
+    let user_ids: Vec<i64> = committees
+        .iter()
+        .map(|committee| committee.user_id)
+        .collect();
+
+    let members = members
+        .into_iter()
+        .filter(|member| user_ids.contains(&member.user_id))
+        .collect();
+
+    members
 }

@@ -1,6 +1,15 @@
 use dioxus_translate::translate;
 
 translate! {
+    PreviewComponentTranslate;
+
+    update: {
+        ko: "수정하기",
+        en: "Update"
+    }
+}
+
+translate! {
     OpinionNewTranslate;
 
     organization_management: {
