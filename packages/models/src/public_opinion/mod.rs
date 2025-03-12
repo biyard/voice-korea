@@ -1,63 +1,12 @@
 pub mod profile;
 pub mod v2;
-use crate::step_type::StepType;
 
-use crate::{group::MemberInfo, projects::ProjectArea, ProjectStatus};
-use crate::{ResourceFile, SurveyV2Summary};
+use crate::{projects::ProjectArea, ProjectStatus};
 #[cfg(feature = "server")]
 use by_axum::aide;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub struct CreateOpinionRequest {
-    pub status: Option<OpinionDraftStatus>,
-    pub opinions: Option<Vec<DeliberationSequence>>,
-    pub informations: Option<DeliberationInformation>,
-    pub committees: Option<Vec<Vec<MemberInfo>>>,
-    pub panels: Option<UpsertPanelInfo>,
-    pub discussions: Option<DiscussionInfo>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub struct UpdateOpinionRequest {
-    pub status: Option<OpinionDraftStatus>,
-    pub opinions: Option<Vec<DeliberationSequence>>,
-    pub informations: Option<DeliberationInformation>,
-    pub committees: Option<Vec<Vec<MemberInfo>>>,
-    pub panels: Option<UpsertPanelInfo>,
-    pub discussions: Option<DiscussionInfo>,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub struct DiscussionInfo {
-    pub groups: DiscussionGroupInfo,
-    pub meetings: Vec<MeetingInfo>,
-    pub schedules: Vec<ScheduleInfo>,
-    pub documents: Vec<Document>,
-}
-
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub enum OpinionActionRequest {
-    Create(CreateOpinionRequest),
-}
-
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-#[serde(rename_all = "snake_case")]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub enum OpinionByIdActionRequest {
-    Delete,
-    Update(UpdateOpinionRequest),
-    UpdateProjectType(ProjectArea),
-    UpdatePanels(Vec<PanelInfo>),
-    UpdateStatus(ProjectStatus),
-}
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
@@ -81,16 +30,6 @@ pub struct ScheduleDetailInfo {
 pub struct ScheduleOption {
     pub title: String,
     pub contents: String,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub struct MeetingInfo {
-    pub meeting_type: MeetingType,
-    pub title: String,
-    pub start_date: u64,
-    pub end_date: u64,
-    pub discussion_group: Vec<DiscussionGroupInfo>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
@@ -153,16 +92,6 @@ pub enum AllocationMethod {
     ProportionalAllocation,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub struct DeliberationInformation {
-    pub deliberation_type: Option<ProjectArea>,
-    pub title: Option<String>,
-    pub description: Option<String>,
-    pub documents: Vec<ResourceFile>,
-    pub projects: Vec<SurveyV2Summary>,
-}
-
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 #[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
 pub struct Document {
@@ -178,16 +107,6 @@ pub struct Document {
 pub struct ProjectInfo {
     pub id: String,
     pub name: String,
-}
-
-// TODO: refactor this @henry
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
-#[cfg_attr(feature = "server", derive(JsonSchema, aide::OperationIo))]
-pub struct DeliberationSequence {
-    pub name: String,
-    pub start_date: Option<u64>,
-    pub end_date: Option<u64>,
-    pub step_type: Option<StepType>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]

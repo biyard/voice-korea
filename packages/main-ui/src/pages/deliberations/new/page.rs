@@ -16,7 +16,7 @@ use super::i18n::OpinionNewTranslate;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::deliberation_user::DeliberationUserCreateRequest;
-use models::{File, ResourceFileSummary, Role, SurveyV2Summary};
+use models::{File, PanelV2Summary, ResourceFileSummary, Role, SurveyV2Summary};
 
 #[derive(Props, Clone, PartialEq)]
 pub struct OpinionProps {
@@ -30,11 +30,14 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let surveys = ctrl.surveys()?;
     let metadatas = ctrl.metadatas()?;
     let members = ctrl.members()?;
+    let panels = ctrl.panels()?;
 
     let resources = ctrl.resources();
     let step = ctrl.get_current_step();
     let selected_surveys = ctrl.selected_surveys();
+    let selected_panels = ctrl.get_selected_panels();
     let committees = ctrl.get_committees();
+    tracing::debug!("panels: {:?}", panels);
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -120,7 +123,26 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                     },
                 }
             } else if step == CurrentStep::PanelComposition {
-                CompositionPanel { lang: props.lang.clone() }
+                CompositionPanel {
+                    lang: props.lang.clone(),
+                    panels,
+                    selected_panels,
+                    add_panel: move |panel: PanelV2Summary| {
+                        ctrl.add_selected_panel(panel);
+                    },
+                    remove_panel: move |id: i64| {
+                        ctrl.remove_selected_panel(id);
+                    },
+                    clear_panel: move |_| {
+                        ctrl.clear_selected_panel();
+                    },
+                    change_selected_panel_by_index: move |(index, value): (usize, u64)| {
+                        ctrl.change_selected_panel_by_index(index, value);
+                    },
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                }
             } else if step == CurrentStep::DiscussionSetting {
                 SettingDiscussion { lang: props.lang.clone() }
             } else {

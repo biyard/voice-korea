@@ -58,6 +58,9 @@ pub struct Deliberation {
     #[api_model(summary, action = create, many_to_many = panel_deliberations, foreign_table_name = panels, foreign_primary_key = panel_id, foreign_reference_key = deliberation_id,)]
     #[serde(default)]
     pub panels: Vec<PanelV2>,
+    // TODO: panel counts field is required.
+    // #[api_model(summary, action = create, type = JSONB, version = v0.1, action_by_id = update)]
+    // pub panel_counts: Vec<PanelCountsV2>,
     #[api_model(one_to_many = discussions)]
     pub discussions: Vec<Discussion>,
     #[api_model(one_to_many = deliberation_comments)]

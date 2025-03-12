@@ -60,6 +60,7 @@ pub mod components {
     pub mod select;
     pub mod stepper;
     pub mod table_row;
+    pub mod textarea;
     pub mod upload_button;
 }
 

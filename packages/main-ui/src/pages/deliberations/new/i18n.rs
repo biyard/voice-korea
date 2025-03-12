@@ -478,6 +478,14 @@ translate! {
         ko: "패널 선택",
         en: "Select Panel"
     }
+    panel_hint: {
+        ko: "패널을 선택해주세요",
+        en: "Select a panel"
+    }
+    unit: {
+        ko: "명",
+        en: "Unit"
+    }
     input_panel_count: {
         ko: "패널 수 입력",
         en: "Input Panel Count"
