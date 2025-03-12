@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::collections::HashMap;
 
 use by_axum::auth::generate_jwt;

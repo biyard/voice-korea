@@ -1,16 +1,14 @@
 pub mod verification;
 
-use std::collections::HashMap;
-
 use by_axum::{
-    auth::{generate_jwt, Authorization},
+    auth::Authorization,
     axum::{
         extract::{Path, Query, State},
         routing::{get, post},
         Extension, Json,
     },
 };
-use by_types::{Claims, JsonWithHeaders};
+use by_types::JsonWithHeaders;
 use models::{
     invitation::{Invitation, InvitationRepository, InvitationSummary},
     organization::{Organization, OrganizationRepository},

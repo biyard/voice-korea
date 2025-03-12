@@ -6,8 +6,6 @@ use validator::Validate;
 
 // TODO(web): using comments for all project view
 // TODO(api): below specs
-// - POST /v2/deliverations/:deliveration-id/comments (comment)
-// - POST /v2/deliverations/:deliveration-id/comments/:id (reply_to_comment, like)
 // - GET /v2/deliverations/:deliveration-id/comments (query, replies_of)
 // NOTE: now replies on a comment is not supported
 #[derive(Validate)]
@@ -33,7 +31,7 @@ pub struct DeliberationComment {
 
     // num_of_replies is used for the number of replies on a comment.
     // it means the number of comments that have the parent_id of this comment.
-    #[api_model(summary, skip)]
+    #[api_model(summary, one_to_many = deliberation_comments, foreign_key = parent_id, aggregator = count)]
     pub replies: i64,
 
     #[api_model(summary, one_to_many = deliberation_comments_likes, foreign_key = comment_id, aggregator = count)]

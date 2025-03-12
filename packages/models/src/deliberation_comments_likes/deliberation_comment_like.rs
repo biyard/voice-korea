@@ -14,7 +14,7 @@ pub struct DeliberationCommentLike {
     pub updated_at: i64,
 
     #[api_model(many_to_one = deliberation_comments)]
-    pub deliberation_id: i64,
+    pub comment_id: i64,
     #[api_model(many_to_one = users)]
     pub user_id: i64,
 }
