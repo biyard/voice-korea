@@ -17,7 +17,6 @@ use models::{organization::Organization, *};
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
-mod common;
 mod controllers {
     pub mod v1;
     pub mod v2;
