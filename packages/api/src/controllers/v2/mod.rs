@@ -14,7 +14,11 @@ pub mod surveys {
     }
 }
 
-pub mod deliberations;
+pub mod deliberations {
+    pub mod _id {
+        pub mod responses;
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Version2Controller {}

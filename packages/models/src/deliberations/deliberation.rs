@@ -6,8 +6,6 @@ use by_axum::aide;
 use by_macros::api_model;
 use validator::Validate;
 
-use crate::step::StepCreateRequest;
-
 use crate::deliberation_vote::DeliberationVote;
 use crate::discussions::*;
 use crate::step::*;
