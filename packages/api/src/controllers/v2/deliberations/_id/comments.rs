@@ -152,6 +152,8 @@ impl DeliberationCommentController {
             .await?
             .ok_or(ApiError::DeliberationCommentException)?;
 
+        tx.commit().await?;
+
         Ok(res)
     }
 }
