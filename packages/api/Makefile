@@ -32,7 +32,7 @@ setup.tool:
 	cargo install cargo-watch toml-cli
 
 run:
-	$(BUILD_ENV) cargo watch -w src -x "run --target-dir $(PWD)/target"
+	$(BUILD_ENV) cargo watch -w src -x run
 
 test:
 	$(BUILD_ENV) RUSTFLAGS="-A warnings" RUST_TEST_THREADS=1 cargo test --tests $(TESTFLAGS)

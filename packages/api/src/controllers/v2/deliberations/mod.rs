@@ -77,6 +77,7 @@ impl DeliberationController {
 
     pub fn route(&self) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
+            .route("/:id/contents", get(Self::get_deliberation_content))
             .route(
                 "/:id",
                 get(Self::get_deliberation_by_id), // .post(Self::act_deliberation_by_id)
@@ -87,6 +88,23 @@ impl DeliberationController {
                 post(Self::act_deliberation).get(Self::get_deliberation),
             )
             .with_state(self.clone()))
+    }
+
+    pub async fn get_deliberation_content(
+        State(ctrl): State<DeliberationController>,
+        Path(DeliberationPath { org_id, id }): Path<DeliberationPath>,
+        Extension(_auth): Extension<Option<Authorization>>,
+    ) -> Result<Json<Deliberation>> {
+        tracing::debug!("get_deliberation_content {} {:?}", org_id, id);
+        Ok(Json(
+            Deliberation::query_builder()
+                .id_equals(id)
+                .org_id_equals(org_id)
+                .query()
+                .map(Deliberation::from)
+                .fetch_one(&ctrl.pool)
+                .await?,
+        ))
     }
 
     pub async fn act_deliberation(

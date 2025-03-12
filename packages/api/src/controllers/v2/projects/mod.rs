@@ -242,16 +242,13 @@ mod tests {
         } = setup().await.unwrap();
         let org_id = user.orgs[0].id;
 
-        let cli = Deliberation::get_client(&endpoint);
+        let cli = DeliberationProject::get_client(&endpoint);
 
         let res = cli
-            .query(
-                org_id,
-                DeliberationQuery {
-                    size: 1,
-                    bookmark: None,
-                },
-            )
+            .query(DeliberationProjectQuery {
+                size: 1,
+                bookmark: None,
+            })
             .await;
 
         assert!(res.is_ok());
