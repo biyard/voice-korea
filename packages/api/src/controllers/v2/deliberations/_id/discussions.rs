@@ -174,6 +174,8 @@ impl DiscussionController {
             .await?
             .ok_or(ApiError::DiscussionNotFound)?;
 
+        tx.commit().await?;
+
         Ok(res)
     }
 
