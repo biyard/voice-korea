@@ -2,6 +2,7 @@
 use crate::pages::deliberations::new::composition_commitee::CompositionCommitee;
 use crate::pages::deliberations::new::composition_opinion::CompositionOpinion;
 use crate::pages::deliberations::new::composition_panel::CompositionPanel;
+use crate::pages::deliberations::new::controller::MeetingInfo;
 use crate::pages::deliberations::new::input_opinion::InputOpinion;
 use crate::pages::deliberations::new::preview::Preview;
 use crate::pages::deliberations::new::setting_discussion::SettingDiscussion;
@@ -37,6 +38,8 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let selected_surveys = ctrl.selected_surveys();
     let selected_panels = ctrl.get_selected_panels();
     let committees = ctrl.get_committees();
+    let discussions = ctrl.get_discussions();
+    let discussion_resources = ctrl.get_discussion_resources();
     tracing::debug!("panels: {:?}", panels);
 
     rsx! {
@@ -144,7 +147,33 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                     },
                 }
             } else if step == CurrentStep::DiscussionSetting {
-                SettingDiscussion { lang: props.lang.clone() }
+                SettingDiscussion {
+                    lang: props.lang.clone(),
+                    discussions,
+                    add_discussion: move |_| {
+                        ctrl.add_discussion();
+                    },
+                    remove_discussion: move |index: usize| {
+                        ctrl.remove_discussion(index);
+                    },
+                    update_discussion: move |(index, discussion): (usize, MeetingInfo)| {
+                        ctrl.update_discussion(index, discussion);
+                    },
+
+                    discussion_resources,
+                    create_resource: move |file: File| async move {
+                        let _ = ctrl.create_discussion_resource(file).await;
+                    },
+                    remove_resource: move |id: i64| {
+                        let _ = ctrl.remove_discussion_resource(id);
+                    },
+                    clear_resource: move |_| {
+                        let _ = ctrl.clear_discussion_resource();
+                    },
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                }
             } else {
                 Preview { lang: props.lang.clone() }
             }

@@ -1,4 +1,5 @@
 use by_macros::DioxusController;
+use chrono::Utc;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
@@ -71,6 +72,10 @@ pub struct Controller {
     pub panels: Resource<Vec<PanelV2Summary>>,
     pub selected_panels: Signal<Vec<PanelV2Summary>>,
     total_attributes: Signal<Vec<AttributeResponse>>,
+
+    //step 5
+    pub discussions: Signal<Vec<MeetingInfo>>,
+    pub discussion_resources: Signal<Vec<ResourceFileSummary>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Copy)]
@@ -85,6 +90,7 @@ pub enum CurrentStep {
 
 impl Controller {
     pub fn new(lang: dioxus_translate::Language) -> std::result::Result<Self, RenderError> {
+        let timestamp = Utc::now().timestamp();
         let user: LoginService = use_context();
         let popup_service: PopupService = use_context();
         let translates: OpinionNewTranslate = translate(&lang.clone());
@@ -254,6 +260,19 @@ impl Controller {
             panels,
             selected_panels: use_signal(|| vec![]),
             committees: use_signal(|| vec![]),
+
+            discussions: use_signal(|| {
+                vec![MeetingInfo {
+                    meeting_type: models::prelude::MeetingType::Offline,
+                    title: "".to_string(),
+                    start_date: timestamp,
+                    end_date: timestamp,
+                    description: "".to_string(),
+                    users: 20,
+                }]
+            }),
+            discussion_resources: use_signal(|| vec![]),
+
             //FIXME: fix to connect api
             total_attributes: use_signal(|| {
                 vec![
@@ -403,34 +422,16 @@ impl Controller {
         self.deliberation_informations.set(information);
     }
 
-    pub async fn create_resource(&self, file: File) -> Result<()> {
-        let org = self.user.get_selected_org();
-        if org.is_none() {
-            return Err(models::ApiError::OrganizationNotFound);
-        }
-        let org_id = org.unwrap().id;
-        let client = models::ResourceFile::get_client(&config::get().api_url);
-        let mut ctrl = self.clone();
+    pub async fn create_resource(&mut self, file: File) -> Result<()> {
+        let metadata = self.create_metadata(file).await;
 
-        match client
-            .create(
-                org_id,
-                file.name.clone(),
-                None,
-                None,
-                None,
-                None,
-                None,
-                vec![file],
-            )
-            .await
-        {
+        match metadata {
             Ok(v) => {
-                let mut info = (ctrl.deliberation_informations)();
+                let mut info = (self.deliberation_informations)();
                 let mut documents = info.documents;
                 documents.push(v);
                 info.documents = documents;
-                ctrl.deliberation_informations.set(info);
+                self.deliberation_informations.set(info);
                 Ok(())
             }
             Err(e) => {
@@ -510,6 +511,86 @@ impl Controller {
         self.selected_panels.with_mut(|panels| {
             panels[index].user_count = value;
         });
+    }
+
+    //step 5
+    pub fn get_discussions(&self) -> Vec<MeetingInfo> {
+        (self.discussions)()
+    }
+
+    pub fn add_discussion(&mut self) {
+        let timestamp = Utc::now().timestamp();
+
+        self.discussions.push(MeetingInfo {
+            meeting_type: models::prelude::MeetingType::Offline,
+            title: "".to_string(),
+            start_date: timestamp,
+            end_date: timestamp,
+            description: "".to_string(),
+            users: 20,
+        });
+    }
+
+    pub fn remove_discussion(&mut self, index: usize) {
+        self.discussions.remove(index);
+    }
+
+    pub fn update_discussion(&mut self, index: usize, discussion: MeetingInfo) {
+        let mut discussions = (self.discussions)();
+        discussions[index] = discussion;
+        self.discussions.set(discussions);
+    }
+
+    pub fn get_discussion_resources(&self) -> Vec<ResourceFileSummary> {
+        (self.discussion_resources)()
+    }
+
+    pub fn remove_discussion_resource(&mut self, id: i64) {
+        self.discussion_resources
+            .retain(|resource| !(resource.id == id));
+    }
+
+    pub fn clear_discussion_resource(&mut self) {
+        self.discussion_resources.set(vec![]);
+    }
+
+    pub async fn create_metadata(&self, file: File) -> Result<ResourceFile> {
+        let org = self.user.get_selected_org();
+        if org.is_none() {
+            return Err(models::ApiError::OrganizationNotFound);
+        }
+        let org_id = org.unwrap().id;
+        let client = models::ResourceFile::get_client(&config::get().api_url);
+
+        client
+            .create(
+                org_id,
+                file.name.clone(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                vec![file],
+            )
+            .await
+    }
+
+    pub async fn create_discussion_resource(&mut self, file: File) -> Result<()> {
+        let metadata = self.create_metadata(file).await;
+
+        match metadata {
+            Ok(v) => {
+                let mut info = (self.discussion_resources)();
+                info.push(v.into());
+                self.discussion_resources.set(info);
+                Ok(())
+            }
+            Err(e) => {
+                tracing::error!("Create Failed Reason: {:?}", e);
+                Err(models::ApiError::ReqwestFailed(e.to_string()))
+            }
+        }
     }
 
     // pub fn open_create_panel_modal(&self, lang: Language, translates: CompositionPanelTranslate) {

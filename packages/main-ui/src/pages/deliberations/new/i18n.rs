@@ -581,6 +581,18 @@ translate! {
         ko: "온라인 회의",
         en: "Online Meeting"
     }
+    discussion_description: {
+        ko: "토론 설명",
+        en: "Discussion Description"
+    }
+    maximum_people: {
+        ko: "최대 인원",
+        en: "Maximum number of people"
+    }
+    unit: {
+        ko: "명",
+        en: "People"
+    }
 }
 
 translate! {
