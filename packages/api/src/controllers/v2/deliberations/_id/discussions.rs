@@ -96,7 +96,7 @@ impl DiscussionController {
                 .id_equals(resource_id)
                 .query()
                 .map(ResourceFile::from)
-                .fetch_optional(&self.pool)
+                .fetch_optional(&mut *tx)
                 .await?
                 .ok_or(ApiError::ResourceNotFound)?;
 
@@ -114,7 +114,7 @@ impl DiscussionController {
             .id_equals(res.id)
             .query()
             .map(Discussion::from)
-            .fetch_optional(&self.pool)
+            .fetch_optional(&mut *tx)
             .await?
             .ok_or(ApiError::DiscussionNotFound)?;
 
