@@ -12,7 +12,7 @@ use deliberation::Deliberation;
 use discussion_resources::DiscussionResource;
 use discussions::*;
 use models::*;
-use sqlx::postgres::PgRow;
+use sqlx::{postgres::PgRow, Postgres, Transaction};
 
 use crate::utils::app_claims::AppClaims;
 
@@ -72,26 +72,9 @@ impl DiscussionController {
 
         let mut tx = self.pool.begin().await?;
 
-        let deliberation = Deliberation::query_builder()
-            .id_equals(deliberation_id)
-            .query()
-            .map(Deliberation::from)
-            .fetch_optional(&self.pool)
-            .await?
-            .ok_or(ApiError::DeliberationNotFound)?;
-
-        let user = User::query_builder()
-            .id_equals(user_id)
-            .query()
-            .map(User::from)
-            .fetch_optional(&self.pool)
-            .await?
-            .ok_or(ApiError::NoUser)?;
-
-        user.orgs
-            .iter()
-            .find(|org| org.id == deliberation.org_id)
-            .ok_or(ApiError::NoUser)?;
+        let org_id = self
+            .verify_permission(&mut tx, deliberation_id, user_id)
+            .await?;
 
         let res = self
             .repo
@@ -106,8 +89,6 @@ impl DiscussionController {
             )
             .await?
             .ok_or(ApiError::DeliberationNotFound)?;
-
-        let org_id = deliberation.org_id;
 
         for resource_id in resources {
             let rsc = ResourceFile::query_builder()
@@ -143,25 +124,55 @@ impl DiscussionController {
 
     async fn update(
         &self,
+        deliberation_id: i64,
         id: i64,
         auth: Option<Authorization>,
         param: DiscussionUpdateRequest,
     ) -> Result<Discussion> {
-        if auth.is_none() {
-            return Err(ApiError::Unauthorized);
-        }
+        let user_id = match auth {
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
+            _ => return Err(ApiError::Unauthorized),
+        };
 
-        let res = self.repo.update(id, param.into()).await?;
+        let mut tx = self.pool.begin().await?;
+
+        let _org_id = self
+            .verify_permission(&mut tx, deliberation_id, user_id)
+            .await?;
+
+        let res = self
+            .repo
+            .update_with_tx(&mut *tx, id, param.into())
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?;
+
+        tx.commit().await?;
 
         Ok(res)
     }
 
-    async fn delete(&self, id: i64, auth: Option<Authorization>) -> Result<Discussion> {
-        if auth.is_none() {
-            return Err(ApiError::Unauthorized);
-        }
+    async fn delete(
+        &self,
+        deliberation_id: i64,
+        id: i64,
+        auth: Option<Authorization>,
+    ) -> Result<Discussion> {
+        let user_id = match auth {
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
+            _ => return Err(ApiError::Unauthorized),
+        };
 
-        let res = self.repo.delete(id).await?;
+        let mut tx = self.pool.begin().await?;
+
+        let _org_id = self
+            .verify_permission(&mut tx, deliberation_id, user_id)
+            .await?;
+
+        let res = self
+            .repo
+            .delete_with_tx(&mut *tx, id)
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?;
 
         Ok(res)
     }
@@ -226,11 +237,11 @@ impl DiscussionController {
 
         match body {
             DiscussionByIdAction::Update(param) => {
-                let res = ctrl.update(id, auth, param).await?;
+                let res = ctrl.update(deliberation_id, id, auth, param).await?;
                 Ok(Json(res))
             }
             DiscussionByIdAction::Delete(_) => {
-                let res = ctrl.delete(id, auth).await?;
+                let res = ctrl.delete(deliberation_id, id, auth).await?;
                 Ok(Json(res))
             }
 
@@ -280,6 +291,36 @@ impl DiscussionController {
             //     Ok(Json(DiscussionGetResponse::Read(res)))
             // }
         }
+    }
+
+    pub async fn verify_permission(
+        &self,
+        tx: &mut Transaction<'static, Postgres>,
+        deliberation_id: i64,
+        user_id: i64,
+    ) -> Result<i64> {
+        let deliberation = Deliberation::query_builder()
+            .id_equals(deliberation_id)
+            .query()
+            .map(Deliberation::from)
+            .fetch_optional(&mut **tx)
+            .await?
+            .ok_or(ApiError::DeliberationNotFound)?;
+
+        let user = User::query_builder()
+            .id_equals(user_id)
+            .query()
+            .map(User::from)
+            .fetch_optional(&mut **tx)
+            .await?
+            .ok_or(ApiError::NoUser)?;
+
+        user.orgs
+            .iter()
+            .find(|org| org.id == deliberation.org_id)
+            .ok_or(ApiError::NoUser)?;
+
+        Ok(deliberation.org_id)
     }
 }
 
