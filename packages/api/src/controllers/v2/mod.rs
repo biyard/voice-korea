@@ -4,9 +4,7 @@ pub mod organizations;
 pub mod projects;
 pub mod reviews;
 
-use deliberations::_id::responses::DeliberationResponseController;
 use models::*;
-use surveys::_id::responses::SurveyResponseController;
 
 pub mod surveys {
     pub mod _id {
@@ -16,6 +14,8 @@ pub mod surveys {
 
 pub mod deliberations {
     pub mod _id {
+        pub mod comments;
+        pub mod discussions;
         pub mod responses;
     }
 }
@@ -45,11 +45,20 @@ impl Version2Controller {
             .nest("/reviews", reviews::ReviewController::route(pool.clone())?)
             .nest(
                 "/surveys/:survey-id/responses",
-                SurveyResponseController::route(pool.clone())?,
+                surveys::_id::responses::SurveyResponseController::route(pool.clone())?,
+            )
+            .nest(
+                "/deliberations/:deliberation-id/discussions",
+                deliberations::_id::discussions::DiscussionController::new(pool.clone()).route(),
+            )
+            .nest(
+                "/deliberations/:deliberation-id/comments",
+                deliberations::_id::comments::DeliberationCommentController::new(pool.clone())
+                    .route(),
             )
             .nest(
                 "/deliberations/:deliberation-id/responses",
-                DeliberationResponseController::route(pool.clone())?,
+                deliberations::_id::responses::DeliberationResponseController::route(pool)?,
             ))
     }
 }

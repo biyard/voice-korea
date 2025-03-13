@@ -13,6 +13,7 @@ mod public_opinion;
 mod resource;
 // mod public_survey;
 pub mod deliberation_comments;
+pub mod deliberation_comments_likes;
 pub mod deliberation_resources;
 pub mod deliberation_responses;
 pub mod deliberation_surveys;

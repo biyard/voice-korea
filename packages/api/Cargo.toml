@@ -1,12 +1,11 @@
 [package]
 name = "api"
-version = "0.3.18"
+version = "0.3.19"
 authors.workspace = true
 description.workspace = true
 edition.workspace = true
 
 [dependencies]
-easy-dynamodb.workspace = true
 by-axum.workspace = true
 by-types.workspace = true
 
@@ -21,7 +20,6 @@ sqlx.workspace = true
 rest-api.workspace = true
 
 tokio = { version = "1.41.1", features = ["full"] }
-thiserror = "2.0.3"
 jsonwebtoken = "9.3.0"
 sha3 = "0.10.8"
 uuid = { version = "1.11.0", features = ["v4"] }

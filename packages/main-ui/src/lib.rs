@@ -46,9 +46,14 @@ pub mod components {
     pub mod button;
     pub mod calendar;
     pub mod checkbox;
+    pub mod close_label;
+    pub mod custom_checkbox;
+    pub mod drop_zone;
+    pub mod file_list;
     pub mod icons;
     pub mod input;
     pub mod label;
+    pub mod outside_hook;
     pub mod pagination;
     pub mod pi_graph;
     pub mod popup;

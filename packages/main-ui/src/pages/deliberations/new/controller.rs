@@ -1,9 +1,16 @@
+use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::{deliberation::Deliberation, step_type::StepType, *};
+use models::{
+    deliberation::Deliberation, deliberation_user::DeliberationUserCreateRequest,
+    step::StepCreateRequest, step_type::StepType, *,
+};
 
-use crate::service::{login_service::LoginService, popup_service::PopupService};
+use crate::{
+    config,
+    service::{login_service::LoginService, popup_service::PopupService},
+};
 
 use super::{
     composition_panel::{AddAttributeModal, CreateNewPanelModal},
@@ -11,15 +18,25 @@ use super::{
     preview::SendAlertModal,
 };
 
-#[derive(Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
     popup_service: Signal<PopupService>,
     current_step: Signal<CurrentStep>,
-    public_opinion_sequences: Signal<Vec<OpinionInfo>>,
+    user: LoginService,
+
+    //step 1
+    deliberation_sequences: Signal<Vec<StepCreateRequest>>,
 
     //step 2
     total_fields: Signal<Vec<String>>,
-    opinion_informations: Signal<OpinionInformation>,
+    deliberation_informations: Signal<DeliberationInformation>,
+    pub surveys: Resource<Vec<SurveyV2Summary>>,
+    pub metadatas: Resource<Vec<ResourceFileSummary>>,
+    pub search_keyword: Signal<String>,
+
+    //step 3
+    pub members: Resource<Vec<OrganizationMemberSummary>>,
+    pub committee_users: Signal<Vec<DeliberationUserCreateRequest>>,
 
     //step 4
     total_attributes: Signal<Vec<AttributeResponse>>,
@@ -36,44 +53,124 @@ pub enum CurrentStep {
 }
 
 impl Controller {
-    pub fn new(lang: dioxus_translate::Language) -> Self {
+    pub fn new(lang: dioxus_translate::Language) -> std::result::Result<Self, RenderError> {
+        let user: LoginService = use_context();
         let popup_service: PopupService = use_context();
         let translates: OpinionNewTranslate = translate(&lang.clone());
+        let search_keyword = use_signal(|| "".to_string());
+
+        let client = SurveyV2::get_client(&crate::config::get().api_url);
+        let surveys = use_server_future(move || {
+            let page = 1;
+            let size = 20;
+            let client = client.clone();
+
+            async move {
+                let org_id = user.get_selected_org();
+                if org_id.is_none() {
+                    tracing::error!("Organization ID is missing");
+                    return vec![];
+                }
+
+                match client
+                    .query(org_id.unwrap().id, SurveyV2Query::new(size).with_page(page))
+                    .await
+                {
+                    Ok(res) => res.items,
+                    Err(e) => {
+                        tracing::error!("Failed to list surveys: {:?}", e);
+                        vec![]
+                    }
+                }
+            }
+        })?;
+
+        let metadatas = use_server_future(move || {
+            let page = 1;
+            let size = 20;
+            let keyword = search_keyword().clone();
+            async move {
+                let client = ResourceFile::get_client(&config::get().api_url);
+                let org_id = user.get_selected_org();
+                if org_id.is_none() {
+                    tracing::error!("Organization ID is missing");
+                    return vec![];
+                }
+
+                if keyword.is_empty() {
+                    let query = ResourceFileQuery::new(size).with_page(page);
+                    client
+                        .query(org_id.unwrap().id, query)
+                        .await
+                        .unwrap_or_default()
+                        .items
+                } else {
+                    client
+                        .search_by(size, Some(page.to_string()), org_id.unwrap().id, keyword)
+                        .await
+                        .unwrap_or_default()
+                        .items
+                }
+            }
+        })?;
+
+        let members = use_server_future(move || {
+            let page = 1;
+            let size = 20;
+            async move {
+                let org_id = user.get_selected_org();
+                if org_id.is_none() {
+                    tracing::error!("Organization ID is missing");
+                    return vec![];
+                }
+                let endpoint = crate::config::get().api_url;
+                let res = OrganizationMember::get_client(endpoint)
+                    .query(
+                        org_id.unwrap().id,
+                        OrganizationMemberQuery::new(size).with_page(page),
+                    )
+                    .await;
+
+                res.unwrap_or_default().items
+            }
+        })?;
+
         let ctrl = Self {
+            user,
             popup_service: use_signal(|| popup_service),
             current_step: use_signal(|| CurrentStep::PublicOpinionComposition),
-            public_opinion_sequences: use_signal(|| {
+            deliberation_sequences: use_signal(|| {
                 // TODO: refactor this @henry
                 vec![
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::GeneralPost,
                         name: translates.information_provided.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::GeneralPost),
+                        started_at: 0,
+                        ended_at: 0,
                     },
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::VideoConference,
                         name: translates.discussion_and_deliberation.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::VideoConference),
+                        started_at: 0,
+                        ended_at: 0,
                     },
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::Post,
                         name: translates.derive_opinions.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::Post),
+                        started_at: 0,
+                        ended_at: 0,
                     },
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::Vote,
                         name: translates.reach_consensus.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::Vote),
+                        started_at: 0,
+                        ended_at: 0,
                     },
-                    OpinionInfo {
+                    StepCreateRequest {
+                        step_type: StepType::Report,
                         name: translates.analysis_result.to_string(),
-                        start_date: None,
-                        end_date: None,
-                        public_opinion_type: Some(StepType::Report),
+                        started_at: 0,
+                        ended_at: 0,
                     },
                 ]
             }),
@@ -94,12 +191,18 @@ impl Controller {
                     "정치".to_string(),
                 ]
             }),
-            opinion_informations: use_signal(|| OpinionInformation {
-                opinion_type: None,
+            deliberation_informations: use_signal(|| DeliberationInformation {
+                deliberation_type: None,
                 title: None,
                 description: None,
                 documents: vec![],
+                projects: vec![],
             }),
+            surveys,
+            search_keyword,
+            metadatas,
+            members,
+            committee_users: use_signal(|| vec![]),
             //FIXME: fix to connect api
             total_attributes: use_signal(|| {
                 vec![
@@ -173,48 +276,46 @@ impl Controller {
             }),
         };
         use_context_provider(|| ctrl);
-        ctrl
+        Ok(ctrl)
     }
 
     pub fn get_total_attributes(&self) -> Vec<AttributeResponse> {
         (self.total_attributes)()
     }
 
-    pub fn update_opinion_info(&mut self, index: usize, opinion: OpinionInfo) {
-        let mut sequences = self.get_public_opinion_sequences();
+    pub fn update_opinion_info(&mut self, index: usize, opinion: StepCreateRequest) {
+        let mut sequences = self.get_deliberation_sequences();
         sequences[index] = opinion;
-        self.public_opinion_sequences.set(sequences);
+        self.deliberation_sequences.set(sequences);
     }
 
     pub fn delete_opinion_info(&mut self, index: usize) {
-        let mut sequences = self.get_public_opinion_sequences();
+        let mut sequences = self.get_deliberation_sequences();
         sequences.remove(index);
-        self.public_opinion_sequences.set(sequences);
+        self.deliberation_sequences.set(sequences);
     }
 
     pub fn add_opinion_info(&mut self) {
-        let mut sequences = self.get_public_opinion_sequences();
-        sequences.push(OpinionInfo {
+        let mut sequences = self.get_deliberation_sequences();
+        sequences.push(StepCreateRequest {
+            step_type: StepType::GeneralPost,
             name: "".to_string(),
-            start_date: None,
-            end_date: None,
-            public_opinion_type: None,
+            started_at: 0,
+            ended_at: 0,
         });
-        self.public_opinion_sequences.set(sequences);
+        self.deliberation_sequences.set(sequences);
     }
 
     pub fn check_opinion_info(&self) -> bool {
-        let sequences = &self.get_public_opinion_sequences();
+        let sequences = &self.get_deliberation_sequences();
 
         for sequence in sequences {
-            if sequence.start_date.is_none() || sequence.end_date.is_none() {
+            if sequence.started_at == 0 || sequence.ended_at == 0 {
                 return false;
             }
 
-            if let (Some(start), Some(end)) = (sequence.start_date, sequence.end_date) {
-                if start > end {
-                    return false;
-                }
+            if sequence.started_at > sequence.ended_at {
+                return false;
             }
         }
 
@@ -222,11 +323,12 @@ impl Controller {
     }
 
     pub fn change_step(&mut self, step: CurrentStep) {
+        tracing::debug!("informations: {:?}", self.deliberation_informations());
         self.current_step.set(step);
     }
 
-    pub fn get_public_opinion_sequences(&self) -> Vec<OpinionInfo> {
-        (self.public_opinion_sequences)()
+    pub fn get_deliberation_sequences(&self) -> Vec<StepCreateRequest> {
+        (self.deliberation_sequences)()
     }
 
     pub fn get_current_step(&self) -> CurrentStep {
@@ -242,24 +344,84 @@ impl Controller {
         (self.total_fields)()
     }
 
-    pub fn get_opinion_informations(&self) -> OpinionInformation {
-        (self.opinion_informations)()
+    pub fn get_deliberation_informations(&self) -> DeliberationInformation {
+        (self.deliberation_informations)()
     }
 
-    pub fn update_opinion_field_type_from_str(
-        &self,
-        opinion_field_type: String,
-    ) -> Option<ProjectArea> {
-        let field = opinion_field_type.parse::<ProjectArea>();
+    pub fn update_deliberation_information(&mut self, information: DeliberationInformation) {
+        self.deliberation_informations.set(information);
+    }
 
-        match field {
-            Ok(v) => Some(v),
-            Err(_) => None,
+    pub async fn create_resource(&self, file: File) -> Result<()> {
+        let org = self.user.get_selected_org();
+        if org.is_none() {
+            return Err(models::ApiError::OrganizationNotFound);
+        }
+        let org_id = org.unwrap().id;
+        let client = models::ResourceFile::get_client(&config::get().api_url);
+        let mut ctrl = self.clone();
+
+        match client
+            .create(
+                org_id,
+                file.name.clone(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                vec![file],
+            )
+            .await
+        {
+            Ok(v) => {
+                let mut info = (ctrl.deliberation_informations)();
+                let mut documents = info.documents;
+                documents.push(v);
+                info.documents = documents;
+                ctrl.deliberation_informations.set(info);
+                Ok(())
+            }
+            Err(e) => {
+                tracing::error!("Create Failed Reason: {:?}", e);
+                Err(models::ApiError::ReqwestFailed(e.to_string()))
+            }
         }
     }
 
-    pub fn update_opinion_information(&mut self, information: OpinionInformation) {
-        self.opinion_informations.set(information);
+    pub fn add_resource(&mut self, resource: ResourceFile) {
+        let mut info = (self.deliberation_informations)();
+        let mut documents = info.documents;
+        documents.push(resource);
+        info.documents = documents;
+        self.deliberation_informations.set(info);
+    }
+
+    pub fn delete_resource(&mut self, id: i64) {
+        let mut info = (self.deliberation_informations)();
+        let mut documents = info.documents;
+        documents.retain(|doc| doc.id != id);
+        info.documents = documents;
+        self.deliberation_informations.set(info);
+    }
+
+    pub fn set_projects(&mut self, surveys: Vec<SurveyV2Summary>) {
+        let mut info = (self.deliberation_informations)();
+        info.projects = surveys;
+        self.deliberation_informations.set(info);
+    }
+
+    pub fn resources(&self) -> Vec<ResourceFile> {
+        (self.deliberation_informations)().documents
+    }
+
+    pub fn selected_surveys(&self) -> Vec<SurveyV2Summary> {
+        (self.deliberation_informations)().projects
+    }
+
+    //step 3
+    pub fn get_committee_users(&self) -> Vec<DeliberationUserCreateRequest> {
+        (self.committee_users)()
     }
 
     pub fn open_create_panel_modal(&self, lang: Language, translates: CompositionPanelTranslate) {
@@ -344,27 +506,23 @@ impl Controller {
     }
 
     pub fn get_period(&self) -> (u64, u64) {
-        let sequences = self.get_public_opinion_sequences();
+        let sequences = self.get_deliberation_sequences();
         if sequences.is_empty() {
             return (0, 0);
         }
-        let mut start = sequences[0].start_date.unwrap_or(0);
-        let mut end = sequences[sequences.len() - 1].end_date.unwrap_or(0);
+        let mut start = sequences[0].started_at;
+        let mut end = sequences[sequences.len() - 1].ended_at;
         for sequence in sequences.iter() {
-            if let Some(start_date) = sequence.start_date {
-                if start_date < start {
-                    start = start_date;
-                }
+            if sequence.started_at < start {
+                start = sequence.started_at;
             }
 
-            if let Some(end_date) = sequence.end_date {
-                if end_date > end {
-                    end = end_date;
-                }
+            if sequence.ended_at > end {
+                end = sequence.ended_at;
             }
         }
 
-        (start, end)
+        (start as u64, end as u64)
     }
 
     pub async fn create_deliberation(&self) -> Result<()> {
@@ -374,13 +532,13 @@ impl Controller {
             return Err(models::ApiError::OrganizationNotFound);
         }
         let org_id = org.unwrap().id;
-        let opinion_informations = self.get_opinion_informations();
-        let public_opinion_sequences = self.get_public_opinion_sequences();
+        let opinion_informations = self.get_deliberation_informations();
+        let deliberation_sequences = self.get_deliberation_sequences();
         let total_attributes = self.get_total_attributes();
         let total_fields = self.get_total_fields();
 
         tracing::debug!("opinion_informations: {:?}", opinion_informations);
-        tracing::debug!("public_opinion_sequences: {:?}", public_opinion_sequences);
+        tracing::debug!("deliberation_sequences: {:?}", deliberation_sequences);
         tracing::debug!("total_attributes: {:?}", total_attributes);
         tracing::debug!("total_fields: {:?}", total_fields);
 
@@ -393,14 +551,14 @@ impl Controller {
                 org_id,
                 started_at as i64,
                 ended_at as i64,
-                opinion_informations.opinion_type.unwrap_or_default(),
+                opinion_informations.deliberation_type.unwrap_or_default(),
                 opinion_informations.title.unwrap_or_default(),
                 opinion_informations.description.unwrap_or_default(),
                 vec![], // TODO: panels
                 vec![], // TODO: resources
                 vec![], // TODO: surveys
                 vec![], // roles
-                public_opinion_sequences,
+                deliberation_sequences,
                 vec![], // elearning
                 vec![], // discussions
             )

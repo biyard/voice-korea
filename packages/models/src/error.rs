@@ -88,9 +88,20 @@ pub enum ApiError {
 
     OrganizationNotFound,
 
+    InvalidType,
+
+    // Resource Errors
+    #[translate(
+        ko = "참고자료 또는 파일을 찾을 수 없습니다.",
+        en = "Cannot find the reference or file."
+    )]
     ResourceNotFound,
 
-    InvalidType,
+    #[translate(
+        ko = "자료에 접근권한이 없습니다.",
+        en = "No access permission to the resource."
+    )]
+    ResourceNotPermitted,
 
     // Survey Errors
     SurveyAlreadyExists,
@@ -146,12 +157,42 @@ pub enum ApiError {
     )]
     DeliberationPanelException,
 
+    #[translate(
+        ko = "선택된 공론이 정상인지 확인해주세요.",
+        en = "Please check if the selected deliberation is normal."
+    )]
+    DeliberationNotFound,
+
+    #[translate(
+        ko = "댓글과 사용자 정보가 정확한지 확인해주세요.",
+        en = "Please check the comment and user information."
+    )]
+    DeliberationCommentLikeException,
+
+    #[translate(
+        ko = "댓글을 가져오는데 실패했습니다. 새로고침 후 다시 시도해주세요.",
+        en = "Failed to get comments. Please refresh and try again."
+    )]
+    DeliberationCommentException,
+
+    #[translate(ko = "댓글을 찾을 수 없습니다.", en = "Cannot find the comment.")]
+    DeliberationCommentNotFound,
+
     // Discussion Errors
     #[translate(
         ko = "토론에 첨부된 자료를 확인해주세요.",
         en = "Please check the attached file in the discussion."
     )]
     DiscussionResourceException,
+
+    #[translate(
+        ko = "토론에 참여한 사용자를 확인해주세요.",
+        en = "Please check the users who participated in the discussion."
+    )]
+    DiscussionUserException,
+
+    #[translate(ko = "토론을 찾을 수 없습니다.", en = "Cannot find the discussion.")]
+    DiscussionNotFound,
 }
 
 impl From<reqwest::Error> for ApiError {

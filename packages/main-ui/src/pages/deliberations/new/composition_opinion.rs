@@ -12,7 +12,7 @@ use chrono::{TimeZone, Utc};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::prelude::{step_type::StepType, OpinionInfo};
+use models::{prelude::step_type::StepType, step::StepCreateRequest};
 use std::str::FromStr;
 
 #[derive(Props, Clone, PartialEq)]
@@ -41,9 +41,10 @@ pub struct PeriodOpinionProcedureTranslate {
 
 #[component]
 pub fn CompositionOpinion(props: CompositionOpinionProps) -> Element {
+    //FIXME: fix to get params
     let mut ctrl: Controller = use_context();
     let translates: OpinionNewTranslate = translate(&props.lang.clone());
-    let opinion_sequences = ctrl.get_public_opinion_sequences();
+    let deliberation_sequences = ctrl.get_deliberation_sequences();
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -51,7 +52,7 @@ pub fn CompositionOpinion(props: CompositionOpinionProps) -> Element {
                 "{translates.organization_and_period_title}"
             }
             OrganizationOpinionProcedure {
-                opinion_sequences: opinion_sequences.clone(),
+                deliberation_sequences: deliberation_sequences.clone(),
                 lang: props.lang.clone(),
                 i18n: OrganizationOpinionProcedureTranslate {
                     organization_of_procedures: translates.organization_of_procedures.to_string(),
@@ -64,7 +65,7 @@ pub fn CompositionOpinion(props: CompositionOpinionProps) -> Element {
                 },
             }
             PeriodOpinionProcedure {
-                opinion_sequences: opinion_sequences.clone(),
+                deliberation_sequences: deliberation_sequences.clone(),
                 i18n: PeriodOpinionProcedureTranslate {
                     duration_per_procedure: translates.duration_per_procedure.to_string(),
                     duration_per_procedure_description: translates
@@ -111,30 +112,22 @@ pub fn CompositionOpinion(props: CompositionOpinionProps) -> Element {
 
 #[component]
 pub fn PeriodOpinionProcedure(
-    opinion_sequences: Vec<OpinionInfo>,
+    deliberation_sequences: Vec<StepCreateRequest>,
     i18n: PeriodOpinionProcedureTranslate,
 ) -> Element {
     let mut clicked_index = use_signal(|| 0);
     let mut ctrl: Controller = use_context();
 
-    let mut updated_sequence = use_signal(|| OpinionInfo::default());
-    updated_sequence.set(opinion_sequences[clicked_index()].clone());
+    let mut updated_sequence = use_signal(|| StepCreateRequest::default());
+    updated_sequence.set(deliberation_sequences[clicked_index()].clone());
 
-    let mut start_date = None;
-    let mut end_date = None;
+    let start_datetime = Utc.timestamp_opt(updated_sequence().started_at, 0).unwrap();
+    let start_date = Some(start_datetime.format("%Y/%m/%d").to_string());
 
-    if updated_sequence().start_date.is_some() {
-        let start_datetime = Utc
-            .timestamp_opt(updated_sequence().start_date.unwrap() as i64, 0)
-            .unwrap();
-        start_date = Some(start_datetime.format("%Y/%m/%d").to_string());
-    }
-    if updated_sequence().end_date.is_some() {
-        let end_datetime = Utc
-            .timestamp_opt(updated_sequence().end_date.unwrap() as i64, 0)
-            .unwrap();
-        end_date = Some(end_datetime.format("%Y/%m/%d").to_string());
-    }
+    let end_datetime = Utc
+        .timestamp_opt(updated_sequence().ended_at as i64, 0)
+        .unwrap();
+    let end_date = Some(end_datetime.format("%Y/%m/%d").to_string());
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white mt-[20px]",
@@ -158,7 +151,7 @@ pub fn PeriodOpinionProcedure(
             }
             div { class: "flex flex-row w-full justify-end items-start",
                 div { class: "flex flex-col w-[415px] justify-end items-end h-full",
-                    for (index , sequence) in opinion_sequences.iter().enumerate() {
+                    for (index , sequence) in deliberation_sequences.iter().enumerate() {
                         div {
                             class: format!(
                                 "cursor-pointer flex flex-col w-[415px] h-[100px] justify-start items-start px-[40px] py-[20px] {}",
@@ -179,7 +172,7 @@ pub fn PeriodOpinionProcedure(
                                 }
                             }
 
-                            if sequence.start_date.is_none() || sequence.end_date.is_none() {
+                            if sequence.started_at == 0 || sequence.ended_at == 0 {
                                 div { class: "font-normal text-[#6d6d6d] text-[15px]",
                                     "{i18n.required_period_selection}"
                                 }
@@ -201,12 +194,12 @@ pub fn PeriodOpinionProcedure(
                             CalendarIcon { width: "28", height: "28" }
                         }
                         Calendar {
-                            timestamp: updated_sequence().start_date,
+                            timestamp: if updated_sequence().started_at != 0 { Some(updated_sequence().started_at as u64) } else { None },
                             update_date: {
-                                let sequence = opinion_sequences[clicked_index()].clone();
+                                let sequence = deliberation_sequences[clicked_index()].clone();
                                 move |timestamp: i64| {
                                     let mut value = sequence.clone();
-                                    value.start_date = Some(timestamp as u64);
+                                    value.started_at = timestamp as i64;
                                     tracing::debug!("{:?}", value);
                                     spawn(async move {
                                         tracing::debug!("{:?}", value);
@@ -233,12 +226,12 @@ pub fn PeriodOpinionProcedure(
                             CalendarIcon { width: "28", height: "28" }
                         }
                         Calendar {
-                            timestamp: updated_sequence().end_date,
+                            timestamp: if updated_sequence().ended_at != 0 { Some(updated_sequence().ended_at as u64) } else { None },
                             update_date: {
-                                let sequence = opinion_sequences[clicked_index()].clone();
+                                let sequence = deliberation_sequences[clicked_index()].clone();
                                 move |timestamp: i64| {
                                     let mut value = sequence.clone();
-                                    value.end_date = Some(timestamp as u64);
+                                    value.ended_at = timestamp as i64;
                                     spawn(async move {
                                         ctrl.update_opinion_info(clicked_index(), value);
                                     });
@@ -255,7 +248,7 @@ pub fn PeriodOpinionProcedure(
 #[component]
 pub fn OrganizationOpinionProcedure(
     lang: Language,
-    opinion_sequences: Vec<OpinionInfo>,
+    deliberation_sequences: Vec<StepCreateRequest>,
     i18n: OrganizationOpinionProcedureTranslate,
 ) -> Element {
     let mut composition_clicked = use_signal(|| false);
@@ -293,7 +286,7 @@ pub fn OrganizationOpinionProcedure(
 
             //sequence
             div { class: "flex flex-wrap w-full justify-start items-center mt-[20px]",
-                for (index , sequence) in opinion_sequences.iter().enumerate() {
+                for (index , sequence) in deliberation_sequences.iter().enumerate() {
                     div { class: "flex flex-row w-[184px] h-[55px] justify-start items-center p-[15px] border border-[#bfc8d9] rounded-[4px]",
                         if sequence.name != "" {
                             "{index + 1}. {sequence.name}"
@@ -301,7 +294,7 @@ pub fn OrganizationOpinionProcedure(
                             "{index + 1}. {i18n.no_contents}"
                         }
                     }
-                    if index < opinion_sequences.len() - 1 {
+                    if index < deliberation_sequences.len() - 1 {
                         div { class: "mx-[15px]",
                             ArrowRight { width: "18", height: "24" }
                         }
@@ -314,7 +307,7 @@ pub fn OrganizationOpinionProcedure(
                 div { class: "flex flex-col w-full",
                     div { class: "flex flex-row w-full h-[1px] bg-[#ebeff5] mt-[10px] mb-[20px]" }
                     div { class: "flex flex-col w-full justify-start items-start ",
-                        for (index , sequence) in opinion_sequences.iter().enumerate() {
+                        for (index , sequence) in deliberation_sequences.iter().enumerate() {
                             div { class: "flex flex-row w-full justify-start items-center mb-[20px]",
                                 MenuDial { width: "24", height: "24" }
                                 div { class: "ml-[10px] mr-[35px] w-[260px] text-[16px] font-medium text-black",
@@ -326,26 +319,26 @@ pub fn OrganizationOpinionProcedure(
                                 }
                                 select {
                                     class: "focus:outline-none w-[200px] h-[55px] justify-start items-start p-[15px] bg-[#f7f7f7] rounded-[4px] mr-[10px]",
-                                    value: sequence.public_opinion_type.map_or("", |v| v.translate(&lang)),
+                                    value: sequence.step_type.to_string(),
                                     onchange: {
                                         let sequence = sequence.clone();
                                         move |e: Event<FormData>| {
                                             let mut value = sequence.clone();
                                             let opinion_type = StepType::from_str(e.value().as_str()).ok();
-                                            value.public_opinion_type = opinion_type;
+                                            value.step_type = opinion_type.unwrap_or_default();
                                             ctrl.update_opinion_info(index, value);
                                         }
                                     },
-                                    option {
-                                        value: "",
-                                        disabled: true,
-                                        selected: sequence.public_opinion_type.is_none(),
-                                        "{i18n.no_selection}"
-                                    }
+                                    // option {
+                                    //     value: "",
+                                    //     disabled: true,
+                                    //     selected: sequence.step_type.is_none(),
+                                    //     "{i18n.no_selection}"
+                                    // }
                                     for option_type in StepType::VARIANTS.iter() {
                                         option {
                                             value: option_type.translate(&lang),
-                                            selected: sequence.public_opinion_type == Some(*option_type),
+                                            selected: sequence.step_type == option_type.clone(),
                                             "{option_type.translate(&lang)}"
                                         }
                                     }
