@@ -64,6 +64,19 @@ pub fn ClockDropdown(id: String, time: i64, onchange: EventHandler<i64>) -> Elem
 
 fn generate_time_array() -> Vec<String> {
     (0..24)
-        .map(|hour| format!("{:02}:00 {}", hour, if hour < 12 { "AM" } else { "PM" }))
+        .map(|hour| {
+            let display_hour = if hour == 0 {
+                12
+            } else if hour > 12 {
+                hour - 12
+            } else {
+                hour
+            };
+            format!(
+                "{:02}:00 {}",
+                display_hour,
+                if hour < 12 { "AM" } else { "PM" }
+            )
+        })
         .collect()
 }

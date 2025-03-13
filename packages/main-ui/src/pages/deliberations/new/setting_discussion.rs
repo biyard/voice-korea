@@ -193,7 +193,7 @@ pub fn CreateMeeting(
                             div { class: "w-[16px] h-[1px] bg-[#bfc8d9] mx-[10px]" }
                             div { class: "flex flex-row gap-[10px]",
                                 CalendarDropdown {
-                                    id: format!("calendar_start_date_{index}"),
+                                    id: format!("calendar_end_date_{index}"),
                                     date: discussion.end_date,
                                     onchange: {
                                         let discussion = discussion.clone();
