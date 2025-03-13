@@ -3,7 +3,7 @@ use crate::pages::deliberations::new::composition_commitee::CompositionCommitee;
 use crate::pages::deliberations::new::composition_deliberation::CompositionDeliberation;
 use crate::pages::deliberations::new::composition_panel::CompositionPanel;
 use crate::pages::deliberations::new::controller::MeetingInfo;
-use crate::pages::deliberations::new::input_deleberation::InputDeliberation;
+use crate::pages::deliberations::new::input_deliberation::InputDeliberation;
 use crate::pages::deliberations::new::preview::Preview;
 use crate::pages::deliberations::new::setting_discussion::SettingDiscussion;
 
