@@ -8,14 +8,8 @@ use crate::pages::projects::_id::components::comment_item::CommentItem;
 #[component]
 pub fn Comment(lang: Language, comments: Vec<DeliberationCommentSummary>) -> Element {
     let mut comment = use_signal(|| "".to_string());
-    // let mut comments = use_signal(|| Vec::<String>::new());
     let tr: CommentTranslate = translate(&lang);
-    let add_comment = move || {
-        // if !comment().is_empty() {
-        //     comments.push(comment().clone());
-        //     comment.set("".to_string());
-        // }
-    };
+    let add_comment = move || {};
 
     rsx! {
         div { class: "max-w-[1300px] h-[48px] mb-[75px]",
@@ -49,7 +43,6 @@ pub fn Comment(lang: Language, comments: Vec<DeliberationCommentSummary>) -> Ele
             //comments
             div { class: "w-full h-auto flex flex-col justify-center items-start",
                 for c in comments.iter() {
-                    // Each comment is now handled independently by a separate component
                     CommentItem { lang, comment: c.clone() }
                 }
             }
