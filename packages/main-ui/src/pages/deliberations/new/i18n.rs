@@ -10,7 +10,7 @@ translate! {
 }
 
 translate! {
-    OpinionNewTranslate;
+    DeliberationNewTranslate;
 
     organization_management: {
         ko: "조직 관리",

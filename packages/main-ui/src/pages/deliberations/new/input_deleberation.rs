@@ -34,7 +34,7 @@ pub enum DocumentTabType {
 }
 
 #[component]
-pub fn InputOpinion(
+pub fn InputDeliberation(
     lang: Language,
     resources: Vec<ResourceFile>,
     surveys: Vec<SurveyV2Summary>,

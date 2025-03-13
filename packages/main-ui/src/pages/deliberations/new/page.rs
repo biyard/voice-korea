@@ -1,9 +1,9 @@
 #![allow(non_snake_case)]
 use crate::pages::deliberations::new::composition_commitee::CompositionCommitee;
-use crate::pages::deliberations::new::composition_opinion::CompositionOpinion;
+use crate::pages::deliberations::new::composition_deliberation::CompositionDeliberation;
 use crate::pages::deliberations::new::composition_panel::CompositionPanel;
 use crate::pages::deliberations::new::controller::MeetingInfo;
-use crate::pages::deliberations::new::input_opinion::InputOpinion;
+use crate::pages::deliberations::new::input_deleberation::InputDeliberation;
 use crate::pages::deliberations::new::preview::Preview;
 use crate::pages::deliberations::new::setting_discussion::SettingDiscussion;
 
@@ -13,15 +13,16 @@ use crate::{
     routes::Route,
 };
 
-use super::i18n::OpinionNewTranslate;
+use super::i18n::DeliberationNewTranslate;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::deliberation_user::DeliberationUserCreateRequest;
+use models::step::StepCreateRequest;
 use models::{File, PanelV2Summary, ResourceFileSummary, Role, SurveyV2Summary};
 
 #[component]
 pub fn OpinionCreatePage(lang: Language) -> Element {
-    let translates: OpinionNewTranslate = translate(&lang.clone());
+    let translates: DeliberationNewTranslate = translate(&lang.clone());
     let mut ctrl = Controller::new(lang)?;
     let surveys = ctrl.surveys()?;
     let metadatas = ctrl.metadatas()?;
@@ -69,9 +70,25 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
             }
 
             if step == CurrentStep::PublicOpinionComposition {
-                CompositionOpinion { lang }
+                CompositionDeliberation {
+                    lang,
+                    deliberation_sequences: ctrl.get_deliberation_sequences(),
+                    check_sequence: ctrl.check_deliberation_info(),
+                    onadd: move |_| {
+                        let _ = ctrl.add_deliberation_info();
+                    },
+                    onupdate: move |(index, opinion): (usize, StepCreateRequest)| {
+                        let _ = ctrl.update_deliberation_info(index, opinion);
+                    },
+                    ondelete: move |index: usize| {
+                        let _ = ctrl.delete_deliberation_info(index);
+                    },
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                }
             } else if step == CurrentStep::InputInformation {
-                InputOpinion {
+                InputDeliberation {
                     lang,
                     resources,
                     surveys,

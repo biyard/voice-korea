@@ -35,8 +35,8 @@ pub fn Preview(
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
-            CompositionOpinionSummary { lang, sequences, onstep }
-            InputOpinionSummary { lang, informations, onstep }
+            CompositionDeliberationSummary { lang, sequences, onstep }
+            InputDeliberationSummary { lang, informations, onstep }
             CompositionCommitteeSummary {
                 lang,
                 committees,
@@ -231,7 +231,7 @@ pub fn CompositionCommitteeSummary(
 }
 
 #[component]
-pub fn InputOpinionSummary(
+pub fn InputDeliberationSummary(
     lang: Language,
     informations: DeliberationInformation,
     onstep: EventHandler<CurrentStep>,
@@ -285,7 +285,7 @@ pub fn InputOpinionSummary(
 }
 
 #[component]
-pub fn CompositionOpinionSummary(
+pub fn CompositionDeliberationSummary(
     lang: Language,
     sequences: Vec<StepCreateRequest>,
     onstep: EventHandler<CurrentStep>,

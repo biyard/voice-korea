@@ -44,7 +44,7 @@ pub struct DeliberationInformation {
     pub projects: Vec<SurveyV2Summary>,
 }
 
-use super::i18n::OpinionNewTranslate;
+use super::i18n::DeliberationNewTranslate;
 
 #[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
@@ -91,7 +91,7 @@ impl Controller {
         let timestamp = Utc::now().timestamp();
         let user: LoginService = use_context();
         let popup_service: PopupService = use_context();
-        let translates: OpinionNewTranslate = translate(&lang.clone());
+        let translates: DeliberationNewTranslate = translate(&lang.clone());
         let search_keyword = use_signal(|| "".to_string());
 
         let client = SurveyV2::get_client(&crate::config::get().api_url);
@@ -350,19 +350,19 @@ impl Controller {
     //     (self.total_attributes)()
     // }
 
-    pub fn update_opinion_info(&mut self, index: usize, opinion: StepCreateRequest) {
+    pub fn update_deliberation_info(&mut self, index: usize, opinion: StepCreateRequest) {
         let mut sequences = self.get_deliberation_sequences();
         sequences[index] = opinion;
         self.deliberation_sequences.set(sequences);
     }
 
-    pub fn delete_opinion_info(&mut self, index: usize) {
+    pub fn delete_deliberation_info(&mut self, index: usize) {
         let mut sequences = self.get_deliberation_sequences();
         sequences.remove(index);
         self.deliberation_sequences.set(sequences);
     }
 
-    pub fn add_opinion_info(&mut self) {
+    pub fn add_deliberation_info(&mut self) {
         let mut sequences = self.get_deliberation_sequences();
         sequences.push(StepCreateRequest {
             step_type: StepType::GeneralPost,
@@ -373,7 +373,7 @@ impl Controller {
         self.deliberation_sequences.set(sequences);
     }
 
-    pub fn check_opinion_info(&self) -> bool {
+    pub fn check_deliberation_info(&self) -> bool {
         let sequences = &self.get_deliberation_sequences();
 
         for sequence in sequences {
