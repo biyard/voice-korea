@@ -2,14 +2,15 @@ use by_macros::DioxusController;
 use chrono::Utc;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
-use dioxus_translate::translate;
+use dioxus_translate::{translate, Language};
 use models::{
-    deliberation_user::DeliberationUserCreateRequest, step::StepCreateRequest, step_type::StepType,
-    *,
+    deliberation::Deliberation, deliberation_user::DeliberationUserCreateRequest,
+    discussions::DiscussionCreateRequest, step::StepCreateRequest, step_type::StepType, *,
 };
 
 use crate::{
     config,
+    routes::Route,
     service::{login_service::LoginService, popup_service::PopupService},
 };
 
@@ -674,7 +675,83 @@ impl Controller {
         (start as u64, end as u64)
     }
 
-    pub async fn create_deliberation(&self) -> Result<()> {
-        Ok(())
+    pub async fn create_deliberation(&self, lang: Language) -> Result<()> {
+        let navigator = use_navigator();
+
+        let sequences = self.get_deliberation_sequences();
+        let informations = self.get_deliberation_informations();
+        let selected_panels = self.get_selected_panels();
+        let committees = self.get_committees();
+        let meetings = self.get_discussions();
+        let discussion_resources = self.get_discussion_resources();
+
+        let endpoint = crate::config::get().api_url;
+        let client = Deliberation::get_client(endpoint);
+
+        let org_id = self.user.get_selected_org();
+        if org_id.is_none() {
+            tracing::error!("Organization ID is missing");
+            return Err(ApiError::OrganizationNotFound);
+        }
+
+        let mut discussions: Vec<DiscussionCreateRequest> = vec![];
+        let deliberation_time = self.get_deliberation_time(sequences.clone());
+
+        for meeting in meetings.clone() {
+            discussions.push(DiscussionCreateRequest {
+                started_at: meeting.start_date,
+                ended_at: meeting.end_date,
+                name: meeting.title.clone(),
+                description: meeting.description.clone(),
+                resources: discussion_resources
+                    .iter()
+                    .map(|resource| resource.id)
+                    .collect(),
+            });
+        }
+
+        match client
+            .create(
+                org_id.unwrap().id,
+                deliberation_time.0,
+                deliberation_time.1,
+                informations.deliberation_type.unwrap_or_default(),
+                informations.title.unwrap_or_default(),
+                informations.description.unwrap_or_default(),
+                informations
+                    .documents
+                    .iter()
+                    .map(|document| document.id)
+                    .collect(),
+                informations
+                    .projects
+                    .iter()
+                    .map(|project| project.id)
+                    .collect(),
+                committees,
+                selected_panels.iter().map(|panel| panel.id).collect(),
+                sequences,
+                vec![],
+                discussions,
+            )
+            .await
+        {
+            Ok(_) => {
+                btracing::debug!("success to create deliberation");
+                navigator.push(Route::DeliberationPage { lang });
+                Ok(())
+            }
+            Err(e) => {
+                btracing::error!("failed to create deliberation: {}", e.translate(&lang));
+                return Err(e);
+            }
+        }
+    }
+
+    pub fn get_deliberation_time(&self, steps: Vec<StepCreateRequest>) -> (i64, i64) {
+        let started_at = steps.iter().map(|s| s.started_at).min().unwrap_or(0);
+        let ended_at = steps.iter().map(|s| s.ended_at).max().unwrap_or(0);
+
+        (started_at, ended_at)
     }
 }

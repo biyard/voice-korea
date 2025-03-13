@@ -38,8 +38,6 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
     let discussions = ctrl.get_discussions();
     let discussion_resources = ctrl.get_discussion_resources();
 
-    tracing::debug!("panels: {:?}", panels);
-
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
             div { class: "text-[#9b9b9b] font-medium text-[14px] mb-[10px]",
@@ -181,7 +179,7 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
                         ctrl.change_step(step);
                     },
                     onsend: move |_| async move {
-                        let _ = ctrl.create_deliberation().await;
+                        let _ = ctrl.create_deliberation(lang).await;
                     },
                 }
             }

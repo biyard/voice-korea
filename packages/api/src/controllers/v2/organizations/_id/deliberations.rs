@@ -60,7 +60,7 @@ impl DeliberationController {
             project_area,
             title,
             description,
-            panels,
+            panel_ids,
             resource_ids,
             survey_ids,
             roles,
@@ -182,7 +182,7 @@ impl DeliberationController {
             }
         }
 
-        for PanelV2 { id, .. } in panels {
+        for id in panel_ids {
             pd.insert_with_tx(&mut *tx, id, deliberation.id)
                 .await?
                 .ok_or(ApiError::DeliberationPanelException)?;
