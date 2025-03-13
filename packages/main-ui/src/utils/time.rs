@@ -1,4 +1,4 @@
-use chrono::{Datelike, Local, TimeZone, Utc};
+use chrono::{Datelike, Local, TimeZone, Timelike, Utc};
 
 pub fn convert_timestamp_to_fmt_string(timestamp: i64, format: &str) -> String {
     let date_time = Utc.timestamp_millis_opt(timestamp).unwrap();
@@ -17,9 +17,36 @@ pub fn convert_timestamp_to_separate_string(timestamp: i64) -> (i32, u32, u32) {
     )
 }
 
+pub fn get_hour_from_timestamp(timestamp: i64) -> u32 {
+    let datetime = Utc
+        .timestamp_opt(timestamp, 0)
+        .single()
+        .expect("Invalid timestamp");
+
+    datetime.hour()
+}
+
+pub fn update_hour_in_timestamp(timestamp: i64, new_hour: u32) -> i64 {
+    let datetime = Utc
+        .timestamp_opt(timestamp, 0)
+        .single()
+        .expect("Invalid timestamp");
+
+    let updated_utc = datetime.with_hour(new_hour).expect("Invalid hour update");
+
+    updated_utc.timestamp()
+}
+
 pub fn convert_timestamp_to_date(timestamp: i64) -> String {
     let datetime = Utc.timestamp_opt(timestamp, 0).unwrap();
     datetime.format("%Y.%m.%d").to_string()
+}
+
+pub fn change_date_from_timestamp(timestamp: i64) -> String {
+    let datetime = Utc.timestamp_opt(timestamp, 0).unwrap();
+    let formatted_date = datetime.format("%Y/%m/%d").to_string();
+
+    formatted_date
 }
 
 pub fn format_remaining_time(target_timestamp: i64) -> String {

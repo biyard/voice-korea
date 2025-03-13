@@ -8,7 +8,7 @@ use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
 
 use crate::config;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MetadataApi {}
 
 impl MetadataApi {

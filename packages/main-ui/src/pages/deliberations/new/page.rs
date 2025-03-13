@@ -2,6 +2,7 @@
 use crate::pages::deliberations::new::composition_commitee::CompositionCommitee;
 use crate::pages::deliberations::new::composition_opinion::CompositionOpinion;
 use crate::pages::deliberations::new::composition_panel::CompositionPanel;
+use crate::pages::deliberations::new::controller::MeetingInfo;
 use crate::pages::deliberations::new::input_opinion::InputOpinion;
 use crate::pages::deliberations::new::preview::Preview;
 use crate::pages::deliberations::new::setting_discussion::SettingDiscussion;
@@ -15,7 +16,10 @@ use crate::{
 use super::i18n::OpinionNewTranslate;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::{File, ResourceFileSummary, SurveyV2Summary};
+use models::deliberation_user::DeliberationUserCreateRequest;
+use models::{
+    File, OrganizationMemberSummary, PanelV2Summary, ResourceFileSummary, Role, SurveyV2Summary,
+};
 
 #[derive(Props, Clone, PartialEq)]
 pub struct OpinionProps {
@@ -29,12 +33,20 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let surveys = ctrl.surveys()?;
     let metadatas = ctrl.metadatas()?;
     let members = ctrl.members()?;
+    let panels = ctrl.panels()?;
 
+    let sequences = ctrl.get_deliberation_sequences();
+    let informations = ctrl.get_deliberation_informations();
     let resources = ctrl.resources();
     let step = ctrl.get_current_step();
     let selected_surveys = ctrl.selected_surveys();
+    let selected_panels = ctrl.get_selected_panels();
+    let committees = ctrl.get_committees();
+    let discussions = ctrl.get_discussions();
+    let discussion_resources = ctrl.get_discussion_resources();
 
-    tracing::debug!("members: {:?}", members);
+    let committee_users = get_committee_users(members.clone(), committees.clone());
+    tracing::debug!("panels: {:?}", panels);
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -102,14 +114,102 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                     },
                 }
             } else if step == CurrentStep::CommitteeComposition {
-                CompositionCommitee { lang: props.lang.clone() }
+                CompositionCommitee {
+                    lang: props.lang.clone(),
+                    members,
+                    committees,
+                    add_committee: move |committee: DeliberationUserCreateRequest| {
+                        ctrl.add_committee(committee);
+                    },
+                    remove_committee: move |(user_id, role): (i64, Role)| {
+                        ctrl.remove_committee(user_id, role);
+                    },
+                    clear_committee: move |role: Role| {
+                        ctrl.clear_committee(role);
+                    },
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                }
             } else if step == CurrentStep::PanelComposition {
-                CompositionPanel { lang: props.lang.clone() }
+                CompositionPanel {
+                    lang: props.lang.clone(),
+                    panels,
+                    selected_panels,
+                    add_panel: move |panel: PanelV2Summary| {
+                        ctrl.add_selected_panel(panel);
+                    },
+                    remove_panel: move |id: i64| {
+                        ctrl.remove_selected_panel(id);
+                    },
+                    clear_panel: move |_| {
+                        ctrl.clear_selected_panel();
+                    },
+                    change_selected_panel_by_index: move |(index, value): (usize, u64)| {
+                        ctrl.change_selected_panel_by_index(index, value);
+                    },
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                }
             } else if step == CurrentStep::DiscussionSetting {
-                SettingDiscussion { lang: props.lang.clone() }
+                SettingDiscussion {
+                    lang: props.lang.clone(),
+                    discussions,
+                    add_discussion: move |_| {
+                        ctrl.add_discussion();
+                    },
+                    remove_discussion: move |index: usize| {
+                        ctrl.remove_discussion(index);
+                    },
+                    update_discussion: move |(index, discussion): (usize, MeetingInfo)| {
+                        ctrl.update_discussion(index, discussion);
+                    },
+
+                    discussion_resources,
+                    create_resource: move |file: File| async move {
+                        let _ = ctrl.create_discussion_resource(file).await;
+                    },
+                    remove_resource: move |id: i64| {
+                        let _ = ctrl.remove_discussion_resource(id);
+                    },
+                    clear_resource: move |_| {
+                        let _ = ctrl.clear_discussion_resource();
+                    },
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                }
             } else {
-                Preview { lang: props.lang.clone() }
+                Preview {
+                    lang: props.lang.clone(),
+                    sequences,
+                    informations,
+                    committee_users,
+                    selected_panels,
+
+                    onstep: move |step: CurrentStep| {
+                        ctrl.change_step(step);
+                    },
+                }
             }
         }
     }
+}
+
+pub fn get_committee_users(
+    members: Vec<OrganizationMemberSummary>,
+    committees: Vec<DeliberationUserCreateRequest>,
+) -> Vec<OrganizationMemberSummary> {
+    let user_ids: Vec<i64> = committees
+        .iter()
+        .map(|committee| committee.user_id)
+        .collect();
+
+    let members = members
+        .into_iter()
+        .filter(|member| user_ids.contains(&member.user_id))
+        .collect();
+
+    members
 }

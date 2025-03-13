@@ -1,6 +1,15 @@
 use dioxus_translate::translate;
 
 translate! {
+    PreviewComponentTranslate;
+
+    update: {
+        ko: "수정하기",
+        en: "Update"
+    }
+}
+
+translate! {
     OpinionNewTranslate;
 
     organization_management: {
@@ -478,6 +487,14 @@ translate! {
         ko: "패널 선택",
         en: "Select Panel"
     }
+    panel_hint: {
+        ko: "패널을 선택해주세요",
+        en: "Select a panel"
+    }
+    unit: {
+        ko: "명",
+        en: "Unit"
+    }
     input_panel_count: {
         ko: "패널 수 입력",
         en: "Input Panel Count"
@@ -572,6 +589,18 @@ translate! {
     online_meeting: {
         ko: "온라인 회의",
         en: "Online Meeting"
+    }
+    discussion_description: {
+        ko: "토론 설명",
+        en: "Discussion Description"
+    }
+    maximum_people: {
+        ko: "최대 인원",
+        en: "Maximum number of people"
+    }
+    unit: {
+        ko: "명",
+        en: "People"
     }
 }
 
