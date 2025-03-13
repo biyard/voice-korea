@@ -716,6 +716,26 @@ translate! {
         ko: "역할 분담",
         en: "Division of Roles"
     }
+    admin: {
+        ko: "공론 설계자",
+        en: "Admin"
+    }
+    deliberation_admin: {
+        ko: "특정 공론 설계자",
+        en: "Deliberation Admin"
+    }
+    analyst: {
+        ko: "분석가",
+        en: "analyst"
+    }
+    moderator: {
+        ko: "중개자",
+        en: "Moderator"
+    }
+    speaker: {
+        ko: "강연자",
+        en: "Speaker"
+    }
 }
 
 translate! {
@@ -732,6 +752,10 @@ translate! {
     select_panel: {
         ko: "패널 선택",
         en: "Select Panel"
+    }
+    unit: {
+        ko: "명",
+        en: "People",
     }
     setting_properties_for_each_panel: {
         ko: "패널별 속성 설정",

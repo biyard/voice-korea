@@ -17,19 +17,12 @@ use super::i18n::OpinionNewTranslate;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::deliberation_user::DeliberationUserCreateRequest;
-use models::{
-    File, OrganizationMemberSummary, PanelV2Summary, ResourceFileSummary, Role, SurveyV2Summary,
-};
-
-#[derive(Props, Clone, PartialEq)]
-pub struct OpinionProps {
-    lang: Language,
-}
+use models::{File, PanelV2Summary, ResourceFileSummary, Role, SurveyV2Summary};
 
 #[component]
-pub fn OpinionCreatePage(props: OpinionProps) -> Element {
-    let translates: OpinionNewTranslate = translate(&props.lang.clone());
-    let mut ctrl = Controller::new(props.lang)?;
+pub fn OpinionCreatePage(lang: Language) -> Element {
+    let translates: OpinionNewTranslate = translate(&lang.clone());
+    let mut ctrl = Controller::new(lang)?;
     let surveys = ctrl.surveys()?;
     let metadatas = ctrl.metadatas()?;
     let members = ctrl.members()?;
@@ -45,7 +38,6 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
     let discussions = ctrl.get_discussions();
     let discussion_resources = ctrl.get_discussion_resources();
 
-    let committee_users = get_committee_users(members.clone(), committees.clone());
     tracing::debug!("panels: {:?}", panels);
 
     rsx! {
@@ -54,11 +46,7 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                 "{translates.organization_management} / {translates.public_opinion_management}"
             }
             div { class: "flex flex-row w-full justify-start items-center mb-[25px]",
-                Link {
-                    class: "mr-[6px]",
-                    to: Route::DeliberationPage {
-                        lang: props.lang,
-                    },
+                Link { class: "mr-[6px]", to: Route::DeliberationPage { lang },
                     ArrowLeft { width: "24", height: "24", color: "#3a3a3a" }
                 }
                 div { class: "text-[#3a3a3a] font-semibold text-[28px] mr-[20px]",
@@ -83,10 +71,10 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
             }
 
             if step == CurrentStep::PublicOpinionComposition {
-                CompositionOpinion { lang: props.lang.clone() }
+                CompositionOpinion { lang }
             } else if step == CurrentStep::InputInformation {
                 InputOpinion {
-                    lang: props.lang.clone(),
+                    lang,
                     resources,
                     surveys,
                     selected_surveys,
@@ -115,7 +103,7 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                 }
             } else if step == CurrentStep::CommitteeComposition {
                 CompositionCommitee {
-                    lang: props.lang.clone(),
+                    lang,
                     members,
                     committees,
                     add_committee: move |committee: DeliberationUserCreateRequest| {
@@ -133,7 +121,7 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                 }
             } else if step == CurrentStep::PanelComposition {
                 CompositionPanel {
-                    lang: props.lang.clone(),
+                    lang,
                     panels,
                     selected_panels,
                     add_panel: move |panel: PanelV2Summary| {
@@ -154,7 +142,7 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                 }
             } else if step == CurrentStep::DiscussionSetting {
                 SettingDiscussion {
-                    lang: props.lang.clone(),
+                    lang,
                     discussions,
                     add_discussion: move |_| {
                         ctrl.add_discussion();
@@ -182,34 +170,21 @@ pub fn OpinionCreatePage(props: OpinionProps) -> Element {
                 }
             } else {
                 Preview {
-                    lang: props.lang.clone(),
+                    lang,
                     sequences,
                     informations,
-                    committee_users,
+                    committees,
+                    members,
                     selected_panels,
 
                     onstep: move |step: CurrentStep| {
                         ctrl.change_step(step);
                     },
+                    onsend: move |_| async move {
+                        let _ = ctrl.create_deliberation().await;
+                    },
                 }
             }
         }
     }
-}
-
-pub fn get_committee_users(
-    members: Vec<OrganizationMemberSummary>,
-    committees: Vec<DeliberationUserCreateRequest>,
-) -> Vec<OrganizationMemberSummary> {
-    let user_ids: Vec<i64> = committees
-        .iter()
-        .map(|committee| committee.user_id)
-        .collect();
-
-    let members = members
-        .into_iter()
-        .filter(|member| user_ids.contains(&member.user_id))
-        .collect();
-
-    members
 }
