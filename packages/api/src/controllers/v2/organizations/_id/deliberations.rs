@@ -18,12 +18,14 @@ use discussions::{Discussion, DiscussionCreateRequest};
 use models::{
     deliberation::{
         Deliberation, DeliberationAction, DeliberationCreateRequest, DeliberationGetResponse,
-        DeliberationParam, DeliberationQuery, DeliberationRepository, DeliberationSummary,
+        DeliberationParam, DeliberationQuery, DeliberationQueryActionType, DeliberationRepository,
+        DeliberationSummary,
     },
     step::{Step, StepRepository},
     *,
 };
 use panel_deliberations::PanelDeliberation;
+use sqlx::postgres::PgRow;
 use step::StepCreateRequest;
 
 use crate::controllers::v2::organizations::OrganizationPath;
@@ -196,7 +198,7 @@ impl DeliberationController {
     pub async fn query(
         &self,
         org_id: i64,
-        DeliberationQuery { size, bookmark }: DeliberationQuery,
+        DeliberationQuery { size, bookmark, .. }: DeliberationQuery,
     ) -> Result<QueryResponse<DeliberationSummary>> {
         let mut total_count: i64 = 0;
         let items: Vec<DeliberationSummary> = Deliberation::query_builder()
@@ -236,6 +238,33 @@ impl DeliberationController {
                 post(Self::act_deliberation).get(Self::get_deliberation),
             )
             .with_state(self.clone()))
+    }
+
+    pub async fn search_by(
+        &self,
+        org_id: i64,
+        q: DeliberationQuery,
+    ) -> Result<Json<DeliberationGetResponse>> {
+        let mut total_count: i64 = 0;
+
+        let items = DeliberationSummary::query_builder()
+            .org_id_equals(org_id)
+            .title_contains(q.clone().title.unwrap_or_default())
+            .limit(q.size())
+            .page(q.page())
+            .query()
+            .map(|r: PgRow| {
+                use sqlx::Row;
+                total_count = r.get("total_count");
+                r.into()
+            })
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(Json(DeliberationGetResponse::Query(QueryResponse {
+            items,
+            total_count,
+        })))
     }
 
     pub async fn act_deliberation(
@@ -296,9 +325,14 @@ impl DeliberationController {
 
         match param {
             // "DatabaseQueryError": "error returned from database: relation \"f\" does not exist"
-            DeliberationParam::Query(q) => Ok(Json(DeliberationGetResponse::Query(
-                ctrl.query(org_id, q).await?,
-            ))),
+            DeliberationParam::Query(q) => match q.action {
+                Some(DeliberationQueryActionType::SearchBy) => ctrl.search_by(org_id, q).await,
+                None => {
+                    return Ok(Json(DeliberationGetResponse::Query(
+                        ctrl.query(org_id, q).await?,
+                    )));
+                }
+            },
         }
     }
 }
