@@ -8,11 +8,12 @@ use by_components::icons::{
 };
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
+use models::deliberation_comment::DeliberationCommentSummary;
 
 use crate::components::icons::{bold::BoldIcon, more::MoreIcon};
 
 #[component]
-pub fn CommentItem(lang: Language, comment: String) -> Element {
+pub fn CommentItem(lang: Language, comment: DeliberationCommentSummary) -> Element {
     let mut show_comments = use_signal(|| false);
     let mut show_reply_input = use_signal(|| false);
     let mut reply = use_signal(|| "".to_string());
@@ -35,9 +36,9 @@ pub fn CommentItem(lang: Language, comment: String) -> Element {
                 img { class: "w-[40px] h-[40px] bg-[#D9D9D9] rounded-full" }
                 div { class: "flex flex-col justify-start",
                     //user name
-                    p { class: "font-semibold text-[15px] justify-start", "id" }
+                    p { class: "font-semibold text-[15px] justify-start", "{comment.id}" }
                     // write time
-                    p { class: "font-semibold text-[12px] justify-start", "time" }
+                    p { class: "font-semibold text-[12px] justify-start", "{comment.created_at}" }
                 }
             }
             //more icon
@@ -97,7 +98,7 @@ pub fn CommentItem(lang: Language, comment: String) -> Element {
             }
         }
         div { class: "w-full px-[40px] mt-[14px]",
-            "{comment}"
+            "{comment.comment}"
             div { class: "flex flex-row justify-between",
                 div { class: "flex flex-row mt-[20px] gap-[40px]",
 
@@ -136,7 +137,7 @@ pub fn CommentItem(lang: Language, comment: String) -> Element {
                             SquareChat { color: "#555462" }
                         }
                         // TODO: connect to comment numbers
-                        p { "{replies.len()}" }
+                        p { "{comment.replies}" }
                     }
                     div { class: "flex flex-row justify-center gap-[8px]",
                         div {
@@ -275,8 +276,8 @@ translate! {
     }
 
     edit_button:{
-        ko: "취소",
-        en: "Cancel"
+        ko: "수정하기",
+        en: "Edit"
 }
 
     report_title:{

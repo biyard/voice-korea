@@ -1,19 +1,20 @@
 use by_components::icons::chat::SquareChat;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
+use models::deliberation_comment::DeliberationCommentSummary;
 
 use crate::pages::projects::_id::components::comment_item::CommentItem;
 
 #[component]
-pub fn Comment(lang: Language) -> Element {
+pub fn Comment(lang: Language, comments: Vec<DeliberationCommentSummary>) -> Element {
     let mut comment = use_signal(|| "".to_string());
-    let mut comments = use_signal(|| Vec::<String>::new());
+    // let mut comments = use_signal(|| Vec::<String>::new());
     let tr: CommentTranslate = translate(&lang);
-    let mut add_comment = move || {
-        if !comment().is_empty() {
-            comments.push(comment().clone());
-            comment.set("".to_string());
-        }
+    let add_comment = move || {
+        // if !comment().is_empty() {
+        //     comments.push(comment().clone());
+        //     comment.set("".to_string());
+        // }
     };
 
     rsx! {
