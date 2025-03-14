@@ -144,7 +144,7 @@ impl DeliberationProjectController {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use models::{deliberations::deliberation::DeliberationQuery, ProjectArea};
+    use models::ProjectArea;
 
     use crate::tests::{setup, TestContext};
     #[tokio::test]
@@ -240,7 +240,8 @@ mod tests {
             endpoint,
             ..
         } = setup().await.unwrap();
-        let org_id = user.orgs[0].id;
+        let _now = now;
+        let _org_id = user.orgs[0].id;
 
         let cli = DeliberationProject::get_client(&endpoint);
 

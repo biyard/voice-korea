@@ -24,6 +24,8 @@ pub enum SurveyStatus {
     Finish,
 }
 
+// TODO : need to check this codes. for install 'make run', put '#[allow(dead_code)]' code.
+#[allow(dead_code)]
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum SurveyStep {
     Display,
@@ -32,6 +34,8 @@ pub enum SurveyStep {
     Statistics,
 }
 
+// TODO : need to check this codes. for install 'make run', put '#[allow(dead_code)]' code.
+#[allow(dead_code)]
 pub fn get_survey_status(started_at: i64, ended_at: i64) -> SurveyStatus {
     let current = current_timestamp();
 
