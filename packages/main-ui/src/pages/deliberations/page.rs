@@ -158,7 +158,7 @@ pub fn DeliberationPage(lang: Language) -> Element {
                                     "0% (0/0)"
                                 }
                             }
-                            div { class: "flex flex-row flex-1 h-full justify-center items-center gap-[5px]",
+                            div { class: "flex flex-wrap flex-1 h-full justify-center items-center gap-[5px]",
                                 for panel in deliberation.panels {
                                     PanelLabel { label: panel.name.clone() }
                                 }
