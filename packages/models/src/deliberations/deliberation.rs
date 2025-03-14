@@ -12,7 +12,7 @@ use crate::step::*;
 use crate::{PanelV2, ProjectArea, ResourceFile, SurveyV2};
 
 #[derive(Validate)]
-#[api_model(base = "/v2/organizations/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, panel_ids = Vec<i64>, steps = Vec<StepCreateRequest>, elearning = Vec<i64>, discussions = Vec<DiscussionCreateRequest>)], table = deliberations)]
+#[api_model(base = "/v2/organizations/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, panel_ids = Vec<i64>, steps = Vec<StepCreateRequest>, elearning = Vec<i64>, discussions = Vec<DiscussionCreateRequest>)], action_by_id = [update(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, panel_ids = Vec<i64>, steps = Vec<StepCreateRequest>, elearning = Vec<i64>, discussions = Vec<DiscussionCreateRequest>)], table = deliberations)]
 pub struct Deliberation {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -26,22 +26,22 @@ pub struct Deliberation {
 
     // First page of creating a deliberation
     // started_at indicates the start time of the deliberation.
-    #[api_model(summary, action = create)]
+    #[api_model(summary, action = create, action_by_id = update)]
     pub started_at: i64,
     // ended_at indicates the end time of the deliberation.
-    #[api_model(summary, action = create)]
+    #[api_model(summary, action = create, action_by_id = update)]
     pub ended_at: i64,
     #[api_model(summary, one_to_many = deliberations_steps, foreign_key = deliberation_id)]
     #[serde(default)]
     pub steps: Vec<Step>,
 
     // Second page of creating a deliberation
-    #[api_model(summary, type = INTEGER, action = create)]
+    #[api_model(summary, type = INTEGER, action = create, action_by_id = update)]
     #[serde(default)]
     pub project_area: ProjectArea,
-    #[api_model(summary, action = create, query_action = search_by)]
+    #[api_model(summary, action = create, action_by_id = update, query_action = search_by)]
     pub title: String,
-    #[api_model(action = create)]
+    #[api_model(action = create, action_by_id = update)]
     pub description: String,
 
     // Relation fields
