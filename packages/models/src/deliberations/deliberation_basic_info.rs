@@ -5,7 +5,6 @@ use by_macros::api_model;
 use crate::{deliberation_user::DeliberationUser, ResourceFile};
 
 // TODO(web): using resource for basic info tab.
-// TODO(api): implement Read action(read) of GET /v2/projects/:deliberation-id/basic-info
 #[api_model(base = "/v2/projects/:deliberation-id/basic-info", table = deliberations, read_action = read)]
 pub struct DeliberationBasicInfo {
     #[api_model(summary, primary_key)]

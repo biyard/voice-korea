@@ -1,51 +1,63 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
+use models::{
+    deliberation_user::DeliberationUserCreateRequest, step::StepCreateRequest,
+    OrganizationMemberSummary, PanelV2Summary, Role,
+};
 
 use crate::{
-    components::icons::{ArrowRight, Message},
+    components::icons::ArrowRight,
     pages::deliberations::new::{
-        controller::Controller,
+        components::preview_component::PreviewComponent,
         i18n::{
             CompositionCommitteeSummaryTranslate, CompositionOpinionSummaryTranslate,
             CompositionPanelSummaryTranslate, InputOpinionSummaryTranslate, PreviewTranslate,
-            SendAlertTranslate,
         },
     },
+    utils::time::convert_timestamp_to_date,
 };
 
-use super::controller::CurrentStep;
-
-#[derive(Props, Clone, PartialEq)]
-pub struct PreviewProps {
-    lang: Language,
-}
+use super::controller::{CurrentStep, DeliberationInformation};
 
 #[component]
-pub fn Preview(props: PreviewProps) -> Element {
-    let translate: PreviewTranslate = translate(&props.lang);
-    let mut ctrl: Controller = use_context();
+pub fn Preview(
+    lang: Language,
+    sequences: Vec<StepCreateRequest>,
+    informations: DeliberationInformation,
+    committees: Vec<DeliberationUserCreateRequest>,
+    members: Vec<OrganizationMemberSummary>,
+    selected_panels: Vec<PanelV2Summary>,
+
+    onstep: EventHandler<CurrentStep>,
+    onsend: EventHandler<MouseEvent>,
+) -> Element {
+    let translate: PreviewTranslate = translate(&lang);
 
     rsx! {
-        //FIXME: fix to real data
-        div { class: "flex flex-col w-full justify-start items-start",
-            CompositionOpinionSummary { lang: props.lang }
-            InputOpinionSummary { lang: props.lang }
-            CompositionCommitteeSummary { lang: props.lang }
-            CompositionPanelSummary { lang: props.lang }
+        div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
+            CompositionDeliberationSummary { lang, sequences, onstep }
+            InputDeliberationSummary { lang, informations, onstep }
+            CompositionCommitteeSummary {
+                lang,
+                committees,
+                members,
+                onstep,
+            }
+            CompositionPanelSummary { lang, selected_panels, onstep }
 
-            div { class: "flex flex-row w-full justify-end items-end mt-[40px] mb-[50px]",
+            div { class: "flex flex-row w-full justify-end items-end mb-[50px]",
                 div {
                     class: "flex flex-row w-[70px] h-[55px] rounded-[4px] justify-center items-center bg-white border border-[#bfc8d9] font-semibold text-[16px] text-[#555462] mr-[20px]",
                     onclick: move |_| {
-                        ctrl.change_step(CurrentStep::DiscussionSetting);
+                        onstep.call(CurrentStep::DiscussionSetting);
                     },
                     "{translate.backward}"
                 }
                 div {
                     class: "cursor-pointer flex flex-row w-[130px] h-[55px] rounded-[4px] justify-center items-center bg-[#2a60d3] font-semibold text-[16px] text-white",
                     onclick: {
-                        move |_| {
-                            ctrl.open_send_alerm_modal(props.lang);
+                        move |e: Event<MouseData>| {
+                            onsend.call(e);
                         }
                     },
                     "{translate.start_public_opinion}"
@@ -55,113 +67,124 @@ pub fn Preview(props: PreviewProps) -> Element {
     }
 }
 
-#[component]
-pub fn SendAlertModal(
-    onclose: EventHandler<MouseEvent>,
-    onclick: EventHandler<MouseEvent>,
-    lang: Language,
-) -> Element {
-    let translate: SendAlertTranslate = translate(&lang);
-    rsx! {
-        div { class: "flex flex-col w-full justify-center items-center",
-            div { class: "font-normal text-[#222222] text-[14px] mb-[20px]",
-                "{translate.send_alert_description}"
-            }
-            Message { width: "100", height: "100" }
-            div { class: "flex flex-row w-full justify-center items-center font-normal text-[#6d6d6d] text-[14px] mt-[10px] mb-[20px]",
-                "총 50명 선택 / 패널 4개 선택"
-            }
-            div { class: "flex flex-row w-full justify-center items-center gap-[20px]",
-                div {
-                    class: "flex flex-row w-[75px] h-[40px] justify-center items-center bg-[#2a60d3] rounded-[4px] font-semibold text-[16px] text-white",
-                    onclick,
-                    "{translate.send}"
-                }
-                button {
-                    class: "flex flex-row w-[60px] h-[40px] justify-center items-center bg-white font-semibold text-[#222222] text-[16px]",
-                    onclick: move |e: MouseEvent| {
-                        onclose.call(e);
-                    },
-                    "{translate.cancel}"
-                }
-            }
-        }
-    }
-}
+// #[component]
+// pub fn SendAlertModal(
+//     onclose: EventHandler<MouseEvent>,
+//     onclick: EventHandler<MouseEvent>,
+//     lang: Language,
+// ) -> Element {
+//     let translate: SendAlertTranslate = translate(&lang);
+//     rsx! {
+//         div { class: "flex flex-col w-full justify-center items-center",
+//             div { class: "font-normal text-[#222222] text-[14px] mb-[20px]",
+//                 "{translate.send_alert_description}"
+//             }
+//             Message { width: "100", height: "100" }
+//             div { class: "flex flex-row w-full justify-center items-center font-normal text-[#6d6d6d] text-[14px] mt-[10px] mb-[20px]",
+//                 "총 50명 선택 / 패널 4개 선택"
+//             }
+//             div { class: "flex flex-row w-full justify-center items-center gap-[20px]",
+//                 div {
+//                     class: "flex flex-row w-[75px] h-[40px] justify-center items-center bg-[#2a60d3] rounded-[4px] font-semibold text-[16px] text-white",
+//                     onclick,
+//                     "{translate.send}"
+//                 }
+//                 button {
+//                     class: "flex flex-row w-[60px] h-[40px] justify-center items-center bg-white font-semibold text-[#222222] text-[16px]",
+//                     onclick: move |e: MouseEvent| {
+//                         onclose.call(e);
+//                     },
+//                     "{translate.cancel}"
+//                 }
+//             }
+//         }
+//     }
+// }
 
 #[component]
-pub fn CompositionPanelSummary(lang: Language) -> Element {
+pub fn CompositionPanelSummary(
+    lang: Language,
+    selected_panels: Vec<PanelV2Summary>,
+    onstep: EventHandler<CurrentStep>,
+) -> Element {
     let translate: CompositionPanelSummaryTranslate = translate(&lang);
-    //FIXME: fix to real data
+
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start mt-[40px]",
-            div { class: "font-medium text-[16px] text-black mb-[10px]",
-                "{translate.participant_panel_composition}"
-            }
-            div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white px-[40px] py-[24px]",
-                div { class: "flex flex-col w-full justify-start items-start mb-[40px]",
-                    div { class: "font-bold text-[#222222] text-lg mb-[40px]",
-                        "{translate.full_panel_settings}"
-                    }
-                    div { class: "flex flex-row w-full h-[55px] justify-start items-start",
-                        div { class: "flex flex-row w-[180px] justify-start items-start mr-[50px]",
+        PreviewComponent {
+            lang,
+            label: translate.participant_panel_composition,
+            onstep: move |step: CurrentStep| {
+                onstep.call(step);
+            },
+            step: CurrentStep::PanelComposition,
+            title: translate.full_panel_settings,
+            div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
+                div { class: "flex flex-row w-full min-h-[55px] justify-start items-center",
+                    div { class: "flex flex-row w-[230px] h-full justify-start items-center",
+                        div { class: "font-medium text-[#222222] text-[15px]",
                             "{translate.select_panel}"
                         }
-                        div { class: "flex flex-wrap w-full justify-start items-center gap-[30px]",
-                            div { class: "flex flex-row gap-[5px]",
-                                SummaryLabel { label: "패널1" }
-                                div { class: "font-normal text-black text-[15px]", "15명" }
-                            }
-                            div { class: "flex flex-row gap-[5px]",
-                                SummaryLabel { label: "패널2" }
-                                div { class: "font-normal text-black text-[15px]", "15명" }
-                            }
-                            div { class: "flex flex-row gap-[5px]",
-                                SummaryLabel { label: "패널3" }
-                                div { class: "font-normal text-black text-[15px]", "15명" }
+                    }
+                    div { class: "flex flex-row w-full h-full justify-start items-center p-[15px]",
+                        div { class: "flex flex-wrap flex-1 gap-[30px]",
+                            for panel in selected_panels.clone() {
+                                div { class: "flex flex-row w-fit justify-start items-center gap-[5px]",
+                                    SummaryLabel { label: panel.name.clone() }
+                                    div { class: "font-medium text-[15px] text-black",
+                                        "{panel.user_count} {translate.unit}"
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                div { class: "flex flex-col w-full justify-start items-start",
-                    div { class: "font-bold text-[#222222] text-lg mb-[40px]",
+                div { class: "flex flex-col w-full justify-start items-start gap-[20px]",
+                    div { class: "font-bold text-[18px] text-[#222222]",
                         "{translate.setting_properties_for_each_panel}"
                     }
-                    div { class: "flex flex-row w-full h-[55px] justify-start items-start mb-[20px]",
-                        div { class: "flex flex-row w-[180px] justify-start items-start mr-[50px]",
-                            "패널1"
-                        }
-                        div { class: "flex flex-wrap w-full justify-start items-center gap-[5px]",
-                            SummaryLabel { label: "속성1" }
-                            SummaryLabel { label: "속성2" }
-                            SummaryLabel { label: "속성3" }
-                        }
-                    }
-                    div { class: "flex flex-row w-full h-[55px] justify-start items-start mb-[20px]",
-                        div { class: "flex flex-row w-[180px] justify-start items-start mr-[50px]",
-                            "패널2"
-                        }
-                        div { class: "flex flex-wrap w-full justify-start items-center gap-[5px]",
-                            SummaryLabel { label: "속성1" }
-                            SummaryLabel { label: "속성2" }
-                            SummaryLabel { label: "속성3" }
-                        }
-                    }
-                    div { class: "flex flex-row w-full h-[55px] justify-start items-start",
-                        div { class: "flex flex-row w-[180px] justify-start items-start mr-[50px]",
-                            "패널3"
-                        }
-                        div { class: "flex flex-wrap w-full justify-start items-center gap-[5px]",
-                            SummaryLabel { label: "속성1" }
-                            SummaryLabel { label: "속성2" }
-                            SummaryLabel { label: "속성3" }
-                        }
-                    }
-                }
 
-                div { class: "flex flex-row w-full justify-end items-end font-light text-[#6d6d6d] text-[14px]",
-                    "총 45명 / 공평한 인원수 배정 / 패널1 15명, 패널2 15명, 패널3 15명"
+                    div { class: "flex flex-col w-full justify-start items-start gap-[20px]",
+                        for panel in selected_panels.clone() {
+                            div { class: "flex flex-row w-full min-h-[55px] justify-start items-center",
+                                div { class: "flex flex-row w-[230px] h-full justify-start items-center",
+                                    div { class: "font-medium text-[15px] text-black",
+                                        "{panel.name}"
+                                    }
+                                }
+
+                                div { class: "flex flex-wrap flex-1 gap-[5px]",
+                                    for attribute in panel.attributes.clone() {
+                                        match attribute {
+                                            models::response::Attribute::Age(age) => {
+                                                rsx! {
+                                                    SummaryLabel { label: age.translate(&lang) }
+                                                }
+                                            }
+                                            models::response::Attribute::Gender(gender) => {
+                                                rsx! {
+                                                    SummaryLabel { label: gender.translate(&lang) }
+                                                }
+                                            }
+                                            models::response::Attribute::Region(region) => {
+                                                rsx! {
+                                                    SummaryLabel { label: region.translate(&lang) }
+                                                }
+                                            }
+                                            models::response::Attribute::Salary(salary) => {
+                                                rsx! {
+                                                    SummaryLabel { label: salary.translate(&lang) }
+                                                }
+                                            }
+                                            models::response::Attribute::None => {
+                                                rsx! {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -169,181 +192,92 @@ pub fn CompositionPanelSummary(lang: Language) -> Element {
 }
 
 #[component]
-pub fn CompositionCommitteeSummary(lang: Language) -> Element {
+pub fn CompositionCommitteeSummary(
+    lang: Language,
+    committees: Vec<DeliberationUserCreateRequest>,
+    members: Vec<OrganizationMemberSummary>,
+    onstep: EventHandler<CurrentStep>,
+) -> Element {
     let translate: CompositionCommitteeSummaryTranslate = translate(&lang);
-    let opinion_designers = use_signal(|| {
-        vec![
-            "보이스".to_string(),
-            "보이스".to_string(),
-            "보이스".to_string(),
-        ]
-    });
-    let specific_opinion_designers = use_signal(|| {
-        vec![
-            "보이스".to_string(),
-            "보이스".to_string(),
-            "보이스".to_string(),
-        ]
-    });
-    let analysts = use_signal(|| {
-        vec![
-            "보이스".to_string(),
-            "보이스".to_string(),
-            "보이스".to_string(),
-        ]
-    });
-    let intermediaries = use_signal(|| {
-        vec![
-            "보이스".to_string(),
-            "보이스".to_string(),
-            "보이스".to_string(),
-        ]
-    });
-    let lecturers = use_signal(|| {
-        vec![
-            "보이스".to_string(),
-            "보이스".to_string(),
-            "보이스".to_string(),
-        ]
-    });
+
+    let admin = get_role_list(committees.clone(), members.clone(), Role::Admin);
+    let deliberation_admin =
+        get_role_list(committees.clone(), members.clone(), Role::DeliberationAdmin);
+    let analyst = get_role_list(committees.clone(), members.clone(), Role::Analyst);
+    let moderator = get_role_list(committees.clone(), members.clone(), Role::Moderator);
+    let speaker = get_role_list(committees.clone(), members.clone(), Role::Speaker);
 
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start mt-[40px]" }
-        div { class: "font-medium text-black text-[16px] mb-[10px]",
-            "{translate.composition_public_opinion_committee}"
-        }
-        div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white px-[40px] py-[24px]",
-            div { class: "font-bold text-[#222222] text-lg mb-[20px]", "{translate.division_of_roles}" }
-
-            div { class: "flex flex-row w-full h-[55px] justify-start items-center mb-[10px]",
-                div { class: "flex flex-row w-[180px] justify-start items-start mr-[50px]",
-                    "공론 설계자"
+        PreviewComponent {
+            lang,
+            label: translate.composition_public_opinion_committee,
+            onstep: move |step: CurrentStep| {
+                onstep.call(step);
+            },
+            step: CurrentStep::CommitteeComposition,
+            title: translate.division_of_roles,
+            div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                CommitteeSummary { label: translate.admin, members: admin }
+                CommitteeSummary {
+                    label: translate.deliberation_admin,
+                    members: deliberation_admin,
                 }
-
-                div { class: "flex flex-wrap w-full justify-start items-center p-[15px] gap-[5px]",
-                    for role in opinion_designers() {
-                        SummaryLabel { label: role }
-                    }
-                }
-            }
-
-            div { class: "flex flex-row w-full h-[55px] justify-start items-center mb-[10px]",
-                div { class: "flex flex-row w-[180px] justify-start items-start mr-[50px]",
-                    "특정 공론 설계자"
-                }
-
-                div { class: "flex flex-wrap w-full justify-start items-center p-[15px] gap-[5px]",
-                    for role in specific_opinion_designers() {
-                        SummaryLabel { label: role }
-                    }
-                }
-            }
-
-            div { class: "flex flex-row w-full h-[55px] justify-start items-center mb-[10px]",
-                div { class: "flex flex-row w-[180px] justify-start items-start mr-[50px]",
-                    "분석가"
-                }
-
-                div { class: "flex flex-wrap w-full justify-start items-center p-[15px] gap-[5px]",
-                    for role in analysts() {
-                        SummaryLabel { label: role }
-                    }
-                }
-            }
-            div { class: "flex flex-row w-full h-[55px] justify-start items-center mb-[10px]",
-                div { class: "flex flex-row w-[180px] justify-start items-start mr-[50px]",
-                    "중개자"
-                }
-
-                div { class: "flex flex-wrap w-full justify-start items-center p-[15px] gap-[5px]",
-                    for role in intermediaries() {
-                        SummaryLabel { label: role }
-                    }
-                }
-            }
-
-            div { class: "flex flex-row w-full h-[55px] justify-start items-center mb-[10px]",
-                div { class: "flex flex-row w-[180px] justify-start items-start mr-[50px]",
-                    "강연자"
-                }
-
-                div { class: "flex flex-wrap w-full justify-start items-center p-[15px] gap-[5px]",
-                    for role in lecturers() {
-                        SummaryLabel { label: role }
-                    }
-                }
-            }
-
-            div { class: "flex flex-row w-full justify-end items-end font-light text-[#6d6d6d] text-[14px]",
-                "총 15명 / 공론 설계자 3명, 특정 공론 설계자 3명, 분석가 3명, 중계자 3명, 강연자 3명"
+                CommitteeSummary { label: translate.analyst, members: analyst }
+                CommitteeSummary { label: translate.moderator, members: moderator }
+                CommitteeSummary { label: translate.speaker, members: speaker }
             }
         }
     }
 }
 
 #[component]
-pub fn InputOpinionSummary(lang: Language) -> Element {
+pub fn InputDeliberationSummary(
+    lang: Language,
+    informations: DeliberationInformation,
+    onstep: EventHandler<CurrentStep>,
+) -> Element {
     let translate: InputOpinionSummaryTranslate = translate(&lang);
-    let documents = use_signal(|| {
-        vec![
-            "assets.doc".to_string(),
-            "assets.pdf".to_string(),
-            "assets.pdf".to_string(),
-            "assets.pdf".to_string(),
-            "assets.pdf".to_string(),
-        ]
-    });
 
-    let projects = use_signal(|| {
-        vec![
-            "조사주제".to_string(),
-            "조사주제".to_string(),
-            "조사주제".to_string(),
-        ]
-    });
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start mt-[40px]",
-            div { class: "font-medium text-black text-[#16px] mb-[10px]",
-                "{translate.input_necessary_information}"
-            }
-            div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white px-[40px] py-[24px]",
-                div { class: "flex flex-col w-full justify-start items-start  mb-[50px]",
-                    div { class: "font-bold text-[#222222] text-lg mb-[20px]",
-                        "{translate.introduction}"
-                    }
-                    div { class: "flex flex-row w-full h-[45px] justify-start items-center px-[15px] font-medium text-[#222222] text-[18px]",
-                        "공론주제입니다."
-                    }
-                    div { class: "flex flex-row w-full justify-start items-start border border-[#ebeff5] mt-[5px] mb-[20px]" }
-                    div { class: "flex flex-row w-full justify-start items-start px-[15px] font-medium text-[#222222] text-[15px] whitespace-pre-line",
-                        "공론주제의 소개내용입니다.\n공론주제의 소개내용입니다.\n공론주제의 소개내용입니다.\n공론주제의 소개내용입니다.\n공론주제의 소개내용입니다."
-                    }
+        PreviewComponent {
+            lang,
+            label: translate.input_necessary_information,
+            onstep: move |step: CurrentStep| {
+                onstep.call(step);
+            },
+            step: CurrentStep::InputInformation,
+            title: translate.introduction,
+            div { class: "flex flex-col w-full justify-start items-start",
+                div { class: "flex flex-row px-[15px] py-[8px] justify-start items-start font-medium text-[18px] text-[#222222]",
+                    "{informations.title.clone().unwrap_or_default()}"
                 }
-
-                div { class: "flex flex-col w-full justify-start items-start mb-[55px]",
-                    div { class: "font-bold text-[#222222] text-lg mb-[25px]",
-                        "{translate.upload_document}"
+                div { class: "flex flex-row w-full h-[1px] bg-[#EBEFF5] mb-[10px]" }
+                div { class: "flex flex-col w-full gap-[40px]",
+                    div { class: "flex flex-row px-[15px] py-[8px] justify-start items-start font-medium text-[15px] text-[#222222]",
+                        "{informations.description.clone().unwrap_or_default()}"
                     }
-                    div { class: "flex flex-wrap w-full justify-start items-start px-[15px] gap-[5px]",
-                        for document in documents() {
-                            SummaryLabel { label: document }
+
+                    div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                        div { class: "font-bold text-[18px] text-[#222222]",
+                            "{translate.upload_document}"
+                        }
+                        div { class: "flex flex-wrap flex-1 gap-[5px] p-[15px]",
+                            for document in informations.clone().documents {
+                                SummaryLabel { label: document.title.clone() }
+                            }
                         }
                     }
-                }
 
-                div { class: "flex flex-col w-full justify-start items-start mb-[25px]",
-                    div { class: "font-bold text-[#222222] text-lg mb-[25px]",
-                        "{translate.upload_survey_project}"
-                    }
-                    div { class: "flex flex-wrap w-full justify-start items-start px-[15px] gap-[5px]",
-                        for project in projects() {
-                            SummaryLabel { label: project }
+                    div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                        div { class: "font-bold text-[18px] text-[#222222]",
+                            "{translate.upload_survey_project}"
+                        }
+                        div { class: "flex flex-wrap flex-1 gap-[5px] p-[15px]",
+                            for project in informations.clone().projects {
+                                SummaryLabel { label: project.name.clone() }
+                            }
                         }
                     }
-                }
-
-                div { class: "flex flex-row w-full justify-end items-end font-light text-[#6d6d6d] text-[14px]",
-                    "총 8개 자료, 업로드된 자료 5개, 조사 프로젝트 3개"
                 }
             }
         }
@@ -351,41 +285,31 @@ pub fn InputOpinionSummary(lang: Language) -> Element {
 }
 
 #[component]
-pub fn CompositionOpinionSummary(lang: Language) -> Element {
+pub fn CompositionDeliberationSummary(
+    lang: Language,
+    sequences: Vec<StepCreateRequest>,
+    onstep: EventHandler<CurrentStep>,
+) -> Element {
     let translate: CompositionOpinionSummaryTranslate = translate(&lang);
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start",
-            div { class: "font-medium text-black text-[#16px] mb-[10px]",
-                "{translate.public_opinion_composition_and_period}"
-            }
-            div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white px-[40px] py-[24px]",
-                div { class: "font-bold text-[#222222] text-lg mb-[20px]",
-                    "{translate.public_opinion_composition_and_period}"
-                }
-                div { class: "flex flex-wrap w-full justify-start items-center mb-[10px]",
-                    CompositionOpinionSummaryCard { title: "정보 제공", date: "2.12.2025 ~ 3.12.2025" }
-                    div { class: "flex justify-center items-center mx-[10px]",
-                        ArrowRight { width: "12", height: "12" }
-                    }
+        PreviewComponent {
+            lang,
+            label: translate.public_opinion_composition_and_period,
+            onstep: move |step: CurrentStep| {
+                onstep.call(step);
+            },
+            step: CurrentStep::PublicOpinionComposition,
+            title: translate.public_opinion_composition_and_period,
+            div { class: "flex flex-wrap w-full justify-start items-center gap-[10px]",
+                for (i , sequence) in sequences.iter().enumerate() {
                     CompositionOpinionSummaryCard {
-                        title: "토론 및 숙의",
-                        date: "2.12.2025 ~ 3.12.2025",
+                        title: sequence.name.clone(),
+                        date: "{convert_timestamp_to_date(sequence.started_at)} ~ {convert_timestamp_to_date(sequence.ended_at)}",
                     }
-                    div { class: "flex justify-center items-center mx-[10px]",
+
+                    if i != sequences.len() - 1 {
                         ArrowRight { width: "12", height: "12" }
                     }
-                    CompositionOpinionSummaryCard { title: "의견 도출", date: "2.12.2025 ~ 3.12.2025" }
-                    div { class: "flex justify-center items-center mx-[10px]",
-                        ArrowRight { width: "12", height: "12" }
-                    }
-                    CompositionOpinionSummaryCard { title: "합의 도출", date: "2.12.2025 ~ 3.12.2025" }
-                    div { class: "flex justify-center items-center mx-[10px]",
-                        ArrowRight { width: "12", height: "12" }
-                    }
-                    CompositionOpinionSummaryCard { title: "결과 분석", date: "2.12.2025 ~ 3.12.2025" }
-                }
-                div { class: "flex flex-row w-full justify-end items-end font-light text-[#6d6d6d] text-[14px]",
-                    "{translate.total_period} 2월 12일 2025년 - 3월 12일 2025년"
                 }
             }
         }
@@ -404,9 +328,47 @@ pub fn SummaryLabel(label: String) -> Element {
 #[component]
 pub fn CompositionOpinionSummaryCard(title: String, date: String) -> Element {
     rsx! {
-        div { class: "flex flex-col w-[185px] justify-center items-center bg-white border border-[#bfc8d9] px-[15px] py-[10px]",
+        div { class: "flex flex-col w-[200px] justify-center items-center bg-white border border-[#bfc8d9] px-[15px] py-[10px]",
             div { class: "font-medium text-[#222222] text-[15px] mb-[5px]", {title} }
             div { class: "font-normal text-[#6d6d6d] text-[14px]", {date} }
         }
     }
+}
+
+#[component]
+pub fn CommitteeSummary(label: String, members: Vec<OrganizationMemberSummary>) -> Element {
+    rsx! {
+        div { class: "flex flex-row w-full min-h-[55px] justify-start items-center",
+            div { class: "flex flex-row w-[230px] h-full justify-start items-center",
+                div { class: "font-medium text-[#222222] text-[15px]", "{label}" }
+            }
+
+            div { class: "flex flex-row w-full h-full justify-start items-center p-[15px]",
+                div { class: "flex flex-wrap flex-1 gap-[5px]",
+                    for member in members {
+                        SummaryLabel { label: member.name.clone() }
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn get_role_list(
+    committees: Vec<DeliberationUserCreateRequest>,
+    members: Vec<OrganizationMemberSummary>,
+    role: Role,
+) -> Vec<OrganizationMemberSummary> {
+    let user_ids: Vec<i64> = committees
+        .iter()
+        .filter(|committee| committee.role == role)
+        .map(|committee| committee.user_id)
+        .collect();
+
+    let users: Vec<OrganizationMemberSummary> = members
+        .into_iter()
+        .filter(|member| user_ids.contains(&member.user_id))
+        .collect();
+
+    users
 }

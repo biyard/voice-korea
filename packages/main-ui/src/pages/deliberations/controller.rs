@@ -1,11 +1,14 @@
-use chrono::{TimeZone, Utc};
+use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
-use dioxus_translate::Language;
-use models::prelude::{OpinionResponse, PanelInfo, ProjectStatus};
+use models::{
+    deliberation::{Deliberation, DeliberationQuery, DeliberationSummary},
+    prelude::PanelInfo,
+    QueryResponse,
+};
 use serde::{Deserialize, Serialize};
 
-use crate::service::opinion_api::OpinionApi;
+use crate::service::login_service::LoginService;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Opinion {
@@ -20,111 +23,100 @@ pub struct Opinion {
     pub status: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, PartialEq, DioxusController)]
 pub struct Controller {
-    pub opinion_resource:
-        Resource<Result<crate::api::common::CommonQueryResponse<OpinionResponse>, ServerFnError>>,
-    pub opinions: Signal<Vec<Opinion>>,
-    pub project_types: Signal<Vec<String>>,
-    pub project_statuses: Signal<Vec<String>>,
+    pub deliberations: Resource<QueryResponse<DeliberationSummary>>,
+    page: Signal<usize>,
+    pub size: usize,
+    pub search_keyword: Signal<String>,
 }
 
 impl Controller {
-    pub fn init(lang: dioxus_translate::Language) -> Self {
-        let api: OpinionApi = use_context();
-        let opinion_resource: Resource<
-            Result<crate::api::common::CommonQueryResponse<OpinionResponse>, ServerFnError>,
-        > = use_resource(move || {
-            let api = api.clone();
-            async move { api.list_opinions(Some(100), None).await }
-        });
-        let mut ctrl = Self {
-            opinion_resource,
-            opinions: use_signal(|| vec![]),
-            project_types: use_signal(|| {
-                vec![
-                    "경제".to_string(),
-                    "사회".to_string(),
-                    "환경".to_string(),
-                    "교육".to_string(),
-                    "문화".to_string(),
-                    "노동".to_string(),
-                    "도시".to_string(),
-                    "기술".to_string(),
-                    "보건".to_string(),
-                    "정치".to_string(),
-                ]
-            }),
-            project_statuses: use_signal(|| {
-                vec!["준비".to_string(), "진행".to_string(), "마감".to_string()]
-            }),
-        };
+    pub fn new(_lang: dioxus_translate::Language) -> std::result::Result<Self, RenderError> {
+        let user: LoginService = use_context();
+        let page = use_signal(|| 1);
+        let size = 10;
+        let search_keyword = use_signal(|| "".to_string());
 
-        let opinions = if let Some(v) = opinion_resource.value()() {
-            match v {
-                Ok(d) => {
-                    let mut items = vec![];
+        let deliberations = use_server_future(move || {
+            let page = page();
+            let keyword = search_keyword().clone();
 
-                    for item in d.items {
-                        items.push(Opinion {
-                            project_id: item.project_id.clone(),
-                            opinion_type: item.opinion_type.translate(&lang).to_string(),
-                            project_name: item.project_name.clone(),
-                            total_response_count: item.total_response_count,
-                            response_count: item.response_count,
-                            panels: item.panels,
-                            start_date: ctrl.format_timestamp(item.start_date as i64),
-                            end_date: ctrl.format_timestamp(item.end_date as i64),
-                            status: ctrl
-                                .project_status_translate(lang.clone(), item.status)
-                                .to_string(),
-                        });
-                    }
-
-                    items
+            async move {
+                let org_id = user.get_selected_org();
+                if org_id.is_none() {
+                    tracing::error!("Organization ID is missing");
+                    return QueryResponse {
+                        items: vec![],
+                        total_count: 0,
+                    };
                 }
-                Err(e) => {
-                    tracing::error!("Failed to fetch opinion: {:?}", e);
-                    vec![]
+                let client = Deliberation::get_client(&crate::config::get().api_url);
+
+                let query = DeliberationQuery::new(size).with_page(page);
+
+                if keyword.is_empty() {
+                    match client.query(org_id.unwrap().id, query).await {
+                        Ok(res) => res,
+                        Err(e) => {
+                            tracing::error!("Failed to list deliberations: {:?}", e);
+                            return QueryResponse {
+                                items: vec![],
+                                total_count: 0,
+                            };
+                        }
+                    }
+                } else {
+                    match client
+                        .search_by(size, Some(page.to_string()), org_id.unwrap().id, keyword)
+                        .await
+                    {
+                        Ok(res) => res,
+                        Err(e) => {
+                            tracing::error!("Failed to list deliberations: {:?}", e);
+                            return QueryResponse {
+                                items: vec![],
+                                total_count: 0,
+                            };
+                        }
+                    }
                 }
             }
-        } else {
-            vec![]
+        })?;
+
+        let ctrl = Self {
+            deliberations,
+            page,
+            size,
+            search_keyword,
         };
 
-        ctrl.opinions.set(opinions);
-        ctrl
+        Ok(ctrl)
     }
 
-    pub fn get_project_types(&self) -> Vec<String> {
-        (self.project_types)()
+    pub fn set_page(&mut self, page: usize) {
+        self.page.set(page);
     }
 
-    pub fn get_project_statuses(&self) -> Vec<String> {
-        (self.project_statuses)()
+    pub fn total_pages(&self) -> usize {
+        let size = self.size;
+        self.deliberations.with(|v| {
+            if let Some(v) = v {
+                if v.total_count != 0 {
+                    (v.total_count as usize - 1) / size + 1
+                } else {
+                    0
+                }
+            } else {
+                0
+            }
+        }) as usize
     }
 
-    pub fn get_opinions(&self) -> Vec<Opinion> {
-        (self.opinions)()
-    }
-
-    fn format_timestamp(&self, timestamp: i64) -> String {
-        let datetime = Utc.timestamp_opt(timestamp, 0).unwrap();
-        datetime.format("%Y.%m.%d").to_string()
-    }
-
-    fn project_status_translate(&self, lang: Language, status: ProjectStatus) -> &'static str {
-        match lang {
-            Language::En => match status {
-                ProjectStatus::Ready => "Ready",
-                ProjectStatus::InProgress => "In Progress",
-                ProjectStatus::Finish => "Finish",
-            },
-            Language::Ko => match status {
-                ProjectStatus::Ready => "준비",
-                ProjectStatus::InProgress => "진행",
-                ProjectStatus::Finish => "마감",
-            },
-        }
+    pub fn get_deliberations(&self) -> Vec<DeliberationSummary> {
+        self.deliberations.with(|v| match v {
+            Some(v) => v.clone().items,
+            None => vec![],
+        })
     }
 }

@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use chrono::{Local, TimeZone};
+use chrono::Local;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::ProjectArea;
@@ -8,6 +8,7 @@ use models::ProjectArea;
 use crate::{
     components::{calendar::Calendar, icons::CalendarIcon},
     pages::surveys::i18n::InputIntroductionTranslate,
+    utils::time::change_date_from_timestamp,
 };
 
 #[component]
@@ -174,11 +175,4 @@ pub fn InputIntroduction(
             }
         }
     }
-}
-
-pub fn change_date_from_timestamp(timestamp: i64) -> String {
-    let datetime = Local.timestamp_opt(timestamp, 0).unwrap();
-    let formatted_date = datetime.format("%Y/%m/%d").to_string();
-
-    formatted_date
 }

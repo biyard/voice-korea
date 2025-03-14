@@ -6,7 +6,6 @@ use crate::{response::SurveyResponse, SurveyV2};
 
 // TODO(web): using resource for Sample survey tab on a project.
 // TODO(web): using resource for final survey tab on a project.
-// TODO(api): implement Read action(read) of GET /v2/projects/:deliberation-id/surveys
 #[api_model(base = "/v2/projects/:deliberation-id/surveys", table = deliberations, read_action = read)]
 pub struct DeliberationSurvey {
     #[api_model(primary_key)]

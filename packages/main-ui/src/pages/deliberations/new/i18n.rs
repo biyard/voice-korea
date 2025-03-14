@@ -1,7 +1,16 @@
 use dioxus_translate::translate;
 
 translate! {
-    OpinionNewTranslate;
+    PreviewComponentTranslate;
+
+    update: {
+        ko: "수정하기",
+        en: "Update"
+    }
+}
+
+translate! {
+    DeliberationNewTranslate;
 
     organization_management: {
         ko: "조직 관리",
@@ -478,6 +487,14 @@ translate! {
         ko: "패널 선택",
         en: "Select Panel"
     }
+    panel_hint: {
+        ko: "패널을 선택해주세요",
+        en: "Select a panel"
+    }
+    unit: {
+        ko: "명",
+        en: "Unit"
+    }
     input_panel_count: {
         ko: "패널 수 입력",
         en: "Input Panel Count"
@@ -572,6 +589,18 @@ translate! {
     online_meeting: {
         ko: "온라인 회의",
         en: "Online Meeting"
+    }
+    discussion_description: {
+        ko: "토론 설명",
+        en: "Discussion Description"
+    }
+    maximum_people: {
+        ko: "최대 인원",
+        en: "Maximum number of people"
+    }
+    unit: {
+        ko: "명",
+        en: "People"
     }
 }
 
@@ -687,6 +716,26 @@ translate! {
         ko: "역할 분담",
         en: "Division of Roles"
     }
+    admin: {
+        ko: "공론 설계자",
+        en: "Admin"
+    }
+    deliberation_admin: {
+        ko: "특정 공론 설계자",
+        en: "Deliberation Admin"
+    }
+    analyst: {
+        ko: "분석가",
+        en: "analyst"
+    }
+    moderator: {
+        ko: "중개자",
+        en: "Moderator"
+    }
+    speaker: {
+        ko: "강연자",
+        en: "Speaker"
+    }
 }
 
 translate! {
@@ -703,6 +752,10 @@ translate! {
     select_panel: {
         ko: "패널 선택",
         en: "Select Panel"
+    }
+    unit: {
+        ko: "명",
+        en: "People",
     }
     setting_properties_for_each_panel: {
         ko: "패널별 속성 설정",

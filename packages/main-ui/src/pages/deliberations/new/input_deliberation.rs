@@ -14,8 +14,7 @@ use crate::{
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::{
-    DeliberationInformation, File, FileExtension, ProjectArea, ResourceFile, ResourceFileSummary,
-    SurveyV2Summary,
+    File, FileExtension, ProjectArea, ResourceFile, ResourceFileSummary, SurveyV2Summary,
 };
 
 use crate::{
@@ -26,7 +25,7 @@ use crate::{
     },
 };
 
-use super::controller::CurrentStep;
+use super::controller::{CurrentStep, DeliberationInformation};
 
 #[derive(Clone, PartialEq)]
 pub enum DocumentTabType {
@@ -35,7 +34,7 @@ pub enum DocumentTabType {
 }
 
 #[component]
-pub fn InputOpinion(
+pub fn InputDeliberation(
     lang: Language,
     resources: Vec<ResourceFile>,
     surveys: Vec<SurveyV2Summary>,

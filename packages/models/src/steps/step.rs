@@ -14,6 +14,7 @@ pub struct Step {
     #[api_model(summary, many_to_one = deliberations)]
     pub deliberation_id: i64,
     #[api_model(summary, type = INTEGER, action = create)]
+    #[serde(default)]
     pub step_type: StepType,
     #[api_model(summary, action = create)]
     pub name: String,
