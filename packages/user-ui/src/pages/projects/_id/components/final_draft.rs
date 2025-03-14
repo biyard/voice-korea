@@ -11,7 +11,7 @@ pub fn FinalDraft(
     children: Element,
 ) -> Element {
     let ctrl = Controller::new(lang, project_id)?;
-    let tr: BasicInfoTranslate = translate(&lang);
+    let tr: FinalDraftTranslate = translate(&lang);
 
     rsx! {
         div { id: "final-draft", ..attributes,
@@ -40,10 +40,10 @@ impl Controller {
 }
 
 translate! {
-    BasicInfoTranslate;
+    FinalDraftTranslate;
 
     title: {
-        ko: "BasicInfo",
-        en: "BasicInfo",
+        ko: "Final Draft",
+        en: "Final Draft",
     },
 }
