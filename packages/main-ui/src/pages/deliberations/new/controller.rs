@@ -5,11 +5,12 @@ use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use models::{
     deliberation::Deliberation, deliberation_user::DeliberationUserCreateRequest,
-    step::StepCreateRequest, step_type::StepType, *,
+    discussions::DiscussionCreateRequest, step::StepCreateRequest, step_type::StepType, *,
 };
 
 use crate::{
     config,
+    routes::Route,
     service::{login_service::LoginService, popup_service::PopupService},
 };
 
@@ -43,10 +44,7 @@ pub struct DeliberationInformation {
     pub projects: Vec<SurveyV2Summary>,
 }
 
-use super::{
-    i18n::{OpinionNewTranslate, PreviewTranslate},
-    preview::SendAlertModal,
-};
+use super::i18n::DeliberationNewTranslate;
 
 #[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
@@ -71,7 +69,7 @@ pub struct Controller {
     //step 4
     pub panels: Resource<Vec<PanelV2Summary>>,
     pub selected_panels: Signal<Vec<PanelV2Summary>>,
-    total_attributes: Signal<Vec<AttributeResponse>>,
+    // total_attributes: Signal<Vec<AttributeResponse>>,
 
     //step 5
     pub discussions: Signal<Vec<MeetingInfo>>,
@@ -93,7 +91,7 @@ impl Controller {
         let timestamp = Utc::now().timestamp();
         let user: LoginService = use_context();
         let popup_service: PopupService = use_context();
-        let translates: OpinionNewTranslate = translate(&lang.clone());
+        let translates: DeliberationNewTranslate = translate(&lang.clone());
         let search_keyword = use_signal(|| "".to_string());
 
         let client = SurveyV2::get_client(&crate::config::get().api_url);
@@ -272,100 +270,99 @@ impl Controller {
                 }]
             }),
             discussion_resources: use_signal(|| vec![]),
-
             //FIXME: fix to connect api
-            total_attributes: use_signal(|| {
-                vec![
-                    AttributeResponse {
-                        id: "1".to_string(),
-                        name: Some("직업".to_string()),
-                        attribute: vec![AttributeItemInfo {
-                            id: "1".to_string(),
-                            name: "개발자".to_string(),
-                        }],
-                    },
-                    AttributeResponse {
-                        id: "2".to_string(),
-                        name: Some("성별".to_string()),
-                        attribute: vec![AttributeItemInfo {
-                            id: "1".to_string(),
-                            name: "여성".to_string(),
-                        }],
-                    },
-                    AttributeResponse {
-                        id: "3".to_string(),
-                        name: Some("나이".to_string()),
-                        attribute: vec![
-                            AttributeItemInfo {
-                                id: "1".to_string(),
-                                name: "20대".to_string(),
-                            },
-                            AttributeItemInfo {
-                                id: "2".to_string(),
-                                name: "30대".to_string(),
-                            },
-                            AttributeItemInfo {
-                                id: "3".to_string(),
-                                name: "40대".to_string(),
-                            },
-                            AttributeItemInfo {
-                                id: "4".to_string(),
-                                name: "50대".to_string(),
-                            },
-                            AttributeItemInfo {
-                                id: "5".to_string(),
-                                name: "60대".to_string(),
-                            },
-                        ],
-                    },
-                    AttributeResponse {
-                        id: "4".to_string(),
-                        name: Some("학력".to_string()),
-                        attribute: vec![AttributeItemInfo {
-                            id: "1".to_string(),
-                            name: "대학원".to_string(),
-                        }],
-                    },
-                    AttributeResponse {
-                        id: "5".to_string(),
-                        name: Some("거주지".to_string()),
-                        attribute: vec![AttributeItemInfo {
-                            id: "1".to_string(),
-                            name: "서울".to_string(),
-                        }],
-                    },
-                    AttributeResponse {
-                        id: "6".to_string(),
-                        name: Some("국적".to_string()),
-                        attribute: vec![AttributeItemInfo {
-                            id: "1".to_string(),
-                            name: "국내".to_string(),
-                        }],
-                    },
-                ]
-            }),
+            // total_attributes: use_signal(|| {
+            //     vec![
+            //         AttributeResponse {
+            //             id: "1".to_string(),
+            //             name: Some("직업".to_string()),
+            //             attribute: vec![AttributeItemInfo {
+            //                 id: "1".to_string(),
+            //                 name: "개발자".to_string(),
+            //             }],
+            //         },
+            //         AttributeResponse {
+            //             id: "2".to_string(),
+            //             name: Some("성별".to_string()),
+            //             attribute: vec![AttributeItemInfo {
+            //                 id: "1".to_string(),
+            //                 name: "여성".to_string(),
+            //             }],
+            //         },
+            //         AttributeResponse {
+            //             id: "3".to_string(),
+            //             name: Some("나이".to_string()),
+            //             attribute: vec![
+            //                 AttributeItemInfo {
+            //                     id: "1".to_string(),
+            //                     name: "20대".to_string(),
+            //                 },
+            //                 AttributeItemInfo {
+            //                     id: "2".to_string(),
+            //                     name: "30대".to_string(),
+            //                 },
+            //                 AttributeItemInfo {
+            //                     id: "3".to_string(),
+            //                     name: "40대".to_string(),
+            //                 },
+            //                 AttributeItemInfo {
+            //                     id: "4".to_string(),
+            //                     name: "50대".to_string(),
+            //                 },
+            //                 AttributeItemInfo {
+            //                     id: "5".to_string(),
+            //                     name: "60대".to_string(),
+            //                 },
+            //             ],
+            //         },
+            //         AttributeResponse {
+            //             id: "4".to_string(),
+            //             name: Some("학력".to_string()),
+            //             attribute: vec![AttributeItemInfo {
+            //                 id: "1".to_string(),
+            //                 name: "대학원".to_string(),
+            //             }],
+            //         },
+            //         AttributeResponse {
+            //             id: "5".to_string(),
+            //             name: Some("거주지".to_string()),
+            //             attribute: vec![AttributeItemInfo {
+            //                 id: "1".to_string(),
+            //                 name: "서울".to_string(),
+            //             }],
+            //         },
+            //         AttributeResponse {
+            //             id: "6".to_string(),
+            //             name: Some("국적".to_string()),
+            //             attribute: vec![AttributeItemInfo {
+            //                 id: "1".to_string(),
+            //                 name: "국내".to_string(),
+            //             }],
+            //         },
+            //     ]
+            // }),
         };
         use_context_provider(|| ctrl);
         Ok(ctrl)
     }
 
-    pub fn get_total_attributes(&self) -> Vec<AttributeResponse> {
-        (self.total_attributes)()
-    }
+    // pub fn get_total_attributes(&self) -> Vec<AttributeResponse> {
+    //     (self.total_attributes)()
+    // }
 
-    pub fn update_opinion_info(&mut self, index: usize, opinion: StepCreateRequest) {
+    pub fn update_deliberation_info(&mut self, index: usize, opinion: StepCreateRequest) {
         let mut sequences = self.get_deliberation_sequences();
         sequences[index] = opinion;
         self.deliberation_sequences.set(sequences);
     }
 
-    pub fn delete_opinion_info(&mut self, index: usize) {
+    pub fn delete_deliberation_info(&mut self, index: usize) {
         let mut sequences = self.get_deliberation_sequences();
         sequences.remove(index);
         self.deliberation_sequences.set(sequences);
     }
 
-    pub fn add_opinion_info(&mut self) {
+    pub fn add_deliberation_info(&mut self) {
         let mut sequences = self.get_deliberation_sequences();
         sequences.push(StepCreateRequest {
             step_type: StepType::GeneralPost,
@@ -376,7 +373,7 @@ impl Controller {
         self.deliberation_sequences.set(sequences);
     }
 
-    pub fn check_opinion_info(&self) -> bool {
+    pub fn check_deliberation_info(&self) -> bool {
         let sequences = &self.get_deliberation_sequences();
 
         for sequence in sequences {
@@ -629,34 +626,34 @@ impl Controller {
     //         .with_title(translates.create_panel);
     // }
 
-    pub fn open_send_alerm_modal(&self, lang: Language) {
-        let translates: PreviewTranslate = translate(&lang);
-        let mut popup_service = (self.popup_service)().clone();
-        let ctrl = self.clone();
-        popup_service
-            .open(rsx! {
-                SendAlertModal {
-                    lang,
-                    onclose: move |_e: MouseEvent| {
-                        popup_service.close();
-                    },
-                    onclick: move |_| {
-                        async move {
-                            match ctrl.create_deliberation().await {
-                                Ok(_) => {
-                                    popup_service.close();
-                                }
-                                Err(e) => {
-                                    tracing::error!("Create Deliberation Failed Reason: {:?}", e);
-                                }
-                            }
-                        }
-                    },
-                }
-            })
-            .with_id("send_alert")
-            .with_title(translates.send_alerm);
-    }
+    // pub fn open_send_alerm_modal(&self, lang: Language) {
+    //     let translates: PreviewTranslate = translate(&lang);
+    //     let mut popup_service = (self.popup_service)().clone();
+    //     let ctrl = self.clone();
+    //     popup_service
+    //         .open(rsx! {
+    //             SendAlertModal {
+    //                 lang,
+    //                 onclose: move |_e: MouseEvent| {
+    //                     popup_service.close();
+    //                 },
+    //                 onclick: move |_| {
+    //                     async move {
+    //                         match ctrl.create_deliberation().await {
+    //                             Ok(_) => {
+    //                                 popup_service.close();
+    //                             }
+    //                             Err(e) => {
+    //                                 tracing::error!("Create Deliberation Failed Reason: {:?}", e);
+    //                             }
+    //                         }
+    //                     }
+    //                 },
+    //             }
+    //         })
+    //         .with_id("send_alert")
+    //         .with_title(translates.send_alerm);
+    // }
 
     pub fn get_period(&self) -> (u64, u64) {
         let sequences = self.get_deliberation_sequences();
@@ -678,50 +675,83 @@ impl Controller {
         (start as u64, end as u64)
     }
 
-    pub async fn create_deliberation(&self) -> Result<()> {
-        let user: LoginService = use_context();
-        let org = user.get_selected_org();
-        if org.is_none() {
-            return Err(models::ApiError::OrganizationNotFound);
+    pub async fn create_deliberation(&self, lang: Language) -> Result<()> {
+        let navigator = use_navigator();
+
+        let sequences = self.get_deliberation_sequences();
+        let informations = self.get_deliberation_informations();
+        let selected_panels = self.get_selected_panels();
+        let committees = self.get_committees();
+        let meetings = self.get_discussions();
+        let discussion_resources = self.get_discussion_resources();
+
+        let endpoint = crate::config::get().api_url;
+        let client = Deliberation::get_client(endpoint);
+
+        let org_id = self.user.get_selected_org();
+        if org_id.is_none() {
+            tracing::error!("Organization ID is missing");
+            return Err(ApiError::OrganizationNotFound);
         }
-        let org_id = org.unwrap().id;
-        let opinion_informations = self.get_deliberation_informations();
-        let deliberation_sequences = self.get_deliberation_sequences();
-        let total_attributes = self.get_total_attributes();
-        let total_fields = self.get_total_fields();
 
-        tracing::debug!("opinion_informations: {:?}", opinion_informations);
-        tracing::debug!("deliberation_sequences: {:?}", deliberation_sequences);
-        tracing::debug!("total_attributes: {:?}", total_attributes);
-        tracing::debug!("total_fields: {:?}", total_fields);
+        let mut discussions: Vec<DiscussionCreateRequest> = vec![];
+        let deliberation_time = self.get_deliberation_time(sequences.clone());
 
-        let client = Deliberation::get_client(&crate::config::get().api_url);
-
-        let (started_at, ended_at) = self.get_period();
+        for meeting in meetings.clone() {
+            discussions.push(DiscussionCreateRequest {
+                started_at: meeting.start_date,
+                ended_at: meeting.end_date,
+                name: meeting.title.clone(),
+                description: meeting.description.clone(),
+                resources: discussion_resources
+                    .iter()
+                    .map(|resource| resource.id)
+                    .collect(),
+            });
+        }
 
         match client
             .create(
-                org_id,
-                started_at as i64,
-                ended_at as i64,
-                opinion_informations.deliberation_type.unwrap_or_default(),
-                opinion_informations.title.unwrap_or_default(),
-                opinion_informations.description.unwrap_or_default(),
-                vec![], // TODO: panels
-                vec![], // TODO: resources
-                vec![], // TODO: surveys
-                vec![], // roles
-                deliberation_sequences,
-                vec![], // elearning
-                vec![], // discussions
+                org_id.unwrap().id,
+                deliberation_time.0,
+                deliberation_time.1,
+                informations.deliberation_type.unwrap_or_default(),
+                informations.title.unwrap_or_default(),
+                informations.description.unwrap_or_default(),
+                informations
+                    .documents
+                    .iter()
+                    .map(|document| document.id)
+                    .collect(),
+                informations
+                    .projects
+                    .iter()
+                    .map(|project| project.id)
+                    .collect(),
+                committees,
+                selected_panels.iter().map(|panel| panel.id).collect(),
+                sequences,
+                vec![],
+                discussions,
             )
             .await
         {
-            Ok(_) => Ok(()),
+            Ok(_) => {
+                btracing::debug!("success to create deliberation");
+                navigator.push(Route::DeliberationPage { lang });
+                Ok(())
+            }
             Err(e) => {
-                tracing::error!("Create Failed Reason: {:?}", e);
-                Err(models::ApiError::ReqwestFailed(e.to_string()))
+                btracing::error!("failed to create deliberation: {}", e.translate(&lang));
+                return Err(e);
             }
         }
+    }
+
+    pub fn get_deliberation_time(&self, steps: Vec<StepCreateRequest>) -> (i64, i64) {
+        let started_at = steps.iter().map(|s| s.started_at).min().unwrap_or(0);
+        let ended_at = steps.iter().map(|s| s.ended_at).max().unwrap_or(0);
+
+        (started_at, ended_at)
     }
 }

@@ -10,7 +10,7 @@ pub struct DeliberationResource {
     pub id: i64,
     #[api_model(summary, auto = [insert])]
     pub created_at: i64,
-    #[api_model(summary, auto = [insert, update])]
+    #[api_model(summary, auto = [insert, update], version = v0.1)]
     pub updated_at: i64,
 
     #[api_model(many_to_one = deliberations)]
