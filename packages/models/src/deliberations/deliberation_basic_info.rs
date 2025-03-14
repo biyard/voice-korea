@@ -15,6 +15,9 @@ pub struct DeliberationBasicInfo {
     pub updated_at: i64,
 
     // Introduction
+    // #[api_model(summary)]
+    pub title: String,
+    // #[api_model(summary)]
     pub description: String,
 
     #[api_model(one_to_many = deliberation_users)]

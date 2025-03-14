@@ -6,12 +6,13 @@ use crate::{deliberation_user::DeliberationUser, ResourceFile};
 
 // TODO(web): using resource for project deliberation tab
 // TODO(api): implement Read action(read) of GET /v2/deliberations/:deliberation-id/contents
-#[api_model(base = "/v2/deliberations/:deliberation-id/contents", table = deliberations, read_action = read)]
+#[api_model(base = "/v2/projects/:deliberation-id/contents", table = deliberations, read_action = read)]
 pub struct DeliberationContent {
     pub id: i64,
     pub created_at: i64,
     pub updated_at: i64,
 
+    pub title: String,
     pub description: String,
 
     #[api_model(one_to_many = deliberation_users)]

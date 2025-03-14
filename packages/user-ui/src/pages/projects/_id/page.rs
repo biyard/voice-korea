@@ -16,12 +16,12 @@ use crate::pages::projects::_id::{
 pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
     let ctrl = controller::Controller::init(lang, project_id)?;
     let _comments = ctrl.comments()?;
-    let deliberation = ctrl.get_deliberation();
+    let deliberation = ctrl.summary()?;
     let active_tab = use_signal(|| Tab::BasicInfo);
     tracing::debug!("deliberation: {:?}", deliberation);
 
     rsx! {
-        div {
+        div { class: "flex flex-col w-full justify-center items-center",
             ProjectHeader { lang, deliberation, active_tab: active_tab.clone() }
             ProjectDetails { lang, active_tab: active_tab.clone(), project_id }
                 // Comment { lang, comments }
@@ -36,26 +36,28 @@ pub fn ProjectDetails(
     project_id: ReadOnlySignal<i64>,
 ) -> Element {
     rsx! {
-        div { class: "w-full bg-[#F7F7F7]",
-            match *active_tab.read() {
-                Tab::BasicInfo => rsx! {
-                    BasicInfo { lang }
-                },
-                Tab::SampleSurvey => rsx! {
-                    SampleSurvey { lang, project_id }
-                },
-                Tab::Deliberation => rsx! {
-                    Deliberation { lang, project_id }
-                },
-                Tab::Discussion => rsx! {
-                    Discussion { lang, project_id }
-                },
-                Tab::FinalSurvey => rsx! {
-                    FinalSurvey { lang, project_id }
-                },
-                Tab::FinalDraft => rsx! {
-                    FinalDraft { lang, project_id }
-                },
+        div { class: "flex flex-col w-full justify-center items-center bg-[#F7F7F7]",
+            div { class: "flex flex-col max-w-[1300px] w-full",
+                match active_tab() {
+                    Tab::BasicInfo => rsx! {
+                        BasicInfo { lang, project_id }
+                    },
+                    Tab::SampleSurvey => rsx! {
+                        SampleSurvey { lang, project_id }
+                    },
+                    Tab::Deliberation => rsx! {
+                        Deliberation { lang, project_id }
+                    },
+                    Tab::Discussion => rsx! {
+                        Discussion { lang, project_id }
+                    },
+                    Tab::FinalSurvey => rsx! {
+                        FinalSurvey { lang, project_id }
+                    },
+                    Tab::FinalDraft => rsx! {
+                        FinalDraft { lang, project_id }
+                    },
+                }
             }
         }
     }

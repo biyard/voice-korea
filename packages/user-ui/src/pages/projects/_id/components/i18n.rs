@@ -18,6 +18,11 @@ translate! {
         en: "Related materials"
     }
 
+    organization: {
+        ko: "조직",
+        en: "Organization"
+    }
+
     vote: {
         ko: "투표",
         en: "Vote"
