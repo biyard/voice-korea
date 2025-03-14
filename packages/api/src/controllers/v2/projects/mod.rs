@@ -9,7 +9,13 @@ use by_axum::{
 };
 use by_types::QueryResponse;
 use deliberation_project::*;
-use models::*;
+use models::{
+    deliberations::{
+        deliberation::Deliberation, deliberation_basic_info::DeliberationBasicInfo,
+        deliberation_survey::DeliberationSurvey,
+    },
+    *,
+};
 use sqlx::postgres::PgRow;
 
 #[derive(
@@ -56,9 +62,45 @@ impl DeliberationProjectController {
 
     pub fn route(&self) -> Result<by_axum::axum::Router> {
         Ok(by_axum::axum::Router::new()
+            .route("/:id/surveys", get(Self::get_deliberation_survey))
+            .route("/:id/basic-info", get(Self::get_deliberation_basic_info))
             .route("/:id", get(Self::get_deliberation_project_by_id))
             .route("/", get(Self::get_deliberation_project))
             .with_state(self.clone()))
+    }
+
+    pub async fn get_deliberation_survey(
+        State(ctrl): State<DeliberationProjectController>,
+        Extension(_auth): Extension<Option<Authorization>>,
+        Path(DeliberationProjectPath { id }): Path<DeliberationProjectPath>,
+    ) -> Result<Json<DeliberationSurvey>> {
+        tracing::debug!("get_deliberation_survey {:?}", id);
+
+        Ok(Json(
+            Deliberation::query_builder()
+                .id_equals(id)
+                .query()
+                .map(DeliberationSurvey::from)
+                .fetch_one(&ctrl.pool)
+                .await?,
+        ))
+    }
+
+    pub async fn get_deliberation_basic_info(
+        State(ctrl): State<DeliberationProjectController>,
+        Extension(_auth): Extension<Option<Authorization>>,
+        Path(DeliberationProjectPath { id }): Path<DeliberationProjectPath>,
+    ) -> Result<Json<DeliberationBasicInfo>> {
+        tracing::debug!("get_deliberation_basic_info {:?}", id);
+
+        Ok(Json(
+            Deliberation::query_builder()
+                .id_equals(id)
+                .query()
+                .map(DeliberationBasicInfo::from)
+                .fetch_one(&ctrl.pool)
+                .await?,
+        ))
     }
 
     pub async fn get_deliberation_project_by_id(
@@ -96,5 +138,163 @@ impl DeliberationProjectController {
             //     Ok(Json(DeliberationProjectGetResponse::Read(res)))
             // }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use models::{deliberations::deliberation::DeliberationQuery, ProjectArea};
+
+    use crate::tests::{setup, TestContext};
+    #[tokio::test]
+    async fn test_get_deliberation_basic_info() {
+        let TestContext {
+            user,
+            now,
+            endpoint,
+            ..
+        } = setup().await.unwrap();
+        let org_id = user.orgs[0].id;
+
+        let cli = Deliberation::get_client(&endpoint);
+        let res = cli
+            .create(
+                org_id,
+                now,
+                now + 1000,
+                ProjectArea::City,
+                format!("title"),
+                format!("test description {now}"),
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+            )
+            .await;
+        assert!(res.is_ok());
+
+        let deliberation = res.unwrap();
+        let id = deliberation.id;
+
+        let cli = DeliberationBasicInfo::get_client(&endpoint);
+        let res = cli.read(id).await;
+        assert!(res.is_ok());
+
+        let basic_info = res.unwrap();
+
+        assert_eq!(basic_info.id, deliberation.id);
+        assert_eq!(basic_info.description, format!("test description {now}"));
+    }
+
+    #[tokio::test]
+    async fn test_get_deliberation_survey() {
+        let TestContext {
+            user,
+            now,
+            endpoint,
+            ..
+        } = setup().await.unwrap();
+        let org_id = user.orgs[0].id;
+
+        let cli = Deliberation::get_client(&endpoint);
+        let res = cli
+            .create(
+                org_id,
+                now,
+                now + 1000,
+                ProjectArea::City,
+                format!("title"),
+                format!("test description"),
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+            )
+            .await;
+        assert!(res.is_ok());
+
+        let deliberation = res.unwrap();
+        let id = deliberation.id;
+
+        let cli = DeliberationSurvey::get_client(&endpoint);
+        let res = cli.read(id).await;
+        assert!(res.is_ok());
+
+        let survey = res.unwrap();
+
+        assert_eq!(survey.id, deliberation.id);
+    }
+
+    #[tokio::test]
+    async fn test_query_project() {
+        let TestContext {
+            user,
+            now,
+            endpoint,
+            ..
+        } = setup().await.unwrap();
+        let org_id = user.orgs[0].id;
+
+        let cli = DeliberationProject::get_client(&endpoint);
+
+        let res = cli
+            .query(DeliberationProjectQuery {
+                size: 1,
+                bookmark: None,
+            })
+            .await;
+
+        assert!(res.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_get_project() {
+        let TestContext {
+            user,
+            now,
+            endpoint,
+            ..
+        } = setup().await.unwrap();
+        let org_id = user.orgs[0].id;
+
+        let cli = Deliberation::get_client(&endpoint);
+
+        let res = cli
+            .create(
+                org_id,
+                now,
+                now + 1000,
+                ProjectArea::City,
+                format!("title"),
+                format!("test description"),
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+            )
+            .await;
+        assert!(res.is_ok());
+
+        let deliberation = res.unwrap();
+
+        let id = deliberation.id;
+
+        let cli = DeliberationProject::get_client(&endpoint);
+        let res = cli.get(id).await;
+        assert!(res.is_ok());
+
+        let deliberation_project = res.unwrap();
+
+        assert_eq!(deliberation_project.id, deliberation.id);
     }
 }
