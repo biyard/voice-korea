@@ -1,3 +1,4 @@
+#![allow(dead_code, unused)]
 use crate::{
     pages::projects::_id::{
         components::sample::{

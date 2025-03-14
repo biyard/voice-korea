@@ -28,6 +28,9 @@ pub fn format_prev_time(timestamp: i64) -> String {
 }
 
 pub fn formatted_timestamp(timestamp: i64) -> String {
+    if timestamp > 10000000000 {
+        return "".to_string();
+    }
     let datetime = Utc
         .timestamp_opt(timestamp, 0)
         .single()
