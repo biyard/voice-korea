@@ -11,7 +11,7 @@ pub fn Discussion(
     children: Element,
 ) -> Element {
     let ctrl = Controller::new(lang, project_id)?;
-    let tr: BasicInfoTranslate = translate(&lang);
+    let tr: DiscussionTranslate = translate(&lang);
 
     rsx! {
         div { id: "discussion", ..attributes,
@@ -40,10 +40,10 @@ impl Controller {
 }
 
 translate! {
-    BasicInfoTranslate;
+    DiscussionTranslate;
 
     title: {
-        ko: "BasicInfo",
-        en: "BasicInfo",
+        ko: "Discussion",
+        en: "Discussion",
     },
 }

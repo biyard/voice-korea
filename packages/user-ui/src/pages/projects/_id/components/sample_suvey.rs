@@ -11,7 +11,7 @@ pub fn SampleSurvey(
     children: Element,
 ) -> Element {
     let ctrl = Controller::new(lang, project_id)?;
-    let tr: BasicInfoTranslate = translate(&lang);
+    let tr: SampleSurveyTranslate = translate(&lang);
 
     rsx! {
         div { id: "sample-survey", ..attributes,
@@ -40,10 +40,10 @@ impl Controller {
 }
 
 translate! {
-    BasicInfoTranslate;
+    SampleSurveyTranslate;
 
     title: {
-        ko: "BasicInfo",
-        en: "BasicInfo",
+        ko: "Sample Survey",
+        en: "Sample Survey",
     },
 }
