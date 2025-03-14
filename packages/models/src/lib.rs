@@ -34,6 +34,7 @@ mod search;
 pub mod steps;
 mod strings;
 mod survey;
+mod tab;
 mod update_field;
 mod users;
 mod verifications;
@@ -63,6 +64,8 @@ pub mod prelude {
     pub use crate::public_opinion::*;
     pub use crate::resource::*;
     pub use crate::reviews::*;
+    pub use crate::tab::*;
+
     // pub use crate::public_survey::*;
 
     pub use crate::group_members::*;
