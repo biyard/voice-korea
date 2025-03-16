@@ -11,6 +11,7 @@ mod panel_count;
 mod panel_survey;
 mod public_opinion;
 mod resource;
+pub mod tab;
 // mod public_survey;
 pub mod deliberation_comments;
 pub mod deliberation_comments_likes;
@@ -63,6 +64,7 @@ pub mod prelude {
     pub use crate::public_opinion::*;
     pub use crate::resource::*;
     pub use crate::reviews::*;
+    pub use crate::tab::*;
     // pub use crate::public_survey::*;
 
     pub use crate::group_members::*;

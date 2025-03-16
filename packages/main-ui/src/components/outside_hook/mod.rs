@@ -1,6 +1,7 @@
 #![allow(unused)]
 use by_components::icons::arrows::ChevronDown;
-use dioxus::{prelude::*, web::WebEventExt};
+use dioxus::prelude::*;
+use dioxus_web::WebEventExt;
 use eventhook::use_outside_click;
 use std::cell::RefCell;
 use std::rc::Rc;

@@ -10,6 +10,7 @@ use by_axum::{
 use by_types::QueryResponse;
 use deliberation_project::*;
 use models::{
+    deliberation_content::DeliberationContent,
     deliberations::{
         deliberation::Deliberation, deliberation_basic_info::DeliberationBasicInfo,
         deliberation_survey::DeliberationSurvey,
@@ -64,6 +65,7 @@ impl DeliberationProjectController {
         Ok(by_axum::axum::Router::new()
             .route("/:id/surveys", get(Self::get_deliberation_survey))
             .route("/:id/basic-info", get(Self::get_deliberation_basic_info))
+            .route("/:id/contents", get(Self::get_deliberation_contents))
             .route("/:id", get(Self::get_deliberation_project_by_id))
             .route("/", get(Self::get_deliberation_project))
             .with_state(self.clone()))
@@ -81,6 +83,23 @@ impl DeliberationProjectController {
                 .id_equals(id)
                 .query()
                 .map(DeliberationSurvey::from)
+                .fetch_one(&ctrl.pool)
+                .await?,
+        ))
+    }
+
+    pub async fn get_deliberation_contents(
+        State(ctrl): State<DeliberationProjectController>,
+        Extension(_auth): Extension<Option<Authorization>>,
+        Path(DeliberationProjectPath { id }): Path<DeliberationProjectPath>,
+    ) -> Result<Json<DeliberationContent>> {
+        tracing::debug!("get_deliberation_contents {:?}", id);
+
+        Ok(Json(
+            Deliberation::query_builder()
+                .id_equals(id)
+                .query()
+                .map(DeliberationContent::from)
                 .fetch_one(&ctrl.pool)
                 .await?,
         ))
@@ -144,7 +163,7 @@ impl DeliberationProjectController {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use models::{deliberations::deliberation::DeliberationQuery, ProjectArea};
+    use models::ProjectArea;
 
     use crate::tests::{setup, TestContext};
     #[tokio::test]
@@ -240,7 +259,8 @@ mod tests {
             endpoint,
             ..
         } = setup().await.unwrap();
-        let org_id = user.orgs[0].id;
+        let _now = now;
+        let _org_id = user.orgs[0].id;
 
         let cli = DeliberationProject::get_client(&endpoint);
 

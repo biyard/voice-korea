@@ -3276,6 +3276,7 @@ dependencies = [
  "dioxus-aws",
  "dioxus-logger 0.5.1",
  "dioxus-translate",
+ "dioxus-web",
  "getrandom 0.2.15",
  "indexmap",
  "models",

@@ -1,10 +1,14 @@
 #![allow(unused)]
+use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use indexmap::IndexMap;
 use models::{
     deliberation::Deliberation,
+    deliberation_comment::{
+        DeliberationComment, DeliberationCommentQuery, DeliberationCommentSummary,
+    },
     deliberation_project::DeliberationProject,
     deliberation_response::{DeliberationResponse, DeliberationType},
     deliberation_user::DeliberationUser,
@@ -31,7 +35,7 @@ pub struct SurveyResponses {
     pub answers: IndexMap<i64, (String, ParsedQuestion)>, // question_id, (title, response_count, <panel_id, answer>)
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
     #[allow(dead_code)]
     lang: Language,
@@ -46,6 +50,8 @@ pub struct Controller {
     // NOTE: In the future, it will be linked to the API and the relevant part should be checked.
     check_edit: Signal<bool>,
     pub survey_responses: Signal<SurveyResponses>,
+
+    pub comments: Resource<Vec<DeliberationCommentSummary>>,
 }
 
 impl Controller {
@@ -62,6 +68,27 @@ impl Controller {
             }
         })?;
 
+        let comments = use_server_future(move || {
+            let id = id();
+
+            async move {
+                let endpoint = crate::config::get().api_url;
+                DeliberationComment::get_client(endpoint)
+                    .query(
+                        id,
+                        DeliberationCommentQuery {
+                            size: 100,
+                            bookmark: None,
+                            action: None,
+                            parent_id: None,
+                        },
+                    )
+                    .await
+                    .unwrap_or_default()
+                    .items
+            }
+        })?;
+
         let mut ctrl = Self {
             answers: use_signal(|| vec![]),
             check_edit: use_signal(|| false),
@@ -70,6 +97,7 @@ impl Controller {
             lang,
             id,
             summary,
+            comments,
         };
 
         use_context_provider(|| ctrl);
@@ -176,13 +204,13 @@ impl Controller {
         self.answers.set(answers.clone());
     }
 
-    pub fn check_edit(&self) -> bool {
-        (self.check_edit)()
-    }
+    // pub fn check_edit(&self) -> bool {
+    //     (self.check_edit)()
+    // }
 
-    pub fn answers(&self) -> Vec<Answer> {
-        (self.answers)()
-    }
+    // pub fn answers(&self) -> Vec<Answer> {
+    // (self.answers)()
+    // }
 
     pub fn remove_sample_survey(&self, lang: Language) {
         let tr: ProjectTranslate = translate(&lang);
