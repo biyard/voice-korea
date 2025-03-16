@@ -20,6 +20,7 @@ models.workspace = true
 
 # Dioxus Dependencies
 dioxus = { workspace = true, features = ["default", "fullstack", "router"] }
+dioxus-web = { version = "0.6.3", git = "https://github.com/hackartists/dioxus.git" }
 
 serde = { version = "1.0.197", features = ["derive"] }
 chrono = "0.4"
