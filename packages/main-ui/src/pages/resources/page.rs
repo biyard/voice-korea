@@ -20,7 +20,7 @@ use crate::{
 use dioxus::html::HasFileData;
 
 #[cfg(feature = "web")]
-use dioxus::web::WebEventExt;
+use dioxus_web::WebEventExt;
 
 #[cfg(feature = "web")]
 use web_sys::window;
