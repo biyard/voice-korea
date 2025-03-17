@@ -74,7 +74,6 @@ impl DeliberationCommentController {
                 .limit(param.size())
                 .page(param.page())
                 .deliberation_id_equals(deliberation_id)
-                .parent_id_equals(0)
                 .query()
                 .map(|row: PgRow| {
                     use sqlx::Row;

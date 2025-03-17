@@ -33,6 +33,9 @@ pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
                 like_comment: move |id: i64| async move {
                     let _ = ctrl.like_comment(id).await;
                 },
+                send_reply: move |(id, reply): (i64, String)| async move {
+                    let _ = ctrl.send_reply(id, reply).await;
+                },
             }
         }
     }

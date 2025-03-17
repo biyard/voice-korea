@@ -130,7 +130,7 @@ impl Controller {
     }
 
     pub fn parsing_comments(&self, comments: Vec<DeliberationCommentSummary>) -> Vec<CommentTree> {
-        let mut map: HashMap<i64, CommentTree> = HashMap::new();
+        let mut map: IndexMap<i64, CommentTree> = IndexMap::new();
         let mut roots = Vec::new();
 
         for comment in comments.into_iter() {
@@ -159,17 +159,23 @@ impl Controller {
             if comment.parent_id == 0 {
                 roots.push(comment.clone());
             } else {
-                parent_child_pairs.push((comment.id, comment.clone()));
+                parent_child_pairs.push((comment.parent_id, comment.clone()));
             }
         }
 
-        for (parent_id, child) in parent_child_pairs {
+        for (parent_id, child) in parent_child_pairs.clone() {
             if let Some(parent) = map.get_mut(&parent_id) {
                 parent.children.push(child);
             } else {
                 orphan_children.push(child);
             }
         }
+
+        roots = map
+            .values()
+            .filter(|comment| comment.parent_id == 0)
+            .cloned()
+            .collect();
 
         roots.extend(orphan_children);
 
@@ -237,6 +243,15 @@ impl Controller {
         let project_id = self.id();
         let _ = DeliberationComment::get_client(&crate::config::get().api_url)
             .comment(project_id, comment)
+            .await;
+
+        self.comments.restart();
+    }
+
+    pub async fn send_reply(&mut self, comment_id: i64, reply: String) {
+        let project_id = self.id();
+        let _ = DeliberationComment::get_client(&crate::config::get().api_url)
+            .reply_to_comment(project_id, comment_id, reply)
             .await;
 
         self.comments.restart();

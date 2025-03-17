@@ -9,6 +9,7 @@ pub fn Comment(
     lang: Language,
     comments: Vec<CommentTree>,
     send_comment: EventHandler<String>,
+    send_reply: EventHandler<(i64, String)>,
     like_comment: EventHandler<i64>,
 ) -> Element {
     let tr: CommentTranslate = translate(&lang);
@@ -51,6 +52,9 @@ pub fn Comment(
                                 like_comment: move |_| {
                                     like_comment.call(comment.id);
                                 },
+                                send_reply: move |(id, reply)| {
+                                    send_reply.call((id, reply));
+                                },
                             }
                         }
                     }
@@ -63,9 +67,24 @@ pub fn Comment(
 translate! {
     CommentTranslate;
 
+    reply: {
+        ko: "답글",
+        en: "Reply"
+    }
+
+    unit: {
+        ko: "개",
+        en: "Unit"
+    }
+
+    reply_comment: {
+        ko: "답글하기",
+        en: "Reply"
+    }
+
     reply_box_text: {
-        ko: "답글 남기기",
-        en: "Leave a reply"
+        ko: "답글 남기기...",
+        en: "Leave a reply..."
     }
 
     anonymity: {
