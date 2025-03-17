@@ -102,50 +102,50 @@ impl Controller {
 
         use_context_provider(|| ctrl);
 
-        let questions = ctrl.clone().get_deliberation().surveys[0].questions.clone();
-        let responses = ctrl.clone().get_deliberation_responses();
+        // let questions = ctrl.clone().get_deliberation().surveys[0].questions.clone();
+        // let responses = ctrl.clone().get_deliberation_responses();
 
-        //FIXME: After connecting the API, you need to check whether the relevant part is working properly.
-        let memoized_answers = use_memo({
-            let questions = questions.clone();
-            move || {
-                questions
-                    .iter()
-                    .map(|question| match question {
-                        Question::SingleChoice(_) => Answer::SingleChoice { answer: 0 },
-                        Question::MultipleChoice(_) => Answer::MultipleChoice { answer: vec![] },
-                        Question::ShortAnswer(_) => Answer::ShortAnswer {
-                            answer: "".to_string(),
-                        },
-                        Question::Subjective(_) => Answer::Subjective {
-                            answer: "".to_string(),
-                        },
-                    })
-                    .collect::<Vec<_>>()
-            }
-        });
+        // //FIXME: After connecting the API, you need to check whether the relevant part is working properly.
+        // let memoized_answers = use_memo({
+        //     let questions = questions.clone();
+        //     move || {
+        //         questions
+        //             .iter()
+        //             .map(|question| match question {
+        //                 Question::SingleChoice(_) => Answer::SingleChoice { answer: 0 },
+        //                 Question::MultipleChoice(_) => Answer::MultipleChoice { answer: vec![] },
+        //                 Question::ShortAnswer(_) => Answer::ShortAnswer {
+        //                     answer: "".to_string(),
+        //                 },
+        //                 Question::Subjective(_) => Answer::Subjective {
+        //                     answer: "".to_string(),
+        //                 },
+        //             })
+        //             .collect::<Vec<_>>()
+        //     }
+        // });
 
-        let memoized_survey_responses = use_memo({
-            let questions = questions.clone();
-            let responses = responses.clone();
-            move || SurveyResponses {
-                answers: ctrl.parsing_answers(questions.clone(), responses.clone()),
-            }
-        });
+        // let memoized_survey_responses = use_memo({
+        //     let questions = questions.clone();
+        //     let responses = responses.clone();
+        //     move || SurveyResponses {
+        //         answers: ctrl.parsing_answers(questions.clone(), responses.clone()),
+        //     }
+        // });
 
-        let mut prev_questions = use_signal(|| vec![]);
-        let mut prev_responses = use_signal(|| vec![]);
+        // let mut prev_questions = use_signal(|| vec![]);
+        // let mut prev_responses = use_signal(|| vec![]);
 
-        use_effect(move || {
-            if *prev_questions() != questions || *prev_responses() != responses {
-                ctrl.answers.set(memoized_answers());
-                ctrl.survey_responses.set(memoized_survey_responses());
-                ctrl.check_edit.set(true);
+        // use_effect(move || {
+        //     if *prev_questions() != questions || *prev_responses() != responses {
+        //         ctrl.answers.set(memoized_answers());
+        //         ctrl.survey_responses.set(memoized_survey_responses());
+        //         ctrl.check_edit.set(true);
 
-                prev_questions.set(questions.clone());
-                prev_responses.set(responses.clone());
-            }
-        });
+        //         prev_questions.set(questions.clone());
+        //         prev_responses.set(responses.clone());
+        //     }
+        // });
 
         Ok(ctrl)
     }

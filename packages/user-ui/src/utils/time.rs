@@ -48,6 +48,24 @@ pub fn formatted_timestamp_to_sec(timestamp: i64) -> String {
     datetime.unwrap_or_default()
 }
 
+pub fn format_time_range(started_at: i64, ended_at: i64) -> String {
+    let start_date = Utc
+        .timestamp_opt(started_at, 0)
+        .single()
+        .map(|datetime| datetime.format("%H:%M").to_string());
+
+    let start = start_date.unwrap_or_default();
+
+    let end_date = Utc
+        .timestamp_opt(ended_at, 0)
+        .single()
+        .map(|datetime| datetime.format("%H:%M").to_string());
+
+    let end = end_date.unwrap_or_default();
+
+    format!("{} ~ {}", start, end)
+}
+
 pub fn current_timestamp() -> i64 {
     let now = Utc::now();
     let timestamp_millis = now.timestamp();

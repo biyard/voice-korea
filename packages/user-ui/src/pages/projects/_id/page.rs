@@ -5,7 +5,7 @@ use models::Tab;
 
 use crate::pages::projects::_id::{
     components::{
-        basic_info::BasicInfo, deliberation::Deliberation, discussion::Discussion,
+        basic_info::BasicInfo, deliberation::Deliberation, discussion::DiscussionPage,
         final_draft::FinalDraft, final_survey::FinalSurvey, project_header::ProjectHeader,
         sample_survey::SampleSurvey,
     },
@@ -49,7 +49,7 @@ pub fn ProjectDetails(
                         Deliberation { lang, project_id }
                     },
                     Tab::Discussion => rsx! {
-                        Discussion { lang, project_id }
+                        DiscussionPage { lang, project_id }
                     },
                     Tab::FinalSurvey => rsx! {
                         FinalSurvey { lang, project_id }

@@ -4,6 +4,7 @@ use by_macros::api_model;
 
 use crate::{deliberation_user::DeliberationUser, response::SurveyResponse, SurveyV2};
 
+// TODO(api): implement survey response for Sample, final Survey.
 // TODO(web): using resource for Sample survey tab on a project.
 // TODO(web): using resource for final survey tab on a project.
 #[api_model(base = "/v2/projects/:deliberation-id/surveys", table = deliberations, read_action = read)]
