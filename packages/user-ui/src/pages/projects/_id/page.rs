@@ -7,7 +7,7 @@ use crate::pages::projects::_id::{
     components::{
         basic_info::BasicInfo, deliberation::Deliberation, discussion::Discussion,
         final_draft::FinalDraft, final_survey::FinalSurvey, project_header::ProjectHeader,
-        sample_suvey::SampleSurvey,
+        sample_survey::SampleSurvey,
     },
     controller,
 };

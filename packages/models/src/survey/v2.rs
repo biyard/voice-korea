@@ -61,6 +61,7 @@ pub struct SurveyV2 {
     #[api_model(summary)]
     pub noncelab_id: Option<i64>,
     #[api_model(summary, one_to_many = survey_responses, foreign_key = survey_id, aggregator = count)]
+    #[serde(default)]
     pub response_count: i64,
     // #[api_model(summary, many_to_many = attrs, foreign_table_name = attributes, foreign_primary_key = attr_id, foreign_reference_key = survey_id)]
     // pub attributes: Vec<Attribute>,
