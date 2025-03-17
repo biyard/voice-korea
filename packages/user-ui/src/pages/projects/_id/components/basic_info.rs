@@ -59,7 +59,7 @@ pub fn BasicInfo(
                             for member in info.members {
                                 div { class: "flex flex-row justify-start gap-[8px]",
                                     img { class: "w-[40px] h-[40px] bg-[#D9D9D9] rounded-full" }
-                                    div { class: "flex flex-col justify-start",
+                                    div { class: "flex flex-col justify-center",
                                         p { class: "font-semibold text-[15px] justify-start",
                                             {member.role.translate(&lang)}
                                         }

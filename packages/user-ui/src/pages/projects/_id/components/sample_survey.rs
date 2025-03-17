@@ -30,8 +30,6 @@ pub enum SurveyStatus {
 pub enum SurveyStep {
     Display,
     WriteSurvey,
-    MySurvey,
-    Statistics,
 }
 
 #[component]
