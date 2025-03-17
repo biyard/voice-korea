@@ -23,7 +23,10 @@ use models::{
 };
 
 use crate::{
-    service::popup_service::{self, PopupService},
+    service::{
+        popup_service::{self, PopupService},
+        user_service::UserService,
+    },
     utils::time::formatted_timestamp_to_sec,
 };
 
@@ -69,10 +72,14 @@ pub struct Controller {
     pub comments: Resource<Vec<DeliberationCommentSummary>>,
 
     pub comment_trees: Signal<Vec<CommentTree>>,
+
+    pub user: UserService,
 }
 
 impl Controller {
     pub fn init(lang: Language, id: ReadOnlySignal<i64>) -> std::result::Result<Self, RenderError> {
+        let user: UserService = use_context();
+
         let summary = use_server_future(move || {
             let id = id();
 
@@ -117,6 +124,7 @@ impl Controller {
             comments,
 
             comment_trees: use_signal(|| vec![]),
+            user,
         };
 
         use_effect(move || {
@@ -231,30 +239,73 @@ impl Controller {
     }
 
     pub async fn like_comment(&mut self, id: i64) {
+        let user_id = (self.user.user_id)();
+
+        if user_id == 0 {
+            btracing::error!("login is required");
+            return;
+        }
+
         let project_id = self.id();
-        let _ = DeliberationComment::get_client(&crate::config::get().api_url)
+        match DeliberationComment::get_client(&crate::config::get().api_url)
             .like(project_id, id)
-            .await;
+            .await
+        {
+            Ok(_) => {
+                self.comments.restart();
+            }
+            Err(e) => {
+                btracing::error!("like comment failed with error: {:?}", e);
+            }
+        };
 
         self.comments.restart();
     }
 
     pub async fn send_comment(&mut self, comment: String) {
+        let user_id = (self.user.user_id)();
+
+        if user_id == 0 {
+            btracing::error!("login is required");
+            return;
+        }
+
         let project_id = self.id();
-        let _ = DeliberationComment::get_client(&crate::config::get().api_url)
+        match DeliberationComment::get_client(&crate::config::get().api_url)
             .comment(project_id, comment)
-            .await;
+            .await
+        {
+            Ok(_) => {
+                self.comments.restart();
+            }
+            Err(e) => {
+                btracing::error!("send comment failed with error: {:?}", e);
+            }
+        };
 
         self.comments.restart();
     }
 
     pub async fn send_reply(&mut self, comment_id: i64, reply: String) {
-        let project_id = self.id();
-        let _ = DeliberationComment::get_client(&crate::config::get().api_url)
-            .reply_to_comment(project_id, comment_id, reply)
-            .await;
+        let user_id = (self.user.user_id)();
 
-        self.comments.restart();
+        if user_id == 0 {
+            btracing::error!("login is required");
+            return;
+        }
+
+        let project_id = self.id();
+        match DeliberationComment::get_client(&crate::config::get().api_url)
+            .reply_to_comment(project_id, comment_id, reply)
+            .await
+        {
+            Ok(_) => {
+                self.comments.restart();
+            }
+            Err(e) => {
+                btracing::error!("send reply failed with error: {:?}", e);
+            }
+        };
     }
 
     pub fn change_answer(&mut self, index: usize, answer: Answer) {

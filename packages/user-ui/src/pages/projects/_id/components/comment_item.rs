@@ -96,7 +96,7 @@ pub fn CommentItem(
                                     }
                                 },
                                 div {
-                                    ThumbsUp { fill: if comment.liked { "red" } else { "none" } }
+                                    ThumbsUp { fill: if comment.liked { "green" } else { "none" } }
                                 }
                                 p { "{comment.likes}" }
                             }
