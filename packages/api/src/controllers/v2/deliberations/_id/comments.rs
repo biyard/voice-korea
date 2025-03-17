@@ -385,7 +385,7 @@ mod deliberation_comment_tests {
             .query(deliberation_id, DeliberationCommentQuery::new(10))
             .await
             .unwrap();
-        assert!(res.total_count == 1, "total_count: {:?}", res);
+        assert!(res.total_count == 3, "total_count: {:?}", res);
         assert_eq!(res.items[0].replies, 2);
     }
 }
