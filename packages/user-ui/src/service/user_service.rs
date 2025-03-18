@@ -1,10 +1,8 @@
 #![allow(non_snake_case)]
 use crate::config;
+use bdk::prelude::*;
 use chrono::{DateTime, Utc};
-use dioxus::prelude::*;
-use dioxus_logger::tracing;
 use dioxus_oauth::prelude::FirebaseService;
-use dioxus_translate::Language;
 use google_wallet::{drive_api::DriveApi, WalletEvent};
 use models::{ApiError, User, UserClient};
 pub enum UserEvent {

@@ -1,7 +1,5 @@
 use super::step_type::StepType;
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 
 #[api_model(base = "/organizations/v2/:org-id/deliberations", table = deliberations_steps)]
 pub struct Step {

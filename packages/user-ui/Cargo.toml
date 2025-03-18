@@ -13,7 +13,7 @@ dioxus-aws.workspace = true
 by-types.workspace = true
 by-macros.workspace = true
 rest-api.workspace = true
-btracing.workspace = true
+bdk = { workspace = true, features = ["fe"] }
 
 models.workspace = true
 dioxus-logger.workspace = true
@@ -34,6 +34,6 @@ google-wallet = { workspace = true }
 
 [features]
 default = []
-server = ["dioxus-aws/server"]
-lambda = ["dioxus-aws/lambda", "server"]
-web = ["dioxus-aws/web", "dioxus-translate/web", "dioxus-oauth/web", "models/web"]
+server = ["bdk/server"]
+lambda = ["server", "bdk/lambda"]
+web = ["bdk/web", "models/web"]

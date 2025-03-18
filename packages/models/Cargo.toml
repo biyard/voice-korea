@@ -12,6 +12,8 @@ by-macros.workspace = true
 by-axum = { workspace = true, optional = true }
 rest-api.workspace = true
 
+bdk.workspace = true
+
 chrono.workspace = true
 reqwest.workspace = true
 sqlx = { workspace = true, optional = true }
@@ -31,5 +33,5 @@ sha3 = "0.10.8"
 lazy_static = "1.5.0"
 
 [features]
-web = ["dioxus-translate/web"]
-server = ["by-axum", "by-macros/server", "by-types/server", "sqlx"]
+web = ["bdk/web"]
+server = ["bdk/be", "by-axum", "by-macros/server", "by-types/server", "sqlx"]

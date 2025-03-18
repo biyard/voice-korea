@@ -1,7 +1,5 @@
-#[cfg(feature = "server")]
-use by_axum::aide;
-#[cfg(feature = "server")]
-use schemars::JsonSchema;
+#[allow(unused_imports)]
+use bdk::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]

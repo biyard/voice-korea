@@ -1,9 +1,7 @@
+#![allow(dead_code, unused)]
 use super::survey::{Age, Gender, ProofId, RegionCode, SalaryTier};
+use bdk::prelude::*;
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "server")]
-use by_axum::aide;
-#[cfg(feature = "server")]
-use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

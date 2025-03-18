@@ -1,6 +1,5 @@
 #![allow(non_snake_case)]
-use dioxus::prelude::*;
-use dioxus_translate::Language;
+use bdk::prelude::*;
 use models::*;
 
 use crate::{

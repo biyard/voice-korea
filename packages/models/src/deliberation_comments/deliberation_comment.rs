@@ -1,7 +1,5 @@
 #![allow(unused_variables, unused)]
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 use validator::Validate;
 
 // TODO(web): using comments for all project view

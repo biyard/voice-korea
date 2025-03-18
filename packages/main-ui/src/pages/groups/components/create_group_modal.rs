@@ -1,7 +1,5 @@
 #![allow(non_snake_case)]
-// use crate::{components::icons::Remove, pages::groups::components::MemberLabel};
-use dioxus::prelude::*;
-use dioxus_translate::*;
+use bdk::prelude::*;
 use models::{organization::Organization, User};
 
 use crate::{

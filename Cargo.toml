@@ -18,6 +18,7 @@ license = "Apache-2.0"
 
 [workspace.dependencies]
 by-axum = { path = "deps/rust-sdk/packages/by-axum" }
+bdk = { path = "deps/rust-sdk/packages/bdk" }
 easy-dynamodb = { path = "deps/rust-sdk/packages/easy-dynamodb" }
 by-components = { path = "deps/rust-sdk/packages/by-components" }
 btracing = { path = "deps/rust-sdk/packages/btracing" }

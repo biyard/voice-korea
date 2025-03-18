@@ -1,7 +1,5 @@
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::ApiModel;
-use dioxus_translate::Translate;
+use bdk::prelude::*;
+
 #[derive(Debug, Clone, Eq, PartialEq, Default, ApiModel, Translate, Copy)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 pub enum Tab {

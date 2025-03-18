@@ -1,8 +1,7 @@
 use std::str::FromStr;
 
+use bdk::prelude::*;
 use by_macros::DioxusController;
-use dioxus::prelude::*;
-use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
 use models::{
     OrganizationMember, OrganizationMemberQuery, OrganizationMemberSummary, QueryResponse, Role,

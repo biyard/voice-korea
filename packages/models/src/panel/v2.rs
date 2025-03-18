@@ -6,9 +6,7 @@ use crate::{
     attribute_v2::{GenderV2, RegionV2, SalaryV2},
     response::AgeV3,
 };
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 use by_types::QueryResponse;
 
 #[derive(validator::Validate)]

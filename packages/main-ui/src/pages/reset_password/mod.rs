@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
+use bdk::prelude::*;
 use controller::Controller;
-use dioxus::prelude::*;
 
 use crate::{
     components::{input::Input, table_row::Row},

@@ -850,6 +850,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
+name = "bdk"
+version = "0.1.0"
+dependencies = [
+ "aide",
+ "bigdecimal",
+ "btracing",
+ "by-axum",
+ "by-components",
+ "by-macros",
+ "by-types",
+ "dioxus",
+ "dioxus-aws",
+ "dioxus-fullstack",
+ "dioxus-logger 0.5.1",
+ "dioxus-popup",
+ "dioxus-translate",
+ "reqwest",
+ "rest-api",
+ "schemars",
+ "sqlx",
+ "tracing",
+ "validator",
+]
+
+[[package]]
 name = "bigdecimal"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1450,9 +1475,11 @@ dependencies = [
  "dioxus-history",
  "dioxus-hooks",
  "dioxus-html",
+ "dioxus-liveview",
  "dioxus-logger 0.6.3",
  "dioxus-router",
  "dioxus-signals",
+ "dioxus-ssr",
  "dioxus-web",
  "manganis",
  "serde",
@@ -1672,6 +1699,9 @@ dependencies = [
  "keyboard-types",
  "lazy-js-bundle",
  "rustversion",
+ "serde",
+ "serde_json",
+ "serde_repr",
  "tracing",
 ]
 
@@ -1691,6 +1721,9 @@ name = "dioxus-interpreter-js"
 version = "0.6.3"
 source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
 dependencies = [
+ "dioxus-core",
+ "dioxus-core-types",
+ "dioxus-html",
  "js-sys",
  "lazy-js-bundle",
  "rustc-hash",
@@ -1729,6 +1762,33 @@ dependencies = [
  "dioxus-rsx",
  "dioxus-signals",
  "warnings",
+]
+
+[[package]]
+name = "dioxus-liveview"
+version = "0.6.3"
+source = "git+https://github.com/hackartists/dioxus.git#4838a4412d9c7f445f34baeca78e0585dd8ada7a"
+dependencies = [
+ "axum 0.7.9",
+ "dioxus-cli-config 0.6.3 (git+https://github.com/hackartists/dioxus.git)",
+ "dioxus-core",
+ "dioxus-devtools",
+ "dioxus-document",
+ "dioxus-history",
+ "dioxus-html",
+ "dioxus-interpreter-js",
+ "futures-channel",
+ "futures-util",
+ "generational-box",
+ "rustc-hash",
+ "serde",
+ "serde_json",
+ "slab",
+ "thiserror 1.0.69",
+ "tokio",
+ "tokio-stream",
+ "tokio-util",
+ "tracing",
 ]
 
 [[package]]
@@ -1782,6 +1842,14 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "dioxus-popup"
+version = "0.1.1"
+dependencies = [
+ "by-components",
+ "dioxus",
 ]
 
 [[package]]
@@ -2074,6 +2142,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad9cdb4b747e485a12abb0e6566612956c7a1bafa3bdb8d682c5b6d403589e48"
 dependencies = [
  "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -3017,6 +3086,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b750dcadc39a09dbadd74e118f6dd6598df77fa01df0cfcdc52c28dece74528a"
 dependencies = [
  "bitflags",
+ "serde",
 ]
 
 [[package]]
@@ -3267,7 +3337,7 @@ dependencies = [
 name = "main-ui"
 version = "0.3.17"
 dependencies = [
- "btracing",
+ "bdk",
  "by-components",
  "by-macros",
  "by-types",
@@ -3404,6 +3474,7 @@ dependencies = [
 name = "models"
 version = "1.0.0"
 dependencies = [
+ "bdk",
  "by-axum",
  "by-macros",
  "by-types",
@@ -4406,6 +4477,17 @@ dependencies = [
  "percent-encoding",
  "serde",
  "thiserror 1.0.69",
+]
+
+[[package]]
+name = "serde_repr"
+version = "0.1.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "175ee3e80ae9982737ca543e96133087cbd9a485eecc3bc4de9c1a37b47ea59c"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.99",
 ]
 
 [[package]]
@@ -5572,7 +5654,7 @@ checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
 name = "user-ui"
 version = "0.1.0"
 dependencies = [
- "btracing",
+ "bdk",
  "by-components",
  "by-macros",
  "by-types",

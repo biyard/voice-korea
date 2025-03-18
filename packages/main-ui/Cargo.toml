@@ -34,12 +34,12 @@ web-sys = { version = "0.3.74" }
 getrandom = { version = "0.2", features = ["js"] }
 num-format = "0.4.4"
 indexmap = "2.7.1"
-btracing.workspace = true
+bdk = { workspace = true, features = ["fe"] }
 tracing = "0.1.41"
 uuid = { version = "1", features = ["v4"] }
 
 [features]
 default = []
-server = ["dioxus-aws/server"]
-lambda = ["dioxus-aws/lambda", "server"]
-web = ["dioxus-aws/web", "dioxus-translate/web", "models/web"]
+web = ["bdk/web"]
+server = ["bdk/server"]
+lambda = ["server", "bdk/lambda"]

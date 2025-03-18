@@ -1,4 +1,4 @@
-use dioxus::prelude::*;
+use bdk::prelude::*;
 
 pub mod components;
 pub mod config;

@@ -1,4 +1,4 @@
-use dioxus_translate::Translate;
+use bdk::prelude::*;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Translate)]
 pub enum DeliberationStatus {
