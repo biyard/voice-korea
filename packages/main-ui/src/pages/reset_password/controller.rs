@@ -1,7 +1,6 @@
 #![allow(non_snake_case)]
+use bdk::prelude::*;
 use by_macros::DioxusController;
-use dioxus::prelude::*;
-use dioxus_translate::*;
 use models::*;
 use regex::Regex;
 
