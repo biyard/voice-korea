@@ -1,8 +1,6 @@
-use serde::{Serialize, Deserialize};
-#[cfg(feature = "server")]
-use by_axum::aide;
-#[cfg(feature = "server")]
-use schemars::JsonSchema;
+#[allow(unused_imports)]
+use bdk::prelude::*;
+use serde::{Deserialize, Serialize};
 
 // TODO: need to feat validation process
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]

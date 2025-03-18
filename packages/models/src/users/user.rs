@@ -3,11 +3,9 @@ use crate::{
     // group::GroupV2,
     organization::Organization,
 };
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
-use validator::ValidationError;
+use bdk::prelude::*;
 use lazy_static::lazy_static;
+use validator::ValidationError;
 
 #[derive(validator::Validate)]
 #[api_model(base = "/v1/users", action = [signup(code = String), reset(code = String)], read_action = refresh, table = users)]

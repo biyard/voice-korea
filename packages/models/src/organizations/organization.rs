@@ -1,7 +1,5 @@
 use crate::User;
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 use by_types::QueryResponse;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;

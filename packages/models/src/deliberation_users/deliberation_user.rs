@@ -1,6 +1,4 @@
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 use validator::Validate;
 
 use crate::Role;

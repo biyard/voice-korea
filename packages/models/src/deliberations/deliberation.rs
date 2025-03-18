@@ -1,9 +1,7 @@
 use crate::deliberation_comment::DeliberationComment;
 use crate::deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
 
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 use validator::Validate;
 
 use crate::deliberation_vote::DeliberationVote;

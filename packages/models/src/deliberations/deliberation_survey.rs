@@ -1,6 +1,4 @@
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 
 use crate::{response::SurveyResponse, SurveyV2};
 

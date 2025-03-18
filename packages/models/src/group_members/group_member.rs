@@ -1,6 +1,4 @@
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 
 #[api_model(base = "/v2/organizations/:org-id/groups/:group-id/members", table = group_members)]
 pub struct GroupMemberV2 {

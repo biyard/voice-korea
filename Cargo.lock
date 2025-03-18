@@ -850,6 +850,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
+name = "bdk"
+version = "0.1.0"
+dependencies = [
+ "aide",
+ "bigdecimal",
+ "btracing",
+ "by-axum",
+ "by-components",
+ "by-macros",
+ "by-types",
+ "dioxus",
+ "dioxus-aws",
+ "dioxus-fullstack",
+ "dioxus-logger 0.5.1",
+ "dioxus-popup",
+ "dioxus-translate",
+ "reqwest",
+ "rest-api",
+ "schemars",
+ "sqlx",
+ "tracing",
+ "validator",
+]
+
+[[package]]
 name = "bigdecimal"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1782,6 +1807,14 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "dioxus-popup"
+version = "0.1.1"
+dependencies = [
+ "by-components",
+ "dioxus",
 ]
 
 [[package]]
@@ -3404,6 +3437,7 @@ dependencies = [
 name = "models"
 version = "1.0.0"
 dependencies = [
+ "bdk",
  "by-axum",
  "by-macros",
  "by-types",

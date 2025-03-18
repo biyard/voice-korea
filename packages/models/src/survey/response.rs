@@ -2,11 +2,8 @@
 use std::{str::FromStr, time::SystemTime};
 
 use crate::{attribute_v2::*, PanelV2, Result};
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 use by_types::QueryResponse;
-use dioxus_translate::Language;
 
 use crate::attribute_v2::{GenderV2, RegionV2, SalaryV2};
 

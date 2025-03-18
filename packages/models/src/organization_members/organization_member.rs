@@ -3,9 +3,7 @@ pub use crate::group::GroupInfo;
 pub use crate::groups::Group;
 #[allow(unused)]
 use crate::Result;
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 #[cfg(feature = "server")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

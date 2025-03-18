@@ -3,11 +3,8 @@
 use crate::ProjectArea;
 #[allow(unused)]
 use crate::Result;
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::{api_model, ApiModel};
+use bdk::prelude::*;
 use by_types::QueryResponse;
-use dioxus_translate::Translate;
 use serde::{Deserialize, Serialize};
 
 use by_types::ApiError;

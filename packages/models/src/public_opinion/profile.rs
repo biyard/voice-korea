@@ -2,11 +2,8 @@
 
 #[allow(unused)]
 use crate::Result;
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 use by_types::QueryResponse;
-use dioxus_translate::Language;
 
 #[api_model(base = "/profile", table = profile, iter_type=QueryResponse)]
 pub struct Profile {

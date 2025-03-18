@@ -1,7 +1,5 @@
 #![allow(unused_variables)]
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 
 #[derive(validator::Validate)]
 #[api_model(base = "/v1/users/verification", table = verifications)]

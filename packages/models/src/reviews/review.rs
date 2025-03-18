@@ -2,9 +2,7 @@
 
 #[allow(unused)]
 use crate::Result;
-#[cfg(feature = "server")]
-use by_axum::aide;
-use by_macros::api_model;
+use bdk::prelude::*;
 use by_types::QueryResponse;
 
 #[api_model(base = "/v2/reviews", table = reviews, iter_type=QueryResponse, action_by_id = delete)]
