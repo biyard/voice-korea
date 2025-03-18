@@ -16,6 +16,7 @@ pub mod utils {
 
 pub mod routes;
 
+use dioxus_oauth::prelude::FirebaseProvider;
 use routes::Route;
 use service::{popup_service::PopupService, user_service::UserService};
 
@@ -33,7 +34,19 @@ fn main() {
 fn App() -> Element {
     PopupService::init();
     UserService::init();
+
+    let conf = config::get();
+
     rsx! {
+        FirebaseProvider {
+            api_key: conf.firebase.api_key.clone(),
+            auth_domain: conf.firebase.auth_domain.clone(),
+            project_id: conf.firebase.project_id.clone(),
+            storage_bucket: conf.firebase.storage_bucket.clone(),
+            messaging_sender_id: conf.firebase.messaging_sender_id.clone(),
+            app_id: conf.firebase.app_id.clone(),
+            measurement_id: conf.firebase.measurement_id.clone(),
+        }
         btracing::ToastTracing {
             img {
                 src: asset!("/public/logos/logo_symbol_white.png"),
@@ -44,7 +57,6 @@ fn App() -> Element {
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
 
-        document::Script { src: asset!("/public/dep.js") }
         document::Script { src: "https://d3js.org/d3.v7.min.js" }
         load_tailwindcss {}
         Router::<Route> {}

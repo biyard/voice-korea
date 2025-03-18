@@ -1,67 +1,39 @@
-use by_components::icons::validations::Extra;
+#![allow(non_snake_case, dead_code, unused_variables)]
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::{response::Answer, Question, SurveyV2};
 
 use crate::{
     components::icons::left_arrow::LeftArrow,
-    pages::projects::_id::{
-        components::{
-            multiple_objective::MultipleObjective, single_objective::SingleObjective,
-            subjective::Subjective,
-        },
-        i18n::MySurveyTranslate,
+    pages::projects::_id::components::{
+        final_survey::FinalSurveyTranslate, multiple_objective::MultipleObjective,
+        single_objective::SingleObjective, subjective::Subjective,
     },
 };
 
 #[component]
-pub fn MySurvey(
+pub fn FinalSurveyQuestion(
     lang: Language,
     survey: SurveyV2,
     answers: Vec<Answer>,
     onprev: EventHandler<MouseEvent>,
+    onsend: EventHandler<MouseEvent>,
     onchange: EventHandler<(usize, Answer)>,
-    onupdate: EventHandler<MouseEvent>,
-    onremove: EventHandler<MouseEvent>,
 ) -> Element {
-    let tr: MySurveyTranslate = translate(&lang);
-    rsx! {
-        div { class: "flex flex-col gap-[10px]",
-            div { class: "flex flex-row w-full justify-between items-center mb-[10px]",
-                div { class: "flex flex-row justify-start items-center gap-[8px]",
-                    div {
-                        class: "cursor-pointer w-[24px] h-[24px]",
-                        onclick: move |e: Event<MouseData>| {
-                            onprev.call(e);
-                        },
-                        LeftArrow { stroke: "black" }
-                    }
-                    div { class: "font-semibold text-[#222222] text-[20px]", "{tr.title}" }
-                }
+    let tr: FinalSurveyTranslate = translate(&lang);
+    let survey_title = survey.name;
 
-                div { class: "group relative",
-                    div { class: "flex flex-row w-[90px] min-w-[90px] h-full justify-center items-center",
-                        button { class: "cursor-pointer", Extra {} }
-                        nav { class: "border-2 bg-white invisible border-none shadow-lg rounded w-60 absolute right-0 top-full transition-all opacity-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-1 group-focus-within:z-20",
-                            ul { class: "py-1",
-                                li {
-                                    class: "p-3 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer",
-                                    onclick: move |e: Event<MouseData>| {
-                                        onupdate.call(e);
-                                    },
-                                    "{tr.update}"
-                                }
-                                li {
-                                    class: "p-3 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer",
-                                    onclick: move |e: Event<MouseData>| {
-                                        onremove.call(e);
-                                    },
-                                    "{tr.remove}"
-                                }
-                            }
-                        }
-                    }
+    rsx! {
+        div { class: "flex flex-col w-full justify-start items-start gap-[10px] mt-[28px]",
+            div { class: "flex flex-row w-full justify-start items-center gap-[8px] mb-[10px]",
+                div {
+                    class: "cursor-pointer w-[24px] h-[24px]",
+                    onclick: move |e: Event<MouseData>| {
+                        onprev.call(e);
+                    },
+                    LeftArrow { stroke: "black" }
                 }
+                div { class: "font-semibold text-[#222222] text-[20px]", "{survey_title}" }
             }
 
             for (i , question) in survey.questions.iter().enumerate() {
@@ -140,6 +112,16 @@ pub fn MySurvey(
                             }
                         }
                     }
+                }
+            }
+
+            div { class: "flex flex-row w-full justify-center items-center mb-[40px]",
+                div {
+                    class: "cursor-pointer flex flex-row justify-center items-center w-[200px] py-[13px] font-bold text-white text-[16px] bg-[#8095EA] rounded-[8px]",
+                    onclick: move |e: Event<MouseData>| {
+                        onsend.call(e);
+                    },
+                    "{tr.submit}"
                 }
             }
         }

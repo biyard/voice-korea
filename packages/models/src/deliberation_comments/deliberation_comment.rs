@@ -24,12 +24,12 @@ pub struct DeliberationComment {
     pub comment: String,
 
     // parent_id is used for reply to a comment
-    #[api_model(summary, query_action = replies_of)]
+    #[api_model(summary, many_to_one = deliberation_comments, query_action = replies_of)]
     pub parent_id: i64,
 
     // num_of_replies is used for the number of replies on a comment.
     // it means the number of comments that have the parent_id of this comment.
-    #[api_model(summary, one_to_many = deliberation_comments, foreign_key = parent_id, reference_key = parent_id aggregator = count)]
+    #[api_model(summary, one_to_many = deliberation_comments, foreign_key = parent_id, aggregator = count)]
     pub replies: i64,
 
     #[api_model(summary, one_to_many = deliberation_comments_likes, foreign_key = comment_id, aggregator = count)]

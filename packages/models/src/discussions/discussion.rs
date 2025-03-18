@@ -31,11 +31,14 @@ pub struct Discussion {
     #[api_model(summary, action = create, action_by_id = update)]
     pub description: String,
 
+    #[api_model(summary)]
     pub zoom_link: Option<String>,
 
-    #[api_model(many_to_many = discussion_groups, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = discussion_id)]
+    #[api_model(summary, many_to_many = discussion_groups, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = discussion_id)]
+    #[serde(default)]
     pub user_id: Vec<User>,
 
-    #[api_model(many_to_many = discussion_resources, table_name = resources, foreign_primary_key = resource_id, foreign_reference_key = discussion_id)]
+    #[api_model(summary, many_to_many = discussion_resources, table_name = resources, foreign_primary_key = resource_id, foreign_reference_key = discussion_id)]
+    #[serde(default)]
     pub resources: Vec<ResourceFile>,
 }

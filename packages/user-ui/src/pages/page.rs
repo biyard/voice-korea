@@ -25,6 +25,7 @@ pub fn MainPage(lang: Language) -> Element {
     let public_opinion_reviews = data.reviews;
 
     rsx! {
+        // TODO(mobile): dashboard implemented to fit mobile size
         div { class: "flex flex-col w-full justify-center items-center gap-[100px]",
             div { class: "flex flex-col w-full justify-center items-center gap-[150px]",
                 div { class: "flex flex-col w-full justify-center items-center gap-[50px]",

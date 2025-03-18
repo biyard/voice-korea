@@ -7,30 +7,33 @@ use models::{deliberation_survey::DeliberationSurvey, response::Answer, Question
 
 use crate::{
     pages::projects::_id::components::{
-        final_survey_info::FinalSurveyInfo, final_survey_question::FinalSurveyQuestion,
+        sample_survey_info::SampleSurveyInfo, sample_survey_question::SampleSurveyQuestion,
     },
     utils::time::current_timestamp,
 };
 
 #[derive(Translate, PartialEq, Default, Debug)]
-pub enum FinalSurveyStatus {
+pub enum SurveyStatus {
     #[default]
-    #[translate(ko = "투표가 준비중입니다.", en = "Voting is in preparation.")]
+    #[translate(ko = "조사가 준비중입니다.", en = "The investigation is underway.")]
     Ready,
-    #[translate(ko = "투표 참여하기", en = "Take part in the vote.")]
+    #[translate(ko = "조사 참여하기", en = "Take part in the survey")]
     InProgress,
-    #[translate(ko = "투표가 마감되었습니다.", en = "Voting is now closed.")]
+    #[translate(
+        ko = "조사가 마감되었습니다.",
+        en = "The investigation has been closed."
+    )]
     Finish,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
-pub enum FinalSurveyStep {
+pub enum SurveyStep {
     Display,
     WriteSurvey,
 }
 
 #[component]
-pub fn FinalSurvey(
+pub fn SampleSurvey(
     lang: Language,
     project_id: ReadOnlySignal<i64>,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
@@ -38,12 +41,16 @@ pub fn FinalSurvey(
 ) -> Element {
     let mut ctrl = Controller::new(lang, project_id)?;
     let survey = ctrl.survey()?;
-    let mut survey_step: Signal<FinalSurveyStep> = use_signal(|| FinalSurveyStep::Display);
+    let mut survey_step: Signal<SurveyStep> = use_signal(|| SurveyStep::Display);
 
     rsx! {
-        div { id: "final-survey", ..attributes,
-            if survey_step() == FinalSurveyStep::Display {
-                FinalSurveyInfo {
+        div {
+            id: "sample-survey",
+            class: "flex flex-col w-full h-fit justify-center items-center",
+            ..attributes,
+
+            if survey_step() == SurveyStep::Display {
+                SampleSurveyInfo {
                     lang,
                     survey,
                     onchange: move |step| {
@@ -51,12 +58,12 @@ pub fn FinalSurvey(
                     },
                 }
             } else {
-                FinalSurveyQuestion {
+                SampleSurveyQuestion {
                     lang,
                     survey: if survey.surveys.len() != 0 { survey.surveys[0].clone() } else { SurveyV2::default() },
                     answers: ctrl.answers(),
                     onprev: move |_| {
-                        survey_step.set(FinalSurveyStep::Display);
+                        survey_step.set(SurveyStep::Display);
                     },
                     onsend: move |_| {
                         tracing::debug!("answers: {:?}", ctrl.answers());
@@ -66,6 +73,7 @@ pub fn FinalSurvey(
                     },
                 }
             }
+        
         }
     }
 }
@@ -137,11 +145,11 @@ impl Controller {
 }
 
 translate! {
-    FinalSurveyTranslate;
+    SampleSurveyTranslate;
 
     title: {
-        ko: "최종 투표 주제",
-        en: "Final Vote Topic",
+        ko: "표본 조사 주제",
+        en: "Sample Survey Title",
     },
     submit: {
         ko: "제출하기",
@@ -149,19 +157,19 @@ translate! {
     }
 }
 
-pub fn get_survey_status(started_at: i64, ended_at: i64) -> FinalSurveyStatus {
+pub fn get_survey_status(started_at: i64, ended_at: i64) -> SurveyStatus {
     let current = current_timestamp();
 
     if started_at > 10000000000 {
         tracing::error!("time parsing failed");
-        return FinalSurveyStatus::default();
+        return SurveyStatus::default();
     }
 
     if started_at > current {
-        FinalSurveyStatus::Ready
+        SurveyStatus::Ready
     } else if ended_at < current {
-        FinalSurveyStatus::Finish
+        SurveyStatus::Finish
     } else {
-        FinalSurveyStatus::InProgress
+        SurveyStatus::InProgress
     }
 }

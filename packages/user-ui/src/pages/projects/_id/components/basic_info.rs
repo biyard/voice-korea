@@ -7,7 +7,12 @@ use models::{deliberation_basic_info::DeliberationBasicInfo, Tab};
 
 use crate::components::icons::triangle::{TriangleDown, TriangleUp};
 #[component]
-pub fn BasicInfo(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
+pub fn BasicInfo(
+    lang: Language,
+    project_id: ReadOnlySignal<i64>,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
+) -> Element {
     let ctrl = Controller::new(lang, project_id)?;
     let info = ctrl.infos()?;
 
@@ -16,7 +21,10 @@ pub fn BasicInfo(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
     let tab_title: &str = Tab::BasicInfo.translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
+        div {
+            id: "basic-info",
+            class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
+            ..attributes,
             // header
             div { class: "w-full flex flex-row justify-between items-center ",
                 p { class: "font-semibold text-[20px] mt-[28px]", "{tab_title}" }
@@ -51,7 +59,7 @@ pub fn BasicInfo(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
                             for member in info.members {
                                 div { class: "flex flex-row justify-start gap-[8px]",
                                     img { class: "w-[40px] h-[40px] bg-[#D9D9D9] rounded-full" }
-                                    div { class: "flex flex-col justify-start",
+                                    div { class: "flex flex-col justify-center",
                                         p { class: "font-semibold text-[15px] justify-start",
                                             {member.role.translate(&lang)}
                                         }

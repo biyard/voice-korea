@@ -5,26 +5,39 @@ use models::Tab;
 
 use crate::pages::projects::_id::{
     components::{
-        basic_info::BasicInfo, deliberation::Deliberation, discussion::Discussion,
-        final_draft::FinalDraft, final_survey::FinalSurvey, project_header::ProjectHeader,
-        sample_suvey::SampleSurvey,
+        basic_info::BasicInfo, comments::Comment, deliberation::Deliberation,
+        discussion::DiscussionPage, final_draft::FinalDraft, final_survey::FinalSurvey,
+        project_header::ProjectHeader, sample_survey::SampleSurvey,
     },
     controller,
 };
 
 #[component]
 pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
-    let ctrl = controller::Controller::init(lang, project_id)?;
-    let _comments = ctrl.comments()?;
+    let mut ctrl = controller::Controller::init(lang, project_id)?;
+    let comments = ctrl.comment_trees();
     let deliberation = ctrl.summary()?;
     let active_tab = use_signal(|| Tab::BasicInfo);
     tracing::debug!("deliberation: {:?}", deliberation);
 
     rsx! {
+        // TODO(mobile): tab view implemented to fit mobile size
         div { class: "flex flex-col w-full justify-center items-center",
             ProjectHeader { lang, deliberation, active_tab: active_tab.clone() }
             ProjectDetails { lang, active_tab: active_tab.clone(), project_id }
-                // Comment { lang, comments }
+            Comment {
+                lang,
+                comments,
+                send_comment: move |comment: String| async move {
+                    let _ = ctrl.send_comment(comment).await;
+                },
+                like_comment: move |id: i64| async move {
+                    let _ = ctrl.like_comment(id).await;
+                },
+                send_reply: move |(id, reply): (i64, String)| async move {
+                    let _ = ctrl.send_reply(id, reply).await;
+                },
+            }
         }
     }
 }
@@ -49,7 +62,7 @@ pub fn ProjectDetails(
                         Deliberation { lang, project_id }
                     },
                     Tab::Discussion => rsx! {
-                        Discussion { lang, project_id }
+                        DiscussionPage { lang, project_id }
                     },
                     Tab::FinalSurvey => rsx! {
                         FinalSurvey { lang, project_id }

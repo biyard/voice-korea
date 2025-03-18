@@ -13,7 +13,7 @@ use models::{
     deliberation_content::DeliberationContent,
     deliberations::{
         deliberation::Deliberation, deliberation_basic_info::DeliberationBasicInfo,
-        deliberation_survey::DeliberationSurvey,
+        deliberation_draft::DeliberationDraft, deliberation_survey::DeliberationSurvey,
     },
     *,
 };
@@ -66,9 +66,27 @@ impl DeliberationProjectController {
             .route("/:id/surveys", get(Self::get_deliberation_survey))
             .route("/:id/basic-info", get(Self::get_deliberation_basic_info))
             .route("/:id/contents", get(Self::get_deliberation_contents))
+            .route("/:id/draft", get(Self::get_deliberation_draft))
             .route("/:id", get(Self::get_deliberation_project_by_id))
             .route("/", get(Self::get_deliberation_project))
             .with_state(self.clone()))
+    }
+
+    pub async fn get_deliberation_draft(
+        State(ctrl): State<DeliberationProjectController>,
+        Extension(_auth): Extension<Option<Authorization>>,
+        Path(DeliberationProjectPath { id }): Path<DeliberationProjectPath>,
+    ) -> Result<Json<DeliberationDraft>> {
+        tracing::debug!("get_deliberation_draft {:?}", id);
+
+        Ok(Json(
+            DeliberationDraft::query_builder()
+                .id_equals(id)
+                .query()
+                .map(DeliberationDraft::from)
+                .fetch_one(&ctrl.pool)
+                .await?,
+        ))
     }
 
     pub async fn get_deliberation_survey(
