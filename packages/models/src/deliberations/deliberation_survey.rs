@@ -29,7 +29,7 @@ pub struct DeliberationSurvey {
     pub surveys: Vec<SurveyV2>,
 
     // responses is a list of responses of a user(requester) for surveys.
-    #[api_model(summary,  one_to_many = deliberation_responses, foreign_key = deliberation_id)]
+    #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id)]
     #[serde(default)]
     pub responses: Vec<DeliberationResponse>,
     // NOTE: skipped data for chart, responses per question types

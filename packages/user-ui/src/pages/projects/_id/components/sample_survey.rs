@@ -10,12 +10,15 @@ use models::{
 
 use crate::{
     pages::projects::_id::components::{
-        my_sample_survey::MySampleSurvey, sample_statistics::SampleStatistics,
-        sample_survey_info::SampleSurveyInfo, sample_survey_question::SampleSurveyQuestion,
+        my_sample_survey::MySampleSurvey, remove_survey_modal::RemoveSurveyModal,
+        sample_statistics::SampleStatistics, sample_survey_info::SampleSurveyInfo,
+        sample_survey_question::SampleSurveyQuestion,
     },
-    service::user_service::UserService,
+    service::{popup_service::PopupService, user_service::UserService},
     utils::time::current_timestamp,
 };
+
+use super::remove_survey_modal::RemoveSurveyModalTranslate;
 
 #[derive(Translate, PartialEq, Default, Debug)]
 pub enum SurveyStatus {
@@ -31,7 +34,7 @@ pub enum SurveyStatus {
     Finish,
 }
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum SurveyStep {
     Display,
     WriteSurvey,
@@ -48,7 +51,7 @@ pub fn SampleSurvey(
 ) -> Element {
     let mut ctrl = Controller::new(lang, project_id)?;
     let survey = ctrl.survey()?;
-    let mut survey_step: Signal<SurveyStep> = use_signal(|| SurveyStep::Display);
+    let step = ctrl.survey_step();
 
     rsx! {
         div {
@@ -56,49 +59,48 @@ pub fn SampleSurvey(
             class: "flex flex-col w-full h-fit justify-center items-center",
             ..attributes,
 
-            if survey_step() == SurveyStep::Display {
+            if step == SurveyStep::Display {
                 SampleSurveyInfo {
                     lang,
                     survey,
                     survey_completed: ctrl.survey_completed(),
                     onchange: move |step| {
-                        survey_step.set(step);
+                        ctrl.set_step(step);
                     },
                 }
-            } else if survey_step() == SurveyStep::WriteSurvey {
+            } else if step == SurveyStep::WriteSurvey {
                 SampleSurveyQuestion {
                     lang,
                     survey: if survey.surveys.len() != 0 { survey.surveys[0].clone() } else { SurveyV2::default() },
                     answers: ctrl.answers(),
                     onprev: move |_| {
-                        survey_step.set(SurveyStep::Display);
+                        ctrl.set_step(SurveyStep::Display);
                     },
                     onsend: move |_| async move {
                         ctrl.send_sample_response().await;
-                        survey_step.set(SurveyStep::Display);
+                        ctrl.set_step(SurveyStep::Display);
                     },
                     onchange: move |(index, answer)| {
                         ctrl.change_answer(index, answer);
                     },
                 }
-            } else if survey_step() == SurveyStep::MySurvey {
+            } else if step == SurveyStep::MySurvey {
                 MySampleSurvey {
                     lang,
                     survey: if survey.surveys.len() != 0 { survey.surveys[0].clone() } else { SurveyV2::default() },
                     answers: ctrl.answers(),
                     onprev: move |_| {
-                        survey_step.set(SurveyStep::Display);
+                        ctrl.set_step(SurveyStep::Display);
                     },
                     onchange: move |(index, answer)| {
                         ctrl.change_answer(index, answer);
                     },
                     onupdate: move |_| async move {
                         ctrl.update_sample_response().await;
-                        survey_step.set(SurveyStep::Display);
+                        ctrl.set_step(SurveyStep::Display);
                     },
                     onremove: move |_| async move {
-                        ctrl.remove_sample_response().await;
-                        survey_step.set(SurveyStep::Display);
+                        ctrl.open_remove_sample_modal();
                     },
                 }
             } else {
@@ -106,7 +108,7 @@ pub fn SampleSurvey(
                     lang,
                     responses: ctrl.survey_responses(),
                     onprev: move |_| {
-                        survey_step.set(SurveyStep::Display);
+                        ctrl.set_step(SurveyStep::Display);
                     },
                 }
             }
@@ -128,6 +130,8 @@ pub struct Controller {
 
     pub user: UserService,
     pub survey_responses: Signal<SampleSurveyResponses>,
+    popup_service: PopupService,
+    survey_step: Signal<SurveyStep>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -160,6 +164,8 @@ impl Controller {
 
             user,
             survey_responses: use_signal(|| SampleSurveyResponses::default()),
+            popup_service: use_context(),
+            survey_step: use_signal(|| SurveyStep::Display),
         };
 
         use_effect(move || {
@@ -279,6 +285,10 @@ impl Controller {
         survey_maps
     }
 
+    pub fn set_step(&mut self, step: SurveyStep) {
+        self.survey_step.set(step);
+    }
+
     pub fn change_answer(&mut self, index: usize, answer: Answer) {
         let mut answers = self.answers();
         answers[index] = answer;
@@ -301,11 +311,35 @@ impl Controller {
         {
             Ok(_) => {
                 self.survey.restart();
+                self.set_step(SurveyStep::Display);
             }
             Err(e) => {
                 btracing::error!("update response failed with error: {:?}", e);
             }
         }
+    }
+
+    pub fn open_remove_sample_modal(&mut self) {
+        let mut popup_service = self.popup_service;
+        let mut ctrl = self.clone();
+        let lang = self.lang;
+        let tr: RemoveSurveyModalTranslate = translate(&lang);
+
+        popup_service
+            .open(rsx! {
+                RemoveSurveyModal {
+                    lang,
+                    onclose: move |_| {
+                        popup_service.close();
+                    },
+                    onremove: move |_| async move {
+                        ctrl.remove_sample_response().await;
+                        popup_service.close();
+                    },
+                }
+            })
+            .with_id("remove_sample")
+            .with_title(tr.title);
     }
 
     pub async fn update_sample_response(&mut self) {
