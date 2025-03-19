@@ -2,7 +2,9 @@
 use by_axum::aide;
 use by_macros::api_model;
 
-use crate::{deliberation_user::DeliberationUser, response::SurveyResponse};
+use crate::{
+    deliberation_response::DeliberationResponse, deliberation_user::DeliberationUser, SurveyV2,
+};
 
 // TODO(web): using resource for basic info tab.
 // TODO(api): implement query survey response.
@@ -22,7 +24,11 @@ pub struct DeliberationDraft {
     #[api_model(one_to_many = deliberation_users)]
     pub members: Vec<DeliberationUser>,
 
+    #[api_model(many_to_many = deliberation_surveys, table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = deliberation_id)]
+    pub surveys: Vec<SurveyV2>,
+
     // responses is a list of responses of a user(requester) for surveys.
-    #[api_model(skip)]
-    pub responses: Vec<SurveyResponse>,
+    #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id)]
+    #[serde(default)]
+    pub responses: Vec<DeliberationResponse>,
 }

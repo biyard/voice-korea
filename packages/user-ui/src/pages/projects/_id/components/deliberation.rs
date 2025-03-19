@@ -82,7 +82,7 @@ pub fn Deliberation(
                         }
                         //file
                         div { class: "flex flex-wrap flex-1 justify-start items-center gap-[8px]",
-                            for resource in deliberation.study_materials {
+                            for resource in deliberation.resources {
                                 div {
                                     class: "cursor-pointer flex flex-row justify-start items-center rounded-[100px] bg-[#7C8292] gap-[4px] px-[12px] py-[4px]",
                                     onclick: {
@@ -112,7 +112,6 @@ pub fn Deliberation(
                     }
                 }
             }
-        
         }
     }
 }

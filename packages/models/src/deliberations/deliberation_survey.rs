@@ -1,6 +1,8 @@
 use bdk::prelude::*;
 
-use crate::{deliberation_user::DeliberationUser, response::SurveyResponse, SurveyV2};
+use crate::{
+    deliberation_response::DeliberationResponse, deliberation_user::DeliberationUser, SurveyV2,
+};
 
 // TODO(api): implement survey response for Sample, final Survey.
 // TODO(web): using resource for Sample survey tab on a project.
@@ -27,8 +29,9 @@ pub struct DeliberationSurvey {
     pub surveys: Vec<SurveyV2>,
 
     // responses is a list of responses of a user(requester) for surveys.
-    #[api_model(skip)]
-    pub responses: Vec<SurveyResponse>,
+    #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id)]
+    #[serde(default)]
+    pub responses: Vec<DeliberationResponse>,
     // NOTE: skipped data for chart, responses per question types
     #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id, aggregator = count)]
     pub response_count: i64,

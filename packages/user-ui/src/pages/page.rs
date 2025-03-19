@@ -271,7 +271,10 @@ pub fn OpinionProject(lang: Language, deliberations: Vec<DeliberationProject>) -
                                     });
                                 }
                             },
-                            ProjectBox { lang, deliberation: deliberation.clone() }
+                            ProjectBox {
+                                lang,
+                                deliberation: deliberation.clone().into(),
+                            }
                         }
                     }
                 }
@@ -281,7 +284,7 @@ pub fn OpinionProject(lang: Language, deliberations: Vec<DeliberationProject>) -
                     MoreButton {
                         lang,
                         onclick: move |_| {
-                            tracing::debug!("more button clicked");
+                            nav.push(Route::ProjectListPage { lang });
                         },
                     }
                 }
