@@ -27,6 +27,18 @@ pub fn SampleSurveyInfo(
     let status = get_survey_status(survey.started_at, survey.ended_at);
     let tr: SampleSurveyTranslate = translate(&lang);
 
+    let title = if survey.surveys.is_empty() {
+        "".to_string()
+    } else {
+        survey.surveys[0].name.clone()
+    };
+
+    let description = if survey.surveys.is_empty() {
+        "".to_string()
+    } else {
+        survey.surveys[0].description.clone()
+    };
+
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
             div { class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
@@ -61,11 +73,9 @@ pub fn SampleSurveyInfo(
                             //line
                             hr { class: "w-full h-[1px] mt-[12px] mb-[12px] border-[#eee]" }
                             div { class: "w-full justify-start mt-[15px] mb-[20px] font-bold text-[18px]",
-                                "{survey.title}"
+                                "{title}"
                             }
-                            div { class: "w-full flex justify-start text-[15px]",
-                                "{survey.description}"
-                            }
+                            div { class: "w-full flex justify-start text-[15px]", "{description}" }
                             div { class: "w-full mt-[20px] flex flex-row justify-start gap-[40px]",
                                 for member in survey.members {
                                     div { class: "flex flex-row justify-start gap-[8px]",
