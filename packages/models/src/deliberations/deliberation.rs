@@ -1,4 +1,5 @@
 use crate::deliberation_comment::DeliberationComment;
+use crate::deliberation_response::DeliberationResponse;
 use crate::deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
 
 use bdk::prelude::*;
@@ -69,6 +70,9 @@ pub struct Deliberation {
     #[api_model(one_to_many = deliberation_comments)]
     #[serde(default)]
     pub comments: Vec<DeliberationComment>,
+    #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id)]
+    #[serde(default)]
+    pub responses: Vec<DeliberationResponse>,
     #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id, aggregator = count)]
     pub response_count: i64,
 }

@@ -84,6 +84,8 @@ pub enum ApiError {
 
     AlreadyExists,
 
+    UpdateNotAllowed,
+
     InvalidPermissions, // if organization is not matched with organization_member or group_member
 
     OrganizationNotFound,

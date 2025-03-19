@@ -2,7 +2,7 @@ use bdk::prelude::*;
 
 use crate::response::Answer;
 
-#[api_model(base = "/v2/deliberations/:deliberation-id/responses", table = deliberation_responses)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/responses", action_by_id = remove_respond_answer, table = deliberation_responses)]
 pub struct DeliberationResponse {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -13,10 +13,10 @@ pub struct DeliberationResponse {
 
     #[api_model(many_to_one = deliberations)]
     pub deliberation_id: i64,
-    #[api_model(many_to_one = users, action = respond_answer, summary)]
+    #[api_model(many_to_one = users, summary)]
     pub user_id: i64,
 
-    #[api_model(summary, action = respond_answer, type = JSONB)]
+    #[api_model(summary, action = respond_answer, action_by_id = update_respond_answer, type = JSONB)]
     pub answers: Vec<Answer>,
     #[api_model(summary, action = [respond_answer], type = INTEGER)]
     pub deliberation_type: DeliberationType,

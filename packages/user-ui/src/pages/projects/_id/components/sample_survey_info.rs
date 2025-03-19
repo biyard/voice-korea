@@ -5,7 +5,10 @@ use dioxus_translate::{translate, Language};
 use models::{deliberation_survey::DeliberationSurvey, Tab};
 
 use crate::{
-    components::icons::triangle::{TriangleDown, TriangleUp},
+    components::icons::{
+        right_arrow::RightArrow,
+        triangle::{TriangleDown, TriangleUp},
+    },
     pages::projects::_id::components::sample_survey::{SampleSurveyTranslate, SurveyStatus},
     utils::time::current_timestamp,
 };
@@ -16,6 +19,7 @@ use super::sample_survey::SurveyStep;
 pub fn SampleSurveyInfo(
     lang: Language,
     survey: DeliberationSurvey,
+    survey_completed: bool,
     onchange: EventHandler<SurveyStep>,
 ) -> Element {
     let tab_title: &str = Tab::SampleSurvey.translate(&lang);
@@ -33,7 +37,9 @@ pub fn SampleSurveyInfo(
                 }
 
                 // information section
-                div { class: "flex flex-col gap-[10px]",
+                div {
+                    style: if survey_completed { "display: none;" } else { "" },
+                    class: "flex flex-col gap-[10px]",
 
                     // introduction section
                     div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
@@ -75,11 +81,31 @@ pub fn SampleSurveyInfo(
                         }
                     }
                 }
+
+                // information section when survey completed
+                div {
+                    class: "flex flex-col w-full gap-[10px]",
+                    style: if survey_completed { "" } else { "display: none;" },
+                    SampleLinkComponent {
+                        lang,
+                        title: tr.my_answer,
+                        onclick: move |_| {
+                            onchange.call(SurveyStep::MySurvey);
+                        },
+                    }
+                    SampleLinkComponent {
+                        lang,
+                        title: "질문별 응답",
+                        onclick: move |_| {
+                            onchange.call(SurveyStep::Statistics);
+                        },
+                    }
+                }
             }
 
             div { class: "flex flex-row w-full justify-center mb-[40px]",
                 div {
-                    visibility: if survey.surveys.len() == 0 { "hidden" },
+                    style: if survey.surveys.is_empty() || survey_completed { "display: none;" } else { "" },
                     class: format!(
                         "flex flex-row px-[15px] py-[13px] {} rounded-[8px] font-bold text-white text-[16px]",
                         if status == SurveyStatus::InProgress {
@@ -95,6 +121,30 @@ pub fn SampleSurveyInfo(
                     },
                     {status.translate(&lang)}
                 }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn SampleLinkComponent(
+    lang: Language,
+    title: String,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
+    let tr: SampleSurveyTranslate = translate(&lang);
+    rsx! {
+        div { class: "flex flex-row w-full justify-between items-center px-[20px] py-[9px] bg-white rounded-[8px]",
+            div { class: "font-bold text-[16px] text-[#222222]", "{title}" }
+            div { class: "flex flex-row justify-start items-center gap-[5px]",
+                div {
+                    class: "cursor-pointer font-semibold text-[#2A60D3] text-[14px] underline",
+                    onclick: move |e: Event<MouseData>| {
+                        onclick.call(e);
+                    },
+                    "{tr.see_detail}"
+                }
+                RightArrow { color: "#555462" }
             }
         }
     }

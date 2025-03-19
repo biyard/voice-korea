@@ -11,12 +11,15 @@ use by_types::QueryResponse;
 use models::{
     deliberation::{Deliberation, DeliberationRepository},
     deliberation_response::{
-        DeliberationResponse, DeliberationResponseAction, DeliberationResponseGetResponse,
-        DeliberationResponseParam, DeliberationResponseRepository,
-        DeliberationResponseRespondAnswerRequest,
+        DeliberationResponse, DeliberationResponseAction, DeliberationResponseByIdAction,
+        DeliberationResponseGetResponse, DeliberationResponseParam, DeliberationResponseRepository,
+        DeliberationResponseRepositoryUpdateRequest, DeliberationResponseRespondAnswerRequest,
+        DeliberationResponseUpdateRespondAnswerRequest, DeliberationType,
     },
     *,
 };
+
+use crate::utils::app_claims::AppClaims;
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
@@ -42,13 +45,44 @@ impl DeliberationResponseController {
         let ctrl = Self::new(pool);
 
         Ok(by_axum::axum::Router::new()
-            .route("/:id", get(Self::get_deliberation_response))
+            .route(
+                "/:id",
+                get(Self::get_deliberation_response).post(Self::act_deliberation_response_by_id),
+            )
             .with_state(ctrl.clone())
             .route(
                 "/",
                 post(Self::act_deliberation_response).get(Self::list_deliberation_response),
             )
             .with_state(ctrl.clone()))
+    }
+
+    pub async fn act_deliberation_response_by_id(
+        State(ctrl): State<DeliberationResponseController>,
+        Extension(auth): Extension<Option<Authorization>>,
+        Path(DeliberationResponsePath {
+            deliberation_id,
+            id,
+        }): Path<DeliberationResponsePath>,
+        Json(body): Json<DeliberationResponseByIdAction>,
+    ) -> Result<Json<DeliberationResponse>> {
+        tracing::debug!(
+            "act_deliberation_response_by_id {} {:?} {:?}",
+            deliberation_id,
+            id,
+            body
+        );
+
+        let res = match body {
+            DeliberationResponseByIdAction::UpdateRespondAnswer(params) => {
+                ctrl.update_respond_answer(id, auth, params).await?
+            }
+            DeliberationResponseByIdAction::RemoveRespondAnswer(_) => {
+                ctrl.remove_respond_answer(id, auth).await?
+            }
+        };
+
+        Ok(res)
     }
 
     pub async fn get_deliberation_response(
@@ -105,23 +139,91 @@ impl DeliberationResponseController {
 }
 
 impl DeliberationResponseController {
+    pub async fn remove_respond_answer(
+        &self,
+        response_id: i64,
+        auth: Option<Authorization>,
+    ) -> Result<Json<DeliberationResponse>> {
+        let _ = match auth {
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
+            _ => return Err(ApiError::Unauthorized),
+        };
+
+        let respond = DeliberationResponse::query_builder()
+            .id_equals(response_id)
+            .query()
+            .map(DeliberationResponse::from)
+            .fetch_one(&self.pool)
+            .await?;
+
+        if respond.deliberation_type == DeliberationType::Survey {
+            return Err(ApiError::UpdateNotAllowed);
+        }
+
+        let res = self.repo.delete(response_id).await?;
+
+        Ok(Json(res))
+    }
+
+    pub async fn update_respond_answer(
+        &self,
+        response_id: i64,
+        auth: Option<Authorization>,
+        DeliberationResponseUpdateRespondAnswerRequest {
+            answers,
+        }: DeliberationResponseUpdateRespondAnswerRequest,
+    ) -> Result<Json<DeliberationResponse>> {
+        let _ = match auth {
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
+            _ => return Err(ApiError::Unauthorized),
+        };
+
+        let respond = DeliberationResponse::query_builder()
+            .id_equals(response_id)
+            .query()
+            .map(DeliberationResponse::from)
+            .fetch_one(&self.pool)
+            .await?;
+
+        if respond.deliberation_type == DeliberationType::Survey {
+            return Err(ApiError::UpdateNotAllowed);
+        }
+
+        let res = self
+            .repo
+            .update(
+                response_id,
+                DeliberationResponseRepositoryUpdateRequest {
+                    deliberation_id: None,
+                    user_id: None,
+                    answers: Some(answers),
+                    deliberation_type: None,
+                },
+            )
+            .await?;
+
+        Ok(Json(res))
+    }
+
     pub async fn respond_answer(
         &self,
         deliberation_id: i64,
-        _auth: Option<Authorization>,
+        auth: Option<Authorization>,
         DeliberationResponseRespondAnswerRequest {
-            user_id,
             answers,
             deliberation_type,
         }: DeliberationResponseRespondAnswerRequest,
     ) -> Result<Json<DeliberationResponse>> {
-        // auth.ok_or(ApiError::Unauthorized)?;
-        let _deliberation_id = deliberation_id;
-        let _user_id = user_id;
-        let _answers = answers;
-        let _deliberation_type = deliberation_type;
+        let user_id: i64 = match auth {
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
+            _ => return Err(ApiError::Unauthorized),
+        };
 
-        Ok(Json(DeliberationResponse::default()))
+        let res = self
+            .repo
+            .insert(deliberation_id, user_id, answers, deliberation_type)
+            .await?;
+        Ok(Json(res))
     }
 }
 
