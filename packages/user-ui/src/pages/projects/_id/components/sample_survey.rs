@@ -80,7 +80,7 @@ pub fn SampleSurvey(
                         ctrl.change_answer(index, answer);
                     },
                 }
-            } else {
+            } else if survey_step() == SurveyStep::MySurvey {
                 MySampleSurvey {
                     lang,
                     survey: if survey.surveys.len() != 0 { survey.surveys[0].clone() } else { SurveyV2::default() },
@@ -100,6 +100,8 @@ pub fn SampleSurvey(
                         survey_step.set(SurveyStep::Display);
                     },
                 }
+            } else {
+
             }
         }
     }
@@ -292,6 +294,18 @@ translate! {
     my_answer: {
         ko: "내가 작성한 답변",
         en: "My Answer"
+    }
+    response_per_question: {
+        ko: "질문별 응답",
+        en: "Responses to each question"
+    }
+    update: {
+        ko: "수정하기",
+        en: "Update"
+    }
+    remove: {
+        ko: "삭제하기",
+        en: "Remove"
     }
     submit: {
         ko: "제출하기",

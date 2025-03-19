@@ -95,7 +95,7 @@ pub fn SampleSurveyInfo(
                     }
                     SampleLinkComponent {
                         lang,
-                        title: "질문별 응답",
+                        title: tr.response_per_question,
                         onclick: move |_| {
                             onchange.call(SurveyStep::Statistics);
                         },
