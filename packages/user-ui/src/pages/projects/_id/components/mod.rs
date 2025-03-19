@@ -13,6 +13,7 @@ pub mod my_final_survey;
 pub mod my_sample_survey;
 pub mod not_complete_survey_modal;
 pub mod project_header;
+pub mod sample_statistics;
 pub mod sample_survey;
 pub mod sample_survey_info;
 pub mod sample_survey_question;

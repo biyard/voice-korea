@@ -1,16 +1,17 @@
 #![allow(non_snake_case, dead_code, unused_variables)]
 use bdk::prelude::*;
+use indexmap::IndexMap;
 use models::{
     deliberation_response::{DeliberationResponse, DeliberationType},
     deliberation_survey::DeliberationSurvey,
     response::Answer,
-    Question, SurveyV2,
+    ParsedQuestion, Question, SurveyV2,
 };
 
 use crate::{
     pages::projects::_id::components::{
-        my_sample_survey::MySampleSurvey, sample_survey_info::SampleSurveyInfo,
-        sample_survey_question::SampleSurveyQuestion,
+        my_sample_survey::MySampleSurvey, sample_statistics::SampleStatistics,
+        sample_survey_info::SampleSurveyInfo, sample_survey_question::SampleSurveyQuestion,
     },
     service::user_service::UserService,
     utils::time::current_timestamp,
@@ -101,7 +102,13 @@ pub fn SampleSurvey(
                     },
                 }
             } else {
-
+                SampleStatistics {
+                    lang,
+                    responses: ctrl.survey_responses(),
+                    onprev: move |_| {
+                        survey_step.set(SurveyStep::Display);
+                    },
+                }
             }
         }
     }
@@ -120,6 +127,12 @@ pub struct Controller {
     response_id: Signal<i64>,
 
     pub user: UserService,
+    pub survey_responses: Signal<SampleSurveyResponses>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct SampleSurveyResponses {
+    pub answers: IndexMap<i64, (String, ParsedQuestion)>, // question_id, (title, response_count, <panel_id, answer>)
 }
 
 impl Controller {
@@ -146,6 +159,7 @@ impl Controller {
             response_id: use_signal(|| 0),
 
             user,
+            survey_responses: use_signal(|| SampleSurveyResponses::default()),
         };
 
         use_effect(move || {
@@ -161,6 +175,21 @@ impl Controller {
             let mut response_id = 0;
 
             let user_id = (ctrl.user.user_id)();
+
+            let questions = if (ctrl.survey)().unwrap_or_default().surveys.is_empty() {
+                vec![]
+            } else {
+                (ctrl.survey)().unwrap_or_default().surveys[0]
+                    .clone()
+                    .questions
+            };
+            let responses = (ctrl.survey)().unwrap_or_default().responses;
+
+            let survey_responses = SampleSurveyResponses {
+                answers: ctrl
+                    .clone()
+                    .parsing_sample_answers(questions.clone(), responses.clone()),
+            };
 
             for response in (ctrl.survey)().unwrap_or_default().responses {
                 if response.deliberation_type == DeliberationType::Sample
@@ -189,12 +218,65 @@ impl Controller {
                     .collect::<Vec<_>>();
             }
 
+            ctrl.survey_responses.set(survey_responses);
             ctrl.answers.set(answers);
             ctrl.survey_completed.set(completed);
             ctrl.response_id.set(response_id);
         });
 
         Ok(ctrl)
+    }
+
+    pub fn parsing_sample_answers(
+        &self,
+        questions: Vec<Question>,
+        responses: Vec<DeliberationResponse>,
+    ) -> IndexMap<i64, (String, ParsedQuestion)> {
+        let mut survey_maps: IndexMap<i64, (String, ParsedQuestion)> = IndexMap::new();
+
+        for response in responses {
+            if response.deliberation_type == DeliberationType::Survey {
+                continue;
+            }
+
+            for (i, answer) in response.answers.iter().enumerate() {
+                let questions = questions.clone();
+                let question = &questions[i];
+                let title = question.title();
+
+                let parsed_question: ParsedQuestion = (question, answer).into();
+
+                survey_maps
+                    .entry(i as i64)
+                    .and_modify(|survey_data| match &mut survey_data.1 {
+                        ParsedQuestion::SingleChoice { response_count, .. } => {
+                            if let Answer::SingleChoice { answer } = answer {
+                                response_count[(answer - 1) as usize] += 1;
+                            }
+                        }
+                        ParsedQuestion::MultipleChoice { response_count, .. } => {
+                            if let Answer::MultipleChoice { answer } = answer {
+                                for ans in answer {
+                                    response_count[(ans - 1) as usize] += 1;
+                                }
+                            }
+                        }
+                        ParsedQuestion::ShortAnswer { answers } => {
+                            if let Answer::ShortAnswer { answer } = answer {
+                                answers.push(answer.clone());
+                            }
+                        }
+                        ParsedQuestion::Subjective { answers } => {
+                            if let Answer::Subjective { answer } = answer {
+                                answers.push(answer.clone());
+                            }
+                        }
+                    })
+                    .or_insert_with(|| (title, parsed_question.clone()));
+            }
+        }
+
+        survey_maps
     }
 
     pub fn change_answer(&mut self, index: usize, answer: Answer) {
@@ -298,6 +380,22 @@ translate! {
     response_per_question: {
         ko: "질문별 응답",
         en: "Responses to each question"
+    }
+    necessary: {
+        ko: "[필수]",
+        en: "[Necessary]"
+    }
+    plural: {
+        ko: "[복수]",
+        en: "[Plural]"
+    }
+    unit: {
+        ko: "명",
+        en: "Unit"
+    }
+    subjective_answer: {
+        ko: "주관식 답변",
+        en: "Subjective Answer"
     }
     update: {
         ko: "수정하기",

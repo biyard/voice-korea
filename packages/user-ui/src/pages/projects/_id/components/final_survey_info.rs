@@ -22,7 +22,7 @@ pub fn FinalSurveyInfo(
     survey_completed: bool,
     onchange: EventHandler<FinalSurveyStep>,
 ) -> Element {
-    let tab_title: &str = Tab::SampleSurvey.translate(&lang);
+    let tab_title: &str = Tab::FinalSurvey.translate(&lang);
     let mut clicked1 = use_signal(|| true);
     let status = get_survey_status(survey.started_at, survey.ended_at);
     let tr: FinalSurveyTranslate = translate(&lang);
