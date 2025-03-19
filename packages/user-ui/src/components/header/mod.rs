@@ -283,8 +283,7 @@ pub fn Header(lang: Language) -> Element {
                     "{translates.service}"
                 }
                 Link {
-                    //TODO: Change Target
-                    to: Route::MainPage {
+                    to: Route::ProjectListPage {
                         lang: lang.clone(),
                     },
                     "{translates.project}"

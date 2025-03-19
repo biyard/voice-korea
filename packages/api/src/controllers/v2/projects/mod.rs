@@ -33,15 +33,72 @@ pub struct DeliberationProjectController {
 
 // TODO: implement APIs
 impl DeliberationProjectController {
+    async fn search(
+        &self,
+        _auth: Option<Authorization>,
+        DeliberationProjectQuery { title, .. }: DeliberationProjectQuery,
+    ) -> Result<QueryResponse<DeliberationProjectSummary>> {
+        let mut total_count = 0;
+        let items: Vec<DeliberationProjectSummary> = DeliberationProjectSummary::query_builder()
+            .title_contains(title.unwrap_or_default())
+            .with_count()
+            .order_by_created_at_desc()
+            .query()
+            .map(|row: PgRow| {
+                use sqlx::Row;
+                total_count = row.get("total_count");
+                row.into()
+            })
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(QueryResponse { total_count, items })
+    }
+
+    async fn custom_query(
+        &self,
+        _auth: Option<Authorization>,
+        param: ProjectQueryBy,
+    ) -> Result<QueryResponse<DeliberationProjectSummary>> {
+        let mut total_count = 0;
+
+        let mut builder = DeliberationProjectSummary::query_builder()
+            .limit(100)
+            .page(1);
+
+        if param.sorter == ProjectSorter::Newest {
+            builder = builder.order_by_created_at_desc();
+        } else {
+            builder = builder.order_by_created_at_asc();
+        }
+
+        let items: Vec<DeliberationProjectSummary> = builder
+            .query()
+            .map(|row: PgRow| {
+                use sqlx::Row;
+
+                total_count = row.try_get("total_count").unwrap_or_default();
+                row.into()
+            })
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(QueryResponse { total_count, items })
+    }
+
     async fn query(
         &self,
         _auth: Option<Authorization>,
         param: DeliberationProjectQuery,
     ) -> Result<QueryResponse<DeliberationProjectSummary>> {
         let mut total_count = 0;
-        let items: Vec<DeliberationProjectSummary> = DeliberationProjectSummary::query_builder()
+
+        let builder = DeliberationProjectSummary::query_builder()
             .limit(param.size())
-            .page(param.page())
+            .page(param.page());
+
+        let items: Vec<DeliberationProjectSummary> = builder
+            .order_by_created_at_desc()
             .query()
             .map(|row: PgRow| {
                 use sqlx::Row;
@@ -165,15 +222,17 @@ impl DeliberationProjectController {
         tracing::debug!("list_deliberation_project {:?}", q);
 
         match q {
-            DeliberationProjectParam::Query(param) => Ok(Json(
-                DeliberationProjectGetResponse::Query(ctrl.query(auth, param).await?),
+            DeliberationProjectParam::Query(param) => match param.action {
+                Some(DeliberationProjectQueryActionType::Search) => Ok(Json(
+                    DeliberationProjectGetResponse::Query(ctrl.search(auth, param).await?),
+                )),
+                _ => Ok(Json(DeliberationProjectGetResponse::Query(
+                    ctrl.query(auth, param).await?,
+                ))),
+            },
+            DeliberationProjectParam::Custom(param) => Ok(Json(
+                DeliberationProjectGetResponse::Query(ctrl.custom_query(auth, param).await?),
             )),
-            // DeliberationProjectParam::Read(param)
-            //     if param.action == Some(DeliberationProjectReadActionType::ActionType) =>
-            // {
-            //     let res = ctrl.run_read_action(auth, param).await?;
-            //     Ok(Json(DeliberationProjectGetResponse::Read(res)))
-            // }
         }
     }
 }
@@ -286,6 +345,8 @@ mod tests {
             .query(DeliberationProjectQuery {
                 size: 1,
                 bookmark: None,
+                action: None,
+                title: None,
             })
             .await;
 
