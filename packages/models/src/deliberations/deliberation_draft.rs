@@ -18,10 +18,6 @@ pub struct DeliberationDraft {
     #[api_model(summary, auto = [insert, update])]
     pub updated_at: i64,
 
-    // Draft
-    pub title: String,
-    pub description: String,
-
     #[api_model(summary, many_to_one = organizations)]
     pub org_id: i64,
 

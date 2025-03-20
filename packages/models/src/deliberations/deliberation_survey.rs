@@ -1,7 +1,8 @@
 use bdk::prelude::*;
 
 use crate::{
-    deliberation_response::DeliberationResponse, deliberation_user::DeliberationUser, SurveyV2,
+    deliberation_response::DeliberationResponse, deliberation_user::DeliberationUser, step::Step,
+    SurveyV2,
 };
 
 // TODO(api): implement survey response for Sample, final Survey.
@@ -27,6 +28,10 @@ pub struct DeliberationSurvey {
 
     #[api_model(many_to_many = deliberation_surveys, table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = deliberation_id)]
     pub surveys: Vec<SurveyV2>,
+
+    #[api_model(summary, one_to_many = deliberations_steps, foreign_key = deliberation_id)]
+    #[serde(default)]
+    pub steps: Vec<Step>,
 
     // responses is a list of responses of a user(requester) for surveys.
     #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id)]

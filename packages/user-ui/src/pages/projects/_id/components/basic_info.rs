@@ -5,7 +5,10 @@ use dioxus::prelude::*;
 use dioxus_translate::*;
 use models::{deliberation_basic_info::DeliberationBasicInfo, Tab};
 
-use crate::components::icons::triangle::{TriangleDown, TriangleUp};
+use crate::{
+    components::icons::triangle::{TriangleDown, TriangleUp},
+    utils::time::formatted_timestamp,
+};
 #[component]
 pub fn BasicInfo(
     lang: Language,
@@ -15,6 +18,16 @@ pub fn BasicInfo(
 ) -> Element {
     let ctrl = Controller::new(lang, project_id)?;
     let info = ctrl.infos()?;
+
+    let steps = info.clone().steps;
+
+    let mut start_date = 0;
+    let mut end_date = 0;
+
+    if steps.len() == 5 {
+        start_date = steps[0].started_at;
+        end_date = steps[0].ended_at;
+    }
 
     let tr: BasicInfoTranslate = translate(&lang);
     let mut clicked1 = use_signal(|| true);
@@ -26,8 +39,17 @@ pub fn BasicInfo(
             class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
             ..attributes,
             // header
-            div { class: "w-full flex flex-row justify-between items-center ",
-                p { class: "font-semibold text-[20px] mt-[28px]", "{tab_title}" }
+            div { class: "w-full flex flex-row justify-between items-center mt-[28px]",
+                div { class: " font-semibold text-[20px]", "{tab_title}" }
+                div { class: "font-medium text-[15px] text-black",
+                    {
+                        format!(
+                            "{} ~ {}",
+                            formatted_timestamp(start_date),
+                            formatted_timestamp(end_date),
+                        )
+                    }
+                }
             }
             // information section
             div { class: "flex flex-col gap-[10px]",

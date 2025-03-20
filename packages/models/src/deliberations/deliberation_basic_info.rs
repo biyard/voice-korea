@@ -1,6 +1,6 @@
 use bdk::prelude::*;
 
-use crate::{deliberation_user::DeliberationUser, ResourceFile};
+use crate::{deliberation_user::DeliberationUser, step::Step, ResourceFile};
 
 // TODO(web): using resource for basic info tab.
 #[api_model(base = "/v2/projects/:deliberation-id/basic-info", table = deliberations, read_action = read)]
@@ -17,6 +17,10 @@ pub struct DeliberationBasicInfo {
     pub title: String,
     // #[api_model(summary)]
     pub description: String,
+
+    #[api_model(summary, one_to_many = deliberations_steps, foreign_key = deliberation_id)]
+    #[serde(default)]
+    pub steps: Vec<Step>,
 
     #[api_model(one_to_many = deliberation_users, foreign_key = deliberation_id)]
     pub members: Vec<DeliberationUser>,

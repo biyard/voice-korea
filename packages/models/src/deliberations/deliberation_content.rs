@@ -1,6 +1,6 @@
 use bdk::prelude::*;
 
-use crate::{deliberation_user::DeliberationUser, ResourceFile};
+use crate::{deliberation_user::DeliberationUser, step::Step, ResourceFile};
 
 // TODO(web): using resource for project deliberation tab
 // TODO(api): implement Read action(read) of GET /v2/deliberations/:deliberation-id/contents
@@ -15,6 +15,10 @@ pub struct DeliberationContent {
 
     #[api_model(one_to_many = deliberation_users, foreign_key = deliberation_id)]
     pub members: Vec<DeliberationUser>,
+
+    #[api_model(summary, one_to_many = deliberations_steps, foreign_key = deliberation_id)]
+    #[serde(default)]
+    pub steps: Vec<Step>,
 
     // NOTE: Remove PDFs after querying.
     // NOTE: Filter only PDFs after querying. Currently, api_model does not support filtering on joined table.
