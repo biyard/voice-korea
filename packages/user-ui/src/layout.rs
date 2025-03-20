@@ -11,10 +11,6 @@ use crate::components::{Footer, Header};
 use crate::service::popup_service::PopupZone;
 #[component]
 pub fn RootLayout(lang: Language) -> Element {
-    let path: Route = use_route();
-
-    let path = path.to_string();
-
     rsx! {
         ErrorBoundary {
             handle_error: move |e| {
@@ -26,27 +22,17 @@ pub fn RootLayout(lang: Language) -> Element {
                 //     logout: translates.logout,
                 //     lang,
                 // }
-
-                if path.contains("projects") {
-                    div { class: "w-full flex flex-col justify-center items-center",
-                        div { class: "w-full flex flex-col max-w-[1300px] px-[10px]",
-                            Header { lang: lang.clone() }
-                        }
-                        div { class: "flex flex-col w-full min-h-lvh", Outlet::<Route> {} }
+                div { class: "w-full flex flex-col justify-center items-center",
+                    div { class: "w-full flex flex-col max-w-[1300px] px-[10px]",
+                        Header { lang: lang.clone() }
                     }
-                } else {
-                    div { class: "w-full flex flex-col justify-center items-center",
-                        div { class: "w-full flex flex-col max-w-[1300px] px-[10px]",
-                            Header { lang: lang.clone() }
-                        }
-                        SuspenseBoundary {
-                            fallback: |_| rsx! {
-                                div { class: "absolute w-screen h-screen top-0 left-0 flex items-center justify-center text-white",
-                                    CubeLoader {}
-                                }
-                            },
-                            div { class: "flex flex-col w-full min-h-lvh", Outlet::<Route> {} }
-                        }
+                    SuspenseBoundary {
+                        fallback: |_| rsx! {
+                            div { class: "absolute w-screen h-screen top-0 left-0 flex items-center justify-center text-white",
+                                CubeLoader {}
+                            }
+                        },
+                        div { class: "flex flex-col w-full min-h-lvh", Outlet::<Route> {} }
                     }
                 }
                 PopupZone {}
