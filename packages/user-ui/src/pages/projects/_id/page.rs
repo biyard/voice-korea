@@ -28,9 +28,7 @@ pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
             div { class: "w-full flex flex-col justify-center items-center",
                 SuspenseBoundary {
                     fallback: |_| rsx! {
-                        div { class: "absolute w-screen h-screen top-0 left-0 flex items-center justify-center text-white",
-                            CubeLoader {}
-                        }
+                        div { class: "w-full h-fit flex items-center justify-center", CubeLoader {} }
                     },
                     div { class: "flex flex-col w-full h-fit",
                         ProjectDetails {
