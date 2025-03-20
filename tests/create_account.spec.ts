@@ -54,14 +54,14 @@ test.describe('Create Account Flow - Step 3 & Step 4', () => {
         await expect(page.getByLabel('Email Address')).toBeVisible();
         await expect(page.getByLabel('Name')).toBeVisible();
         await expect(page.getByLabel('Cellphone')).toBeVisible();
-        await expect(page.getByLabel('Company Name')).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Complete Registration' })).toBeVisible();
+        await expect(page.getByLabel('Corporation Name')).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Complete' })).toBeVisible();
     });
 
     test('Step 4: Should validate required fields before submission', async ({ page }) => {
         await page.goto('http://127.0.0.1:8080/create');
 
-        await page.getByRole('button', { name: 'Complete Registration' }).click();
+        await page.getByRole('button', { name: 'Complete' }).click();
         await expect(page.getByText('Please enter your email address.')).toBeVisible();
         await expect(page.getByText('Please enter your full name.')).toBeVisible();
         await expect(page.getByText('Please enter your phone number.')).toBeVisible();
@@ -71,7 +71,7 @@ test.describe('Create Account Flow - Step 3 & Step 4', () => {
         await page.goto('http://127.0.0.1:8080/create');
 
         await page.getByLabel('Email Address').fill('user@example.com');
-        await page.getByLabel('Full Name').fill('John Doe');
+        await page.getByLabel('Name').fill('John Doe');
         await page.getByLabel('Cellphone').fill('+1234567890');
         await page.getByLabel('Corporation Name').fill('Biyard Co');
         await page.getByRole('button', { name: 'Complete' }).click();
