@@ -22,7 +22,7 @@ pub struct DeliberationSurvey {
     pub ended_at: i64,
     pub title: String,
     pub description: String,
-    #[api_model(one_to_many = deliberation_users)]
+    #[api_model(one_to_many = deliberation_users, foreign_key = deliberation_id)]
     pub members: Vec<DeliberationUser>,
 
     #[api_model(many_to_many = deliberation_surveys, table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = deliberation_id)]

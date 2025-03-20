@@ -56,7 +56,12 @@ fn App() -> Element {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+        document::Link {
+            rel: "stylesheet",
+            href: "https://cdn.quilljs.com/1.3.6/quill.snow.css",
+        }
 
+        document::Script { src: "https://cdn.quilljs.com/1.3.6/quill.min.js" }
         document::Script { src: "https://d3js.org/d3.v7.min.js" }
         load_tailwindcss {}
         Router::<Route> {}

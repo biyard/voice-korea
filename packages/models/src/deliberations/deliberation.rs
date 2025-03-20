@@ -5,6 +5,7 @@ use crate::deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
 use bdk::prelude::*;
 use validator::Validate;
 
+use crate::deliberation_report::DeliberationReport;
 use crate::deliberation_vote::DeliberationVote;
 use crate::discussions::*;
 use crate::step::*;
@@ -48,6 +49,9 @@ pub struct Deliberation {
     #[serde(default)]
     pub resources: Vec<ResourceFile>,
 
+    #[api_model(one_to_many = deliberation_reports, foreign_key = deliberation_id)]
+    pub reports: Vec<DeliberationReport>,
+
     #[api_model(many_to_many = deliberation_surveys, table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = deliberation_id)]
     #[serde(default)]
     pub surveys: Vec<SurveyV2>,
@@ -55,7 +59,7 @@ pub struct Deliberation {
     #[api_model(many_to_many = deliberations_users, table_name = users, foreign_primary_key = user_id, foreign_reference_key = deliberation_id)]
     #[serde(default)]
     pub members: Vec<DeliberationUser>,
-    #[api_model(one_to_many = deliberation_votes)]
+    #[api_model(one_to_many = deliberation_votes, foreign_key = deliberation_id)]
     #[serde(default)]
     pub votes: Vec<DeliberationVote>,
     #[api_model(summary, many_to_many = panel_deliberations, foreign_table_name = panels, foreign_primary_key = panel_id, foreign_reference_key = deliberation_id,)]
@@ -64,10 +68,10 @@ pub struct Deliberation {
     // TODO: panel counts field is required.
     // #[api_model(summary, action = create, type = JSONB, version = v0.1, action_by_id = update)]
     // pub panel_counts: Vec<PanelCountsV2>,
-    #[api_model(one_to_many = discussions)]
+    #[api_model(one_to_many = discussions, foreign_key = deliberation_id)]
     #[serde(default)]
     pub discussions: Vec<Discussion>,
-    #[api_model(one_to_many = deliberation_comments)]
+    #[api_model(one_to_many = deliberation_comments, foreign_key = deliberation_id)]
     #[serde(default)]
     pub comments: Vec<DeliberationComment>,
     #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id)]

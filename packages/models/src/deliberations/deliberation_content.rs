@@ -13,7 +13,7 @@ pub struct DeliberationContent {
     pub title: String,
     pub description: String,
 
-    #[api_model(one_to_many = deliberation_users)]
+    #[api_model(one_to_many = deliberation_users, foreign_key = deliberation_id)]
     pub members: Vec<DeliberationUser>,
 
     // NOTE: Remove PDFs after querying.

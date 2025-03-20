@@ -1,4 +1,4 @@
-#![allow(non_snake_case, dead_code, unused_variables)]
+#![allow(non_snake_case, dead_code, unused)]
 use bdk::prelude::*;
 use by_components::charts::{
     horizontal_bar::HorizontalBar,
@@ -7,12 +7,21 @@ use by_components::charts::{
 use indexmap::IndexMap;
 use models::{
     deliberation_draft::DeliberationDraft,
+    deliberation_report::{DeliberationReport, DeliberationReportStatus},
     deliberation_response::{DeliberationResponse, DeliberationType},
     response::Answer,
     ParsedQuestion, Question, Tab,
 };
 
-use crate::components::icons::triangle::{TriangleDown, TriangleUp};
+use crate::by_components::rich_texts::RichText;
+
+use crate::{
+    components::{
+        icons::triangle::{TriangleDown, TriangleUp},
+        input::InputBox,
+    },
+    service::user_service::UserService,
+};
 
 #[component]
 pub fn FinalDraft(
@@ -21,56 +30,105 @@ pub fn FinalDraft(
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     children: Element,
 ) -> Element {
-    let ctrl = Controller::new(lang, project_id)?;
+    let mut title = use_signal(|| "".to_string());
+    let mut content = use_signal(|| "".to_string());
+
+    let mut ctrl = Controller::new(lang, project_id)?;
     let draft = ctrl.draft()?;
+    let members = draft.members.clone();
+    let user_id = ctrl.user_id();
+
     let tr: FinalDraftTranslate = translate(&lang);
     let mut clicked_draft = use_signal(|| true);
+    let mut clicked_update = use_signal(|| false);
     let tab_title: &str = Tab::FinalDraft.translate(&lang);
 
     let answers = ctrl.survey_responses().answers;
 
+    use_effect(move || {
+        let report = draft.reports.clone();
+
+        if !report.is_empty() {
+            let report = report[0].clone();
+
+            title.set(report.title);
+            content.set(report.description);
+        }
+    });
+
     rsx! {
         div {
             id: "final-draft",
-            class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
+            class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px] mt-[28px] mb-[40px]",
             ..attributes,
             // header
-            div { class: "w-full flex flex-row justify-between items-center ",
-                p { class: "font-semibold text-[20px] mt-[28px]", "{tab_title}" }
+            div { class: "w-full flex flex-row justify-between items-center",
+                p { class: "font-semibold text-[20px]", "{tab_title}" }
+                div {
+                    class: "cursor-pointer flex flex-row w-[200px] justify-center items-center bg-[#8095EA] rounded-[8px] px-[16px] py-[14px] font-bold text-white text-[16px]",
+                    visibility: if !clicked_update() && members.clone().iter().any(|member| member.user_id == user_id) { "flex" } else { "hidden" },
+                    onclick: move |_| {
+                        clicked_update.set(true);
+                    },
+                    "{tr.update}"
+                }
+            }
+
+            if clicked_update() {
+                EditDraft {
+                    lang,
+                    content: content(),
+                    change_content: move |value: String| {
+                        content.set(value);
+                    },
+
+                    title: title(),
+                    change_title: move |value: String| {
+                        title.set(value);
+                    },
+
+                    update_draft: move |_| async move {
+                        ctrl.update_draft(title(), content()).await;
+                        clicked_update.set(false);
+                    },
+                }
             }
             // information section
             div { class: "flex flex-col gap-[10px]",
 
                 // introduction section
-                div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
-                    div {
-                        class: "w-full flex justify-start items-center text-[16px] font-bold cursor-pointer",
-                        onclick: move |_| {
-                            clicked_draft.set(!clicked_draft());
-                        },
-                        div { class: "w-full flex flex-row justify-between items-center",
-                            span { "{tr.title}" }
-                            if clicked_draft() {
-                                TriangleUp {}
-                            } else {
-                                TriangleDown {}
+                if !clicked_update() {
+                    div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
+                        div {
+                            class: "w-full flex justify-start items-center text-[16px] font-bold cursor-pointer",
+                            onclick: move |_| {
+                                clicked_draft.set(!clicked_draft());
+                            },
+                            div { class: "w-full flex flex-row justify-between items-center",
+                                span { "{title()}" }
+                                if clicked_draft() {
+                                    TriangleUp {}
+                                } else {
+                                    TriangleDown {}
+                                }
                             }
                         }
-                    }
-                    if clicked_draft() {
-                        //line
-                        hr { class: "w-full h-[1px] mt-[12px] mb-[12px] border-[#eee]" }
-                        div { class: "w-full justify-start mt-[15px] mb-[20px] font-bold text-[18px]",
-                            "{draft.title}"
-                        }
-                        div { class: "w-full flex justify-start text-[15px]", "{draft.description}" }
-                        div { class: "w-full mt-[20px] flex flex-row justify-start gap-[40px]",
-                            for member in draft.members {
-                                div { class: "flex flex-row justify-start gap-[8px]",
-                                    img { class: "w-[40px] h-[40px] bg-[#D9D9D9] rounded-full" }
-                                    div { class: "flex flex-col justify-center",
-                                        p { class: "font-semibold text-[15px] justify-start",
-                                            {member.role.translate(&lang)}
+                        if clicked_draft() {
+                            //line
+                            hr { class: "w-full h-[1px] mt-[12px] mb-[12px] border-[#eee]" }
+                            div {
+                                class: "ql-snow rich-text-editor w-full report-description ",
+                                dangerous_inner_html: content(),
+                                style: "user-select: none; pointer-events: none;",
+                            }
+                            div { class: "w-full mt-[20px] flex flex-row justify-start gap-[40px]",
+                                for member in members.clone() {
+                                    div { class: "flex flex-row justify-start gap-[8px]",
+                                        img { class: "w-[40px] h-[40px] bg-[#D9D9D9] rounded-full" }
+                                        div { class: "flex flex-col justify-center",
+                                            p { class: "font-semibold text-[15px] justify-start",
+                                                {member.role.translate(&lang)}
+                                            }
                                         }
                                     }
                                 }
@@ -80,7 +138,7 @@ pub fn FinalDraft(
                 }
             }
 
-            div { class: "flex flex-col w-full gap-[20px] mb-[40px]",
+            div { class: "flex flex-col w-full gap-[20px]",
                 //chart section
                 for (i , (_key , (title , parsed_question))) in answers.iter().enumerate() {
                     match parsed_question {
@@ -125,6 +183,53 @@ pub fn FinalDraft(
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn EditDraft(
+    lang: Language,
+    content: String,
+    change_content: EventHandler<String>,
+    title: String,
+    change_title: EventHandler<String>,
+    update_draft: EventHandler<MouseEvent>,
+) -> Element {
+    let tr: FinalDraftTranslate = translate(&lang);
+
+    rsx! {
+        div { class: "flex flex-col w-full justify-start items-start",
+            div { class: "flex flex-col min-w-[500px] w-full justify-center items-center gap-[15px]",
+                div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                    div { class: "font-semibold text-[15px] text-[#222222]", "{tr.name}" }
+                    InputBox {
+                        class: "flex flex-row w-full rounded-[10px] px-[15px] py-[10px] placeholder-[#b4b4b4] bg-transparent text-[#222222] border border-gray-300 focus:outline-none focus:border focus:border-[#8095ea]",
+                        placeholder: tr.name_hint,
+                        value: title,
+                        onchange: move |value: String| {
+                            change_title.call(value);
+                        },
+                    }
+                }
+                div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                    div { class: "font-semibold text-[15px] text-[#222222]", "{tr.description}" }
+                    RichText {
+                        content,
+                        onchange: move |value: String| {
+                            change_content.call(value);
+                        },
+                    }
+                }
+
+                div {
+                    class: "cursor-pointer flex flex-row w-[200px] justify-center items-center bg-[#8095EA] rounded-[8px] px-[16px] py-[14px] font-bold text-white text-[16px]",
+                    onclick: move |e: Event<MouseData>| {
+                        update_draft.call(e);
+                    },
+                    "{tr.update}"
                 }
             }
         }
@@ -272,6 +377,7 @@ pub struct Controller {
     #[allow(dead_code)]
     lang: Language,
     project_id: ReadOnlySignal<i64>,
+    user_id: Signal<i64>,
 
     draft: Resource<DeliberationDraft>,
     pub survey_responses: Signal<FinalSurveyResponses>,
@@ -287,6 +393,8 @@ impl Controller {
         lang: Language,
         project_id: ReadOnlySignal<i64>,
     ) -> std::result::Result<Self, RenderError> {
+        let user: UserService = use_context();
+
         let draft = use_server_future(move || async move {
             DeliberationDraft::get_client(&crate::config::get().api_url)
                 .read(project_id())
@@ -297,6 +405,7 @@ impl Controller {
         let mut ctrl = Self {
             lang,
             project_id,
+            user_id: use_signal(|| (user.user_id)()),
             draft,
             survey_responses: use_signal(|| FinalSurveyResponses::default()),
         };
@@ -321,6 +430,48 @@ impl Controller {
         });
 
         Ok(ctrl)
+    }
+
+    pub async fn update_draft(&mut self, title: String, description: String) {
+        tracing::debug!("title: {:?} description: {:?}", title, description);
+        let draft = self.draft().unwrap_or_default();
+        let deliberation_id = self.project_id();
+
+        let reports = draft.reports;
+
+        if reports.is_empty() {
+            match DeliberationReport::get_client(&crate::config::get().api_url)
+                .create(
+                    draft.org_id,
+                    deliberation_id,
+                    title,
+                    description,
+                    DeliberationReportStatus::Draft,
+                )
+                .await
+            {
+                Ok(_) => {
+                    self.draft.restart();
+                }
+                Err(e) => {
+                    btracing::error!("change report failed with error: {:?}", e);
+                }
+            };
+        } else {
+            let id = reports[0].id;
+
+            match DeliberationReport::get_client(&crate::config::get().api_url)
+                .update(draft.org_id, id, title, description)
+                .await
+            {
+                Ok(_) => {
+                    self.draft.restart();
+                }
+                Err(e) => {
+                    btracing::error!("change report failed with error: {:?}", e);
+                }
+            };
+        }
     }
 
     pub fn parsing_final_answers(
@@ -398,5 +549,22 @@ translate! {
     subjective_answer: {
         ko: "주관식 답변",
         en: "Subjective Answer"
+    }
+    update: {
+        ko: "수정하기",
+        en: "Update"
+    }
+
+    name: {
+        ko: "제목",
+        en: "Title"
+    }
+    description: {
+        ko: "내용",
+        en: "Description"
+    }
+    name_hint: {
+        ko: "제목 입력",
+        en: "Input Title"
     }
 }
