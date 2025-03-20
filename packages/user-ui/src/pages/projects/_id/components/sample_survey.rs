@@ -51,6 +51,16 @@ pub fn SampleSurvey(
 ) -> Element {
     let mut ctrl = Controller::new(lang, project_id)?;
     let survey = ctrl.survey()?;
+    let steps = survey.clone().steps;
+
+    let mut start_date = 0;
+    let mut end_date = 0;
+
+    if steps.len() == 5 {
+        start_date = steps[1].started_at;
+        end_date = steps[1].ended_at;
+    }
+
     let step = ctrl.survey_step();
 
     rsx! {
@@ -63,6 +73,8 @@ pub fn SampleSurvey(
                 SampleSurveyInfo {
                     lang,
                     survey,
+                    start_date,
+                    end_date,
                     survey_completed: ctrl.survey_completed(),
                     onchange: move |step| {
                         ctrl.set_step(step);
@@ -87,6 +99,8 @@ pub fn SampleSurvey(
             } else if step == SurveyStep::MySurvey {
                 MySampleSurvey {
                     lang,
+                    start_date,
+                    end_date,
                     survey: if survey.surveys.len() != 0 { survey.surveys[0].clone() } else { SurveyV2::default() },
                     answers: ctrl.answers(),
                     onprev: move |_| {

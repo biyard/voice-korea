@@ -10,7 +10,7 @@ use crate::{
         triangle::{TriangleDown, TriangleUp},
     },
     pages::projects::_id::components::final_survey::{FinalSurveyStatus, FinalSurveyTranslate},
-    utils::time::current_timestamp,
+    utils::time::{current_timestamp, formatted_timestamp},
 };
 
 use super::final_survey::FinalSurveyStep;
@@ -19,6 +19,8 @@ use super::final_survey::FinalSurveyStep;
 pub fn FinalSurveyInfo(
     lang: Language,
     survey: DeliberationSurvey,
+    start_date: i64,
+    end_date: i64,
     survey_completed: bool,
     onchange: EventHandler<FinalSurveyStep>,
 ) -> Element {
@@ -27,13 +29,34 @@ pub fn FinalSurveyInfo(
     let status = get_survey_status(survey.started_at, survey.ended_at);
     let tr: FinalSurveyTranslate = translate(&lang);
 
+    let title = if survey.surveys.is_empty() {
+        "".to_string()
+    } else {
+        survey.surveys[0].name.clone()
+    };
+
+    let description = if survey.surveys.is_empty() {
+        "".to_string()
+    } else {
+        survey.surveys[0].description.clone()
+    };
+
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
             div { class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
 
                 // header
-                div { class: "w-full flex flex-row justify-between items-center",
-                    p { class: "mt-[28px] font-semibold text-[20px]", "{tab_title}" }
+                div { class: "w-full flex flex-row justify-between items-center mt-[28px]",
+                    div { class: " font-semibold text-[20px]", "{tab_title}" }
+                    div { class: "font-medium text-[15px] text-black",
+                        {
+                            format!(
+                                "{} ~ {}",
+                                formatted_timestamp(start_date),
+                                formatted_timestamp(end_date),
+                            )
+                        }
+                    }
                 }
 
                 // information section
@@ -61,11 +84,9 @@ pub fn FinalSurveyInfo(
                             //line
                             hr { class: "w-full h-[1px] mt-[12px] mb-[12px] border-[#eee]" }
                             div { class: "w-full justify-start mt-[15px] mb-[20px] font-bold text-[18px]",
-                                "{survey.title}"
+                                "{title}"
                             }
-                            div { class: "w-full flex justify-start text-[15px]",
-                                "{survey.description}"
-                            }
+                            div { class: "w-full flex justify-start text-[15px]", "{description}" }
                             div { class: "w-full mt-[20px] flex flex-row justify-start gap-[40px]",
                                 for member in survey.members {
                                     div { class: "flex flex-row justify-start gap-[8px]",

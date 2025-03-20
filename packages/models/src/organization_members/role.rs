@@ -14,7 +14,7 @@ pub enum Role {
     Analyst = 2,
     #[translate(ko = "중재자", en = "mediator")]
     Moderator = 3,
-    #[translate(ko = "발언자", en = "speaker")]
+    #[translate(ko = "강연자", en = "speaker")]
     Speaker = 4,
     #[default]
     None = 5,

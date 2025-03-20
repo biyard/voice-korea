@@ -15,6 +15,7 @@ pub mod tab;
 // mod public_survey;
 pub mod deliberation_comments;
 pub mod deliberation_comments_likes;
+pub mod deliberation_reports;
 pub mod deliberation_resources;
 pub mod deliberation_responses;
 pub mod deliberation_surveys;
@@ -67,6 +68,7 @@ pub mod prelude {
     pub use crate::tab::*;
     // pub use crate::public_survey::*;
 
+    pub use crate::deliberation_reports::*;
     pub use crate::group_members::*;
     pub use crate::organization_members::*;
     pub use crate::parsed_question::*;

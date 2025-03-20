@@ -35,6 +35,10 @@ impl OrganizationController {
                 deliberations::DeliberationController::new(pool.clone()).route()?,
             )
             .nest(
+                "/:org-id/drafts",
+                reports::DeliberationReportController::new(pool.clone()).route()?,
+            )
+            .nest(
                 "/:org-id/surveys",
                 surveys::SurveyControllerV2::route(pool.clone())?,
             )

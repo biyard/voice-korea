@@ -1,3 +1,4 @@
+use crate::by_components::loaders::cube_loader::CubeLoader;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
@@ -24,7 +25,20 @@ pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
         // TODO(mobile): tab view implemented to fit mobile size
         div { class: "flex flex-col w-full justify-center items-center",
             ProjectHeader { lang, deliberation, active_tab: active_tab.clone() }
-            ProjectDetails { lang, active_tab: active_tab.clone(), project_id }
+            div { class: "w-full flex flex-col justify-center items-center",
+                SuspenseBoundary {
+                    fallback: |_| rsx! {
+                        div { class: "w-full h-fit flex items-center justify-center", CubeLoader {} }
+                    },
+                    div { class: "flex flex-col w-full h-fit",
+                        ProjectDetails {
+                            lang,
+                            active_tab: active_tab.clone(),
+                            project_id,
+                        }
+                    }
+                }
+            }
             Comment {
                 lang,
                 comments,

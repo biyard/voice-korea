@@ -9,9 +9,10 @@ use deliberation_resources::deliberation_resource::DeliberationResource;
 use discussions::Discussion;
 use models::step::Step;
 use models::{
-    deliberation::Deliberation, deliberation_response::DeliberationResponse,
-    deliberation_user::DeliberationUser, deliberation_vote::DeliberationVote,
-    invitation::Invitation, response::SurveyResponse, review::Review, v2::Institution,
+    deliberation::Deliberation, deliberation_report::DeliberationReport,
+    deliberation_response::DeliberationResponse, deliberation_user::DeliberationUser,
+    deliberation_vote::DeliberationVote, invitation::Invitation, response::SurveyResponse,
+    review::Review, v2::Institution,
 };
 use models::{organization::Organization, *};
 use sqlx::postgres::PgPoolOptions;
@@ -61,6 +62,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
         Invitation,
         Institution,
         Deliberation,
+        DeliberationReport,
         Review,
         DeliberationResponse,
         DeliberationUser,

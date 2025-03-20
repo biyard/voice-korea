@@ -159,7 +159,7 @@ pub fn ObjectiveBox(
                                         format!(
                                             "{:?}{} ({:.2}%)",
                                             answer_count[i],
-                                            "{tr.unit}",
+                                            tr.unit,
                                             if total_answers() != 0 {
                                                 answer_count[i] as f64 * 100.0 / total_answers() as f64
                                             } else {

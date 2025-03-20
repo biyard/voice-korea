@@ -48,6 +48,17 @@ pub fn FinalSurvey(
 ) -> Element {
     let mut ctrl = Controller::new(lang, project_id)?;
     let survey = ctrl.survey()?;
+
+    let steps = survey.clone().steps;
+
+    let mut start_date = 0;
+    let mut end_date = 0;
+
+    if steps.len() == 5 {
+        start_date = steps[4].started_at;
+        end_date = steps[4].ended_at;
+    }
+
     let step = ctrl.get_step();
 
     rsx! {
@@ -56,6 +67,8 @@ pub fn FinalSurvey(
                 FinalSurveyInfo {
                     lang,
                     survey,
+                    start_date,
+                    end_date,
                     survey_completed: ctrl.survey_completed(),
                     onchange: move |step| {
                         ctrl.set_step(step);

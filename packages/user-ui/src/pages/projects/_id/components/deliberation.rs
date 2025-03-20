@@ -5,7 +5,10 @@ use dioxus::prelude::*;
 use dioxus_translate::*;
 use models::{deliberation_content::DeliberationContent, Tab};
 
-use crate::components::icons::triangle::{TriangleDown, TriangleUp};
+use crate::{
+    components::icons::triangle::{TriangleDown, TriangleUp},
+    utils::time::formatted_timestamp,
+};
 
 #[component]
 pub fn Deliberation(
@@ -17,6 +20,16 @@ pub fn Deliberation(
     let ctrl = Controller::new(lang, project_id)?;
     let deliberation = ctrl.deliberation()?;
 
+    let steps = deliberation.clone().steps;
+
+    let mut start_date = 0;
+    let mut end_date = 0;
+
+    if steps.len() == 5 {
+        start_date = steps[2].started_at;
+        end_date = steps[2].ended_at;
+    }
+
     let tr: DeliberationTranslate = translate(&lang);
     let tab_title: &str = Tab::Deliberation.translate(&lang);
     let mut clicked1 = use_signal(|| true);
@@ -27,8 +40,17 @@ pub fn Deliberation(
             class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
             ..attributes,
             // header
-            div { class: "w-full flex flex-row justify-between items-center",
-                p { class: "mt-[28px] font-semibold text-[20px]", "{tab_title}" }
+            div { class: "w-full flex flex-row justify-between items-center mt-[28px]",
+                div { class: " font-semibold text-[20px]", "{tab_title}" }
+                div { class: "font-medium text-[15px] text-black",
+                    {
+                        format!(
+                            "{} ~ {}",
+                            formatted_timestamp(start_date),
+                            formatted_timestamp(end_date),
+                        )
+                    }
+                }
             }
             // information section
             div { class: "flex flex-col gap-[10px]",
