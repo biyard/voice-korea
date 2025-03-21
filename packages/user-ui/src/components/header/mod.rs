@@ -277,9 +277,7 @@ pub fn Header(lang: Language) -> Element {
             div { class: "flex font-bold justify-center items-center text-[#35343f] text-[15px] leading-[18.75px] gap-[45px]",
                 Link {
                     //TODO: Change Target
-                    to: Route::MainPage {
-                        lang: lang.clone(),
-                    },
+                    to: Route::ComingSoonPage { lang },
                     "{translates.service}"
                 }
                 Link {
@@ -290,28 +288,28 @@ pub fn Header(lang: Language) -> Element {
                 }
                 Link {
                     //TODO: Change Target
-                    to: Route::MainPage {
+                    to: Route::ComingSoonPage {
                         lang: lang.clone(),
                     },
                     "{translates.organization}"
                 }
                 Link {
                     //TODO: Change Target
-                    to: Route::MainPage {
+                    to: Route::ComingSoonPage {
                         lang: lang.clone(),
                     },
                     "{translates.plan}"
                 }
                 Link {
                     //TODO: Change Target
-                    to: Route::MainPage {
+                    to: Route::ComingSoonPage {
                         lang: lang.clone(),
                     },
                     "{translates.contact}"
                 }
                 Link {
                     //TODO: Change Target
-                    to: Route::MainPage {
+                    to: Route::ComingSoonPage {
                         lang: lang.clone(),
                     },
                     "{translates.guide}"
