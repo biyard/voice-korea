@@ -245,6 +245,7 @@ impl Controller {
                         user_count: v.user_count as i64,
                     })
                     .collect(),
+                selected_panels.iter().map(|v| v.id).collect(),
             )
             .await
         {
