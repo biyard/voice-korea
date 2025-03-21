@@ -37,10 +37,18 @@ pub fn DiscussionPage(
 
     let discussions = ctrl.discussions()?;
 
-    let (title, description, files) = discussions
+    let (title, description, files, start_date, end_date) = discussions
         .get(0)
-        .map(|d| (d.name.clone(), d.description.clone(), d.resources.clone()))
-        .unwrap_or(("".to_string(), "".to_string(), vec![]));
+        .map(|d| {
+            (
+                d.name.clone(),
+                d.description.clone(),
+                d.resources.clone(),
+                d.started_at,
+                d.ended_at,
+            )
+        })
+        .unwrap_or(("".to_string(), "".to_string(), vec![], 0, 0));
     let tab_title: &str = Tab::Discussion.translate(&lang);
 
     rsx! {
@@ -49,8 +57,17 @@ pub fn DiscussionPage(
             class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
             ..attributes,
             // header
-            div { class: "w-full flex flex-row justify-between items-center ",
-                p { class: "font-semibold text-[20px] mt-[28px]", "{tab_title}" }
+            div { class: "w-full flex flex-row justify-between items-center mt-[28px]",
+                div { class: " font-semibold text-[20px]", "{tab_title}" }
+                div { class: "font-medium text-[15px] text-black",
+                    {
+                        format!(
+                            "{} ~ {}",
+                            formatted_timestamp(start_date),
+                            formatted_timestamp(end_date),
+                        )
+                    }
+                }
             }
 
             // information section

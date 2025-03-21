@@ -10,7 +10,7 @@ use crate::{
         triangle::{TriangleDown, TriangleUp},
     },
     pages::projects::_id::components::sample_survey::{SampleSurveyTranslate, SurveyStatus},
-    utils::time::current_timestamp,
+    utils::time::{current_timestamp, formatted_timestamp},
 };
 
 use super::sample_survey::SurveyStep;
@@ -20,11 +20,13 @@ pub fn SampleSurveyInfo(
     lang: Language,
     survey: DeliberationSurvey,
     survey_completed: bool,
+    start_date: i64,
+    end_date: i64,
     onchange: EventHandler<SurveyStep>,
 ) -> Element {
     let tab_title: &str = Tab::SampleSurvey.translate(&lang);
     let mut clicked1 = use_signal(|| true);
-    let status = get_survey_status(survey.started_at, survey.ended_at);
+    let status = get_survey_status(start_date, end_date);
     let tr: SampleSurveyTranslate = translate(&lang);
 
     let title = if survey.surveys.is_empty() {
@@ -44,8 +46,17 @@ pub fn SampleSurveyInfo(
             div { class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
 
                 // header
-                div { class: "w-full flex flex-row justify-between items-center",
-                    p { class: "mt-[28px] font-semibold text-[20px]", "{tab_title}" }
+                div { class: "w-full flex flex-row justify-between items-center mt-[28px]",
+                    div { class: " font-semibold text-[20px]", "{tab_title}" }
+                    div { class: "font-medium text-[15px] text-black",
+                        {
+                            format!(
+                                "{} ~ {}",
+                                formatted_timestamp(start_date),
+                                formatted_timestamp(end_date),
+                            )
+                        }
+                    }
                 }
 
                 // information section
