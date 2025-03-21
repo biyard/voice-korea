@@ -178,6 +178,7 @@ impl SurveyControllerV2 {
         match body {
             SurveyV2ByIdAction::Update(params) => ctrl.update(org_id, id, params).await,
             SurveyV2ByIdAction::StartSurvey(_) => ctrl.start_survey(id).await,
+            SurveyV2ByIdAction::UpdateSetting(params) => ctrl.update_setting(id, params).await,
         }
     }
 
@@ -295,6 +296,41 @@ impl SurveyControllerV2 {
                     questions: None,
                     panel_counts: None,
                     noncelab_id: Some(noncelab_id as i64),
+
+                    estimate_time: None,
+                    point: None,
+                },
+            )
+            .await?;
+
+        Ok(Json(survey))
+    }
+
+    pub async fn update_setting(
+        &self,
+        id: i64,
+        body: SurveyV2UpdateSettingRequest,
+    ) -> Result<Json<SurveyV2>> {
+        let survey = self
+            .repo
+            .update(
+                id,
+                SurveyV2RepositoryUpdateRequest {
+                    name: None,
+                    project_type: None,
+                    project_area: None,
+                    status: None,
+                    started_at: None,
+                    ended_at: None,
+                    description: None,
+                    quotes: None,
+                    org_id: None,
+                    questions: None,
+                    panel_counts: None,
+                    noncelab_id: None,
+
+                    estimate_time: Some(body.estimate_time),
+                    point: Some(body.point),
                 },
             )
             .await?;
@@ -329,6 +365,9 @@ impl SurveyControllerV2 {
                     questions: Some(body.questions),
                     panel_counts: Some(body.panel_counts),
                     noncelab_id: None,
+
+                    estimate_time: Some(body.estimate_time),
+                    point: Some(body.point),
                 },
             )
             .await?;
@@ -373,6 +412,8 @@ impl SurveyControllerV2 {
             questions,
             panels,
             panel_counts,
+            estimate_time,
+            point,
         }: SurveyV2CreateRequest,
     ) -> Result<Json<SurveyV2>> {
         tracing::debug!("create {:?}", org_id,);
@@ -393,6 +434,8 @@ impl SurveyControllerV2 {
                 org_id.clone(),
                 questions,
                 panel_counts,
+                estimate_time,
+                point,
                 None,
             )
             .await?
@@ -446,6 +489,8 @@ pub mod tests {
                 vec![],
                 vec![],
                 vec![],
+                0,
+                0,
             )
             .await;
 

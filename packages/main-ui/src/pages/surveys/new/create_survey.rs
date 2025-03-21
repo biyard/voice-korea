@@ -77,9 +77,10 @@ pub fn CreateSurvey(
 
     rsx! {
         div {
-            class: "flex flex-col w-full h-full justify-start items-start",
-
-            visibility: if !visibility { "hidden" },
+            class: format!(
+                "flex flex-col w-full h-full justify-start items-start {}",
+                if !visibility { "hidden" } else { "" },
+            ),
             width: if !visibility { "0px" },
             height: if !visibility { "0px" },
             div { class: "flex flex-col w-full",

@@ -47,7 +47,6 @@ pub struct SurveyV2 {
     #[api_model(summary, action = create, type = JSONB, version = v0.1, action_by_id = update)]
     pub questions: Vec<Question>,
 
-    //FIXME: add action_by_id tag
     #[api_model(summary, action = create, many_to_many = panel_surveys, foreign_table_name = panels, foreign_primary_key = panel_id, foreign_reference_key = survey_id,)]
     #[serde(default)]
     pub panels: Vec<PanelV2>,
@@ -55,6 +54,14 @@ pub struct SurveyV2 {
     // FIXME: This data may be one_to_many of panel_surveys table
     #[api_model(summary, action = create, type = JSONB, version = v0.1, action_by_id = update)]
     pub panel_counts: Vec<PanelCountsV2>,
+
+    #[api_model(summary, action = create, version = v0.2, action_by_id = [update, update_setting])]
+    #[serde(default)]
+    pub estimate_time: i64,
+    #[api_model(summary, action = create, version = v0.2, action_by_id = [update, update_setting])]
+    #[serde(default)]
+    pub point: i64,
+
     #[api_model(summary)]
     pub noncelab_id: Option<i64>,
     #[api_model(summary, one_to_many = survey_responses, foreign_key = survey_id, aggregator = count)]

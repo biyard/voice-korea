@@ -1,3 +1,4 @@
+use bdk::prelude::btracing;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
@@ -6,6 +7,9 @@ use models::{
     SurveyV2StartSurveyRequest, SurveyV2Summary,
 };
 
+use crate::pages::surveys::components::setting_reward_modal::{
+    SettingRewardModal, SettingRewardModalTranslate,
+};
 use crate::pages::surveys::page::{ErrorModal, RemoveSurveyModal};
 use crate::service::login_service::LoginService;
 use crate::service::popup_service::PopupService;
@@ -170,13 +174,67 @@ impl Controller {
                 .await
             {
                 Ok(_) => {
+                    btracing::debug!("success to start survey");
                     survey_resource.restart();
                 }
                 Err(e) => {
-                    tracing::error!("Failed to start survey: {:?}", e);
+                    btracing::error!("Failed to start survey with error: {:?}", e);
                 }
             }
         }
+    }
+
+    pub async fn open_setting_reward_modal(
+        &mut self,
+        id: i64,
+        lang: Language,
+        estimate_time: i64,
+        point: i64,
+        questions: i64,
+    ) {
+        let mut surveys = self.surveys;
+        let mut popup_service = self.popup_service;
+        let cli = SurveyV2::get_client(crate::config::get().api_url);
+        let org_id = (self.org_id)().parse::<i64>().unwrap_or_default();
+
+        let tr: SettingRewardModalTranslate = translate(&lang);
+
+        popup_service
+            .open(rsx! {
+                SettingRewardModal {
+                    lang,
+                    questions,
+                    estimate_time,
+                    point,
+
+                    change_estimate_time: move |_| {},
+                    change_point: move |_| {},
+                    onsend: {
+                        move |(estimate_time, point): (i64, i64)| {
+                            let cli = cli.clone();
+                            async move {
+                                tracing::debug!("estimate time: {:?} point: {:?}", estimate_time, point);
+                                match cli.update_setting(org_id, id, estimate_time, point).await {
+                                    Ok(_) => {
+                                        btracing::debug!("success to update setting");
+                                        surveys.restart();
+                                        popup_service.close();
+                                    }
+                                    Err(e) => {
+                                        btracing::error!("Failed to update setting with error: {:?}", e);
+                                        popup_service.close();
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    oncancel: move |_| {
+                        popup_service.close();
+                    },
+                }
+            })
+            .with_id("setting reward in main")
+            .with_title(tr.title);
     }
 
     pub async fn open_remove_survey_modal(&mut self, survey_id: String) {
@@ -200,16 +258,25 @@ impl Controller {
                             let client = client.clone();
                             let org_id = org_id.clone();
                             async move {
-                                let _ = client
+                                match client
                                     .act(
                                         org_id.parse::<i64>().unwrap_or_default(),
                                         models::SurveyV2Action::Delete(SurveyV2DeleteRequest {
                                             id: survey_id.parse::<i64>().unwrap_or_default(),
                                         }),
                                     )
-                                    .await;
-                                public_survey_resource.restart();
-                                popup_service.close();
+                                    .await
+                                {
+                                    Ok(_) => {
+                                        btracing::debug!("success to remove survey");
+                                        public_survey_resource.restart();
+                                        popup_service.close();
+                                    }
+                                    Err(e) => {
+                                        btracing::error!("Failed to remove survey with error: {:?}", e);
+                                        popup_service.close();
+                                    }
+                                }
                             }
                         }
                     },
