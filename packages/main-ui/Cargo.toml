@@ -1,6 +1,6 @@
 [package]
 name = "main-ui"
-version = "0.3.18"
+version = "0.3.19"
 authors.workspace = true
 edition.workspace = true
 
