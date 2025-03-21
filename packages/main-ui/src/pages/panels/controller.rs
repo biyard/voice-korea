@@ -618,31 +618,14 @@ impl Controller {
         attributes: Vec<models::prelude::response::Attribute>,
         attribute: Vec<models::prelude::response::Attribute>,
     ) -> Vec<models::prelude::response::Attribute> {
-        let mut attrs = vec![];
-        let mut is_added = false;
+        let mut attrs = attributes.clone();
 
-        for v in attribute.clone() {}
-
-        for attr in &attributes {
-            if attribute.is_empty() {
-                attrs.push(attr.clone());
-                continue;
-            }
-
-            if let Some(first_attr) = attribute.first() {
-                if discriminant(attr) == discriminant(first_attr) {
-                    if is_added {
-                        continue;
-                    }
-                    attrs.extend(attribute.clone());
-                    is_added = true;
-                } else {
-                    attrs.push(attr.clone());
-                }
-            } else {
-                attrs.push(attr.clone());
-            }
+        if let Some(first_attr) = attribute.first() {
+            attrs.retain(|attr| discriminant(attr) != discriminant(first_attr));
         }
+
+        attrs.extend(attribute);
+
         attrs
     }
 

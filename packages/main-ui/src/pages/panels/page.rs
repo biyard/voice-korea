@@ -273,21 +273,7 @@ pub fn PanelList(
                                             .call(PanelV2CreateRequest {
                                                 name: "".to_string(),
                                                 user_count: 0,
-                                                attributes: vec![
-                                                    models::response::Attribute::Age(models::response::AgeV3::Range {
-                                                        inclusive_min: 0,
-                                                        inclusive_max: 17,
-                                                    }),
-                                                    models::response::Attribute::Gender(
-                                                        models::attribute_v2::GenderV2::Male,
-                                                    ),
-                                                    models::response::Attribute::Region(
-                                                        models::attribute_v2::RegionV2::Seoul,
-                                                    ),
-                                                    models::response::Attribute::Salary(
-                                                        models::attribute_v2::SalaryV2::TierOne,
-                                                    ),
-                                                ],
+                                                attributes: vec![],
                                             });
                                     }
                                 },
@@ -360,8 +346,15 @@ pub fn PanelList(
                                     onclick: move |_| async move {
                                         ctrl.open_setting_age_modal(lang, index).await;
                                     },
-                                    for age in ctrl.convert_vec_to_attributes(panel.attributes.clone()).0 {
-                                        PanelLabel { label: age.translate(&lang) }
+
+                                    if ctrl.convert_vec_to_attributes(panel.attributes.clone()).0.is_empty() {
+                                        button { class: "flex flex-row w-[24px] h-[24px] justify-center items-center bg-[#d1d1d1] opacity-50 rounded-[4px] font-bold text-[#35343f] text-lg",
+                                            "+"
+                                        }
+                                    } else {
+                                        for age in ctrl.convert_vec_to_attributes(panel.attributes.clone()).0 {
+                                            PanelLabel { label: age.translate(&lang) }
+                                        }
                                     }
                                 }
                                 div {
@@ -369,8 +362,15 @@ pub fn PanelList(
                                     onclick: move |_| async move {
                                         ctrl.open_setting_gender_modal(lang, index).await;
                                     },
-                                    for gender in ctrl.convert_vec_to_attributes(panel.attributes.clone()).1 {
-                                        PanelLabel { label: gender.translate(&lang) }
+
+                                    if ctrl.convert_vec_to_attributes(panel.attributes.clone()).1.is_empty() {
+                                        button { class: "flex flex-row w-[24px] h-[24px] justify-center items-center bg-[#d1d1d1] opacity-50 rounded-[4px] font-bold text-[#35343f] text-lg",
+                                            "+"
+                                        }
+                                    } else {
+                                        for gender in ctrl.convert_vec_to_attributes(panel.attributes.clone()).1 {
+                                            PanelLabel { label: gender.translate(&lang) }
+                                        }
                                     }
                                 }
                                 div {
@@ -378,8 +378,14 @@ pub fn PanelList(
                                     onclick: move |_| async move {
                                         ctrl.open_setting_region_modal(lang, index).await;
                                     },
-                                    for region in ctrl.convert_vec_to_attributes(panel.attributes.clone()).2 {
-                                        PanelLabel { label: region.translate(&lang) }
+                                    if ctrl.convert_vec_to_attributes(panel.attributes.clone()).2.is_empty() {
+                                        button { class: "flex flex-row w-[24px] h-[24px] justify-center items-center bg-[#d1d1d1] opacity-50 rounded-[4px] font-bold text-[#35343f] text-lg",
+                                            "+"
+                                        }
+                                    } else {
+                                        for region in ctrl.convert_vec_to_attributes(panel.attributes.clone()).2 {
+                                            PanelLabel { label: region.translate(&lang) }
+                                        }
                                     }
                                 }
                                 div {
@@ -387,8 +393,14 @@ pub fn PanelList(
                                     onclick: move |_| async move {
                                         ctrl.open_setting_salary_modal(lang, index).await;
                                     },
-                                    for salary in ctrl.convert_vec_to_attributes(panel.attributes.clone()).3 {
-                                        PanelLabel { label: salary.translate(&lang) }
+                                    if ctrl.convert_vec_to_attributes(panel.attributes.clone()).3.is_empty() {
+                                        button { class: "flex flex-row w-[24px] h-[24px] justify-center items-center bg-[#d1d1d1] opacity-50 rounded-[4px] font-bold text-[#35343f] text-lg",
+                                            "+"
+                                        }
+                                    } else {
+                                        for salary in ctrl.convert_vec_to_attributes(panel.attributes.clone()).3 {
+                                            PanelLabel { label: salary.translate(&lang) }
+                                        }
                                     }
                                 }
                                 div { class: "group relative",
