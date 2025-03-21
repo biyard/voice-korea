@@ -233,7 +233,7 @@ pub fn PanelList(
                     }
                 }
                 div { class: "flex flex-col w-full justify-start items-start border rounded-lg border-[#bfc8d9]",
-                    div { class: "flex flex-row w-full h-[55px] justify-start items-center",
+                    div { class: "flex flex-row w-full min-h-[55px] justify-start items-center",
                         div { class: "flex flex-row flex-1 h-full justify-center items-center gap-[10px]",
                             div { class: "text-[#555462] font-semibold text-[14px]",
                                 "{translate.panel_name}"
@@ -299,7 +299,7 @@ pub fn PanelList(
                         div { class: "flex flex-col w-full justify-start items-start",
                             div { class: "flex flex-row w-full h-[1px] bg-[#bfc8d9]" }
                             div {
-                                class: "flex flex-row w-full h-[55px]",
+                                class: "flex flex-row w-full min-h-[55px] h-fit py-[5px]",
                                 onclick: {
                                     move |_| {
                                         clicked_panel_index.set(index);
@@ -355,60 +355,40 @@ pub fn PanelList(
                                         }
                                     }
                                 }
-                                div { class: "flex flex-row flex-1 h-full justify-center items-center",
-                                    button {
-                                        class: "font-medium text-[#222222] text-[14px]",
-                                        onclick: move |_| async move {
-                                            ctrl.open_setting_age_modal(lang, index).await;
-                                        },
-                                        PanelLabel {
-                                            label: match ctrl.convert_vec_to_attributes(panel.attributes.clone()).0 {
-                                                Some(v) => v.translate(&lang),
-                                                None => "".to_string(),
-                                            },
-                                        }
+                                div {
+                                    class: "cursor-pointer flex flex-1 flex-wrap h-full justify-center items-center gap-[10px]",
+                                    onclick: move |_| async move {
+                                        ctrl.open_setting_age_modal(lang, index).await;
+                                    },
+                                    for age in ctrl.convert_vec_to_attributes(panel.attributes.clone()).0 {
+                                        PanelLabel { label: age.translate(&lang) }
                                     }
                                 }
-                                div { class: "flex flex-row flex-1 h-full justify-center items-center",
-                                    button {
-                                        class: "font-medium text-[#222222] text-[14px]",
-                                        onclick: move |_| async move {
-                                            ctrl.open_setting_gender_modal(lang, index).await;
-                                        },
-                                        PanelLabel {
-                                            label: match ctrl.convert_vec_to_attributes(panel.attributes.clone()).1 {
-                                                Some(v) => v.translate(&lang).to_string(),
-                                                None => "".to_string(),
-                                            },
-                                        }
+                                div {
+                                    class: "cursor-pointer flex flex-1 flex-wrap h-full justify-center items-center gap-[10px]",
+                                    onclick: move |_| async move {
+                                        ctrl.open_setting_gender_modal(lang, index).await;
+                                    },
+                                    for gender in ctrl.convert_vec_to_attributes(panel.attributes.clone()).1 {
+                                        PanelLabel { label: gender.translate(&lang) }
                                     }
                                 }
-                                div { class: "flex flex-row flex-1 h-full justify-center items-center",
-                                    button {
-                                        class: "font-medium text-[#222222] text-[14px]",
-                                        onclick: move |_| async move {
-                                            ctrl.open_setting_region_modal(lang, index).await;
-                                        },
-                                        PanelLabel {
-                                            label: match ctrl.convert_vec_to_attributes(panel.attributes.clone()).2 {
-                                                Some(v) => v.translate(&lang).to_string(),
-                                                None => "".to_string(),
-                                            },
-                                        }
+                                div {
+                                    class: "cursor-pointer flex flex-1 flex-wrap h-full justify-center items-center gap-[10px]",
+                                    onclick: move |_| async move {
+                                        ctrl.open_setting_region_modal(lang, index).await;
+                                    },
+                                    for region in ctrl.convert_vec_to_attributes(panel.attributes.clone()).2 {
+                                        PanelLabel { label: region.translate(&lang) }
                                     }
                                 }
-                                div { class: "flex flex-row flex-1 h-full justify-center items-center",
-                                    button {
-                                        class: "font-medium text-[#222222] text-[14px]",
-                                        onclick: move |_| async move {
-                                            ctrl.open_setting_salary_modal(lang, index).await;
-                                        },
-                                        PanelLabel {
-                                            label: match ctrl.convert_vec_to_attributes(panel.attributes.clone()).3 {
-                                                Some(v) => v.translate(&lang).to_string(),
-                                                None => "".to_string(),
-                                            },
-                                        }
+                                div {
+                                    class: "cursor-pointer flex flex-1 flex-wrap h-full justify-center items-center gap-[10px]",
+                                    onclick: move |_| async move {
+                                        ctrl.open_setting_salary_modal(lang, index).await;
+                                    },
+                                    for salary in ctrl.convert_vec_to_attributes(panel.attributes.clone()).3 {
+                                        PanelLabel { label: salary.translate(&lang) }
                                     }
                                 }
                                 div { class: "group relative",
