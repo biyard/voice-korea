@@ -84,5 +84,6 @@ node_modules/
 /playwright/.cache/
 /packages/api/target-test/
 target-*/
+/tests-example/
 
 /packages/user-ui/public/dep.js
