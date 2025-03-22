@@ -197,7 +197,7 @@ pub fn ContentSection(
                 }
             }
 
-            OpinionInstitution { lang, institutions }
+        // OpinionInstitution { lang, institutions }
         }
     }
 }

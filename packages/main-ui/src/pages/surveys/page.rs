@@ -252,6 +252,24 @@ pub fn SurveyPage(props: SurveyProps) -> Element {
                                                                 },
                                                                 "{translate.remove_survey}"
                                                             }
+                                                            li {
+                                                                class: "p-3 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer",
+                                                                onclick: move |_| {
+                                                                    let questions = survey.questions.clone();
+                                                                    let id = survey.id.clone();
+                                                                    async move {
+                                                                        ctrl.open_setting_reward_modal(
+                                                                                id,
+                                                                                props.lang,
+                                                                                survey.estimate_time,
+                                                                                survey.point,
+                                                                                questions.len() as i64,
+                                                                            )
+                                                                            .await;
+                                                                    }
+                                                                },
+                                                                "{translate.update_reward}"
+                                                            }
                                                         }
                                                     }
                                                 }

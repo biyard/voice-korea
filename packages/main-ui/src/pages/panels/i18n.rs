@@ -37,7 +37,7 @@ translate! {
         en: "Under 17 years old"
     }
     twenty: {
-        ko: "18~29세",
+        ko: "18-29세",
         en: "18-29 years old"
     }
     thirty: {

@@ -386,6 +386,10 @@ translate! {
         ko: "조사 삭제하기",
         en: "Remove Survey"
     }
+    update_reward: {
+        ko: "예상 소요 시간 및 리워드 수정하기",
+        en: "Modify estimated time and rewards"
+    }
 
     remove_modal_title: {
         ko: "설문 삭제",

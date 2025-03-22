@@ -1,3 +1,4 @@
+#![allow(dead_code, unused)]
 use std::{mem::discriminant, str::FromStr};
 
 use dioxus::prelude::*;
@@ -209,13 +210,17 @@ impl Controller {
         let panels = self.get_panels();
         let panel = panels[index].clone();
         let (_, _, _, salary) = self.convert_vec_to_attributes(panel.attributes.clone());
-        let salary = salary.unwrap_or_default().translate(&lang);
+        let salary = salary
+            .iter()
+            .map(|v| v.translate(&lang).to_string().clone())
+            .collect();
         let client = (self.client)().clone();
         let mut panel_resource = self.panel_resource;
 
         popup_service
             .open(rsx! {
                 AttributeSetting {
+                    attribute_name: "salary",
                     lang,
                     name: translate.clone().salary.to_string(),
                     total_options: vec![
@@ -231,27 +236,25 @@ impl Controller {
                         let attributes = panel.attributes.clone();
                         let req = self.convert_update_request(panel);
                         let org_id = (self.org_id)();
-                        move |option: String| {
+                        move |option: Vec<String>| {
                             let client = client.clone();
-                            let salary = SalaryV2::from_str(&option);
+                            let salary: Vec<models::prelude::response::Attribute> = option
+                                .iter()
+                                .map(|v| models::prelude::response::Attribute::Salary(
+                                    SalaryV2::from_str(&v).unwrap_or_default(),
+                                ))
+                                .collect();
                             let mut req = req.clone();
                             let id = id.clone();
                             let attributes = attributes.clone();
                             async move {
-                                if salary.is_ok() {
-                                    let salary = salary.unwrap();
-                                    req.attributes = ctrl
-                                        .update_attribute_vec(
-                                            attributes.clone(),
-                                            models::prelude::response::Attribute::Salary(salary),
-                                        );
-                                    tracing::info!("update salary clicked: {index} {:?}", req);
-                                    let _ = client
-                                        .act_by_id(org_id, id, PanelV2ByIdAction::Update(req))
-                                        .await;
-                                    panel_resource.restart();
-                                    popup_service.close();
-                                } else {}
+                                req.attributes = ctrl.update_attribute_vec(attributes.clone(), salary);
+                                tracing::info!("update salary clicked: {index} {:?}", req);
+                                let _ = client
+                                    .act_by_id(org_id, id, PanelV2ByIdAction::Update(req))
+                                    .await;
+                                panel_resource.restart();
+                                popup_service.close();
                             }
                         }
                     },
@@ -271,13 +274,17 @@ impl Controller {
         let panels = self.get_panels();
         let panel = panels[index].clone();
         let (_, _, region, _) = self.convert_vec_to_attributes(panel.attributes.clone());
-        let region = region.unwrap_or_default().translate(&lang);
+        let region = region
+            .iter()
+            .map(|v| v.translate(&lang).to_string().clone())
+            .collect();
         let client = (self.client)().clone();
         let mut panel_resource = self.panel_resource;
 
         popup_service
             .open(rsx! {
                 AttributeSetting {
+                    attribute_name: "region",
                     lang,
                     name: translate.clone().region.to_string(),
                     total_options: vec![
@@ -305,28 +312,26 @@ impl Controller {
                         let attributes = panel.attributes.clone();
                         let req = self.convert_update_request(panel);
                         let org_id = (self.org_id)();
-                        move |option: String| {
+                        move |option: Vec<String>| {
                             let client = client.clone();
-                            let region = RegionV2::from_str(&option);
+                            let region: Vec<models::prelude::response::Attribute> = option
+                                .iter()
+                                .map(|v| models::prelude::response::Attribute::Region(
+                                    RegionV2::from_str(&v).unwrap_or_default(),
+                                ))
+                                .collect();
                             let mut req = req.clone();
                             let id = id.clone();
                             let org_id = org_id.clone();
                             let attributes = attributes.clone();
                             async move {
-                                if region.is_ok() {
-                                    let region = region.unwrap();
-                                    req.attributes = ctrl
-                                        .update_attribute_vec(
-                                            attributes.clone(),
-                                            models::prelude::response::Attribute::Region(region),
-                                        );
-                                    tracing::info!("update region clicked: {index} {:?}", req);
-                                    let _ = client
-                                        .act_by_id(org_id, id, PanelV2ByIdAction::Update(req))
-                                        .await;
-                                    panel_resource.restart();
-                                    popup_service.close();
-                                } else {}
+                                req.attributes = ctrl.update_attribute_vec(attributes.clone(), region);
+                                tracing::info!("update region clicked: {index} {:?}", req);
+                                let _ = client
+                                    .act_by_id(org_id, id, PanelV2ByIdAction::Update(req))
+                                    .await;
+                                panel_resource.restart();
+                                popup_service.close();
                             }
                         }
                     },
@@ -346,13 +351,17 @@ impl Controller {
         let panels = self.get_panels();
         let panel = panels[index].clone();
         let (_, gender, _, _) = self.convert_vec_to_attributes(panel.attributes.clone());
-        let gender = gender.unwrap_or_default().translate(&lang);
+        let gender = gender
+            .iter()
+            .map(|v| v.translate(&lang).to_string().clone())
+            .collect();
         let client = (self.client)().clone();
         let mut panel_resource = self.panel_resource;
 
         popup_service
             .open(rsx! {
                 AttributeSetting {
+                    attribute_name: "gender",
                     lang,
                     name: translate.clone().gender.to_string(),
                     total_options: vec![translate.clone().male.to_string(), translate.clone().female.to_string()],
@@ -362,28 +371,26 @@ impl Controller {
                         let attributes = panel.attributes.clone();
                         let req = self.convert_update_request(panel);
                         let org_id = (self.org_id)();
-                        move |option: String| {
+                        move |option: Vec<String>| {
                             let client = client.clone();
-                            let gender = GenderV2::from_str(&option);
+                            let gender: Vec<models::prelude::response::Attribute> = option
+                                .iter()
+                                .map(|v| models::prelude::response::Attribute::Gender(
+                                    GenderV2::from_str(&v).unwrap_or_default(),
+                                ))
+                                .collect();
                             let mut req = req.clone();
                             let id = id.clone();
                             let org_id = org_id.clone();
                             let attributes = attributes.clone();
                             async move {
-                                if gender.is_some() {
-                                    let gender = gender.unwrap();
-                                    req.attributes = ctrl
-                                        .update_attribute_vec(
-                                            attributes.clone(),
-                                            models::prelude::response::Attribute::Gender(gender),
-                                        );
-                                    tracing::info!("update gender clicked: {index} {:?}", req);
-                                    let _ = client
-                                        .act_by_id(org_id, id, PanelV2ByIdAction::Update(req))
-                                        .await;
-                                    panel_resource.restart();
-                                    popup_service.close();
-                                } else {}
+                                req.attributes = ctrl.update_attribute_vec(attributes.clone(), gender);
+                                tracing::info!("update gender clicked: {index} {:?}", req);
+                                let _ = client
+                                    .act_by_id(org_id, id, PanelV2ByIdAction::Update(req))
+                                    .await;
+                                panel_resource.restart();
+                                popup_service.close();
                             }
                         }
                     },
@@ -403,13 +410,17 @@ impl Controller {
         let panels = self.get_panels();
         let panel = panels[index].clone();
         let (age, _, _, _) = self.convert_vec_to_attributes(panel.attributes.clone());
-        let age = age.unwrap_or_default().translate(&lang);
+        let age: Vec<String> = age
+            .iter()
+            .map(|v| v.translate(&lang).to_string().clone())
+            .collect();
         let client = (self.client)().clone();
         let mut panel_resource = self.panel_resource;
 
         popup_service
             .open(rsx! {
                 AttributeSetting {
+                    attribute_name: "age",
                     lang,
                     name: translate.clone().age.to_string(),
                     total_options: vec![
@@ -427,30 +438,28 @@ impl Controller {
                         let attributes = panel.attributes.clone();
                         let req = self.convert_update_request(panel);
                         let org_id = (self.org_id)();
-                        move |option: String| {
+                        move |option: Vec<String>| {
                             let client = client.clone();
                             tracing::info!("age option: {:?}", option);
-                            let age = AgeV3::from_str(&option);
+                            let age: Vec<models::prelude::response::Attribute> = option
+                                .iter()
+                                .map(|v| models::prelude::response::Attribute::Age(
+                                    AgeV3::from_str(&v).unwrap_or_default(),
+                                ))
+                                .collect();
                             tracing::info!("age: {:?}", age);
                             let mut req = req.clone();
                             let id = id.clone();
                             let org_id = org_id.clone();
                             let attributes = attributes.clone();
                             async move {
-                                if age.is_ok() {
-                                    let age = age.unwrap();
-                                    req.attributes = ctrl
-                                        .update_attribute_vec(
-                                            attributes.clone(),
-                                            models::prelude::response::Attribute::Age(age),
-                                        );
-                                    tracing::debug!("update age clicked: {index} {:?}", req);
-                                    let _ = client
-                                        .act_by_id(org_id, id, PanelV2ByIdAction::Update(req))
-                                        .await;
-                                    panel_resource.restart();
-                                    popup_service.close();
-                                } else {}
+                                req.attributes = ctrl.update_attribute_vec(attributes.clone(), age);
+                                tracing::debug!("update age clicked: {index} {:?}", req);
+                                let _ = client
+                                    .act_by_id(org_id, id, PanelV2ByIdAction::Update(req))
+                                    .await;
+                                panel_resource.restart();
+                                popup_service.close();
                             }
                         }
                     },
@@ -607,42 +616,43 @@ impl Controller {
     pub fn update_attribute_vec(
         &self,
         attributes: Vec<models::prelude::response::Attribute>,
-        attribute: models::prelude::response::Attribute,
+        attribute: Vec<models::prelude::response::Attribute>,
     ) -> Vec<models::prelude::response::Attribute> {
-        let mut attrs = vec![];
+        let mut attrs = attributes.clone();
 
-        for attr in attributes.clone() {
-            let attribute = attribute.clone();
-            if discriminant(&attr) == discriminant(&attribute.clone()) {
-                attrs.push(attribute);
-            } else {
-                attrs.push(attr);
-            }
+        if let Some(first_attr) = attribute.first() {
+            attrs.retain(|attr| discriminant(attr) != discriminant(first_attr));
         }
+
+        attrs.extend(attribute);
+
         attrs
     }
 
     pub fn convert_vec_to_attributes(
         &self,
         attributes: Vec<models::prelude::response::Attribute>,
-    ) -> (
-        Option<AgeV3>,
-        Option<GenderV2>,
-        Option<RegionV2>,
-        Option<SalaryV2>,
-    ) {
-        let mut age = None;
-        let mut gender = None;
-        let mut region = None;
-        let mut salary = None;
+    ) -> (Vec<AgeV3>, Vec<GenderV2>, Vec<RegionV2>, Vec<SalaryV2>) {
+        let mut age: Vec<AgeV3> = vec![];
+        let mut gender: Vec<GenderV2> = vec![];
+        let mut region: Vec<RegionV2> = vec![];
+        let mut salary: Vec<SalaryV2> = vec![];
 
         for attribute in attributes {
             match attribute {
-                models::response::Attribute::Age(age_v3) => age = Some(age_v3),
-                models::response::Attribute::Gender(gender_v2) => gender = Some(gender_v2),
-                models::response::Attribute::Region(region_v2) => region = Some(region_v2),
-                models::response::Attribute::Salary(salary_v2) => salary = Some(salary_v2),
-                models::response::Attribute::None => todo!(),
+                models::response::Attribute::Age(age_v3) => {
+                    age.push(age_v3);
+                }
+                models::response::Attribute::Gender(gender_v2) => {
+                    gender.push(gender_v2);
+                }
+                models::response::Attribute::Region(region_v2) => {
+                    region.push(region_v2);
+                }
+                models::response::Attribute::Salary(salary_v2) => {
+                    salary.push(salary_v2);
+                }
+                models::response::Attribute::None => {}
             }
         }
 

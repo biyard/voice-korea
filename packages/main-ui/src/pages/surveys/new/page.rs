@@ -48,7 +48,7 @@ pub fn SurveyCreatePage(lang: Language, survey_id: Option<i64>) -> Element {
                     survey_id,
                     visibility: ctrl.get_current_step() == CurrentStep::SettingPanel,
                     onnext: move |req: PanelRequest| async move {
-                        ctrl.save_survey(req).await;
+                        ctrl.open_setting_reward_modal(lang, req).await;
                     },
                     onback: move || ctrl.change_step(CurrentStep::CreateSurvey),
                 }

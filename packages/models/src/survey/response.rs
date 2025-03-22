@@ -195,7 +195,7 @@ impl FromStr for AgeV3 {
                 inclusive_min: 0,
                 inclusive_max: 17,
             }),
-            "18-29 years old" | "18~29세" => Ok(AgeV3::Range {
+            "18-29 years old" | "18-29세" => Ok(AgeV3::Range {
                 inclusive_min: 18,
                 inclusive_max: 29,
             }),

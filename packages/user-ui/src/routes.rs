@@ -29,6 +29,8 @@ pub enum Route {
             ProjectPage { lang: Language, project_id: i64 },
             #[route("/projects")]
             ProjectListPage { lang: Language },
+            #[route("/coming-soon")]
+            ComingSoonPage { lang: Language },
         #[end_layout]
     #[end_nest]
     #[redirect("/", || Route::MainPage { lang: Language::Ko })]
