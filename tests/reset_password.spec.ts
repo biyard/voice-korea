@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 const timeouts = {
-    wait: process.env.WAIT_TIMEOUT as unknown as number,
-    visible: process.env.VISIBLE_TIMEOUT as unknown as number
-}
+    wait: process.env.WAIT_TIMEOUT as unknown as number | 5000,
+    visible: process.env.VISIBLE_TIMEOUT as unknown as number | 10000,
+    url: process.env.URL_TIMEOUT as unknown as number | 15000
+  }
 
 
 test.describe('Reset Password Flow', () => {
