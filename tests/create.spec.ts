@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 const timeouts = {
-  wait: process.env.WAIT_TIMEOUT as unknown as number | 5000,
-  visible: process.env.VISIBLE_TIMEOUT as unknown as number | 10000,
-  url: process.env.URL_TIMEOUT as unknown as number | 15000
-}
+  wait: parseInt(process.env.WAIT_TIMEOUT || "5000", 10),
+  visible: parseInt(process.env.VISIBLE_TIMEOUT || "10000", 10),
+  url: parseInt(process.env.URL_TIMEOUT || "15000", 10)
+};
+
 
 test.describe('Create Page Flow', () => {
   test('[Create-001] Successful Account Creation', async ({ page }) => {

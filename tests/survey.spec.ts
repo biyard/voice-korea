@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 const timeouts = {
-  wait: process.env.WAIT_TIMEOUT as unknown as number | 5000,
-  visible: process.env.VISIBLE_TIMEOUT as unknown as number | 10000,
-  url: process.env.URL_TIMEOUT as unknown as number | 15000
-}
+  wait: parseInt(process.env.WAIT_TIMEOUT || "5000", 10),
+  visible: parseInt(process.env.VISIBLE_TIMEOUT || "10000", 10),
+  url: parseInt(process.env.URL_TIMEOUT || "15000", 10)
+};
+
 
 
 test.describe('Survey Page Flow', () => {
@@ -73,7 +74,7 @@ test.describe('Survey Page Flow', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(timeouts.wait);
 
-    await expect(page).toHaveURL(/.*surveys/, { timeout: timeouts.url });
+    await expect(page).toHaveURL("https://voice-korea.dev.biyard.co/en/surveys/", { timeout: timeouts.url });
     await page.screenshot({ path: 'screenshots/Survey-002/05-survey-page.png', fullPage: true });
 
     const logoutButton = page.getByRole('link', { name: "Logout" });
