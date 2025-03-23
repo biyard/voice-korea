@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+const timeouts = {
+  wait: process.env.WAIT_TIMEOUT as unknown as number,
+  visible: process.env.VISIBLE_TIMEOUT as unknown as number,
+  url: process.env.URL_TIMEOUT as unknown as number
+}
+
+
 test.describe('Login Page Flow', () => {
   test('[Login-001] Successful Login', async ({ page }) => {
     await page.goto('https://voice-korea.dev.biyard.co/en/');
@@ -8,24 +15,24 @@ test.describe('Login Page Flow', () => {
     await page.waitForLoadState('domcontentloaded');
 
     const emailInput = page.getByRole('textbox', { name: "Email" });
-    await expect(emailInput).toBeVisible({ timeout: 10000 });
+    await expect(emailInput).toBeVisible({ timeout: timeouts.visible});
     await emailInput.fill('jesuswrites20043@gmail.com');
     await page.screenshot({ path: 'screenshots/Login-001/02-email-filled.png', fullPage: true });
 
     const passwordInput = page.getByRole('textbox', { name: "Password" });
-    await expect(passwordInput).toBeVisible({ timeout: 10000 });
+    await expect(passwordInput).toBeVisible({ timeout: timeouts.visible});
     await passwordInput.fill('12345678a#');
     await page.screenshot({ path: 'screenshots/Login-001/03-password-filled.png', fullPage: true });
 
     const loginButton = page.getByRole('button', { name: "Login" });
-    await expect(loginButton).toBeVisible({ timeout: 10000 });
+    await expect(loginButton).toBeVisible({ timeout: timeouts.visible});
     await loginButton.click();
     await page.screenshot({ path: 'screenshots/Login-001/04-login-clicked.png', fullPage: true });
 
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(timeouts.wait);
 
-    await expect(page).toHaveURL(/.*surveys/, { timeout: 15000 });
+    await expect(page).toHaveURL(/.*surveys/, { timeout: timeouts.url });
     await page.screenshot({ path: 'screenshots/Login-001/05-surveys-page.png', fullPage: true });
   });
 
@@ -34,7 +41,7 @@ test.describe('Login Page Flow', () => {
     await page.screenshot({ path: 'screenshots/Login-002/01-empty-fields-login.png', fullPage: true });
 
     const loginButton = page.getByRole('button', { name: "Login" });
-    await expect(loginButton).toBeVisible({ timeout: 10000 });
+    await expect(loginButton).toBeVisible({ timeout: timeouts.visible});
     await loginButton.click();
     await page.screenshot({ path: 'screenshots/Login-002/02-error-messages.png', fullPage: true });
 
