@@ -29,8 +29,8 @@ pub struct Discussion {
     #[api_model(summary, action = create, action_by_id = update)]
     pub description: String,
 
-    #[api_model(summary)]
-    pub meeting_link: Option<String>,
+    #[api_model(summary, action_by_id = update)]
+    pub meeting_id: Option<String>,
 
     #[api_model(summary, many_to_many = discussion_groups, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = discussion_id)]
     #[serde(default)]

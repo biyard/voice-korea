@@ -47,9 +47,49 @@ impl DiscussionController {
         Ok(QueryResponse { total_count, items })
     }
 
-    async fn start_meeting(&self, _id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
+    // TODO: if you want start (activate) meeting, you should using amazon-chime-sdk-js in client side.
+    //       this code is just for create meeting room and get meeting id not for online link.
+    async fn start_meeting(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
         // TODO(api): implement using AWS chime and media pipeline.
-        todo!()
+        let client = crate::utils::aws_chime_sdk_meeting::ChimeMeetingService::new().await;
+
+        let name = Discussion::query_builder()
+            .id_equals(id)
+            .query()
+            .map(Discussion::from)
+            .fetch_optional(&self.pool)
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?
+            .name;
+
+        let meeting = match client.create_meeting(&name).await {
+            Ok(rst) => rst,
+            Err(e) => {
+                tracing::error!("start_meeting {}", e);
+                return Err(ApiError::AwsChimeError(e.to_string()));
+            }
+        };
+
+        let mut tx = self.pool.begin().await?;
+
+        let discussion = self
+            .repo
+            .update_with_tx(
+                &mut *tx,
+                id,
+                DiscussionRepositoryUpdateRequest {
+                    deliberation_id: None,
+                    started_at: None,
+                    ended_at: None,
+                    name: None,
+                    description: None,
+                    meeting_id: Some(meeting.id),
+                },
+            )
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?;
+
+        Ok(discussion)
     }
 
     async fn create(

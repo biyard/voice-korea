@@ -195,6 +195,8 @@ pub enum ApiError {
 
     #[translate(ko = "토론을 찾을 수 없습니다.", en = "Cannot find the discussion.")]
     DiscussionNotFound,
+
+    AwsChimeError(String),
 }
 
 impl From<reqwest::Error> for ApiError {
