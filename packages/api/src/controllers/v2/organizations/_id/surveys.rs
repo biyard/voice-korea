@@ -178,6 +178,7 @@ impl SurveyControllerV2 {
         match body {
             SurveyV2ByIdAction::Update(params) => ctrl.update(org_id, id, params).await,
             SurveyV2ByIdAction::StartSurvey(_) => ctrl.start_survey(id).await,
+            SurveyV2ByIdAction::UpdateSetting(params) => ctrl.update_setting(id, params).await,
         }
     }
 
@@ -295,6 +296,41 @@ impl SurveyControllerV2 {
                     questions: None,
                     panel_counts: None,
                     noncelab_id: Some(noncelab_id as i64),
+
+                    estimate_time: None,
+                    point: None,
+                },
+            )
+            .await?;
+
+        Ok(Json(survey))
+    }
+
+    pub async fn update_setting(
+        &self,
+        id: i64,
+        body: SurveyV2UpdateSettingRequest,
+    ) -> Result<Json<SurveyV2>> {
+        let survey = self
+            .repo
+            .update(
+                id,
+                SurveyV2RepositoryUpdateRequest {
+                    name: None,
+                    project_type: None,
+                    project_area: None,
+                    status: None,
+                    started_at: None,
+                    ended_at: None,
+                    description: None,
+                    quotes: None,
+                    org_id: None,
+                    questions: None,
+                    panel_counts: None,
+                    noncelab_id: None,
+
+                    estimate_time: Some(body.estimate_time),
+                    point: Some(body.point),
                 },
             )
             .await?;
@@ -308,10 +344,13 @@ impl SurveyControllerV2 {
         id: i64,
         body: SurveyV2UpdateRequest,
     ) -> Result<Json<SurveyV2>> {
-        //FIXME: receive panel params and update panel data
+        let mut tx = self.pool.begin().await?;
+        let panel_ids = body.panel_ids;
+
         let survey = self
             .repo
-            .update(
+            .update_with_tx(
+                &mut *tx,
                 id,
                 SurveyV2RepositoryUpdateRequest {
                     name: Some(body.name),
@@ -326,10 +365,38 @@ impl SurveyControllerV2 {
                     questions: Some(body.questions),
                     panel_counts: Some(body.panel_counts),
                     noncelab_id: None,
+
+                    estimate_time: Some(body.estimate_time),
+                    point: Some(body.point),
                 },
             )
             .await?;
-        Ok(Json(survey))
+
+        let items: Vec<PanelSurveysSummary> = PanelSurveys::query_builder()
+            .survey_id_equals(id)
+            .with_count()
+            .query()
+            .map(|r: sqlx::postgres::PgRow| r.into())
+            .fetch_all(&self.pool)
+            .await?;
+
+        for item in items {
+            let _ = self
+                .panel_survey_repo
+                .delete_with_tx(&mut *tx, item.id)
+                .await?;
+        }
+
+        for panel_id in panel_ids.clone() {
+            let _ = self
+                .panel_survey_repo
+                .insert_with_tx(&mut *tx, panel_id, id)
+                .await?;
+        }
+
+        tx.commit().await?;
+
+        Ok(Json(survey.unwrap_or_default()))
     }
 
     pub async fn create(
@@ -345,6 +412,8 @@ impl SurveyControllerV2 {
             questions,
             panels,
             panel_counts,
+            estimate_time,
+            point,
         }: SurveyV2CreateRequest,
     ) -> Result<Json<SurveyV2>> {
         tracing::debug!("create {:?}", org_id,);
@@ -365,6 +434,8 @@ impl SurveyControllerV2 {
                 org_id.clone(),
                 questions,
                 panel_counts,
+                estimate_time,
+                point,
                 None,
             )
             .await?
@@ -418,6 +489,8 @@ pub mod tests {
                 vec![],
                 vec![],
                 vec![],
+                0,
+                0,
             )
             .await;
 

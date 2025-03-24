@@ -114,6 +114,8 @@ async fn test_survey_reponse() {
             questions,
             panels,
             panel_counts,
+            0,
+            0,
         )
         .await
         .unwrap();
