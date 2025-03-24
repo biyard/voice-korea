@@ -11,20 +11,12 @@ use crate::{
         new::i18n::AddQuestionTranslate,
     },
 };
-// onchange: move |(index, survey): (usize, Question)| {
-//     questions.with_mut(move |q| q[index] = survey);
-// },
-// onremove: move |index: usize| {
-//     questions.remove(index);
-// },
 
 #[component]
 pub fn QuestionListView(
     lang: Language,
     questions: Signal<Vec<Question>>,
     onchange: EventHandler<Vec<Question>>,
-    // onchange: EventHandler<(usize, Question)>,
-    // onremove: EventHandler<usize>,
 ) -> Element {
     let tr: QuestionListViewTranslate = translate(&lang);
 
