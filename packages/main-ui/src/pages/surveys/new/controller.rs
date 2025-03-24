@@ -1,3 +1,5 @@
+use crate::pages::surveys::components::setting_reward_modal::SettingRewardModal;
+use bdk::prelude::btracing;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
@@ -16,6 +18,7 @@ use crate::{
 use super::{
     create_survey::CreateSurveyResponse, i18n::SurveyNewTranslate, setting_panel::PanelRequest,
 };
+use crate::pages::surveys::components::setting_reward_modal::SettingRewardModalTranslate;
 
 #[derive(Clone, Copy)]
 pub struct Controller {
@@ -27,10 +30,14 @@ pub struct Controller {
 
     survey_request: Signal<Option<CreateSurveyResponse>>,
 
+    popup_service: PopupService,
     panels: Signal<Vec<PanelV2Summary>>,
     selected_panels: Signal<Vec<PanelV2>>,
     maximum_panel_count: Signal<Vec<u64>>,
     total_panel_members: Signal<u64>,
+
+    estimate_time: Signal<i64>,
+    point: Signal<i64>,
 
     survey_id: Signal<Option<i64>>,
 }
@@ -60,11 +67,16 @@ impl Controller {
             current_step: use_signal(|| CurrentStep::CreateSurvey),
             panels: use_signal(|| vec![]),
 
+            popup_service: use_context(),
+
             selected_panels: use_signal(|| vec![]),
             maximum_panel_count: use_signal(|| vec![]),
             total_panel_members: use_signal(|| 0),
 
             survey_id: use_signal(|| survey_id),
+
+            estimate_time: use_signal(|| 0),
+            point: use_signal(|| 0),
         };
 
         let survey_resource: Resource<Option<SurveyV2>> = use_resource({
@@ -98,6 +110,9 @@ impl Controller {
                     area: survey.project_area,
                     questions: survey.clone().questions,
                 }));
+
+                ctrl.estimate_time.set(survey.estimate_time);
+                ctrl.point.set(survey.point);
             }
         });
 
@@ -168,7 +183,13 @@ impl Controller {
         self.total_panel_members.set(0);
     }
 
-    pub async fn save_survey(&self, req: PanelRequest) {
+    pub async fn open_setting_reward_modal(&self, lang: Language, req: PanelRequest) {
+        let mut ctrl = self.clone();
+
+        let mut popup_service = self.popup_service;
+
+        let tr: SettingRewardModalTranslate = translate(&lang);
+
         let org = self.user.get_selected_org();
         if org.is_none() {
             tracing::error!("Organization is not selected");
@@ -182,26 +203,100 @@ impl Controller {
         }
 
         let survey_id = (self.survey_id)();
+        let org_id = org.unwrap().id;
 
-        if survey_id.is_none() {
-            self.create_survey(
-                org.unwrap().id,
-                survey_request,
-                req.total_panels,
-                req.selected_panels,
-            )
-            .await;
-        } else {
-            self.update_survey(
-                survey_id.unwrap(),
-                org.unwrap().id,
-                survey_request,
-                req.total_panels,
-                req.selected_panels,
-            )
-            .await;
-        }
+        popup_service
+            .open(rsx! {
+                SettingRewardModal {
+                    lang,
+                    questions: if survey_request.is_none() { 0 } else { survey_request.clone().unwrap().questions.len() as i64 },
+                    estimate_time: (ctrl.estimate_time)(),
+                    point: (ctrl.point)(),
+
+                    change_estimate_time: move |estimate_time| {
+                        ctrl.estimate_time.set(estimate_time);
+                    },
+                    change_point: move |point| {
+                        ctrl.point.set(point);
+                    },
+                    onsend: {
+                        let survey_request = survey_request.clone();
+                        let selected_panels = req.selected_panels.clone();
+                        move |(estimate_time, point): (i64, i64)| {
+                            let survey_request = survey_request.clone();
+                            let selected_panels = selected_panels.clone();
+                            async move {
+                                tracing::debug!("estimate time: {:?} point: {:?}", estimate_time, point);
+                                if survey_id.is_none() {
+                                    ctrl.create_survey(
+                                            org_id,
+                                            survey_request,
+                                            req.total_panels,
+                                            selected_panels,
+                                            estimate_time,
+                                            point,
+                                        )
+                                        .await;
+                                } else {
+                                    ctrl.update_survey(
+                                            survey_id.unwrap(),
+                                            org_id,
+                                            survey_request,
+                                            req.total_panels,
+                                            selected_panels,
+                                            estimate_time,
+                                            point,
+                                        )
+                                        .await;
+                                }
+                                popup_service.close();
+                            }
+                        }
+                    },
+                    oncancel: move |_| {
+                        popup_service.close();
+                    },
+                }
+            })
+            .with_id("setting reward")
+            .with_title(tr.title);
     }
+
+    // pub async fn save_survey(&self, req: PanelRequest) {
+    //     let org = self.user.get_selected_org();
+    //     if org.is_none() {
+    //         tracing::error!("Organization is not selected");
+    //         return;
+    //     }
+
+    //     let survey_request = (self.survey_request)();
+    //     if survey_request.is_none() {
+    //         tracing::error!("Survey request is not created");
+    //         return;
+    //     }
+
+    //     let survey_id = (self.survey_id)();
+
+    //     if survey_id.is_none() {
+    //         self.create_survey(
+    //             org.unwrap().id,
+    //             survey_request,
+    //             req.total_panels,
+    //             req.selected_panels,
+
+    //         )
+    //         .await;
+    //     } else {
+    //         self.update_survey(
+    //             survey_id.unwrap(),
+    //             org.unwrap().id,
+    //             survey_request,
+    //             req.total_panels,
+    //             req.selected_panels,
+    //         )
+    //         .await;
+    //     }
+    // }
 
     pub async fn update_survey(
         &self,
@@ -210,6 +305,9 @@ impl Controller {
         survey_request: Option<CreateSurveyResponse>,
         total_panels: i64,
         selected_panels: Vec<PanelV2>,
+
+        estimate_time: i64,
+        point: i64,
     ) {
         let cli = SurveyV2::get_client(crate::config::get().api_url);
 
@@ -245,14 +343,18 @@ impl Controller {
                         user_count: v.user_count as i64,
                     })
                     .collect(),
+                estimate_time,
+                point,
+                selected_panels.iter().map(|v| v.id).collect(),
             )
             .await
         {
             Ok(_) => {
+                btracing::debug!("success to update survey");
                 self.nav.go_back();
             }
             Err(e) => {
-                tracing::error!("Failed to update survey: {:?}", e);
+                btracing::error!("Failed to update survey with error: {:?}", e);
             }
         }
     }
@@ -263,6 +365,9 @@ impl Controller {
         survey_request: Option<CreateSurveyResponse>,
         total_panels: i64,
         selected_panels: Vec<PanelV2>,
+
+        estimate_time: i64,
+        point: i64,
     ) {
         let cli = SurveyV2::get_client(crate::config::get().api_url);
 
@@ -298,14 +403,17 @@ impl Controller {
                 questions,
                 selected_panels,
                 panel_counts,
+                estimate_time,
+                point,
             )
             .await
         {
             Ok(_) => {
+                btracing::debug!("success to create survey");
                 self.nav.go_back();
             }
             Err(e) => {
-                tracing::error!("Failed to create survey: {:?}", e);
+                btracing::error!("Failed to create survey with error: {:?}", e);
             }
         };
     }

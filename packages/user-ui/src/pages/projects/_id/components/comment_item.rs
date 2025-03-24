@@ -96,7 +96,7 @@ pub fn CommentItem(
                                     }
                                 },
                                 div {
-                                    ThumbsUp { fill: if comment.liked { "green" } else { "none" } }
+                                    ThumbsUp { fill: if comment.liked { "#18B583" } else { "none" } }
                                 }
                                 p { "{comment.likes}" }
                             }
@@ -191,7 +191,6 @@ pub fn ReplyComment(lang: Language, send_reply: EventHandler<String>) -> Element
                     SquareChat { color: "#8095EA" }
                 }
             }
-        
         }
     }
 }

@@ -16,6 +16,8 @@ pub struct NonceLabCreateSurveyRequest {
     pub questions: Vec<NonceLabSurveyQuestion>,
     pub description: Option<String>,
     pub expected_responses: u64,
+    pub estimated_minutes: u64,
+    pub reward_points: u64,
 }
 
 impl From<SurveyV2> for NonceLabCreateSurveyRequest {
@@ -57,6 +59,8 @@ impl From<SurveyV2> for NonceLabCreateSurveyRequest {
                 None
             },
             expected_responses: survey.quotes as u64,
+            estimated_minutes: survey.estimate_time as u64,
+            reward_points: survey.point as u64,
         }
     }
 }
