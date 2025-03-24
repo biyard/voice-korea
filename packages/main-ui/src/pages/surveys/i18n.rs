@@ -91,6 +91,10 @@ translate! {
         ko: "삭제",
         en: "Remove"
     }
+    input_description: {
+        ko: "설명을 입력해주세요.",
+        en: "Please Input Description"
+    }
 }
 
 translate! {

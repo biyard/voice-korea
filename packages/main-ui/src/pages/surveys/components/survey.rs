@@ -94,7 +94,6 @@ pub fn QuestionListView(
                         }
                     }
                 }
-            
             }
         }
 
@@ -135,6 +134,23 @@ pub fn Objective(
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
+
+            input {
+                class: format!(
+                    "flex flex-row w-full h-[55px] justify-start items-center bg-[#f7f7f7] focus:outline-none px-[15px] py-[10px] font-medium text-[#b4b4b4] text-[15px] leading-[22px] rounded-[4px] mt-[10px]",
+                ),
+                r#type: "text",
+                placeholder: tr.input_description,
+                value: question.description(),
+                oninput: {
+                    let mut question = question.clone();
+                    move |e: Event<FormData>| {
+                        question.set_description(&e.value());
+                        onchange.call(question.clone());
+                    }
+                },
+            }
+
             div { class: "flex flex-row w-full h-[1px] bg-[#ebeff5] my-[10px]" }
 
             for (index , option) in options.iter().enumerate() {
