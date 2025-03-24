@@ -47,10 +47,9 @@ impl DiscussionController {
         Ok(QueryResponse { total_count, items })
     }
 
-    // TODO: if you want start (activate) meeting, you should using amazon-chime-sdk-js in client side.
+    // TODO(api): if you want start (activate) meeting, you should using amazon-chime-sdk-js in client side.
     //       this code is just for create meeting room and get meeting id not for online link.
     async fn start_meeting(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
-        // TODO(api): implement using AWS chime and media pipeline.
         let client = crate::utils::aws_chime_sdk_meeting::ChimeMeetingService::new().await;
 
         let name = Discussion::query_builder()
