@@ -30,7 +30,7 @@ pub struct Discussion {
     pub description: String,
 
     #[api_model(summary)]
-    pub zoom_link: Option<String>,
+    pub meeting_link: Option<String>,
 
     #[api_model(summary, many_to_many = discussion_groups, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = discussion_id)]
     #[serde(default)]
