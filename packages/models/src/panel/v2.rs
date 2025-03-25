@@ -72,6 +72,20 @@ impl PartialEq<Vec<crate::survey::response::Attribute>> for PanelV2 {
             }
         }
 
+        //NOTE: if value is none, it covers all attributes.
+        if age_values.is_empty() {
+            cover_age = true;
+        }
+        if gender_values.is_empty() {
+            cover_gender = true;
+        }
+        if region_values.is_empty() {
+            cover_region = true;
+        }
+        if salary_values.is_empty() {
+            cover_salary = true;
+        }
+
         for attr in other {
             match attr {
                 Attribute::Age(age_attr) => {
