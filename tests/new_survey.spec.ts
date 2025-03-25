@@ -45,10 +45,10 @@ test.describe('New Survey Page', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(timeouts.wait);
 
-    await expect(page).toHaveURL('https://voice-korea.dev.biyard.co/en/surveys/new', { timeout: timeouts.url });
+    await expect(page).toHaveURL('https://voice-korea.dev.biyard.co/en/surveys/new/', { timeout: timeouts.url });
     await page.screenshot({ path: 'screenshots/Survey-001/07-survey-questions.png', fullPage: true });
 
-    await page.goto('https://voice-korea.dev.biyard.co/en/surveys/new');
+    await page.goto('https://voice-korea.dev.biyard.co/en/surveys/new/');
     await page.screenshot({ path: 'screenshots/Survey-003/01-new-survey-page.png', fullPage: true });
 
     const back = page.getByRole('link').filter({ hasText: /^$/ })
