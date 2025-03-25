@@ -210,7 +210,7 @@ pub fn LoginComponent(props: LoginProps) -> Element {
 pub fn LoginButton(props: LoginButtonProps) -> Element {
     rsx! {
         div {
-            class: "flex flex-row w-[300px] h-[100px] bg-[#2168c3]",
+            class: "cursor-pointer flex flex-row w-[300px] h-[100px] bg-[#2168c3]",
             style: "width: 300px",
             div { class: "flex flex-row w-full h-full justify-center items-center text-[24px] font-bold text-white",
                 "{props.login_message}"
