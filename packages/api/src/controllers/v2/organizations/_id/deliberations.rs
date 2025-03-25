@@ -3,7 +3,7 @@ use by_axum::{
     auth::Authorization,
     axum::{
         extract::{Path, Query, State},
-        routing::{get, post},
+        routing::post,
         Extension, Json,
     },
 };
@@ -17,9 +17,10 @@ use discussion_resources::DiscussionResource;
 use discussions::{Discussion, DiscussionCreateRequest};
 use models::{
     deliberation::{
-        Deliberation, DeliberationAction, DeliberationCreateRequest, DeliberationGetResponse,
-        DeliberationParam, DeliberationQuery, DeliberationQueryActionType, DeliberationRepository,
-        DeliberationSummary,
+        Deliberation, DeliberationAction, DeliberationByIdAction, DeliberationCreateRequest,
+        DeliberationGetResponse, DeliberationParam, DeliberationQuery, DeliberationQueryActionType,
+        DeliberationRepository, DeliberationRepositoryUpdateRequest, DeliberationSummary,
+        DeliberationUpdateRequest,
     },
     step::{Step, StepRepository},
     *,
@@ -53,6 +54,236 @@ pub struct DeliberationController {
 }
 
 impl DeliberationController {
+    pub async fn update(
+        &self,
+        org_id: i64,
+        id: i64,
+        DeliberationUpdateRequest {
+            started_at,
+            ended_at,
+            project_area,
+            title,
+            description,
+            resource_ids,
+            survey_ids,
+            roles,
+            panel_ids,
+            steps,
+            elearning,
+            discussions,
+        }: DeliberationUpdateRequest,
+    ) -> Result<Deliberation> {
+        if started_at >= ended_at {
+            return Err(ApiError::ValidationError(
+                "started_at should be less than ended_at".to_string(),
+            )
+            .into());
+        }
+
+        let du = DeliberationUser::get_repository(self.pool.clone());
+        let dr = DeliberationResource::get_repository(self.pool.clone());
+        let ds = DeliberationSurvey::get_repository(self.pool.clone());
+        let d = Discussion::get_repository(self.pool.clone());
+        let discussion_resource_repo = DiscussionResource::get_repository(self.pool.clone());
+        let pd = PanelDeliberation::get_repository(self.pool.clone());
+
+        let mut tx = self.pool.begin().await?;
+
+        let deliberation = self
+            .repo
+            .update_with_tx(
+                &mut *tx,
+                id,
+                DeliberationRepositoryUpdateRequest {
+                    org_id: Some(org_id),
+                    started_at: Some(started_at),
+                    ended_at: Some(ended_at),
+                    project_area: Some(project_area),
+                    title: Some(title),
+                    description: Some(description),
+                },
+            )
+            .await?
+            .ok_or(ApiError::DeliberationException)?;
+
+        // resource
+        let prev_resources = DeliberationResource::query_builder()
+            .deliberation_id_equals(id)
+            .query()
+            .map(DeliberationResource::from)
+            .fetch_all(&mut *tx)
+            .await?;
+
+        for resource in prev_resources {
+            let _ = dr.delete_with_tx(&mut *tx, resource.id).await?;
+        }
+
+        for resource_id in resource_ids {
+            dr.insert_with_tx(
+                &mut *tx,
+                deliberation.id,
+                resource_id,
+                DeliberationResourceType::Reference,
+            )
+            .await?
+            .ok_or(ApiError::DeliberationResourceException)?;
+        }
+
+        for resource_id in elearning {
+            dr.insert_with_tx(
+                &mut *tx,
+                deliberation.id,
+                resource_id,
+                DeliberationResourceType::Elearning,
+            )
+            .await?
+            .ok_or(ApiError::DeliberationResourceException)?;
+        }
+
+        // surveys
+        let prev_surveys = DeliberationSurvey::query_builder()
+            .deliberation_id_equals(id)
+            .query()
+            .map(DeliberationSurvey::from)
+            .fetch_all(&mut *tx)
+            .await?;
+
+        for survey in prev_surveys {
+            let _ = ds.delete_with_tx(&mut *tx, survey.id).await?;
+        }
+
+        for survey_id in survey_ids {
+            ds.insert_with_tx(&mut *tx, deliberation.id, survey_id)
+                .await?
+                .ok_or(ApiError::DeliberationSurveyException)?;
+        }
+
+        // members
+        let prev_users = DeliberationUser::query_builder()
+            .deliberation_id_equals(id)
+            .query()
+            .map(DeliberationUser::from)
+            .fetch_all(&mut *tx)
+            .await?;
+
+        for user in prev_users {
+            let _ = du.delete_with_tx(&mut *tx, user.id).await?;
+        }
+
+        for DeliberationUserCreateRequest { user_id, role } in roles {
+            du.insert_with_tx(&mut *tx, user_id, org_id, deliberation.id, role)
+                .await?
+                .ok_or(ApiError::DeliberationUserException)?;
+        }
+
+        //panel
+        let prev_panels = PanelDeliberation::query_builder()
+            .deliberation_id_equals(id)
+            .query()
+            .map(PanelDeliberation::from)
+            .fetch_all(&mut *tx)
+            .await?;
+
+        for panel in prev_panels {
+            let _ = pd.delete_with_tx(&mut *tx, panel.id).await?;
+        }
+
+        for panel_id in panel_ids {
+            pd.insert_with_tx(&mut *tx, panel_id, deliberation.id)
+                .await?
+                .ok_or(ApiError::DeliberationPanelException)?;
+        }
+
+        //step
+        let prev_steps = Step::query_builder()
+            .deliberation_id_equals(id)
+            .query()
+            .map(Step::from)
+            .fetch_all(&mut *tx)
+            .await?;
+
+        for step in prev_steps {
+            let _ = self.step.delete_with_tx(&mut *tx, step.id).await?;
+        }
+
+        for StepCreateRequest {
+            ended_at,
+            step_type,
+            started_at,
+            name,
+        } in steps
+        {
+            self.step
+                .insert_with_tx(
+                    &mut *tx,
+                    deliberation.id,
+                    step_type,
+                    name,
+                    started_at,
+                    ended_at,
+                )
+                .await?
+                .ok_or(ApiError::DeliberationStepException)?;
+        }
+
+        //discussion
+        let prev_discussions = Discussion::query_builder()
+            .deliberation_id_equals(id)
+            .query()
+            .map(Discussion::from)
+            .fetch_all(&mut *tx)
+            .await?;
+
+        for discussion in prev_discussions {
+            let _ = d.delete_with_tx(&mut *tx, discussion.id).await?;
+
+            let prev_discussion_resources = DiscussionResource::query_builder()
+                .discussion_id_equals(discussion.id)
+                .query()
+                .map(DiscussionResource::from)
+                .fetch_all(&mut *tx)
+                .await?;
+
+            for resource in prev_discussion_resources {
+                let _ = discussion_resource_repo
+                    .delete_with_tx(&mut *tx, resource.id)
+                    .await?;
+            }
+        }
+
+        for DiscussionCreateRequest {
+            description,
+            ended_at,
+            name,
+            resources,
+            started_at,
+        } in discussions
+        {
+            let discussion = d
+                .insert_with_tx(
+                    &mut *tx,
+                    deliberation.id,
+                    started_at,
+                    ended_at,
+                    name,
+                    description,
+                    None,
+                )
+                .await?
+                .ok_or(ApiError::DeliberationDiscussionException)?;
+
+            for resource_id in resources {
+                discussion_resource_repo
+                    .insert_with_tx(&mut *tx, discussion.id, resource_id)
+                    .await?
+                    .ok_or(ApiError::DiscussionResourceException)?;
+            }
+        }
+
+        tx.commit().await?;
+        Ok(deliberation)
+    }
+
     pub async fn create(
         &self,
         org_id: i64,
@@ -230,7 +461,7 @@ impl DeliberationController {
         Ok(by_axum::axum::Router::new()
             .route(
                 "/:id",
-                get(Self::get_deliberation_by_id), // .post(Self::act_deliberation_by_id)
+                post(Self::act_deliberation_by_id).get(Self::get_deliberation_by_id), // .post(Self::act_deliberation_by_id)
             )
             .with_state(self.clone())
             .route(
@@ -265,6 +496,19 @@ impl DeliberationController {
             items,
             total_count,
         })))
+    }
+
+    pub async fn act_deliberation_by_id(
+        State(ctrl): State<DeliberationController>,
+        Path(DeliberationPath { org_id, id }): Path<DeliberationPath>,
+        Extension(_auth): Extension<Option<Authorization>>,
+        Json(body): Json<DeliberationByIdAction>,
+    ) -> Result<Json<Deliberation>> {
+        match body {
+            DeliberationByIdAction::Update(params) => {
+                Ok(Json(ctrl.update(org_id, id, params).await?))
+            }
+        }
     }
 
     pub async fn act_deliberation(
