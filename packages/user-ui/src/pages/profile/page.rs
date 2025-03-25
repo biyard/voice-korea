@@ -60,8 +60,10 @@ pub fn ProfilePage(lang: Language) -> Element {
                         ParticipantTable { lang, projects: participant_projects }
                     }
                 }
+            
 
             }
+        
 
         }
     }
@@ -96,10 +98,7 @@ pub fn ProfileBanner(lang: Language, profile: ProfileSummary) -> Element {
     rsx! {
         div { class: "relative flex flex-col w-full h-[200px] justify-start items-center",
             div { class: "relative flex flex-row w-full h-[150px] justify-end items-center rounded-[16px] py-[52px] px-[73px] gap-[48px] overflow-hidden",
-                div {
-                    class: "absolute inset-0 bg-cover bg-center rounded-2xl",
-                    style: "background-image: url({banner_url});",
-                }
+                div { class: "absolute inset-0 bg-[url('{banner_url}')] bg-cover bg-center rounded-2xl" }
                 div { class: "flex flex-col w-fit gap-[3px] justify-center items-center",
                     div { class: "font-bold text-white text-[20px] z-1", "{projects}" }
                     div { class: "font-normal text-white text-[14px] z-1", "{tr.total_project}" }

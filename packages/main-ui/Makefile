@@ -20,22 +20,22 @@ RUST_LOG ?= debug
 
 BUILD_ENV ?= ENV=$(ENV) VERSION=$(VERSION) COMMIT=$(COMMIT) RUST_LOG=$(RUST_LOG) AWS_REGION=${REGION} AWS_ACCESS_KEY_ID=${ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${SECRET_ACCESS_KEY} BASE_URL=$(BASE_URL) API_URL=${API_URL} RUSTFLAGS="${RUSTFLAGS}"
 
-run: public
+setup.tool:
+	cargo install cargo-binstall
+	cargo binstall dioxus-cli
+	cargo binstall toml-cli
+	npm i -g @tailwindcss/cli
+
+run: public/tailwind.css
 	$(BUILD_ENV) dx serve
 
 clean:
 	rm -rf public/tailwind.css
 
-node_modules:
-	npm i
-
 public/tailwind.css:
-	npx tailwindcss -i ./public/input.css -o ./public/tailwind.css
+	tailwindcss -i ./public/input.css -o ./public/tailwind.css
 
-.PHONY: public
-public: node_modules public/tailwind.css
-
-build: clean public
+build: clean public/tailwind.css
 	$(BUILD_ENV) dx build --release --fullstack --server-features lambda
 	cp -r $(WORKSPACE_ROOT)/target/dx/$(SERVICE)/release/web $(ARTIFACT_DIR)
 	mv $(ARTIFACT_DIR)/server $(ARTIFACT_DIR)/bootstrap

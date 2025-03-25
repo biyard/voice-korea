@@ -70,7 +70,7 @@ pub fn LoginPage(props: LoginPageProps) -> Element {
     let check_description_2_message = translates.check_description_2;
 
     rsx! {
-        div { class: "bg-white w-screen min-h-screen flex flex-col",
+        div { class: "bg-white dark:bg-black w-screen min-h-screen flex flex-col",
             div { class: "flex flex-row w-full justify-start items-center px-[30px] py-[3px]",
                 div { class: "mr-[7px]",
                     img { src: logo_path, width: 42, height: 42 }

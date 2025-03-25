@@ -35,21 +35,23 @@ run: public
 	$(BUILD_ENV) dx serve
 
 clean:
-	rm -rf public/tailwind.css
+	rm -rf assets/tailwind.css
 
 node_modules:
 	npm i
 
-public/dep.js:
-	npx webpack --mode $(MODE)
-
-public/tailwind.css:
-	npx tailwindcss -i ./input.css -o ./public/tailwind.css
-
 .PHONY: public
 public: node_modules public/tailwind.css public/dep.js
 
-build: clean public
+.PHONY: public/dep.js
+public/dep.js:
+	npx webpack --mode $(MODE)
+
+.PHONY: public/tailwind.css
+public/tailwind.css:
+	npx tailwindcss -i $(PWD)/input.css -o $(PWD)/public/tailwind.css
+
+build: clean public/tailwind.css
 	$(BUILD_ENV) dx build --release --fullstack --server-features lambda
 	cp -r $(WORKSPACE_ROOT)/target/dx/$(SERVICE)/release/web $(ARTIFACT_DIR)
 	mv $(ARTIFACT_DIR)/server $(ARTIFACT_DIR)/bootstrap

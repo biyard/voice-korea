@@ -4,7 +4,7 @@ use crate::components::icons::search::Search;
 
 #[component]
 pub fn SearchBox(
-    #[props(default = "flex flex-row w-full placeholder-[#bebebe] bg-white text-[#222222] focus:outline-none".to_string())]
+    #[props(default = "flex flex-row w-full placeholder-[#bebebe] bg-[#white] text-[#222222] focus:outline-none".to_string())]
     class: String,
     width: Option<i64>,
     height: Option<i64>,

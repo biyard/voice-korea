@@ -9,10 +9,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@tailwindcss/cli": "^4.0.15",
+    "@tailwindcss/cli": "^4.0.12",
     "firebase": "^11.3.1"
   },
   "devDependencies": {
+    "daisyui": "^4.12.23",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "webpack": "^5.98.0",
