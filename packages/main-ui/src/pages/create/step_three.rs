@@ -87,7 +87,7 @@ pub fn StepThreePage(props: StepThreeProps) -> Element {
                                     onchange: move |e| {
                                         ctrl.set_authentication_number(e);
                                     },
-                                    border: if ctrl.get_authorization_error() { "border-[#ff0000]" } else { "border-[#E0E0E0]" },
+                                    border: if ctrl.get_authorization_error() { "border-error" } else { "border-gray-border" },
                                 }
 
                                 if ctrl.get_authorization_error() {

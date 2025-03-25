@@ -14,22 +14,9 @@ use crate::{
     routes::Route,
 };
 
-use crate::utils::time::current_timestamp;
-
 #[derive(Props, Clone, PartialEq)]
 pub struct SurveyProps {
     lang: Language,
-}
-
-#[derive(Translate, PartialEq, Default, Debug)]
-pub enum SurveyStatus {
-    #[default]
-    #[translate(ko = "준비", en = "Ready")]
-    Ready,
-    #[translate(ko = "진행", en = "InProgress")]
-    InProgress,
-    #[translate(ko = "마감", en = "Finish")]
-    Finish,
 }
 
 #[component]
@@ -200,14 +187,7 @@ pub fn SurveyPage(props: SurveyProps) -> Element {
                                         }
                                         div { class: "flex flex-row w-[120px] min-w-[120px] h-full justify-center items-center",
                                             div { class: "text-[#35343f] font-semibold text-[14px]",
-                                                {
-                                                    if get_survey_status(survey.started_at, survey.ended_at) == SurveyStatus::Finish
-                                                    {
-                                                        SurveyStatus::Finish.translate(&props.lang)
-                                                    } else {
-                                                        survey.status.translate(&props.lang)
-                                                    }
-                                                }
+                                                {survey.survey_status().translate(&props.lang)}
                                             }
                                         }
 
@@ -216,7 +196,7 @@ pub fn SurveyPage(props: SurveyProps) -> Element {
                                                 rsx! {
                                                     div {
                                                         class: "flex flex-row w-[120px] min-w-[120px] h-full justify-center items-center cursor-pointer",
-                                                        visibility: if get_survey_status(survey.started_at, survey.ended_at) == SurveyStatus::Finish { "hidden" } else { "" },
+                                                        visibility: if survey.finished() { "hidden" } else { "" },
                                                         onclick: {
                                                             let id = survey.id.clone();
                                                             move |_| async move {
@@ -243,7 +223,7 @@ pub fn SurveyPage(props: SurveyProps) -> Element {
 
                                         div {
                                             class: "group relative",
-                                            visibility: if get_survey_status(survey.started_at, survey.ended_at) == SurveyStatus::Finish { "hidden" } else { "" },
+                                            visibility: if survey.finished() { "hidden" } else { "" },
                                             div { class: "flex flex-row w-[90px] min-w-[90px] h-full justify-center items-center",
                                                 if survey.status == ProjectStatus::Ready {
                                                     button {
@@ -277,18 +257,21 @@ pub fn SurveyPage(props: SurveyProps) -> Element {
                                                             }
                                                             li {
                                                                 class: "p-3 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer",
-                                                                onclick: move |_| {
-                                                                    let questions = survey.questions.clone();
-                                                                    let id = survey.id.clone();
-                                                                    async move {
-                                                                        ctrl.open_setting_reward_modal(
-                                                                                id,
-                                                                                props.lang,
-                                                                                survey.estimate_time,
-                                                                                survey.point,
-                                                                                questions.len() as i64,
-                                                                            )
-                                                                            .await;
+                                                                onclick: {
+                                                                    let survey = survey.clone();
+                                                                    move |_| {
+                                                                        let questions = survey.questions.clone();
+                                                                        let id = survey.id.clone();
+                                                                        async move {
+                                                                            ctrl.open_setting_reward_modal(
+                                                                                    id,
+                                                                                    props.lang,
+                                                                                    survey.estimate_time,
+                                                                                    survey.point,
+                                                                                    questions.len() as i64,
+                                                                                )
+                                                                                .await;
+                                                                        }
                                                                     }
                                                                 },
                                                                 "{translate.update_reward}"
@@ -382,22 +365,5 @@ pub fn PanelLabel(label: String, background_color: String) -> Element {
             style: format!("background-color: {}", background_color),
             {label}
         }
-    }
-}
-
-pub fn get_survey_status(started_at: i64, ended_at: i64) -> SurveyStatus {
-    let current = current_timestamp();
-
-    if started_at > 10000000000 {
-        tracing::error!("time parsing failed");
-        return SurveyStatus::default();
-    }
-
-    if started_at > current {
-        SurveyStatus::Ready
-    } else if ended_at < current {
-        SurveyStatus::Finish
-    } else {
-        SurveyStatus::InProgress
     }
 }

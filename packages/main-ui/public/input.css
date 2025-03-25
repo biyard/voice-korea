@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme static {
+  /* App-specific colors */
+  --color-error: #FF0000;
+  --color-gray-border: #E0E0E0;
+}
