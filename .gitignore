@@ -86,6 +86,7 @@ node_modules/
 target-*/
 /tests-example/
 /screenshots/
-tests/console/test_surv.spec.ts
+tests/console/test_survey.spec.ts
+/storage
 
 /packages/user-ui/public/dep.js
