@@ -103,7 +103,7 @@ pub fn QuestionListView(
 pub fn AddQuestion(lang: Language) -> Element {
     let translates: AddQuestionTranslate = translate(&lang);
     rsx! {
-        div { class: "flex flex-col w-full h-[200px] rounded-[8px] justify-center items-center border border-dashed border-[#b4b4b4] mt-[20px]",
+        div { class: "cursor-pointer flex flex-col w-full h-[200px] rounded-[8px] justify-center items-center border border-dashed border-[#b4b4b4] mt-[20px]",
             div { class: "flex flex-row w-[45px] h-[45px] justify-center items-center rounded-[100px] border border-[#b4b4b4]",
                 Plus { width: "12", height: "12", color: "#b4b4b4" }
             }
@@ -177,7 +177,7 @@ pub fn Objective(
             div { class: "flex flex-row w-full justify-start items-center mt-[30px]",
                 div { class: "flex flex-row w-[20px] h-[20px] border-[3px] bg-white border-[#9f9f9f] mr-[10px] rounded-[100px]" }
                 button {
-                    class: "font-medium text-[16px] text-[#3a94ff]",
+                    class: "cursor-pointer font-medium text-[16px] text-[#3a94ff]",
                     onclick: {
                         let mut question = question.clone();
                         move |_| {
@@ -191,7 +191,7 @@ pub fn Objective(
 
             div { class: "flex flex-row w-full justify-end items-center gap-[5px] mt-[10px]",
                 button {
-                    class: "flex flex-row w-[80px] items-center justify-end",
+                    class: "cursor-pointer flex flex-row w-[80px] items-center justify-end",
                     onclick: move |e: Event<MouseData>| {
                         onremove.call(e);
                     },
@@ -229,7 +229,7 @@ pub fn Subjective(
 
             div { class: "flex flex-row w-full justify-end items-center gap-[5px]",
                 button {
-                    class: "flex flex-row w-[80px] items-center justify-end",
+                    class: "cursor-pointer flex flex-row w-[80px] items-center justify-end",
                     onclick: move |e: Event<MouseData>| {
                         onremove.call(e);
                     },

@@ -184,7 +184,7 @@ pub fn StepThreePage(props: StepThreeProps) -> Element {
                     "{props.check_membership_descriptions[2]}"
                 }
             }
-            button { class: "flex flex-row w-full justify-end min-w-[710px] items-end pt-[30px]",
+            button { class: "cursor-pointer flex flex-row w-full justify-end min-w-[710px] items-end pt-[30px]",
                 div {
                     onclick: move |_| async move {
                         ctrl.set_click_complete_join_membership().await;
@@ -219,7 +219,7 @@ pub fn ButtonComponent(
 
     rsx! {
         button {
-            class: "flex flex-col {width} h-[35px] justify-start items-start",
+            class: "cursor-pointer flex flex-col {width} h-[35px] justify-start items-start",
             onclick: move |evt| {
                 onclick.call(evt);
             },

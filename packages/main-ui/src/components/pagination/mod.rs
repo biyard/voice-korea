@@ -46,7 +46,7 @@ pub fn Pagination(
             div { class: "flex flex-row gap-[5px]",
                 for i in 0..repeat() {
                     button {
-                        class: "flex flex-row w-[40px] h-[40px] justify-center items-center rounded-lg font-bold text-[15px]",
+                        class: "cursor-pointer flex flex-row w-[40px] h-[40px] justify-center items-center rounded-lg font-bold text-[15px]",
                         background: if start_page() + i == selected_page() { "#7c8292" } else { "white" },
                         color: if start_page() + i == selected_page() { "white" } else { "#0d1732" },
                         border: if start_page() + i == selected_page() { "none" } else { "1px solid #dfdfdf" },
