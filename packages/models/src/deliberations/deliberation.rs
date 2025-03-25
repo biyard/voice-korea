@@ -50,13 +50,14 @@ pub struct Deliberation {
     pub resources: Vec<ResourceFile>,
 
     #[api_model(one_to_many = deliberation_reports, foreign_key = deliberation_id)]
+    #[serde(default)]
     pub reports: Vec<DeliberationReport>,
 
     #[api_model(many_to_many = deliberation_surveys, table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = deliberation_id)]
     #[serde(default)]
     pub surveys: Vec<SurveyV2>,
     // Third page of creating a deliberation
-    #[api_model(many_to_many = deliberations_users, table_name = users, foreign_primary_key = user_id, foreign_reference_key = deliberation_id)]
+    #[api_model(many_to_many = deliberation_users, table_name = users, foreign_primary_key = user_id, foreign_reference_key = deliberation_id)]
     #[serde(default)]
     pub members: Vec<DeliberationUser>,
     #[api_model(one_to_many = deliberation_votes, foreign_key = deliberation_id)]
@@ -78,5 +79,6 @@ pub struct Deliberation {
     #[serde(default)]
     pub responses: Vec<DeliberationResponse>,
     #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id, aggregator = count)]
+    #[serde(default)]
     pub response_count: i64,
 }

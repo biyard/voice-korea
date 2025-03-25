@@ -1,4 +1,5 @@
 pub mod deliberation_status;
-mod web;
 
-pub use web::*;
+pub mod v2;
+
+pub use v2::*;

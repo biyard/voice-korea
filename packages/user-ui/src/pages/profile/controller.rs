@@ -1,7 +1,11 @@
 #![allow(unused)]
 use dioxus::prelude::*;
+use dioxus_logger::tracing;
 use dioxus_translate::Language;
-use models::profile::{DesignProject, ParticipantProject, ProfileSummary};
+use models::{
+    dto::ProfileProjectsData,
+    profile::{DesignProject, ParticipantProject, ProfileSummary},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ProjectType {
@@ -20,6 +24,15 @@ pub struct Controller {
 
 impl Controller {
     pub fn init(lang: Language) -> std::result::Result<Self, RenderError> {
+        let projects = use_server_future(move || async move {
+            ProfileProjectsData::get_client(&crate::config::get().api_url)
+                .find_one()
+                .await
+                .unwrap_or_default()
+        })?;
+
+        tracing::debug!("projects: {:?}", projects);
+
         let ctrl = Self {
             lang,
             profile: use_signal(|| ProfileSummary {
