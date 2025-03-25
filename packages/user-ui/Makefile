@@ -30,7 +30,6 @@ setup.tool:
 	cargo install binstall
 	cargo binstall dioxus-cli
 	cargo binstall toml-cli
-	npm i -g @tailwindcss/cli
 
 run: public
 	$(BUILD_ENV) dx serve
@@ -41,18 +40,16 @@ clean:
 node_modules:
 	npm i
 
-.PHONY: public
-public: node_modules public/tailwind.css public/dep.js
-
-.PHONY: public/dep.js
 public/dep.js:
 	npx webpack --mode $(MODE)
 
-.PHONY: public/tailwind.css
 public/tailwind.css:
-	tailwindcss -i ./input.css -o ./public/tailwind.css
+	npx tailwindcss -i ./input.css -o ./public/tailwind.css
 
-build: clean public/tailwind.css
+.PHONY: public
+public: node_modules public/tailwind.css public/dep.js
+
+build: clean public
 	$(BUILD_ENV) dx build --release --fullstack --server-features lambda
 	cp -r $(WORKSPACE_ROOT)/target/dx/$(SERVICE)/release/web $(ARTIFACT_DIR)
 	mv $(ARTIFACT_DIR)/server $(ARTIFACT_DIR)/bootstrap
