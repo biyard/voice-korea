@@ -30,6 +30,7 @@ setup.tool:
 	cargo install binstall
 	cargo binstall dioxus-cli
 	cargo binstall toml-cli
+	npm i -g @tailwindcss/cli
 
 run: public
 	$(BUILD_ENV) dx serve
