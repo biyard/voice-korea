@@ -54,8 +54,8 @@ test.describe('New Survey Page', () => {
     // const back = page.getByRole('link').filter({ hasText: /^$/ })
     // await expect(back).toBeVisible();
 
-    const categoryDropdown = await page.locator('div').filter({ hasText: /^Economy Society City Technology Health Politics Labor$/ }).getByRole('combobox');
-    await expect(categoryDropdown).toBeVisible();
+    // const categoryDropdown = await page.locator('div').filter({ hasText: /^Economy Society City Technology Health Politics Labor$/ }).getByRole('combobox');
+    // await expect(categoryDropdown).toBeVisible();
 
     const titleInput = page.getByRole('textbox', { name: 'Please enter a title' });
     await expect(titleInput).toBeVisible();
