@@ -103,8 +103,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cargo binstall dioxus-cli
-          cargo binstall toml-cli
+          cargo binstall dioxus-cli --force
+          cargo binstall toml-cli --force
           npm install -g aws-cdk
 
       - name: Deploy APIs
