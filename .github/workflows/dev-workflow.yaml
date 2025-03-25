@@ -184,6 +184,7 @@ jobs:
 
   api-deployment:
     runs-on: ubuntu-22.04
+    needs: [web-user-deployment]
 
     steps:
       - uses: actions/checkout@v3
