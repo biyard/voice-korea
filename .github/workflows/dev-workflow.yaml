@@ -102,6 +102,7 @@ jobs:
           cargo binstall dioxus-cli --force
           cargo binstall toml-cli --force
           npm install -g aws-cdk tailwindcss@3
+          npm install -D tailwindcss
 
       - name: Deploy APIs
         env:
