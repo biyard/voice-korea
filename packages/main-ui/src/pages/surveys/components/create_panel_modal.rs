@@ -1,11 +1,12 @@
+use std::str::FromStr;
+
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::{
-    attribute_v2::{GenderV2, RegionV2, SalaryV2},
-    response::AgeV3,
-    PanelV2CreateRequest,
-};
+use models::attribute_v2::GenderV2;
+use models::attribute_v2::RegionV2;
+use models::attribute_v2::SalaryV2;
+use models::{response::AgeV3, PanelV2CreateRequest};
 
 use crate::{
     components::icons::{Clear, Remove},
@@ -29,79 +30,14 @@ pub struct AttributeInfo {
 pub fn CreatePanelModal(props: CreatePanelModalProps) -> Element {
     let translate: CreatePanelModalTranslate = translate(&props.lang);
     let mut panel_name: Signal<String> = use_signal(|| "".to_string());
-    let mut selected_value: Signal<Vec<String>> = use_signal(|| {
-        vec![
-            "".to_string(),
-            "".to_string(),
-            "".to_string(),
-            "".to_string(),
-        ]
-    });
     let mut is_open: Signal<Vec<bool>> = use_signal(|| vec![false, false, false, false]);
 
     let panel_name_error: Signal<String> = use_signal(|| "".to_string());
-    let error_signals: Vec<Signal<String>> = vec![
-        use_signal(|| "".to_string()), // age_error
-        use_signal(|| "".to_string()), // gender_error
-        use_signal(|| "".to_string()), // region_error
-        use_signal(|| "".to_string()), // salary_error
-    ];
 
-    let total_attributes: Signal<Vec<AttributeInfo>> = use_signal(|| {
-        vec![
-            AttributeInfo {
-                name: translate.clone().age.to_string(),
-                values: vec![
-                    translate.clone().teenager.to_string(),
-                    translate.clone().twenty.to_string(),
-                    translate.clone().thirty.to_string(),
-                    translate.clone().fourty.to_string(),
-                    translate.clone().fifty.to_string(),
-                    translate.clone().sixty.to_string(),
-                    translate.clone().over.to_string(),
-                ],
-            },
-            AttributeInfo {
-                name: translate.clone().gender.to_string(),
-                values: vec![
-                    translate.clone().male.to_string(),
-                    translate.clone().female.to_string(),
-                ],
-            },
-            AttributeInfo {
-                name: translate.clone().region.to_string(),
-                values: vec![
-                    translate.clone().seoul.to_string(),
-                    translate.clone().busan.to_string(),
-                    translate.clone().daegu.to_string(),
-                    translate.clone().incheon.to_string(),
-                    translate.clone().gwangju.to_string(),
-                    translate.clone().daejeon.to_string(),
-                    translate.clone().ulsan.to_string(),
-                    translate.clone().sejong.to_string(),
-                    translate.clone().gyeongi.to_string(),
-                    translate.clone().gangwon.to_string(),
-                    translate.clone().chungbuk.to_string(),
-                    translate.clone().chungnam.to_string(),
-                    translate.clone().jeonbuk.to_string(),
-                    translate.clone().jeonnam.to_string(),
-                    translate.clone().gyeonbuk.to_string(),
-                    translate.clone().gyeonnam.to_string(),
-                    translate.clone().jeju.to_string(),
-                ],
-            },
-            AttributeInfo {
-                name: translate.clone().salary.to_string(),
-                values: vec![
-                    translate.clone().tier_one.to_string(),
-                    translate.clone().tier_two.to_string(),
-                    translate.clone().tier_three.to_string(),
-                    translate.clone().tier_four.to_string(),
-                    translate.clone().tier_five.to_string(),
-                ],
-            },
-        ]
-    });
+    let mut selected_ages: Signal<Vec<String>> = use_signal(|| vec![]);
+    let mut selected_genders: Signal<Vec<String>> = use_signal(|| vec![]);
+    let mut selected_regions: Signal<Vec<String>> = use_signal(|| vec![]);
+    let mut selected_salarys: Signal<Vec<String>> = use_signal(|| vec![]);
 
     rsx! {
         div { class: "flex flex-col w-[540px] justify-start items-start",
@@ -129,142 +65,142 @@ pub fn CreatePanelModal(props: CreatePanelModalProps) -> Element {
                 }
             }
 
-            div { class: "flex flex-col w-full justify-start items-start bg-white border border-[#bfc8d9] rounded-[8px] p-[24px]",
+            div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                SelectedAttribute {
+                    label: translate.age,
+                    is_open: (is_open)()[0],
+                    set_open: move |open: bool| {
+                        let mut opens = is_open();
+                        opens[0] = open;
+                        is_open.set(opens);
+                    },
 
-                for (index , attribute) in total_attributes().iter().enumerate() {
-                    div { class: "flex flex-row w-full justify-start items-center gap-[10px] mt-[10px]",
-                        div { class: "w-[50px] font-medium text-[#222222] text-[15px]",
-                            "{attribute.name}"
-                        }
-                        div { class: "relative w-full",
-                            div { class: "flex flex-col w-full justify-start items-start",
-                                button {
-                                    class: "flex flex-row w-full justify-start items-center bg-[#f7f7f7] rounded-[4px] p-[15px] min-h-[55px]",
-                                    onclick: move |_| {
-                                        let mut open = is_open();
-                                        open[index] = true;
-                                        is_open.set(open);
-                                    },
-                                    if selected_value()[index] != "" {
-                                        AttributeLabel {
-                                            label: selected_value()[index].clone(),
-                                            onclose: move |e: Event<MouseData>| {
-                                                e.stop_propagation();
-                                                e.prevent_default();
-                                                let mut attributes = selected_value();
-                                                attributes[index] = "".to_string();
-                                                selected_value.set(attributes);
-                                            },
-                                        }
-                                    }
-                                }
+                    total_attributes: vec![
+                        translate.clone().teenager.to_string(),
+                        translate.clone().twenty.to_string(),
+                        translate.clone().thirty.to_string(),
+                        translate.clone().fourty.to_string(),
+                        translate.clone().fifty.to_string(),
+                        translate.clone().sixty.to_string(),
+                        translate.clone().over.to_string(),
+                    ],
+                    selected_attributes: selected_ages(),
+                    change_attributes: move |attrs: Vec<String>| {
+                        selected_ages.set(attrs);
+                    },
+                }
+                SelectedAttribute {
+                    label: translate.gender,
+                    is_open: (is_open)()[1],
+                    set_open: move |open: bool| {
+                        let mut opens = is_open();
+                        opens[1] = open;
+                        is_open.set(opens);
+                    },
 
-                                if error_signals[index]() != "" {
-                                    div { class: "font-semibold text-red-600 text-[13px] mt-[10px]",
-                                        {error_signals[index]()}
-                                    }
-                                }
-                            }
+                    total_attributes: vec![translate.clone().male.to_string(), translate.clone().female.to_string()],
+                    selected_attributes: selected_genders(),
+                    change_attributes: move |attrs: Vec<String>| {
+                        selected_genders.set(attrs);
+                    },
+                }
+                SelectedAttribute {
+                    label: translate.region,
+                    is_open: (is_open)()[2],
+                    set_open: move |open: bool| {
+                        let mut opens = is_open();
+                        opens[2] = open;
+                        is_open.set(opens);
+                    },
 
-                            if is_open()[index] {
-                                div { class: "absolute flex flex-col w-full justify-start items-center shadow-[0px_8px_20px_rgba(20,26,62,0.25)] bg-white py-4 rounded-md z-20",
-                                    div { class: "flex flex-row w-full justify-end px-[10px]",
-                                        button {
-                                            onclick: move |e: Event<MouseData>| {
-                                                e.stop_propagation();
-                                                e.prevent_default();
-                                                let mut open = is_open();
-                                                open[index] = false;
-                                                is_open.set(open);
-                                            },
-                                            Remove {
-                                                width: "15",
-                                                height: "15",
-                                                fill: "#555462",
-                                            }
-                                        }
-                                    }
+                    total_attributes: vec![
+                        translate.clone().seoul.to_string(),
+                        translate.clone().busan.to_string(),
+                        translate.clone().daegu.to_string(),
+                        translate.clone().incheon.to_string(),
+                        translate.clone().gwangju.to_string(),
+                        translate.clone().daejeon.to_string(),
+                        translate.clone().ulsan.to_string(),
+                        translate.clone().sejong.to_string(),
+                        translate.clone().gyeongi.to_string(),
+                        translate.clone().gangwon.to_string(),
+                        translate.clone().chungbuk.to_string(),
+                        translate.clone().chungnam.to_string(),
+                        translate.clone().jeonbuk.to_string(),
+                        translate.clone().jeonnam.to_string(),
+                        translate.clone().gyeonbuk.to_string(),
+                        translate.clone().gyeonnam.to_string(),
+                        translate.clone().jeju.to_string(),
+                    ],
+                    selected_attributes: selected_regions(),
+                    change_attributes: move |attrs: Vec<String>| {
+                        selected_regions.set(attrs);
+                    },
+                }
+                SelectedAttribute {
+                    label: translate.salary,
+                    is_open: (is_open)()[3],
+                    set_open: move |open: bool| {
+                        let mut opens = is_open();
+                        opens[3] = open;
+                        is_open.set(opens);
+                    },
 
-                                    div { class: "flex flex-col w-full max-h-[150px] overflow-y-auto justify-start items-start",
-                                        for value in attribute.values.clone() {
-                                            div {
-                                                class: "flex flex-col w-full h-[60px] justify-start items-start py-[9px] bg-white hover:bg-[#f7f7f7] hover:border-l hover:border-l-[#2a60d3] cursor-pointer",
-                                                onclick: move |_| {
-                                                    tracing::info!("attribute value: {}", value);
-                                                    let mut values = selected_value();
-                                                    values[index] = value.clone();
-                                                    selected_value.set(values);
-                                                    let mut open = is_open();
-                                                    open[index] = false;
-                                                    is_open.set(open);
-                                                },
-                                                div { class: "flex flex-col w-full px-4",
-                                                    div { class: "font-bold text-[15px] text-[#222222] mb-[5px]",
-                                                        "{value}"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    total_attributes: vec![
+                        translate.clone().tier_one.to_string(),
+                        translate.clone().tier_two.to_string(),
+                        translate.clone().tier_three.to_string(),
+                        translate.clone().tier_four.to_string(),
+                        translate.clone().tier_five.to_string(),
+                    ],
+                    selected_attributes: selected_salarys(),
+                    change_attributes: move |attrs: Vec<String>| {
+                        selected_salarys.set(attrs);
+                    },
                 }
             }
 
             div { class: "flex flex-row w-full justify-start items-center gap-[20px] mt-[40px]",
-                //FIXME: add error handling
                 button {
                     class: "flex flex-row bg-[#2a60d3] rounded-[4px] px-[14px] py-[8px] font-semibold text-white text-[16px] leading-[24px]",
                     onclick: {
-                        let values = selected_value();
-                        let translate = translate.clone();
-                        let mut age: Option<AgeV3> = None;
-                        let mut gender: Option<GenderV2> = None;
-                        let mut region: Option<RegionV2> = None;
-                        let mut salary: Option<SalaryV2> = None;
-                        if values[0] != "" && values[1] != "" && values[2] != "" && values[3] != "" {
-                            age = Some(values[0].parse().unwrap());
-                            gender = Some(values[1].parse().unwrap());
-                            region = Some(values[2].parse().unwrap());
-                            salary = Some(values[3].parse().unwrap());
-                        }
+                        let selected_ages = (selected_ages)();
+                        let selected_genders = (selected_genders)();
+                        let selected_regions = (selected_regions)();
+                        let selected_salarys = (selected_salarys)();
                         move |_| {
-                            if check_condition(
-                                translate.clone(),
-                                panel_name_error,
-                                error_signals[0],
-                                error_signals[1],
-                                error_signals[2],
-                                error_signals[3],
-                                panel_name(),
-                                values[0].clone(),
-                                values[1].clone(),
-                                values[2].clone(),
-                                values[3].clone(),
-                            ) {
-                                props
-                                    .onsave
-                                    .call(PanelV2CreateRequest {
-                                        name: panel_name(),
-                                        user_count: 0,
-                                        attributes: vec![
-                                            models::response::Attribute::Age(
-                                                age.clone().unwrap_or_default(),
-                                            ),
-                                            models::response::Attribute::Gender(
-                                                gender.clone().unwrap_or_default(),
-                                            ),
-                                            models::response::Attribute::Region(
-                                                region.clone().unwrap_or_default(),
-                                            ),
-                                            models::response::Attribute::Salary(
-                                                salary.clone().unwrap_or_default(),
-                                            ),
-                                        ],
-                                    });
+                            let mut attributes = vec![];
+                            for age in selected_ages.clone() {
+                                let age = models::prelude::response::Attribute::Age(
+                                    AgeV3::from_str(&age).unwrap_or_default(),
+                                );
+                                attributes.push(age);
                             }
+                            for gender in selected_genders.clone() {
+                                let gender = models::prelude::response::Attribute::Gender(
+                                    GenderV2::from_str(&gender).unwrap_or_default(),
+                                );
+                                attributes.push(gender);
+                            }
+                            for region in selected_regions.clone() {
+                                let region = models::prelude::response::Attribute::Region(
+                                    RegionV2::from_str(&region).unwrap_or_default(),
+                                );
+                                attributes.push(region);
+                            }
+                            for salary in selected_salarys.clone() {
+                                let salary = models::prelude::response::Attribute::Salary(
+                                    SalaryV2::from_str(&salary).unwrap_or_default(),
+                                );
+                                attributes.push(salary);
+                            }
+                            props
+                                .onsave
+                                .call(PanelV2CreateRequest {
+                                    name: panel_name(),
+                                    user_count: 0,
+                                    attributes,
+                                });
                         }
                     },
                     "{translate.save}"
@@ -275,6 +211,94 @@ pub fn CreatePanelModal(props: CreatePanelModalProps) -> Element {
                         props.oncancel.call(e);
                     },
                     "{translate.cancel}"
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn SelectedAttribute(
+    label: String,
+    is_open: bool,
+    set_open: EventHandler<bool>,
+
+    total_attributes: Vec<String>,
+    selected_attributes: Vec<String>,
+    change_attributes: EventHandler<Vec<String>>,
+) -> Element {
+    rsx! {
+        div { class: "flex flex-row w-full justify-start items-center gap-[10px] mt-[10px]",
+            div { class: "w-[50px] font-medium text-[#222222] text-[15px]", "{label}" }
+            div { class: "relative w-full",
+                div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                    button {
+                        class: "flex flex-row w-full justify-start items-center bg-[#f7f7f7] rounded-[4px] p-[15px] min-h-[55px]",
+                        onclick: move |_| {
+                            set_open.call(!is_open);
+                        },
+
+                        div { class: "flex flex-wrap flex-1 justify-start items-start gap-[10px]",
+                            for selected_attribute in selected_attributes.clone() {
+                                AttributeLabel {
+                                    label: selected_attribute.clone(),
+                                    onclose: {
+                                        let selected_attributes = selected_attributes.clone();
+                                        move |e: Event<MouseData>| {
+                                            e.stop_propagation();
+                                            e.prevent_default();
+                                            let mut attrs = selected_attributes.clone();
+                                            attrs.retain(|v| !(*v == selected_attribute));
+                                            change_attributes.call(attrs);
+                                        }
+                                    },
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if is_open {
+                    div { class: "absolute flex flex-col w-full justify-start items-center shadow-[0px_8px_20px_rgba(20,26,62,0.25)] bg-white py-4 rounded-md z-20",
+                        div { class: "flex flex-row w-full justify-end px-[10px]",
+                            button {
+                                onclick: move |_| {
+                                    set_open.call(false);
+                                },
+                                Remove {
+                                    width: "15",
+                                    height: "15",
+                                    fill: "#555462",
+                                }
+                            }
+                        }
+
+                        div { class: "flex flex-col w-full max-h-[150px] overflow-y-auto justify-start items-start",
+                            for value in total_attributes.clone() {
+                                if !selected_attributes.contains(&value) {
+                                    div {
+                                        class: "flex flex-col w-full h-[60px] justify-start items-start py-[9px] bg-white hover:bg-[#f7f7f7] hover:border-l hover:border-l-[#2a60d3] cursor-pointer",
+                                        onclick: {
+                                            let selected_attributes = selected_attributes.clone();
+                                            let attribute = value.clone();
+                                            move |_| {
+                                                tracing::info!("attribute value: {}", value);
+                                                let mut attrs = selected_attributes.clone();
+                                                attrs.push(attribute.clone());
+                                                change_attributes.call(attrs);
+                                                set_open.call(false);
+                                            }
+                                        },
+                                        div { class: "flex flex-col w-full px-4",
+                                            div { class: "font-bold text-[15px] text-[#222222] mb-[5px]",
+                                                "{value}"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -294,57 +318,4 @@ pub fn AttributeLabel(label: String, onclose: EventHandler<MouseEvent>) -> Eleme
             }
         }
     }
-}
-
-pub fn check_condition(
-    tr: CreatePanelModalTranslate,
-
-    mut panel_name_error: Signal<String>,
-    mut age_error: Signal<String>,
-    mut gender_error: Signal<String>,
-    mut region_error: Signal<String>,
-    mut salary_error: Signal<String>,
-
-    panel_name: String,
-    age: String,
-    gender: String,
-    region: String,
-    salary: String,
-) -> bool {
-    if panel_name.len() < 2 {
-        panel_name_error.set(tr.panel_name_error.to_string());
-        return false;
-    } else {
-        panel_name_error.set("".to_string());
-    }
-
-    if age == "" {
-        age_error.set(tr.age_error.to_string());
-        return false;
-    } else {
-        age_error.set("".to_string());
-    }
-
-    if gender == "" {
-        gender_error.set(tr.gender_error.to_string());
-        return false;
-    } else {
-        gender_error.set("".to_string());
-    }
-
-    if region == "" {
-        region_error.set(tr.region_error.to_string());
-        return false;
-    } else {
-        region_error.set("".to_string());
-    }
-
-    if salary == "" {
-        salary_error.set(tr.salary_error.to_string());
-        return false;
-    } else {
-        salary_error.set("".to_string());
-    }
-
-    true
 }

@@ -16,6 +16,8 @@ pub struct NonceLabCreateSurveyRequest {
     pub questions: Vec<NonceLabSurveyQuestion>,
     pub description: Option<String>,
     pub expected_responses: u64,
+    pub estimated_minutes: u64,
+    pub reward_points: u64,
 }
 
 impl From<SurveyV2> for NonceLabCreateSurveyRequest {
@@ -57,6 +59,8 @@ impl From<SurveyV2> for NonceLabCreateSurveyRequest {
                 None
             },
             expected_responses: survey.quotes as u64,
+            estimated_minutes: survey.estimate_time as u64,
+            reward_points: survey.point as u64,
         }
     }
 }
@@ -198,32 +202,42 @@ impl From<Question> for NonceLabSurveyQuestion {
     fn from(question: Question) -> Self {
         // NOTE: Noncelab API does not support description field for each question.
         match question {
-            Question::SingleChoice(ChoiceQuestion { title, options, .. }) => {
+            Question::SingleChoice(ChoiceQuestion {
+                title,
+                description,
+                options,
+                ..
+            }) => NonceLabSurveyQuestion {
+                title: title.clone(),
+                question: NonceLabSurveyQuestionType::SingleChoice {
+                    question: description.unwrap_or_default(),
+                    options,
+                },
+            },
+            Question::MultipleChoice(ChoiceQuestion {
+                title,
+                description,
+                options,
+                ..
+            }) => NonceLabSurveyQuestion {
+                title: title.clone(),
+                question: NonceLabSurveyQuestionType::MultipleChoice {
+                    question: description.unwrap_or_default(),
+                    options,
+                },
+            },
+            Question::ShortAnswer(SubjectiveQuestion { title, description }) => {
                 NonceLabSurveyQuestion {
                     title: title.clone(),
-                    question: NonceLabSurveyQuestionType::SingleChoice {
-                        question: title,
-                        options,
-                    },
+                    question: NonceLabSurveyQuestionType::Text(description),
                 }
             }
-            Question::MultipleChoice(ChoiceQuestion { title, options, .. }) => {
+            Question::Subjective(SubjectiveQuestion { title, description }) => {
                 NonceLabSurveyQuestion {
                     title: title.clone(),
-                    question: NonceLabSurveyQuestionType::MultipleChoice {
-                        question: title,
-                        options,
-                    },
+                    question: NonceLabSurveyQuestionType::LongText(description),
                 }
             }
-            Question::ShortAnswer(SubjectiveQuestion { title, .. }) => NonceLabSurveyQuestion {
-                title: title.clone(),
-                question: NonceLabSurveyQuestionType::Text(title),
-            },
-            Question::Subjective(SubjectiveQuestion { title, .. }) => NonceLabSurveyQuestion {
-                title: title.clone(),
-                question: NonceLabSurveyQuestionType::LongText(title),
-            },
         }
     }
 }

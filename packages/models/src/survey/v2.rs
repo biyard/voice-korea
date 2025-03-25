@@ -10,7 +10,7 @@ use validator::ValidationError;
 use super::response::{Answer, SurveyResponse};
 
 // If you want to know how to use Y macro, refer to https://github.com/biyard/rust-sdk/tree/main/packages/by-macros
-#[api_model(base = "/v2/organizations/:org-id/surveys", table = surveys, action_by_id = start_survey, iter_type=QueryResponse)]
+#[api_model(base = "/v2/organizations/:org-id/surveys", table = surveys, action_by_id = [start_survey, update(panel_ids = Vec<i64>)], iter_type=QueryResponse)]
 pub struct SurveyV2 {
     #[api_model(summary, primary_key, action = delete, read_action = find_by_id)]
     pub id: i64,
@@ -47,7 +47,6 @@ pub struct SurveyV2 {
     #[api_model(summary, action = create, type = JSONB, version = v0.1, action_by_id = update)]
     pub questions: Vec<Question>,
 
-    //FIXME: add action_by_id tag
     #[api_model(summary, action = create, many_to_many = panel_surveys, foreign_table_name = panels, foreign_primary_key = panel_id, foreign_reference_key = survey_id,)]
     #[serde(default)]
     pub panels: Vec<PanelV2>,
@@ -55,6 +54,14 @@ pub struct SurveyV2 {
     // FIXME: This data may be one_to_many of panel_surveys table
     #[api_model(summary, action = create, type = JSONB, version = v0.1, action_by_id = update)]
     pub panel_counts: Vec<PanelCountsV2>,
+
+    #[api_model(summary, action = create, version = v0.2, action_by_id = [update, update_setting])]
+    #[serde(default)]
+    pub estimate_time: i64,
+    #[api_model(summary, action = create, version = v0.2, action_by_id = [update, update_setting])]
+    #[serde(default)]
+    pub point: i64,
+
     #[api_model(summary)]
     pub noncelab_id: Option<i64>,
     #[api_model(summary, one_to_many = survey_responses, foreign_key = survey_id, aggregator = count)]
@@ -83,6 +90,17 @@ impl SurveyV2 {
             Language::En => datetime.format("%-m. %-d. %Y").to_string(),
         }
     }
+}
+
+#[derive(Translate, PartialEq, Default, Debug)]
+pub enum SurveyV2Status {
+    #[default]
+    #[translate(ko = "준비", en = "Ready")]
+    Ready,
+    #[translate(ko = "진행", en = "InProgress")]
+    InProgress,
+    #[translate(ko = "마감", en = "Finish")]
+    Finish,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -281,6 +299,32 @@ pub struct ChoiceQuestion {
 }
 
 impl SurveyV2Summary {
+    pub fn finished(&self) -> bool {
+        let status = self.survey_status();
+
+        status == SurveyV2Status::Finish
+    }
+
+    pub fn survey_status(&self) -> SurveyV2Status {
+        let started_at = self.started_at;
+        let ended_at = self.ended_at;
+
+        let now = Utc::now();
+        let current = now.timestamp();
+
+        if started_at > 10000000000 {
+            return SurveyV2Status::default();
+        }
+
+        if started_at > current {
+            SurveyV2Status::Ready
+        } else if ended_at < current {
+            SurveyV2Status::Finish
+        } else {
+            SurveyV2Status::InProgress
+        }
+    }
+
     pub fn start_date(&self) -> String {
         let datetime = Utc.timestamp_opt(self.started_at, 0).unwrap();
         let formatted_date = datetime.format("%Y.%m.%d").to_string();
