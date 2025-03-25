@@ -26,12 +26,18 @@ impl Controller {
     pub fn init(lang: Language) -> std::result::Result<Self, RenderError> {
         let projects = use_server_future(move || async move {
             ProfileProjectsData::get_client(&crate::config::get().api_url)
-                .find_one()
+                .find()
                 .await
                 .unwrap_or_default()
         })?;
 
-        tracing::debug!("projects: {:?}", projects);
+        let projects = projects().unwrap_or_default();
+
+        tracing::debug!(
+            "projects: {:?} {:?}",
+            projects.designed_projects.len(),
+            projects.participated_projects.len()
+        );
 
         let ctrl = Self {
             lang,

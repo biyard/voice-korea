@@ -6,11 +6,15 @@ use by_axum::{
         Extension, Json,
     },
 };
-use models::dto::{
-    ProfileProjectsData, ProfileProjectsDataGetResponse, ProfileProjectsDataParam,
-    ProfileProjectsDataReadActionType,
+use models::{
+    deliberation::Deliberation,
+    deliberation_response::DeliberationResponse,
+    deliberation_user::DeliberationUser,
+    dto::{ProfileProjectsData, ProfileProjectsDataGetResponse, ProfileProjectsDataParam},
 };
-use models::*;
+use models::{dto::ProfileProjectsDataReadActionType, *};
+
+use crate::utils::app_claims::AppClaims;
 
 #[derive(Clone, Debug)]
 pub struct ProfileController {
@@ -20,11 +24,60 @@ pub struct ProfileController {
 
 impl ProfileController {
     async fn query(&self, user_id: i64) -> Result<ProfileProjectsData> {
-        let _user_id = user_id;
+        let mut tx = self.pool.begin().await?;
+
+        let pr_responses = DeliberationResponse::query_builder()
+            .user_id_equals(user_id)
+            .page(1)
+            .limit(30)
+            .order_by_created_at_desc()
+            .query()
+            .map(DeliberationResponse::from)
+            .fetch_all(&mut *tx)
+            .await?;
+
+        let ds_responses = DeliberationUser::query_builder()
+            .user_id_equals(user_id)
+            .page(1)
+            .limit(30)
+            .order_by_created_at_desc()
+            .query()
+            .map(DeliberationUser::from)
+            .fetch_all(&mut *tx)
+            .await?;
+
+        let mut participated_projects: Vec<Deliberation> = vec![];
+        let mut designed_projects: Vec<Deliberation> = vec![];
+
+        for pr_response in pr_responses {
+            let deliberation_id = pr_response.deliberation_id;
+
+            let deliberation = Deliberation::query_builder()
+                .id_equals(deliberation_id)
+                .query()
+                .map(Deliberation::from)
+                .fetch_one(&mut *tx)
+                .await?;
+
+            participated_projects.push(deliberation);
+        }
+
+        for ds_response in ds_responses {
+            let deliberation_id = ds_response.deliberation_id;
+
+            let deliberation = Deliberation::query_builder()
+                .id_equals(deliberation_id)
+                .query()
+                .map(Deliberation::from)
+                .fetch_one(&mut *tx)
+                .await?;
+
+            designed_projects.push(deliberation);
+        }
 
         Ok(ProfileProjectsData {
-            designed_projects: vec![],
-            participated_projects: vec![],
+            designed_projects,
+            participated_projects,
         })
     }
 }
@@ -54,7 +107,7 @@ impl ProfileController {
 
         match q {
             ProfileProjectsDataParam::Read(param)
-                if param.action == Some(ProfileProjectsDataReadActionType::FindOne) =>
+                if param.action == Some(ProfileProjectsDataReadActionType::Find) =>
             {
                 Ok(Json(ProfileProjectsDataGetResponse::Read(
                     ctrl.query(user_id).await?,
