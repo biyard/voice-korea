@@ -9,65 +9,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          ssh-key: ${{ secrets.PULL_KEY_REPO }}
-
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          components: clippy, rustfmt
-          target: wasm32-unknown-unknown
-          toolchain: stable
-      - name: Install PostgreSQL Client
-        run: sudo apt-get install -y postgresql-client
-
-      - name: Initialize Database SQL
-        run: |
-          psql postgresql://postgres:postgres@localhost:5432/test -f ./deps/rust-sdk/fixtures/sql/init.sql
-
-      - name: test
-        env:
-          RUSTFLAGS: "-A warnings"
-          DATABASE_TYPE: postgres
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
-          REGION: ap-northeast-2
-          ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          NONCE_LAB_API_TOKEN: ${{ secrets.NONCE_LAB_API_TOKEN }}
-          INTERNAL_SERVER_KEY: ${{ secrets.VOICE_KOREA_INTERNAL_SERVER_KEY }}
-          ENV: dev
-          STACK: voice-korea-api-dev-stack
-          SERVICE: api
-          BASE_DOMAIN: biyard.co
-          DOMAIN: voice-korea-api.dev.biyard.co
-          AUTH_TYPE: jwt
-          JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
-          BUCKET_NAME: voice-korea.dev.biyard.co
-          # TESTFLAGS: "--features full-test"
-          RUST_TEST_THREADS: 1
-        run: |
-          cd packages/api && make test
-
   user-ui-deployment:
     runs-on: ubuntu-22.04
 

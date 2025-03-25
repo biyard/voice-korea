@@ -24,13 +24,13 @@ run: public
 	$(BUILD_ENV) dx serve
 
 clean:
-	rm -rf assets/tailwind.css
+	rm -rf public/tailwind.css
 
 node_modules:
 	npm i
 
 public/tailwind.css:
-	npx tailwindcss -i ./input.css -o ./public/tailwind.css
+	npx tailwindcss -i ./public/input.css -o ./public/tailwind.css
 
 .PHONY: public
 public: node_modules public/tailwind.css
