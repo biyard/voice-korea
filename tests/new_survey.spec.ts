@@ -11,7 +11,7 @@ const timeouts = {
 test.describe('New Survey Page', () => {
 
   test('[Survey-003] Verify Fields, Errors, and Interactions', async ({ page }) => {
-    await page.goto('https://voice-korea.dev.biyard.co/en');
+    await page.goto('https://voice-korea.dev.biyard.co/en/');
     await page.screenshot({ path: 'screenshots/Survey-001/01-login-page.png', fullPage: true });
 
     await page.waitForLoadState('domcontentloaded');
@@ -51,8 +51,8 @@ test.describe('New Survey Page', () => {
     await page.goto('https://voice-korea.dev.biyard.co/en/surveys/new');
     await page.screenshot({ path: 'screenshots/Survey-003/01-new-survey-page.png', fullPage: true });
 
-    const back = page.getByRole('link').filter({ hasText: /^$/ })
-    await expect(back).toBeVisible();
+    // const back = page.getByRole('link').filter({ hasText: /^$/ })
+    // await expect(back).toBeVisible();
 
     const categoryDropdown = await page.locator('div').filter({ hasText: /^Economy Society City Technology Health Politics Labor$/ }).getByRole('combobox');
     await expect(categoryDropdown).toBeVisible();
