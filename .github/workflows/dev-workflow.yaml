@@ -68,7 +68,7 @@ jobs:
         run: |
           cd packages/api && make test
 
-  web-user-deployment:
+  user-ui-deployment:
     runs-on: ubuntu-22.04
 
     steps:
@@ -90,10 +90,10 @@ jobs:
           toolchain: stable
       - uses: cargo-bins/cargo-binstall@main
       - name: Cache builder
-        id: web-cache-builder
+        id: user-ui-cache-builder
         uses: actions/cache@v3
         with:
-          key: web-cache-builder
+          key: user-ui-cache-builder
           path: |
             target
 
@@ -101,8 +101,7 @@ jobs:
         run: |
           cargo binstall dioxus-cli --force
           cargo binstall toml-cli --force
-          npm install -g aws-cdk tailwindcss@3
-          npm install -D tailwindcss
+          npm install -g aws-cdk @tailwindcss/cli
 
       - name: Deploy APIs
         env:
@@ -134,7 +133,6 @@ jobs:
 
   web-deployment:
     runs-on: ubuntu-22.04
-    needs: [web-user-deployment]
 
     steps:
       - uses: actions/checkout@v3
@@ -166,8 +164,7 @@ jobs:
         run: |
           cargo binstall dioxus-cli --force
           cargo binstall toml-cli --force
-          npm install -g aws-cdk tailwindcss@3
-          npm install -D tailwindcss
+          npm install -g aws-cdk @tailwindcss/cli
 
       - name: Deploy APIs
         env:
@@ -192,7 +189,6 @@ jobs:
 
   api-deployment:
     runs-on: ubuntu-22.04
-    needs: [web-user-deployment, web-deployment]
 
     steps:
       - uses: actions/checkout@v3

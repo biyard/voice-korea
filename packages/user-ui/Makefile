@@ -50,7 +50,7 @@ public/dep.js:
 
 .PHONY: public/tailwind.css
 public/tailwind.css:
-	npx tailwindcss -i $(PWD)/input.css -o $(PWD)/public/tailwind.css
+	tailwindcss -i ./input.css -o ./public/tailwind.css
 
 build: clean public/tailwind.css
 	$(BUILD_ENV) dx build --release --fullstack --server-features lambda
