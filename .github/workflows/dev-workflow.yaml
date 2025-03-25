@@ -152,7 +152,7 @@ jobs:
       - uses: cargo-bins/cargo-binstall@main
       - name: Install dependencies
         run: |
-          cargo binstall toml-cli
+          cargo binstall toml-cli --force
           npm i -g aws-cdk
 
       - name: API Cache builder
@@ -186,7 +186,7 @@ jobs:
           ENABLE_LAMBDA: true
           ENABLE_RDS: false
         run: |
-          make deploy
+          make deploy-if-needed
 
   # watcher-deployment:
   #   runs-on: ubuntu-22.04
