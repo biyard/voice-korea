@@ -204,4 +204,8 @@ translate! {
         ko: "영문, 숫자, 특수기호 조합으로 8자 이상 구성해주세요.",
         en: "Please make up at least 8 characters using a combination of letters, numbers, and special symbols."
     },
+    invalid_authorization_pattern: {
+        ko: "인증번호 형태가 올바르지 않습니다.",
+        en: "The authentication number format is incorrect."
+    }
 }

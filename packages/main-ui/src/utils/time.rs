@@ -84,3 +84,9 @@ pub fn format_remaining_time(target_timestamp: i64) -> String {
 
     result.trim().to_string()
 }
+
+pub fn current_timestamp() -> i64 {
+    let now = Utc::now();
+    let timestamp_millis = now.timestamp();
+    timestamp_millis
+}

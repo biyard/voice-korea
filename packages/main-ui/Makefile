@@ -24,7 +24,7 @@ setup.tool:
 	cargo install cargo-binstall
 	cargo binstall dioxus-cli
 	cargo binstall toml-cli
-	npm i -g tailwindcss@3
+	npm i -g @tailwindcss/cli
 
 run: public/tailwind.css
 	$(BUILD_ENV) dx serve
@@ -33,7 +33,7 @@ clean:
 	rm -rf public/tailwind.css
 
 public/tailwind.css:
-	tailwindcss -i ./input.css -o ./public/tailwind.css
+	tailwindcss -i ./public/input.css -o ./public/tailwind.css
 
 build: clean public/tailwind.css
 	$(BUILD_ENV) dx build --release --fullstack --server-features lambda

@@ -138,6 +138,7 @@ pub fn CreatePage(props: CreatePageProps) -> Element {
                     ],
                     complete_join_membership: translates.complete_join_membership,
 
+                    invalid_authorization_pattern: translates.invalid_authorization_pattern,
                     invalid_password_pattern: translates.invalid_password_pattern,
                     incollect_email_form: translates.incollect_email_form,
                     input_password: translates.input_password,

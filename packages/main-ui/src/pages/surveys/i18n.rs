@@ -91,6 +91,10 @@ translate! {
         ko: "삭제",
         en: "Remove"
     }
+    input_description: {
+        ko: "설명을 입력해주세요.",
+        en: "Please Input Description"
+    }
 }
 
 translate! {
@@ -155,7 +159,7 @@ translate! {
         en: "Under 17 years old"
     }
     twenty: {
-        ko: "18~29세",
+        ko: "18-29세",
         en: "18-29 years old"
     }
     thirty: {

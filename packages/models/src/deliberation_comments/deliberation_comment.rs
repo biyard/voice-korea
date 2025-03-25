@@ -22,7 +22,7 @@ pub struct DeliberationComment {
     pub comment: String,
 
     // parent_id is used for reply to a comment
-    #[api_model(summary, many_to_one = deliberation_comments, query_action = replies_of)]
+    #[api_model(summary, query_action = replies_of)]
     pub parent_id: i64,
 
     // num_of_replies is used for the number of replies on a comment.
