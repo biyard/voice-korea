@@ -63,21 +63,28 @@ fn App() -> Element {
 
         // document::Script { src: "https://cdn.quilljs.com/1.3.6/quill.min.js" }
         document::Script { src: "https://d3js.org/d3.v7.min.js" }
-        load_tailwindcss {}
+        document::Script { src: "https://unpkg.com/@tailwindcss/browser@4.0.12/dist/index.global.js" }
         Router::<Route> {}
     }
 }
 
-#[cfg(not(feature = "lambda"))]
-#[allow(dead_code)]
-fn load_tailwindcss() -> Element {
-    rsx! {
-        script { src: "https://unpkg.com/@tailwindcss/browser@4" }
-    }
-}
+#[cfg(feature = "server")]
+mod api {
+    use bdk::prelude::*;
+    use server_fn::codec::{GetUrl, Json};
 
-#[cfg(feature = "lambda")]
-#[allow(dead_code)]
-fn load_tailwindcss() -> Element {
-    rsx! {}
+    #[server(endpoint = "/version", input=GetUrl, output=Json)]
+    pub async fn version() -> Result<String, ServerFnError> {
+        Ok(match option_env!("VERSION") {
+            Some(version) => match option_env!("COMMIT") {
+                Some(commit) => format!("{}-{}", version, commit),
+                None => format!("{}", version),
+            },
+            None => match option_env!("DATE") {
+                Some(date) => date.to_string(),
+                None => "unknown".to_string(),
+            },
+        }
+        .to_string())
+    }
 }

@@ -47,6 +47,8 @@ deploy-web-if-needed:
 deploy: build cdk-deploy
 deploy-web: build cdk-deploy s3-deploy
 
+deploy-user-web: build cdk-deploy s3-deploy
+
 .PHONY: build
 build: clean
 	mkdir -p .build
