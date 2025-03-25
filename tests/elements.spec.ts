@@ -7,7 +7,7 @@ const timeouts = {
 };
 
 test('Login and extract actual elements using getByRole & getByText', async ({ page }) => {
-    await page.goto('https://voice-korea.dev.biyard.co/en/');
+    await page.goto('https://voice-korea.dev.biyard.co/en');
     await page.screenshot({ path: 'screenshots/Survey-001/01-login-page.png', fullPage: true });
 
     await page.waitForLoadState('domcontentloaded');

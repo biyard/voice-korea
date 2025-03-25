@@ -11,7 +11,7 @@ const timeouts = {
 test.describe('New Survey Page', () => {
 
   test('[Survey-003] Verify Fields, Errors, and Interactions', async ({ page }) => {
-    await page.goto('https://voice-korea.dev.biyard.co/en/');
+    await page.goto('https://voice-korea.dev.biyard.co/en');
     await page.screenshot({ path: 'screenshots/Survey-001/01-login-page.png', fullPage: true });
 
     await page.waitForLoadState('domcontentloaded');
@@ -34,7 +34,7 @@ test.describe('New Survey Page', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(timeouts.wait);
 
-    await expect(page).toHaveURL("https://voice-korea.dev.biyard.co/en/surveys/", { timeout: timeouts.url });
+    await expect(page).toHaveURL("https://voice-korea.dev.biyard.co/en/surveys", { timeout: timeouts.url });
     await page.screenshot({ path: 'screenshots/Survey-001/05-survey-page.png', fullPage: true });
 
     const startSurveyButton = page.getByRole('link', { name: "Start Survey" });
@@ -45,10 +45,10 @@ test.describe('New Survey Page', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(timeouts.wait);
 
-    await expect(page).toHaveURL('https://voice-korea.dev.biyard.co/en/surveys/new/', { timeout: timeouts.url });
+    await expect(page).toHaveURL('https://voice-korea.dev.biyard.co/en/surveys/new', { timeout: timeouts.url });
     await page.screenshot({ path: 'screenshots/Survey-001/07-survey-questions.png', fullPage: true });
 
-    await page.goto('https://voice-korea.dev.biyard.co/en/surveys/new/');
+    await page.goto('https://voice-korea.dev.biyard.co/en/surveys/new');
     await page.screenshot({ path: 'screenshots/Survey-003/01-new-survey-page.png', fullPage: true });
 
     const back = page.getByRole('link').filter({ hasText: /^$/ })

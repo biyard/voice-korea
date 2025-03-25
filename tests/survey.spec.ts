@@ -11,7 +11,7 @@ const timeouts = {
 test.describe('Survey Page Flow', () => {
 
   test('[Survey-001] Login and Interact with Surveys', async ({ page }) => {
-    await page.goto('https://voice-korea.dev.biyard.co/en/');
+    await page.goto('https://voice-korea.dev.biyard.co/en');
     await page.screenshot({ path: 'screenshots/Survey-001/01-login-page.png', fullPage: true });
 
     await page.waitForLoadState('domcontentloaded');
@@ -51,7 +51,7 @@ test.describe('Survey Page Flow', () => {
   });
 
   test('[Survey-002] Login, Go to Surveys, and Logout', async ({ page }) => {
-    await page.goto('https://voice-korea.dev.biyard.co/en/');
+    await page.goto('https://voice-korea.dev.biyard.co/en');
     await page.screenshot({ path: 'screenshots/Survey-002/01-login-page.png', fullPage: true });
 
     await page.waitForLoadState('domcontentloaded');
@@ -74,7 +74,7 @@ test.describe('Survey Page Flow', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(timeouts.wait);
 
-    await expect(page).toHaveURL("https://voice-korea.dev.biyard.co/en/surveys/", { timeout: timeouts.url });
+    await expect(page).toHaveURL("https://voice-korea.dev.biyard.co/en/surveys", { timeout: timeouts.url });
     await page.screenshot({ path: 'screenshots/Survey-002/05-survey-page.png', fullPage: true });
 
     const logoutButton = page.getByRole('link', { name: "Logout" });
@@ -82,7 +82,7 @@ test.describe('Survey Page Flow', () => {
     await logoutButton.click();
     await page.screenshot({ path: 'screenshots/Survey-002/06-logout-clicked.png', fullPage: true });
 
-    await expect(page).toHaveURL('https://voice-korea.dev.biyard.co/en/', { timeout: timeouts.url });
+    await expect(page).toHaveURL('https://voice-korea.dev.biyard.co/en', { timeout: timeouts.url });
     await page.screenshot({ path: 'screenshots/Survey-002/07-logged-out.png', fullPage: true });
   });
 

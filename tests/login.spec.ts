@@ -10,7 +10,7 @@ const timeouts = {
 
 test.describe('Login Page Flow', () => {
   test('[Login-001] Successful Login', async ({ page }) => {
-    await page.goto('https://voice-korea.dev.biyard.co/en/');
+    await page.goto('https://voice-korea.dev.biyard.co/en');
     await page.screenshot({ path: 'screenshots/Login-001/01-login-page.png', fullPage: true });
 
     await page.waitForLoadState('domcontentloaded');
@@ -38,7 +38,7 @@ test.describe('Login Page Flow', () => {
   });
 
   test('[Login-002] Validate Error Messages on Empty Fields', async ({ page }) => {
-    await page.goto('https://voice-korea.dev.biyard.co/en/');
+    await page.goto('https://voice-korea.dev.biyard.co/en');
     await page.screenshot({ path: 'screenshots/Login-002/01-empty-fields-login.png', fullPage: true });
 
     const loginButton = page.getByRole('button', { name: "Login" });
@@ -52,7 +52,7 @@ test.describe('Login Page Flow', () => {
   });
 
   test('[Login-003] Navigate to Reset Password Page', async ({ page }) => {
-    await page.goto('https://voice-korea.dev.biyard.co/en/');
+    await page.goto('https://voice-korea.dev.biyard.co/en');
     await page.screenshot({ path: 'screenshots/Login-003/01-reset-password-nav.png', fullPage: true });
 
     const resetPasswordLink = page.getByRole('link', { name: "Reset Password" });
@@ -64,7 +64,7 @@ test.describe('Login Page Flow', () => {
   });
 
   test('[Login-004] Navigate to Create Account Page', async ({ page }) => {
-    await page.goto('https://voice-korea.dev.biyard.co/en/');
+    await page.goto('https://voice-korea.dev.biyard.co/en');
     await page.screenshot({ path: 'screenshots/Login-004/01-create-account-nav.png', fullPage: true });
 
     const createAccountLink = page.getByRole('link', { name: "Create Account" });
