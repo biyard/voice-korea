@@ -101,7 +101,7 @@ jobs:
         run: |
           cargo binstall dioxus-cli --force
           cargo binstall toml-cli --force
-          npm install -g aws-cdk @tailwindcss/cli
+          npm install -g aws-cdk
 
       - name: Deploy APIs
         env:
@@ -129,7 +129,7 @@ jobs:
 
         run: |
           cargo update -p time --precise 0.3.37
-          make deploy-user-web
+          make deploy-web-if-needed
 
   web-deployment:
     runs-on: ubuntu-22.04
@@ -162,9 +162,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cargo binstall dioxus-cli --force
-          cargo binstall toml-cli --force
-          npm install -g aws-cdk @tailwindcss/cli
+          cargo binstall dioxus-cli
+          cargo binstall toml-cli
+          npm install -g aws-cdk
 
       - name: Deploy APIs
         env:
@@ -185,7 +185,7 @@ jobs:
 
         run: |
           cargo update -p time --precise 0.3.37
-          make deploy-web
+          make deploy-web-if-needed
 
   api-deployment:
     runs-on: ubuntu-22.04
@@ -211,7 +211,8 @@ jobs:
       - uses: cargo-bins/cargo-binstall@main
       - name: Install dependencies
         run: |
-          cargo binstall toml-cli --force
+          cargo binstall toml-cli
+          npm i -g aws-cdk
 
       - name: API Cache builder
         id: api-cache-builder
@@ -244,7 +245,6 @@ jobs:
           ENABLE_LAMBDA: true
           ENABLE_RDS: false
         run: |
-          npm i -g aws-cdk
           make deploy
 
   # watcher-deployment:
