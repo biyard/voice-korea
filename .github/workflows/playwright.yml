@@ -24,12 +24,19 @@ jobs:
           WAIT_TIMEOUT: 5000
           VISIBLE_TIMEOUT: 10000
           URL_TIMEOUT: 15000
+          GOOGLE_PASS: "123456789"
+          GOOGLE_EMAIL: "testemail@gmail.com"
         run: |
           echo "Running tests with timeouts:"
           echo "WAIT_TIMEOUT=$WAIT_TIMEOUT"
           echo "VISIBLE_TIMEOUT=$VISIBLE_TIMEOUT"
           echo "URL_TIMEOUT=$URL_TIMEOUT"
-          npx playwright test
+          echo "GOOGLE_EMAIL=$GOOGLE_EMAIL"
+          echo "GOOGLE_PASS=$GOOGLE_PASS"
+          npx playwright test tests/users
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
