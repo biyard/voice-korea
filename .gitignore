@@ -87,8 +87,6 @@ target-*/
 /tests-example/
 /screenshots/
 tests/console/test_survey.spec.ts
-tests/console/test_surv.spec.ts
-
 /storage
 
 /packages/user-ui/public/dep.js
