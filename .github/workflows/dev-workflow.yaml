@@ -1,0 +1,298 @@
+name: Dev deploy
+
+on:
+  push:
+    branches:
+      - dev
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          ssh-key: ${{ secrets.PULL_KEY_REPO }}
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy, rustfmt
+          target: wasm32-unknown-unknown
+          toolchain: stable
+      - name: Install PostgreSQL Client
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Initialize Database SQL
+        run: |
+          psql postgresql://postgres:postgres@localhost:5432/test -f ./deps/rust-sdk/fixtures/sql/init.sql
+
+      - name: test
+        env:
+          RUSTFLAGS: "-A warnings"
+          DATABASE_TYPE: postgres
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+          REGION: ap-northeast-2
+          ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          NONCE_LAB_API_TOKEN: ${{ secrets.NONCE_LAB_API_TOKEN }}
+          INTERNAL_SERVER_KEY: ${{ secrets.VOICE_KOREA_INTERNAL_SERVER_KEY }}
+          ENV: dev
+          STACK: voice-korea-api-dev-stack
+          SERVICE: api
+          BASE_DOMAIN: biyard.co
+          DOMAIN: voice-korea-api.dev.biyard.co
+          AUTH_TYPE: jwt
+          JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
+          BUCKET_NAME: voice-korea.dev.biyard.co
+          # TESTFLAGS: "--features full-test"
+          RUST_TEST_THREADS: 1
+        run: |
+          cd packages/api && make test
+
+  web-user-deployment:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          ssh-key: ${{ secrets.PULL_KEY_REPO }}
+
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy, rustfmt
+          target: wasm32-unknown-unknown
+          toolchain: stable
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Cache builder
+        id: web-cache-builder
+        uses: actions/cache@v3
+        with:
+          key: web-cache-builder
+          path: |
+            target
+
+      - name: Install dependencies
+        run: |
+          cargo binstall dioxus-cli --force
+          cargo binstall toml-cli --force
+          npm install -g aws-cdk @tailwindcss/cli
+
+      - name: Deploy APIs
+        env:
+          REGION: ap-northeast-2
+          ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          API_URL: https://voice-korea-api.dev.biyard.co
+          ENV: dev
+          STACK: voice-korea-user-dev-stack
+          SERVICE: user-ui
+          BASE_DOMAIN: voice-korea.com
+          DOMAIN: dev.voice-korea.com
+          ENABLE_S3: true
+          ENABLE_LAMBDA: true
+          ENABLE_FARGATE: false
+          ENABLE_DYNAMO: false
+          ENABLE_CRON: false
+
+        run: |
+          cargo update -p time --precise 0.3.37
+          make deploy-user-web
+
+  web-deployment:
+    runs-on: ubuntu-22.04
+    needs: [web-user-deployment]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          ssh-key: ${{ secrets.PULL_KEY_REPO }}
+
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy, rustfmt
+          target: wasm32-unknown-unknown
+          toolchain: stable
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Cache builder
+        id: web-cache-builder
+        uses: actions/cache@v3
+        with:
+          key: web-cache-builder
+          path: |
+            target
+
+      - name: Install dependencies
+        run: |
+          cargo binstall dioxus-cli --force
+          cargo binstall toml-cli --force
+          npm install -g aws-cdk @tailwindcss/cli
+
+      - name: Deploy APIs
+        env:
+          REGION: ap-northeast-2
+          ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          API_URL: https://voice-korea-api.dev.biyard.co
+          ENV: dev
+          STACK: voice-korea-console-dev-stack
+          SERVICE: main-ui
+          BASE_DOMAIN: voice-korea.com
+          DOMAIN: console.dev.voice-korea.com
+          ENABLE_S3: true
+          ENABLE_LAMBDA: true
+          ENABLE_FARGATE: false
+          ENABLE_DYNAMO: false
+          ENABLE_CRON: false
+
+        run: |
+          cargo update -p time --precise 0.3.37
+          make deploy-web
+
+  api-deployment:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          ssh-key: ${{ secrets.PULL_KEY_REPO }}
+
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy, rustfmt
+          target: wasm32-unknown-unknown
+          toolchain: stable
+
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Install dependencies
+        run: |
+          cargo binstall toml-cli --force
+
+      - name: API Cache builder
+        id: api-cache-builder
+        uses: actions/cache@v3
+        with:
+          key: api-cache-builder
+          path: |
+            packages/api/target
+
+      - name: Deploy APIs
+        env:
+          REGION: ap-northeast-2
+          ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          NONCE_LAB_API_TOKEN: ${{ secrets.NONCE_LAB_API_TOKEN }}
+          INTERNAL_SERVER_KEY: ${{ secrets.VOICE_KOREA_INTERNAL_SERVER_KEY }}
+          ENV: dev
+          STACK: voice-korea-api-dev-stack
+          SERVICE: api
+          BASE_DOMAIN: biyard.co
+          DOMAIN: voice-korea-api.dev.biyard.co
+          DATABASE_TYPE: postgres
+          DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+          AUTH_TYPE: jwt
+          JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
+          BUCKET_NAME: voice-korea.dev.biyard.co
+          ENABLE_S3: false
+          ENABLE_FARGATE: false
+          ENABLE_DYNAMO: false
+          ENABLE_LAMBDA: true
+          ENABLE_RDS: false
+        run: |
+          npm i -g aws-cdk
+          make deploy
+
+  # watcher-deployment:
+  #   runs-on: ubuntu-22.04
+
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
+  #         ssh-key: ${{ secrets.PULL_KEY_REPO }}
+
+  #     - uses: aws-actions/configure-aws-credentials@v2
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ap-northeast-2
+
+  #     - uses: actions-rust-lang/setup-rust-toolchain@v1
+  #       with:
+  #         components: clippy, rustfmt
+  #         target: wasm32-unknown-unknown
+  #         toolchain: stable
+
+  #     - name: Install dependencies
+  #       run: |
+  #         cargo install toml-cli
+
+  #     - name: Watcher Cache builder
+  #       id: watcher-cache-builder
+  #       uses: actions/cache@v3
+  #       with:
+  #         key: watcher-cache-builder
+  #         path: |
+  #           target
+
+  #     - name: Deploy APIs
+  #       env:
+  #         REGION: ap-northeast-2
+  #         ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         INTERNAL_SERVER_KEY: ${{ secrets.VOICE_KOREA_INTERNAL_SERVER_KEY }}
+  #         STACK: voice-korea-watcher-api-dev-stack
+  #         ENV: dev
+  #         SERVICE: watcher
+  #         ENABLE_S3: false
+  #         ENABLE_FARGATE: false
+  #         ENABLE_DYNAMO: false
+  #         ENABLE_RDS: false
+  #         ENABLE_LAMBDA: true
+  #         BASE_DOMAIN: biyard.co
+  #         ENABLE_CRON: true
+  #         SCHEDULE: 'cron(0 15 * * ? *)'
+  #         DOMAIN: voice-korea-watcher-api.dev.biyard.co
+
+  #       run: |
+  #         npm i -g aws-cdk
+  #         make deploy-if-needed
