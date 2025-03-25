@@ -1,11 +1,8 @@
 #![allow(unused_variables)]
+use crate::response::AgeV3;
 use crate::response::Attribute;
 #[allow(unused)]
 use crate::Result;
-use crate::{
-    attribute_v2::{GenderV2, RegionV2, SalaryV2},
-    response::AgeV3,
-};
 use bdk::prelude::*;
 use by_types::QueryResponse;
 
@@ -52,28 +49,24 @@ impl PartialEq<Vec<crate::survey::response::Attribute>> for PanelV2 {
         let mut cover_region = false;
         let mut cover_salary = false;
 
-        let mut age_value = None;
-        let mut gender_value = None;
-        let mut region_value = None;
-        let mut salary_value = None;
+        let mut age_values = vec![];
+        let mut gender_values = vec![];
+        let mut region_values = vec![];
+        let mut salary_values = vec![];
 
         for attribute in attributes {
             match attribute {
                 Attribute::Age(age_v3) => {
-                    cover_age = age_v3 == AgeV3::None;
-                    age_value = Some(age_v3);
+                    age_values.push(age_v3);
                 }
                 Attribute::Gender(gender_v2) => {
-                    cover_gender = gender_v2 == GenderV2::None;
-                    gender_value = Some(gender_v2);
+                    gender_values.push(gender_v2);
                 }
                 Attribute::Region(region_v2) => {
-                    cover_region = region_v2 == RegionV2::None;
-                    region_value = Some(region_v2);
+                    region_values.push(region_v2);
                 }
                 Attribute::Salary(salary_v2) => {
-                    cover_salary = salary_v2 == SalaryV2::None;
-                    salary_value = Some(salary_v2);
+                    salary_values.push(salary_v2);
                 }
                 Attribute::None => {}
             }
@@ -81,45 +74,42 @@ impl PartialEq<Vec<crate::survey::response::Attribute>> for PanelV2 {
 
         for attr in other {
             match attr {
-                Attribute::Age(AgeV3::Specific(age)) => {
-                    if let Some(age_v3) = age_value.as_ref() {
-                        let (min, max) = age_v3.to_range();
-                        if *age >= min && *age <= max {
-                            cover_age = true;
+                Attribute::Age(age_attr) => {
+                    if cover_age {
+                        continue;
+                    }
+
+                    cover_age = age_values.iter().any(|panel_age| match age_attr {
+                        AgeV3::Specific(target) => {
+                            let (min, max) = panel_age.to_range();
+                            *target >= min && *target <= max
                         }
+                        AgeV3::Range {
+                            inclusive_min,
+                            inclusive_max,
+                        } => {
+                            let (min, max) = panel_age.to_range();
+                            inclusive_min >= &min && inclusive_max <= &max
+                        }
+                        AgeV3::None => false,
+                    });
+                }
+
+                Attribute::Gender(target) => {
+                    if !cover_gender {
+                        cover_gender = gender_values.contains(target);
                     }
                 }
-                Attribute::Age(AgeV3::Range {
-                    inclusive_min,
-                    inclusive_max,
-                }) => {
-                    if let Some(age_v3) = age_value.as_ref() {
-                        let (min, max) = age_v3.to_range();
-                        if *inclusive_min >= min && *inclusive_max <= max {
-                            cover_age = true;
-                        }
+
+                Attribute::Region(target) => {
+                    if !cover_region {
+                        cover_region = region_values.contains(target);
                     }
                 }
-                Attribute::Age(AgeV3::None) => {}
-                Attribute::Gender(gender) => {
-                    if let Some(gender_v2) = gender_value {
-                        if *gender == gender_v2 {
-                            cover_gender = true;
-                        }
-                    }
-                }
-                Attribute::Region(region) => {
-                    if let Some(region_v2) = region_value {
-                        if *region == region_v2 {
-                            cover_region = true;
-                        }
-                    }
-                }
-                Attribute::Salary(salary) => {
-                    if let Some(salary_v2) = salary_value {
-                        if *salary == salary_v2 {
-                            cover_salary = true;
-                        }
+
+                Attribute::Salary(target) => {
+                    if !cover_salary {
+                        cover_salary = salary_values.contains(target);
                     }
                 }
                 Attribute::None => {}
