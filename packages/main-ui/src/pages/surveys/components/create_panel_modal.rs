@@ -162,7 +162,7 @@ pub fn CreatePanelModal(props: CreatePanelModalProps) -> Element {
 
             div { class: "flex flex-row w-full justify-start items-center gap-[20px] mt-[40px]",
                 button {
-                    class: "flex flex-row bg-[#2a60d3] rounded-[4px] px-[14px] py-[8px] font-semibold text-white text-[16px] leading-[24px]",
+                    class: "cursor-pointer flex flex-row bg-[#2a60d3] rounded-[4px] px-[14px] py-[8px] font-semibold text-white text-[16px] leading-[24px]",
                     onclick: {
                         let selected_ages = (selected_ages)();
                         let selected_genders = (selected_genders)();
@@ -206,7 +206,7 @@ pub fn CreatePanelModal(props: CreatePanelModalProps) -> Element {
                     "{translate.save}"
                 }
                 button {
-                    class: "flex flex-row bg-white px-[14px] py-[8px] font-semibold text-[#222222] text-[16px] leading-[24px]",
+                    class: "cursor-pointer flex flex-row bg-white px-[14px] py-[8px] font-semibold text-[#222222] text-[16px] leading-[24px]",
                     onclick: move |e: Event<MouseData>| {
                         props.oncancel.call(e);
                     },
@@ -233,7 +233,7 @@ pub fn SelectedAttribute(
             div { class: "relative w-full",
                 div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
                     button {
-                        class: "flex flex-row w-full justify-start items-center bg-[#f7f7f7] rounded-[4px] p-[15px] min-h-[55px]",
+                        class: "cursor-pointer flex flex-row w-full justify-start items-center bg-[#f7f7f7] rounded-[4px] p-[15px] min-h-[55px]",
                         onclick: move |_| {
                             set_open.call(!is_open);
                         },
@@ -311,6 +311,7 @@ pub fn AttributeLabel(label: String, onclose: EventHandler<MouseEvent>) -> Eleme
         div { class: "flex flex-row h-[25px] justify-center items-center px-[8px] py-[3px] bg-[#35343f] rounded-[5px] gap-[10px]",
             div { class: "font-semibold text-[14px] text-white", {label} }
             button {
+                class: "cursor-pointer",
                 onclick: move |e: Event<MouseData>| {
                     onclose.call(e);
                 },

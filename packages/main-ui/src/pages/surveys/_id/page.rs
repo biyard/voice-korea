@@ -83,7 +83,7 @@ pub fn SurveyResultPage(lang: Language, survey_id: i64) -> Element {
 pub fn PrimaryButton(children: Element, onclick: EventHandler<()>) -> Element {
     rsx! {
         button {
-            class: "flex items-center justify-center px-[20px] py-[14px] text-[16px] text-white bg-[#2A60D3] rounded-[4px]",
+            class: "cursor-pointer flex items-center justify-center px-[20px] py-[14px] text-[16px] text-white bg-[#2A60D3] rounded-[4px]",
             onclick: move |_| onclick(()),
             {children}
         }

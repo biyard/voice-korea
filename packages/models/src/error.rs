@@ -195,6 +195,12 @@ pub enum ApiError {
 
     #[translate(ko = "토론을 찾을 수 없습니다.", en = "Cannot find the discussion.")]
     DiscussionNotFound,
+
+    #[translate(
+        ko = "AWS Chime 서비스 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        en = "AWS Chime service error occurred. Please try again later."
+    )]
+    AwsChimeError(String),
 }
 
 impl From<reqwest::Error> for ApiError {
