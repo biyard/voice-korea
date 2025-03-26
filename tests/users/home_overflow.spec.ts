@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const mobileViewports = [
+const devMobileViewports = [
   { device: 'iPhone 12', width: 390, height: 844 },
   { device: 'Samsung Galaxy S20', width: 412, height: 915 },
   { device: 'Pixel 5', width: 393, height: 851 },
@@ -8,7 +8,7 @@ const mobileViewports = [
 ];
 
 test.describe('UI Mobile Responsiveness', () => {
-  for (const viewport of mobileViewports) {
+  for (const viewport of devMobileViewports) {
     test(`Check responsiveness on ${viewport.device} (${viewport.width}x${viewport.height})`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await page.goto('https://dev.voice-korea.com/en/');
