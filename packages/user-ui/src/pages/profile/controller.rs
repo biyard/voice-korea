@@ -1,4 +1,5 @@
 #![allow(unused)]
+use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::Language;
@@ -7,23 +8,29 @@ use models::{
     profile::{DesignProject, ParticipantProject, ProfileSummary},
 };
 
+use crate::service::user_service::UserService;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ProjectType {
     Design,
     Participation,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
     lang: Language,
     profile: Signal<ProfileSummary>,
 
+    pub projects: Resource<ProfileProjectsData>,
+    pub user_id: i64,
     selected_type: Signal<ProjectType>,
     keyword: Signal<String>,
 }
 
 impl Controller {
     pub fn init(lang: Language) -> std::result::Result<Self, RenderError> {
+        let user_service: UserService = use_context();
+
         let projects = use_server_future(move || async move {
             ProfileProjectsData::get_client(&crate::config::get().api_url)
                 .find()
@@ -31,16 +38,12 @@ impl Controller {
                 .unwrap_or_default()
         })?;
 
-        let projects = projects().unwrap_or_default();
-
-        tracing::debug!(
-            "projects: {:?} {:?}",
-            projects.designed_projects.len(),
-            projects.participated_projects.len()
-        );
+        let user_id = (user_service.user_id)();
 
         let ctrl = Self {
             lang,
+            projects,
+            user_id,
             profile: use_signal(|| ProfileSummary {
                 id: 1,
                 created_at: 1737759492,

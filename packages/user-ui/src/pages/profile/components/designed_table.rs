@@ -1,56 +1,55 @@
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::profile::{DesignProject, ProjectStatus, Role};
+use models::deliberation::{Deliberation, DeliberationStatus};
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
-    components::icons::{
-        adopted::Adopted, in_progress::InProgress, waiting::Waiting, withdrawal::Withdrawal,
-    },
+    components::icons::{adopted::Adopted, in_progress::InProgress, waiting::Waiting},
     pages::profile::i18n::DesignedTableTranslate,
     utils::time::format_prev_time,
 };
 
 #[component]
-pub fn DesignedTable(lang: Language, projects: Vec<DesignProject>) -> Element {
+pub fn DesignedTable(lang: Language, projects: Vec<Deliberation>, user_id: i64) -> Element {
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
             TableHeader { lang }
 
             for project in projects {
-                TableRow { lang, project }
+                TableRow { lang, project, user_id }
             }
         }
     }
 }
 
 #[component]
-pub fn TableRow(lang: Language, project: DesignProject) -> Element {
+pub fn TableRow(lang: Language, project: Deliberation, user_id: i64) -> Element {
     let tr: DesignedTableTranslate = translate(&lang);
 
-    let role = if !project.role.is_none() {
-        Role::to_type(&project.role.unwrap(), &lang)
-    } else {
-        "".to_string()
+    let roles: Vec<String> = project
+        .members
+        .iter()
+        .filter(|v| v.user_id == user_id)
+        .map(|v| v.role.translate(&lang).to_string())
+        .collect();
+
+    let role = match roles.get(0) {
+        Some(v) => v.clone(),
+        None => "".to_string(),
     };
 
-    let number_of_participation = project
-        .num_of_participation
-        .to_formatted_string(&Locale::ko);
-    let prev_time = format_prev_time(project.created_at);
-    let status = ProjectStatus::to_type(&project.status, &lang);
+    let number_of_participation = project.response_count.to_formatted_string(&Locale::ko);
+    let prev_time = format_prev_time(project.updated_at);
+    let status = project.status();
 
-    let icon = match project.status {
-        ProjectStatus::Inprogress => rsx! {
-            InProgress {}
-        },
-        ProjectStatus::Withdrawal => rsx! {
-            Withdrawal {}
-        },
-        ProjectStatus::Waiting => rsx! {
+    let icon = match status {
+        DeliberationStatus::Ready => rsx! {
             Waiting {}
         },
-        ProjectStatus::Adopted => rsx! {
+        DeliberationStatus::InProgress => rsx! {
+            InProgress {}
+        },
+        DeliberationStatus::Finish => rsx! {
             Adopted {}
         },
     };
@@ -65,7 +64,7 @@ pub fn TableRow(lang: Language, project: DesignProject) -> Element {
                 "{role}"
             }
             div { class: "flex w-[200px] min-w-[200px] justify-center items-center",
-                "{project.institution_name}"
+                "{tr.organization}"
             }
             div { class: "flex w-[116px] min-w-[116px] justify-center items-center",
                 "{number_of_participation}{tr.participation}"
@@ -74,12 +73,12 @@ pub fn TableRow(lang: Language, project: DesignProject) -> Element {
                 "{prev_time}"
             }
             div { class: "flex w-[116px] min-w-[116px] justify-center items-center",
-                "{status}"
+                "{status.translate(&lang)}"
             }
-            //FIXME: fix to connect data
-            div { class: "flex w-[116px] min-w-[116px] justify-center items-center",
-                ""
-            }
+                //FIXME: fix to connect data
+        // div { class: "flex w-[116px] min-w-[116px] justify-center items-center",
+        //     ""
+        // }
         }
     }
 }
@@ -105,9 +104,9 @@ pub fn TableHeader(lang: Language) -> Element {
             div { class: "flex w-[116px] min-w-[116px] justify-center items-center",
                 "{tr.status}"
             }
-            div { class: "flex w-[116px] min-w-[116px] justify-center items-center",
-                "{tr.result_analysis}"
-            }
+                // div { class: "flex w-[116px] min-w-[116px] justify-center items-center",
+        //     "{tr.result_analysis}"
+        // }
         }
     }
 }

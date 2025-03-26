@@ -19,48 +19,59 @@ pub fn ProfilePage(lang: Language) -> Element {
     let tr: ProfileTranslate = translate(&lang);
 
     let profile = ctrl.get_profile();
-    let designed_projects = profile.clone().designed_projects;
-    let participant_projects = profile.clone().participant_projects;
+    let user_id = ctrl.user_id;
+
     let keyword = ctrl.get_keyword();
 
+    let project = ctrl.projects()?;
+
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start gap-[60px]",
-            ProfileBanner { lang, profile }
+        div { class: "flex flex-col w-full justify-center items-center",
+            div { class: "flex flex-col max-w-[1300px] w-full justify-start items-start gap-[60px]",
+                ProfileBanner { lang, profile }
 
-            div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
-                div { class: "flex flex-row w-full justify-start items-start",
-                    ClickableType {
-                        type_name: "{tr.designed_project}",
-                        clicked: ctrl.get_selected_type() == controller::ProjectType::Design,
-                        onclick: move |_| {
-                            ctrl.change_selected_type(controller::ProjectType::Design);
-                        },
+                div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
+                    div { class: "flex flex-row w-full justify-start items-start",
+                        ClickableType {
+                            type_name: "{tr.designed_project}",
+                            clicked: ctrl.get_selected_type() == controller::ProjectType::Design,
+                            onclick: move |_| {
+                                ctrl.change_selected_type(controller::ProjectType::Design);
+                            },
+                        }
+                        ClickableType {
+                            type_name: "{tr.participant_project}",
+                            clicked: ctrl.get_selected_type() == controller::ProjectType::Participation,
+                            onclick: move |_| {
+                                ctrl.change_selected_type(controller::ProjectType::Participation);
+                            },
+                        }
                     }
-                    ClickableType {
-                        type_name: "{tr.participant_project}",
-                        clicked: ctrl.get_selected_type() == controller::ProjectType::Participation,
-                        onclick: move |_| {
-                            ctrl.change_selected_type(controller::ProjectType::Participation);
-                        },
+
+                    div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                        SearchBox {
+                            placeholder: "{tr.search}",
+                            value: keyword,
+                            onsearch: move |e| {
+                                ctrl.change_keyword(e);
+                            },
+                        }
+
+                        if ctrl.get_selected_type() == controller::ProjectType::Design {
+                            DesignedTable {
+                                lang,
+                                projects: project.designed_projects,
+                                user_id,
+                            }
+                        } else {
+                            ParticipantTable {
+                                lang,
+                                projects: project.participated_projects,
+                            }
+                        }
                     }
+
                 }
-
-                div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
-                    SearchBox {
-                        placeholder: "{tr.search}",
-                        value: keyword,
-                        onsearch: move |e| {
-                            ctrl.change_keyword(e);
-                        },
-                    }
-
-                    if ctrl.get_selected_type() == controller::ProjectType::Design {
-                        DesignedTable { lang, projects: designed_projects }
-                    } else {
-                        ParticipantTable { lang, projects: participant_projects }
-                    }
-                }
-
             }
 
         }
