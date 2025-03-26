@@ -44,13 +44,13 @@ impl ChimeMeetingService {
 
     pub async fn create_meeting(&self, meeting_name: &str) -> Result<MeetingInfo, ApiError> {
         let client_request_token = uuid::Uuid::new_v4().to_string();
-
+        let conf = crate::config::get();
         let resp = match self
             .client
             .create_meeting()
             .client_request_token(client_request_token.clone())
-            .external_meeting_id(meeting_name)
-            .media_region("ap-northeast-2") // FIXME: Use env var
+            .external_meeting_id(client_request_token.clone())
+            .media_region(conf.aws.region)
             .send()
             .await
         {
@@ -68,6 +68,11 @@ impl ChimeMeetingService {
                 return Err(ApiError::AwsChimeError("no meeting".to_string()));
             }
         };
+        tracing::debug!(
+            "create_meeting response: {:?} {}",
+            meeting.clone(),
+            client_request_token.clone()
+        );
 
         Ok(MeetingInfo {
             id: meeting.meeting_id.unwrap_or_default(),
@@ -143,37 +148,6 @@ impl ChimeMeetingService {
         let bucket_name = "voicekorea-chime".to_string(); // for testing
         let object_key = format!("recordings/{}#{}", meeting.name, meeting.id);
         let client_request_token = uuid::Uuid::new_v4().to_string();
-
-        // let sink_configuration = ChimeSdkMeetingConfiguration::builder()
-        //     .source_configuration()
-        //     .build()?
-        //     .artifacts_configuration(
-        //         aws_sdk_chimesdkmediapipelines::types::ArtifactsConfiguration::builder()
-        //             .audio(
-        //                 aws_sdk_chimesdkmediapipelines::types::AudioArtifactsConfiguration::builder()
-        //                     .mux_type("AudioWithCompositeMux")
-        //                     .build()?
-        //             )
-        //             .video(
-        //                 aws_sdk_chimesdkmediapipelines::types::VideoArtifactsConfiguration::builder()
-        //                     .mux_type("VideoWithCompositeMux")
-        //                     .build()?
-        //             )
-        //             .content(
-        //                 aws_sdk_chimesdkmediapipelines::types::ContentArtifactsConfiguration::builder()
-        //                     .mux_type("ContentWithCompositeMux")
-        //                     .state("Enabled")
-        //                     .build()?
-        //             )
-        //             .composite_video(
-        //                 aws_sdk_chimesdkmediapipelines::types::CompositeArtifactsConfiguration::builder()
-        //                     .layout("GridView")
-        //                     .resolution("HD")
-        //                     .build()?
-        //             )
-        //             .build()?
-        //     )
-        //     .build()?;
 
         let resp = match self
             .pipeline
