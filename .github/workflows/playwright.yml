@@ -19,21 +19,26 @@ jobs:
         run: npm ci
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-      - name: Run Playwright tests
+      - name: Run Playwright tests (Skip secret-dependent tests on PRs)
         env:
           WAIT_TIMEOUT: 5000
           VISIBLE_TIMEOUT: 10000
           URL_TIMEOUT: 15000
-          GOOGLE_EMAIL: ${{ secrets.TEST_GOOGLE_MAIL }}
-          GOOGLE_PASS: ${{ secrets.TEST_GOOGLE_PASSWORD }}
         run: |
           echo "Running tests with timeouts:"
           echo "WAIT_TIMEOUT=$WAIT_TIMEOUT"
           echo "VISIBLE_TIMEOUT=$VISIBLE_TIMEOUT"
           echo "URL_TIMEOUT=$URL_TIMEOUT"
-          echo "GOOGLE_EMAIL=$GOOGLE_EMAIL"
-          echo "GOOGLE_PASS=$GOOGLE_PASS"
-          npx playwright test tests/users
+          
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+            echo "Skipping tests that require secrets on pull request."
+            npx playwright test --grep-invert @secret-required
+          else
+            echo "Running all tests."
+            export GOOGLE_EMAIL=${{ secrets.TEST_GOOGLE_MAIL }}
+            export GOOGLE_PASS=${{ secrets.TEST_GOOGLE_PASSWORD }}
+            npx playwright test tests/users/google.spec.ts
+          fi
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
