@@ -56,7 +56,7 @@ fn App() -> Element {
         document::Script { src: "https://d3js.org/d3.v7.min.js" }
         document::Style { r#type: "text/tailwindcss", {css} }
         document::Script { src: "https://unpkg.com/@tailwindcss/browser@4.0.12/dist/index.global.js" }
-        // document::Style { href: asset!("/public/tailwind.css") }
+        document::Style { href: asset!("/public/tailwind.css") }
         document::Style { href: asset!("/public/main.css") }
 
         HoverEffects {}
