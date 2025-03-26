@@ -92,6 +92,17 @@ impl SurveyV2 {
     }
 }
 
+#[derive(Translate, PartialEq, Default, Debug)]
+pub enum SurveyV2Status {
+    #[default]
+    #[translate(ko = "준비", en = "Ready")]
+    Ready,
+    #[translate(ko = "진행", en = "InProgress")]
+    InProgress,
+    #[translate(ko = "마감", en = "Finish")]
+    Finish,
+}
+
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
 #[serde(rename_all = "snake_case", tag = "answer_type")]
@@ -288,6 +299,32 @@ pub struct ChoiceQuestion {
 }
 
 impl SurveyV2Summary {
+    pub fn finished(&self) -> bool {
+        let status = self.survey_status();
+
+        status == SurveyV2Status::Finish
+    }
+
+    pub fn survey_status(&self) -> SurveyV2Status {
+        let started_at = self.started_at;
+        let ended_at = self.ended_at;
+
+        let now = Utc::now();
+        let current = now.timestamp();
+
+        if started_at > 10000000000 {
+            return SurveyV2Status::default();
+        }
+
+        if started_at > current {
+            SurveyV2Status::Ready
+        } else if ended_at < current {
+            SurveyV2Status::Finish
+        } else {
+            SurveyV2Status::InProgress
+        }
+    }
+
     pub fn start_date(&self) -> String {
         let datetime = Utc.timestamp_opt(self.started_at, 0).unwrap();
         let formatted_date = datetime.format("%Y.%m.%d").to_string();

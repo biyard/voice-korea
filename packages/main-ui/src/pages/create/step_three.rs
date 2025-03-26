@@ -28,6 +28,7 @@ pub struct StepThreeProps {
     check_membership_descriptions: Vec<String>,
     complete_join_membership: String,
 
+    invalid_authorization_pattern: String,
     invalid_password_pattern: String,
     incollect_email_form: String,
     input_password: String,
@@ -86,6 +87,13 @@ pub fn StepThreePage(props: StepThreeProps) -> Element {
                                     onchange: move |e| {
                                         ctrl.set_authentication_number(e);
                                     },
+                                    border: if ctrl.get_authorization_error() { "border-error" } else { "border-gray-border" },
+                                }
+
+                                if ctrl.get_authorization_error() {
+                                    div { class: "mt-[10px] font-normal text-[#ff0000] text-[12px]",
+                                        {props.invalid_authorization_pattern}
+                                    }
                                 }
                             }
                             div { class: "text-[16px] font-normal text-[#636363]", "{props.authentication_descriptions[0]}" }
@@ -145,94 +153,6 @@ pub fn StepThreePage(props: StepThreeProps) -> Element {
                         }
                     },
                 }
-                        // Row {
-            //     enable_bottom_border: false,
-            //     label: props.company_info,
-            //     element: rsx! {
-            //         div {
-            //             class: "flex flex-row w-full h-full items-center mx-[20px] text-black font-normal text-[16px]",
-            //             "{props.company_example}"
-            //         }
-            //     }
-            // }
-            // Row {
-            //     enable_bottom_border: false,
-            //     label: props.name_info,
-            //     element: rsx! {
-            //         div {
-            //             class: "flex flex-row w-full h-full justify-start items-center",
-            //             div {
-            //                 class: "mx-[10px]",
-            //                 Input {
-            //                     value: ctrl.get_name(),
-            //                     placeholder: props.name_example,
-            //                     onchange: move |e| {
-            //                         ctrl.set_name(e);
-            //                     }
-            //                 }
-            //             },
-            //         }
-            //     }
-            // }
-            // Row {
-            //     enable_bottom_border: false,
-            //     label: props.phone_info,
-            //     element: rsx! {
-            //         div {
-            //             class: "flex flex-row w-full h-full justify-start items-center",
-            //             div {
-            //                 class: "mx-[10px]",
-            //                 Input {
-            //                     value: ctrl.get_cellphone_number(),
-            //                     placeholder: props.phone_example,
-            //                     onchange: move |e| {
-            //                         ctrl.set_cellphone_number(e);
-            //                     }
-            //                 }
-            //             },
-            //         }
-            //     }
-            // }
-            // Row {
-            //     enable_bottom_border: true,
-            //     height: Some(135),
-            //     label: props.address_info,
-            //     element: rsx! {
-            //         div {
-            //             class: "flex flex-col w-full h-min justify-start items-start mt-[10px]",
-            //             div {
-            //                 class: "flex flex-row w-full h-full justify-start items-center mb-[10px]",
-            //                 div {
-            //                     class: "mx-[10px]",
-            //                     Input {
-            //                         value: ctrl.get_simple_address(),
-            //                         onchange: move |e| {
-            //                             ctrl.set_simple_address(e);
-            //                         }
-            //                     }
-            //                 },
-            //                 ButtonComponent {
-            //                     width: Some(130),
-            //                     label: props.search_address,
-            //                     lang: props.lang,
-            //                     onclick: move |_| {
-            //                         ctrl.set_click_search_address();
-            //                     }
-            //                 }
-            //             }
-            //             div {
-            //                 class: "flex flex-row w-full mx-[10px] pr-[20px]",
-            //                 Input {
-            //                     value: ctrl.get_detail_address(),
-            //                     onchange: move |e| {
-            //                         ctrl.set_detail_address(e);
-            //                     },
-            //                     width: Some(-1)
-            //                 }
-            //             },
-            //         }
-            //     }
-            // }
             }
             if ctrl.get_already_exists_user_error() {
                 div { class: "flex flex-col w-full h-min min-w-[710px] px-[20px] py-[15px]",

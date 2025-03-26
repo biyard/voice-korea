@@ -87,7 +87,7 @@ jobs:
           SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SERVICE: main-ui
         run: |
-          npm i -g tailwindcss@3
+          npm i -g @tailwindcss/cli
           make build
 
   api:

@@ -34,6 +34,8 @@ fn App() -> Element {
     OpinionApi::init();
     MetadataApi::init();
 
+    let css = include_str!("../public/input.css");
+
     rsx! {
         document::Link {
             rel: "icon",
@@ -52,27 +54,12 @@ fn App() -> Element {
             rel: "stylesheet",
         }
         document::Script { src: "https://d3js.org/d3.v7.min.js" }
+        document::Style { r#type: "text/tailwindcss", {css} }
+        document::Script { src: "https://unpkg.com/@tailwindcss/browser@4.0.12/dist/index.global.js" }
+        document::Style { href: asset!("/public/tailwind.css") }
+        document::Style { href: asset!("/public/main.css") }
 
-        head {
-            link { rel: "stylesheet", href: asset!("/public/main.css") }
-            link { rel: "stylesheet", href: asset!("/public/tailwind.css") }
-            load_tailwindcss {}
-        }
         HoverEffects {}
         Router::<Route> {}
     }
-}
-
-#[cfg(not(feature = "lambda"))]
-#[allow(dead_code)]
-fn load_tailwindcss() -> Element {
-    rsx! {
-        script { src: "https://cdn.tailwindcss.com/3.4.5" }
-    }
-}
-
-#[cfg(feature = "lambda")]
-#[allow(dead_code)]
-fn load_tailwindcss() -> Element {
-    rsx! {}
 }

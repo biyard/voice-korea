@@ -36,6 +36,7 @@ pub struct Controller {
     password_pattern_error: Signal<bool>,
     invalid_authkey_error: Signal<bool>,
     already_exists_user_error: Signal<bool>,
+    auth_error: Signal<bool>,
     unknown_error: Signal<bool>,
     // click_send_authentication: Signal<bool>,
     // click_search_address: Signal<bool>,
@@ -78,6 +79,7 @@ impl Controller {
             invalid_authkey_error: use_signal(|| false),
             already_exists_user_error: use_signal(|| false),
             unknown_error: use_signal(|| false),
+            auth_error: use_signal(|| false),
 
             auth_key: use_signal(|| "".to_string()),
             auth_api,
@@ -175,6 +177,10 @@ impl Controller {
 
     pub fn get_invalid_authkey_error(&self) -> bool {
         (self.invalid_authkey_error)()
+    }
+
+    pub fn get_authorization_error(&self) -> bool {
+        (self.auth_error)()
     }
 
     pub fn get_already_exists_user_error(&self) -> bool {
@@ -310,9 +316,13 @@ impl Controller {
     }
 
     pub async fn set_click_complete_join_membership(&mut self) {
+        let re = Regex::new(r"^[a-zA-Z0-9+\-_.]{6}$").unwrap();
+
         let mut has_number = false;
         let mut has_special = false;
         let mut has_alpha = false;
+
+        let mut has_error = false;
 
         for c in self.get_password().chars() {
             if c.is_numeric() {
@@ -323,20 +333,32 @@ impl Controller {
                 has_special = true;
             }
         }
+
+        if !re.is_match(&self.get_authentication_number().as_str()) {
+            self.auth_error.set(true);
+            has_error = true;
+        }
         if self.get_password().is_empty() {
             self.password_error.set(true);
-            return;
-        } else if self.get_password() != self.get_password_check() {
+            has_error = true;
+        }
+        if self.get_password() != self.get_password_check() {
             self.password_check_error.set(true);
-            return;
-        } else if !has_number || !has_special || !has_alpha {
+            has_error = true;
+        }
+        if !has_number || !has_special || !has_alpha {
             self.password_pattern_error.set(true);
+            has_error = true;
+        }
+
+        if has_error {
             return;
         }
 
         self.password_error.set(false);
         self.password_check_error.set(false);
         self.password_pattern_error.set(false);
+        self.auth_error.set(false);
         let res = self
             .user_api
             .read()
