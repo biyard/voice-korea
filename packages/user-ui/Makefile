@@ -31,7 +31,7 @@ setup.tool:
 	cargo binstall dioxus-cli
 	cargo binstall toml-cli
 
-run: public
+run: clean public
 	$(BUILD_ENV) dx serve
 
 clean:
@@ -44,7 +44,7 @@ public/dep.js:
 	npx webpack --mode $(MODE)
 
 public/tailwind.css:
-	npx tailwindcss -i ./input.css -o ./public/tailwind.css
+	npx tailwindcss -i ./public/input.css -o ./public/tailwind.css
 
 .PHONY: public
 public: node_modules public/tailwind.css public/dep.js

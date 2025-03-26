@@ -40,7 +40,7 @@ pub fn ProjectBox(lang: Language, deliberation: DeliberationProjectSummary) -> E
                                     }
                                 }
 
-                                Label { name: deliberation.project_area.to_string() }
+                                Label { name: deliberation.project_area.translate(&lang) }
                             }
                         }
                     }

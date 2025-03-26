@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@theme static {
+  /* App-specific colors */
+  --color-key-gray: #35343F;
+  --color-light-gray: #7C8292;
+}
