@@ -14,7 +14,7 @@ const timeouts = {
 
 test('Google OAuth Login and Save Session', async () => {
     const browser = await chromium.launch({ 
-        headless: false, 
+        headless: true, 
         args: [
             '--disable-blink-features=AutomationControlled',
             '--no-sandbox',
