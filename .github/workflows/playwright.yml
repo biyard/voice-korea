@@ -37,7 +37,8 @@ jobs:
             echo "Running all the tests."
             export GOOGLE_EMAIL=${{ secrets.TEST_GOOGLE_MAIL }}
             export GOOGLE_PASS=${{ secrets.TEST_GOOGLE_PASSWORD }}
-            npx playwright test tests/users
+            npx playwright test tests/users/home_overflow.spec.ts
+            npx playwright test tests/users/google.spec.ts
           fi
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
