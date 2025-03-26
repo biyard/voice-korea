@@ -1,5 +1,5 @@
 pub mod landing;
-pub mod profile_projects;
+pub mod profile;
 
 pub use landing::*;
-pub use profile_projects::*;
+pub use profile::*;

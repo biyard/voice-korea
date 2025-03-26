@@ -6,6 +6,7 @@ use num_format::{Locale, ToFormattedString};
 use crate::{
     components::icons::{adopted::Adopted, in_progress::InProgress, waiting::Waiting},
     pages::profile::i18n::ParticipantTableTranslate,
+    routes::Route,
     utils::time::format_prev_time,
 };
 
@@ -24,6 +25,8 @@ pub fn ParticipantTable(lang: Language, projects: Vec<Deliberation>) -> Element 
 
 #[component]
 pub fn TableRow(lang: Language, project: Deliberation) -> Element {
+    let nav = use_navigator();
+
     let tr: ParticipantTableTranslate = translate(&lang);
     let number_of_participation = project.response_count.to_formatted_string(&Locale::ko);
     let prev_time = format_prev_time(project.updated_at);
@@ -42,7 +45,14 @@ pub fn TableRow(lang: Language, project: Deliberation) -> Element {
     };
 
     rsx! {
-        div { class: "flex flex-row w-full min-h-[55px] bg-white border-b border-b-[#e6e6e6] font-normal text-[15px] text-[#222222]",
+        div {
+            class: "cursor-pointer flex flex-row w-full min-h-[55px] bg-white border-b border-b-[#e6e6e6] font-normal text-[15px] text-[#222222]",
+            onclick: move |_| {
+                nav.push(Route::ProjectPage {
+                    lang,
+                    project_id: project.id,
+                });
+            },
             div { class: "flex flex-1 px-[24px] py-[17px] gap-[10px] font-semibold overflow-hidden text-ellipsis whitespace-nowrap",
                 div { {icon} }
                 "{project.title}"

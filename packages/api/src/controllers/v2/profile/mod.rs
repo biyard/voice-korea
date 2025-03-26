@@ -10,9 +10,9 @@ use models::{
     deliberation::Deliberation,
     deliberation_response::DeliberationResponse,
     deliberation_user::DeliberationUser,
-    dto::{ProfileProjectsData, ProfileProjectsDataGetResponse, ProfileProjectsDataParam},
+    dto::{ProfileData, ProfileDataGetResponse, ProfileDataParam},
 };
-use models::{dto::ProfileProjectsDataReadActionType, *};
+use models::{dto::ProfileDataReadActionType, *};
 
 use crate::utils::app_claims::AppClaims;
 
@@ -23,8 +23,15 @@ pub struct ProfileController {
 }
 
 impl ProfileController {
-    async fn query(&self, user_id: i64) -> Result<ProfileProjectsData> {
+    async fn query(&self, user_id: i64) -> Result<ProfileData> {
         let mut tx = self.pool.begin().await?;
+
+        let user = User::query_builder()
+            .id_equals(user_id)
+            .query()
+            .map(User::from)
+            .fetch_one(&mut *tx)
+            .await?;
 
         let pr_responses = DeliberationResponse::query_builder()
             .user_id_equals(user_id)
@@ -75,9 +82,10 @@ impl ProfileController {
             designed_projects.push(deliberation);
         }
 
-        Ok(ProfileProjectsData {
+        Ok(ProfileData {
             designed_projects,
             participated_projects,
+            user,
         })
     }
 }
@@ -96,8 +104,8 @@ impl ProfileController {
     pub async fn get_projects(
         State(ctrl): State<ProfileController>,
         Extension(auth): Extension<Option<Authorization>>,
-        Query(q): Query<ProfileProjectsDataParam>,
-    ) -> Result<Json<ProfileProjectsDataGetResponse>> {
+        Query(q): Query<ProfileDataParam>,
+    ) -> Result<Json<ProfileDataGetResponse>> {
         tracing::debug!("list_projects {:?}", q);
 
         let user_id = match auth {
@@ -106,10 +114,10 @@ impl ProfileController {
         };
 
         match q {
-            ProfileProjectsDataParam::Read(param)
-                if param.action == Some(ProfileProjectsDataReadActionType::Find) =>
+            ProfileDataParam::Read(param)
+                if param.action == Some(ProfileDataReadActionType::Find) =>
             {
-                Ok(Json(ProfileProjectsDataGetResponse::Read(
+                Ok(Json(ProfileDataGetResponse::Read(
                     ctrl.query(user_id).await?,
                 )))
             }
