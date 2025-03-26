@@ -34,7 +34,7 @@ jobs:
             echo "Skipping tests that require secrets on pull request."
             npx playwright test tests/users --grep-invert @secret-required
           else
-            echo "Running all tests."
+            echo "Running all the tests."
             export GOOGLE_EMAIL=${{ secrets.TEST_GOOGLE_MAIL }}
             export GOOGLE_PASS=${{ secrets.TEST_GOOGLE_PASSWORD }}
             npx playwright test tests/users
