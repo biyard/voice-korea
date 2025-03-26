@@ -47,9 +47,51 @@ impl DiscussionController {
         Ok(QueryResponse { total_count, items })
     }
 
-    async fn start_meeting(&self, _id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
-        // TODO(api): implement using AWS chime and media pipeline.
-        todo!()
+    // TODO(api): if you want start (activate) meeting, you should using amazon-chime-sdk-js in client side.
+    //       this code is just for create meeting room and get meeting id not for online link.
+    async fn start_meeting(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
+        let client = crate::utils::aws_chime_sdk_meeting::ChimeMeetingService::new().await;
+
+        let name = Discussion::query_builder()
+            .id_equals(id)
+            .query()
+            .map(Discussion::from)
+            .fetch_optional(&self.pool)
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?
+            .name;
+
+        let meeting = match client.create_meeting(&name).await {
+            Ok(rst) => rst,
+            Err(e) => {
+                tracing::error!("start_meeting {}", e);
+                return Err(ApiError::AwsChimeError(e.to_string()));
+            }
+        };
+
+        let discussion = match self
+            .repo
+            .update(
+                id,
+                DiscussionRepositoryUpdateRequest {
+                    deliberation_id: None,
+                    started_at: None,
+                    ended_at: None,
+                    name: None,
+                    description: None,
+                    meeting_id: Some(meeting.id),
+                },
+            )
+            .await
+        {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::error!("start_meeting {}", e);
+                return Err(ApiError::DiscussionNotFound);
+            }
+        };
+
+        Ok(discussion)
     }
 
     async fn create(
@@ -110,13 +152,16 @@ impl DiscussionController {
                 .ok_or(ApiError::ResourceNotFound)?;
         }
 
-        let res = Discussion::query_builder()
+        let res = match Discussion::query_builder()
             .id_equals(res.id)
             .query()
             .map(Discussion::from)
             .fetch_optional(&mut *tx)
             .await?
-            .ok_or(ApiError::DiscussionNotFound)?;
+        {
+            Some(v) => v,
+            None => return Err(ApiError::DiscussionNotFound),
+        };
 
         tx.commit().await?;
 
@@ -141,11 +186,10 @@ impl DiscussionController {
             .verify_permission(&mut tx, deliberation_id, user_id)
             .await?;
 
-        let res = self
-            .repo
-            .update_with_tx(&mut *tx, id, param.into())
-            .await?
-            .ok_or(ApiError::DiscussionNotFound)?;
+        let res = match self.repo.update_with_tx(&mut *tx, id, param.into()).await? {
+            Some(v) => v,
+            None => return Err(ApiError::DiscussionNotFound),
+        };
 
         tx.commit().await?;
 
