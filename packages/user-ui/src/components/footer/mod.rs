@@ -24,11 +24,13 @@ pub fn Footer(lang: Language) -> Element {
                     }
                 }
 
-                div { class: "flex flex-row justify-center items-center gap-[20px]",
+                div { class: "flex max-[750px]:flex-col flex-row justify-center items-center gap-[20px]",
                     div { class: "flex flex-col gap-[20px] justify-center items-center",
                         img { src: "{survey_design}", width: 310, height: 200 }
                         div { class: "flex flex-row w-[220px] justify-center items-center gap-[5px] px-[16px] py-[12px] bg-transparent border border-white rounded-[12px]",
-                            Upload { width: "24", height: "24", fill: "none" }
+                            div { class: "w-[24px] h-[24px]",
+                                Upload { width: "24", height: "24", fill: "none" }
+                            }
                             button {
                                 class: "font-semibold text-white text-[16px] leading-6 cursor-pointer",
                                 //TODO: Go to public opinion survey participation guide
@@ -44,7 +46,9 @@ pub fn Footer(lang: Language) -> Element {
                             height: 200,
                         }
                         div { class: "flex flex-row w-[250px] justify-center items-center gap-[5px] px-[16px] py-[12px] bg-transparent border border-white rounded-[12px]",
-                            Upload { width: "24", height: "24", fill: "none" }
+                            div { class: "w-[24px] h-[24px]",
+                                Upload { width: "24", height: "24", fill: "none" }
+                            }
                             button {
                                 class: "font-semibold text-white text-[16px] leading-6 cursor-pointer",
                                 //TODO: Go to the Public Opinion Survey Design Guide
@@ -56,7 +60,7 @@ pub fn Footer(lang: Language) -> Element {
                 }
             }
             div { class: "flex flex-row w-full h-[1px] bg-white opacity-5" }
-            div { class: "flex flex-row w-full gap-30 py-10 justify-center items-center text-sm font-semibold text-white/50",
+            div { class: "flex flex-row w-full max-[600px]:gap-1 gap-30 py-10 justify-center items-center text-sm font-semibold text-white/50",
                 div { "© 2025 Biyard. All Rights Reserved." }
                 div { class: "font-extrabold text-base flex gap-1",
                     icons::Logo { class: "fill-white/50" }

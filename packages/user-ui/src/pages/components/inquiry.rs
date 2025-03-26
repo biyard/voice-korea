@@ -24,7 +24,7 @@ pub fn InquirySection(
     let mut email_error = use_signal(|| false);
     let mut message_error = use_signal(|| false);
     rsx! {
-        div { class: "flex flex-col w-full h-full max-w-[1080px] justify-center items-center gap-[50px]",
+        div { class: "max-[1000px]:px-[15px] max-[400px]:mt-[200px] flex flex-col w-full h-full max-w-[1080px] justify-center items-center gap-[50px]",
             div { class: "flex flex-col gap-[30px]",
                 div { class: "font-bold text-[28px] leading-[32px] text-[#555462]",
                     "{tr.inquiry_title}"
@@ -34,7 +34,7 @@ pub fn InquirySection(
                 }
             }
 
-            div { class: "flex flex-row w-full justify-between items-center",
+            div { class: "flex max-[1000px]:flex-col max-[1000px]:gap-[50px] flex-row w-full justify-between items-center",
                 div { class: "flex flex-col gap-[32px]",
                     SolutionInfoComponent {
                         asset: blockchain_info_1,
@@ -50,7 +50,7 @@ pub fn InquirySection(
                     }
                 }
 
-                div { class: "flex flex-col w-[530px] gap-[30px]",
+                div { class: "flex flex-col max-[600px]:w-full w-[530px] gap-[30px]",
                     div { class: "flex flex-col w-full gap-[20px]",
                         div { class: "flex flex-col w-full gap-[10px]",
                             div { class: "font-semibold text-[15px] text-[#222222]",
@@ -139,7 +139,7 @@ pub fn InquirySection(
 #[component]
 pub fn SolutionInfoComponent(asset: Asset, description: String) -> Element {
     rsx! {
-        div { class: "flex flex-row w-[420px] h-[104px] rounded-[12px] bg-white shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-[35px] py-[10px] items-center justify-start gap-[25px]",
+        div { class: "flex flex-row max-[450px]:w-full w-[420px] h-[104px] rounded-[12px] bg-white shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-[35px] py-[10px] items-center justify-start gap-[25px]",
             img { src: asset, width: 60, height: 60 }
 
             div { class: "font-bold text-[15px] text-[#555462] leading-[22px]", "{description}" }

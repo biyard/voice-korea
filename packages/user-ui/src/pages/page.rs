@@ -52,12 +52,11 @@ pub fn MainPage(lang: Language) -> Element {
 pub fn PriceSection(lang: Language) -> Element {
     let tr: PriceSectionTranslate = translate(&lang);
     rsx! {
-        div { class: "flex flex-col w-full h-[620px] justify-center items-center",
-
-            div { class: "relative flex flex-col w-full h-full justify-center items-center",
-                div { class: "relative flex flex-row w-full h-full max-w-[1300px] justify-center items-center",
+        div { class: "flex flex-col w-full max-[700px]:h-fit h-[620px] justify-center items-center",
+            div { class: "max-[1300px]:flex max-[1300px]:flex-col relative flex flex-col w-full h-full justify-center items-center",
+                div { class: "max-[1300px]:flex max-[1300px]:flex-col relative flex flex-row w-full h-full max-w-[1300px] justify-center items-center",
                     div {
-                        class: "absolute top-0 left-[80px] w-[550px] h-[620px] rounded-[12px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-[40px] py-[25px] bg-transparent",
+                        class: "absolute top-0 left-[80px] w-[550px] h-[620px] rounded-[12px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-[40px] py-[25px] bg-transparent max-[1300px]:relative max-[1300px]:w-full max-[1300px]:h-auto max-[1300px]:top-auto max-[1300px]:left-auto",
                         style: "z-index: 10;",
                         div { class: "flex flex-col w-full gap-[32px]",
                             div { class: "flex flex-col w-full gap-[40px]",
@@ -107,7 +106,7 @@ pub fn PriceSection(lang: Language) -> Element {
                     }
 
                     div {
-                        class: "absolute top-0 right-[80px] w-[550px] h-[620px] rounded-[12px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-[40px] py-[25px] bg-transparent",
+                        class: "absolute top-0 right-[80px] w-[550px] h-[620px] rounded-[12px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-[40px] py-[25px] bg-transparent max-[1300px]:relative max-[1300px]:w-full max-[1300px]:h-auto max-[1300px]:top-auto max-[1300px]:right-auto max-[1300px]:left-auto",
                         style: "z-index: 10;",
                         div { class: "flex flex-col w-full gap-[32px]",
                             div { class: "flex flex-col w-full gap-[40px]",
@@ -196,8 +195,7 @@ pub fn ContentSection(
                     OpinionProject { lang, deliberations }
                 }
             }
-
-        // OpinionInstitution { lang, institutions }
+                // OpinionInstitution { lang, institutions }
         }
     }
 }
@@ -258,7 +256,7 @@ pub fn OpinionProject(lang: Language, deliberations: Vec<DeliberationProject>) -
                     }
                 }
 
-                div { class: "grid grid-cols-3 gap-[20px]",
+                div { class: "grid max-[600px]:grid-cols-1 max-[1000px]:grid-cols-2 grid-cols-3 gap-[20px]",
                     for deliberation in deliberations.clone() {
                         div {
                             class: "cursor-pointer",
@@ -317,7 +315,7 @@ pub fn OpinionFeature(lang: Language) -> Element {
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center gap-[32px]",
             div { class: "font-bold text-[28px] text-[#555462] leading-[32px]", "{tr.title}" }
-            div { class: "flex flex-row w-full justify-center items-center gap-[20px]",
+            div { class: "flex flex-row max-[1000px]:flex-col w-full justify-center items-center gap-[20px]",
                 FeatureBox {
                     title: tr.sub_title_1,
                     description: tr.sub_description_1,
@@ -345,7 +343,7 @@ pub fn OpinionFeature(lang: Language) -> Element {
 pub fn FeatureBox(title: String, description: String, asset: Asset) -> Element {
     rsx! {
         div {
-            class: "flex flex-col w-[310px] justify-start items-start px-[24px] py-[34px] rounded-xl gap-[20px]",
+            class: "flex flex-col max-[1000px]:w-full max-[1000px]:max-w-[600px] w-[310px] justify-start items-start px-[24px] py-[34px] rounded-xl gap-[20px]",
             style: "box-shadow: 0px 8px 20px rgba(148, 128, 214, 0.5);",
             div { class: "font-bold text-[18px] text-[#222222]", "{title}" }
             div { class: "font-normal text-[15px] text-[#555462]", "{description}" }
@@ -362,7 +360,7 @@ pub fn MainBanner(lang: Language) -> Element {
     let tr: MainBannerTranslate = translate(&lang);
     rsx! {
         div { class: "flex flex-col w-full max-w-[1300px] px-[10px]",
-            div { class: "relative flex flex-col w-full h-[320px] justify-center items-start rounded-2xl p-[65px] gap-[10px] overflow-hidden ",
+            div { class: "relative flex flex-col w-full max-[500px]:h-fit h-[320px] max-[500px]:p-[25px] p-[65px] justify-center items-start rounded-2xl  gap-[10px] overflow-hidden ",
                 div {
                     class: "absolute inset-0  bg-cover bg-center opacity-80 rounded-2xl",
                     style: "background-image: url({background_url});",

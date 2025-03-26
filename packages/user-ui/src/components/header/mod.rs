@@ -321,7 +321,7 @@ pub fn Header(lang: Language) -> Element {
                         "{translates.logout}"
                     }
                 }
-                div { class: "flex flex-row w-[105px] h-[30px] justify-center items-center rounded-lg px-[5px] py-[10px] bg-white border border-[#35343f]",
+                div { class: "flex flex-row w-fit h-fit justify-center items-center rounded-lg px-[5px] py-[10px] bg-white border border-[#35343f]",
                     "{translates.public_opinion_design}"
                 }
             }
