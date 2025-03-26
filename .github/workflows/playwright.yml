@@ -32,12 +32,12 @@ jobs:
           
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
             echo "Skipping tests that require secrets on pull request."
-            npx playwright test --grep-invert @secret-required
+            npx playwright test tests/users --grep-invert @secret-required
           else
             echo "Running all tests."
             export GOOGLE_EMAIL=${{ secrets.TEST_GOOGLE_MAIL }}
             export GOOGLE_PASS=${{ secrets.TEST_GOOGLE_PASSWORD }}
-            npx playwright test tests/users/google.spec.ts
+            npx playwright test tests/users
           fi
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
