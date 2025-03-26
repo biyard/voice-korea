@@ -363,7 +363,10 @@ pub fn MainBanner(lang: Language) -> Element {
     rsx! {
         div { class: "flex flex-col w-full max-w-[1300px] px-[10px]",
             div { class: "relative flex flex-col w-full h-[320px] justify-center items-start rounded-2xl p-[65px] gap-[10px] overflow-hidden ",
-                div { class: "absolute inset-0 bg-[url('{background_url}')] bg-cover bg-center opacity-80 rounded-2xl" }
+                div {
+                    class: "absolute inset-0  bg-cover bg-center opacity-80 rounded-2xl",
+                    style: "background-image: url({background_url});",
+                }
                 div { class: "relative font-bold text-[40px] leading-[58px] text-white",
                     "{tr.title}"
                 }
