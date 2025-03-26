@@ -47,7 +47,7 @@ pub fn SettingPanel(
                     "{translate.composition_panel}"
                 }
                 button {
-                    class: "bg-[#2a60d3] rounded-4px px-[14px] py-[8px] font-semibold text-white text-[16px] rounded-[4px]",
+                    class: "cursor-pointer bg-[#2a60d3] rounded-4px px-[14px] py-[8px] font-semibold text-white text-[16px] rounded-[4px]",
                     onclick: move |_| {
                         ctrl.open_create_panel_modal();
                     },
@@ -84,7 +84,7 @@ pub fn SettingPanel(
                         }
                         div { class: "relative w-full",
                             button {
-                                class: "flex flex-row w-full min-h-[55px] justify-start items-center bg-[#f7f7f7] rounded-[4px] p-[15px]",
+                                class: "cursor-pointer flex flex-row w-full min-h-[55px] justify-start items-center bg-[#f7f7f7] rounded-[4px] p-[15px]",
                                 onclick: move |_| {
                                     is_open.set(true);
                                 },
@@ -169,7 +169,7 @@ pub fn SettingPanel(
 
             div { class: "flex flex-row w-full justify-end items-center gap-[20px] text-white mt-[40px]",
                 button {
-                    class: "px-[20px] py-[10px] border-[#BFC8D9] bg-white border-[1px] text-[#555462] font-semibold text-[14px] rounded-[4px]",
+                    class: "cursor-pointer px-[20px] py-[10px] border-[#BFC8D9] bg-white border-[1px] text-[#555462] font-semibold text-[14px] rounded-[4px]",
                     onclick: move |_| {
                         onback(());
                     },
@@ -177,7 +177,7 @@ pub fn SettingPanel(
                 }
 
                 button {
-                    class: "px-[20px] py-[10px] bg-[#2A60D3] font-semibold text-[14px] rounded-[4px]",
+                    class: "cursor-pointer px-[20px] py-[10px] bg-[#2A60D3] font-semibold text-[14px] rounded-[4px]",
                     onclick: move |_| async move {
                         let panels = selected_panels();
                         onnext(PanelRequest {
@@ -252,13 +252,14 @@ pub fn PanelSettingInput(
         }
     }
 }
-// TODO: 패널 선택이 작동 안함, 코드 수정 필요
+
 #[component]
 pub fn PanelLabel(label: String, onclose: EventHandler<MouseEvent>) -> Element {
     rsx! {
         div { class: "flex flex-row h-[25px] justify-center items-center px-[8px] py-[3px] bg-[#35343f] rounded-[5px] gap-[10px]",
             div { class: "font-semibold text-[14px] text-white", {label} }
             button {
+                class: "cursor-pointer",
                 onclick: move |e: Event<MouseData>| {
                     onclose.call(e);
                 },
