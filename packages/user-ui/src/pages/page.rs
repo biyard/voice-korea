@@ -22,7 +22,7 @@ pub fn MainPage(lang: Language) -> Element {
     let data = ctrl.data()?;
     let deliberations = data.projects;
     let institutions = data.organizations;
-    let public_opinion_reviews = data.reviews;
+    let deliberation_reviews = data.reviews;
 
     rsx! {
         // TODO(mobile): dashboard implemented to fit mobile size
@@ -43,7 +43,7 @@ pub fn MainPage(lang: Language) -> Element {
                     },
                 }
             }
-            ReviewSection { lang, public_opinion_reviews }
+            ReviewSection { lang, deliberation_reviews }
         }
     }
 }

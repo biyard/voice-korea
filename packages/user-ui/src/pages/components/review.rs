@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[component]
-pub fn ReviewSection(lang: Language, public_opinion_reviews: Vec<Review>) -> Element {
+pub fn ReviewSection(lang: Language, deliberation_reviews: Vec<Review>) -> Element {
     let tr: ReviewSectionTranslate = translate(&lang);
 
     rsx! {
@@ -23,7 +23,7 @@ pub fn ReviewSection(lang: Language, public_opinion_reviews: Vec<Review>) -> Ele
                 }
                 div { class: "flex flex-row w-full max-w-[1300px]",
                     div { class: "w-full grid gap-[20px] grid-cols-3",
-                        for review in public_opinion_reviews.clone() {
+                        for review in deliberation_reviews.clone() {
                             ReviewItem { review }
                         }
                     }
