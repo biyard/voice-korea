@@ -170,7 +170,7 @@ pub fn CreateSurvey(
 
             div { class: "flex flex-row w-full justify-end items-center gap-[20px] text-white mt-[40px]",
                 button {
-                    class: "px-[20px] py-[10px] border-[#BFC8D9] bg-white border-[1px] text-[#555462] font-semibold text-[14px] rounded-[4px]",
+                    class: "cursor-pointer px-[20px] py-[10px] border-[#BFC8D9] bg-white border-[1px] text-[#555462] font-semibold text-[14px] rounded-[4px]",
                     onclick: move |_| {
                         nav.go_back();
                     },
@@ -178,7 +178,7 @@ pub fn CreateSurvey(
                 }
 
                 button {
-                    class: "px-[20px] py-[10px] bg-[#2A60D3] font-semibold text-[14px] rounded-[4px]",
+                    class: "cursor-pointer px-[20px] py-[10px] bg-[#2A60D3] font-semibold text-[14px] rounded-[4px]",
                     onclick: move |_| async move {
                         onnext(CreateSurveyResponse {
                             title: title(),

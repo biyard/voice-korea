@@ -70,7 +70,7 @@ pub fn LoginPage(props: LoginPageProps) -> Element {
     let check_description_2_message = translates.check_description_2;
 
     rsx! {
-        div { class: "bg-white dark:bg-black w-screen min-h-screen flex flex-col",
+        div { class: "bg-white w-screen min-h-screen flex flex-col",
             div { class: "flex flex-row w-full justify-start items-center px-[30px] py-[3px]",
                 div { class: "mr-[7px]",
                     img { src: logo_path, width: 42, height: 42 }
@@ -210,7 +210,7 @@ pub fn LoginComponent(props: LoginProps) -> Element {
 pub fn LoginButton(props: LoginButtonProps) -> Element {
     rsx! {
         div {
-            class: "flex flex-row w-[300px] h-[100px] bg-[#2168c3]",
+            class: "cursor-pointer flex flex-row w-[300px] h-[100px] bg-[#2168c3]",
             style: "width: 300px",
             div { class: "flex flex-row w-full h-full justify-center items-center text-[24px] font-bold text-white",
                 "{props.login_message}"
