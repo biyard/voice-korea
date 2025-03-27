@@ -32,8 +32,7 @@ pub enum Route {
             ProjectPage { lang: Language, project_id: i64 },
         #[end_layout]
 
-        //FIXME: fix layout
-        #[layout(RootLayout)]
+        #[layout(GovernanceLayout)]
             #[route("/governance/:governance_id")]
             GovernancePage { lang: Language, governance_id: i64 },
         #[end_layout]

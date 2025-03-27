@@ -58,7 +58,7 @@ pub fn ProjectMobileHeader(
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
     let nav = use_navigator();
-    let translates: ProjectHeaderTranslate = translate(&lang);
+    let tr: ProjectHeaderTranslate = translate(&lang);
     let mut expanded = use_signal(|| false);
     let custom_class = "fixed top-0 left-0 z-100";
 
@@ -90,7 +90,7 @@ pub fn ProjectMobileHeader(
                             nav.push(Route::ComingSoonPage { lang });
                             expanded.set(false);
                         },
-                        {translates.space}
+                        {tr.space}
                     }
                     button {
                         class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
@@ -98,7 +98,7 @@ pub fn ProjectMobileHeader(
                             nav.push(Route::ComingSoonPage { lang });
                             expanded.set(false);
                         },
-                        {translates.reward}
+                        {tr.reward}
                     }
                     button {
                         class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
@@ -106,7 +106,7 @@ pub fn ProjectMobileHeader(
                             nav.push(Route::ComingSoonPage { lang });
                             expanded.set(false);
                         },
-                        {translates.participant}
+                        {tr.participant}
                     }
                     button {
                         class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
@@ -114,7 +114,7 @@ pub fn ProjectMobileHeader(
                             nav.push(Route::ComingSoonPage { lang });
                             expanded.set(false);
                         },
-                        {translates.deliberation_committee}
+                        {tr.deliberation_committee}
                     }
                     button {
                         class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
@@ -122,7 +122,7 @@ pub fn ProjectMobileHeader(
                             nav.push(Route::ComingSoonPage { lang });
                             expanded.set(false);
                         },
-                        {translates.data_room}
+                        {tr.data_room}
                     }
                     button {
                         class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
@@ -130,7 +130,7 @@ pub fn ProjectMobileHeader(
                             nav.push(Route::ComingSoonPage { lang });
                             expanded.set(false);
                         },
-                        {translates.activity_details}
+                        {tr.activity_details}
                     }
 
                     button {
@@ -141,9 +141,9 @@ pub fn ProjectMobileHeader(
                         },
                         div {
                             if email == "" {
-                                "{translates.login}"
+                                "{tr.login}"
                             } else {
-                                "{translates.logout}"
+                                "{tr.logout}"
                             }
                         }
                     }
@@ -155,7 +155,7 @@ pub fn ProjectMobileHeader(
                                 nav.push(Route::ProfilePage { lang });
                                 expanded.set(false);
                             },
-                            {translates.my_profile}
+                            {tr.my_profile}
                         }
                     }
                 }
