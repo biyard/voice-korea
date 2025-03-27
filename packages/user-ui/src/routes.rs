@@ -1,9 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_translate::Language;
 
-#[allow(unused)]
-use crate::layout::{RootLayout, RootLayoutWithFooter};
-
 use crate::pages::{
     layout::{MainRootLayout, MainRootLayoutWithoutFooter},
     *,
