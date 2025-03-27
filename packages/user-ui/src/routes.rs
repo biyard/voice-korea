@@ -4,7 +4,10 @@ use dioxus_translate::Language;
 #[allow(unused)]
 use crate::layout::{RootLayout, RootLayoutWithFooter};
 
-use crate::pages::{layout::MainRootLayout, *};
+use crate::pages::{
+    layout::{MainRootLayout, MainRootLayoutWithoutFooter},
+    *,
+};
 
 #[derive(Clone, Routable)]
 #[rustfmt::skip]
@@ -15,25 +18,24 @@ pub enum Route {
             MainPage { lang: Language },
         #[end_layout]
 
-        #[layout(RootLayoutWithFooter)]
-            #[nest("/users")]
-                #[route("/")]
-                UserLoginPage { lang: Language },
-            #[end_nest]
+        #[layout(MainRootLayoutWithoutFooter)]
+            #[route("/coming-soon")]
+            ComingSoonPage { lang: Language },
+            #[route("/profile")]
+            ProfilePage { lang: Language },
+            #[route("/projects")]
+            ProjectListPage { lang: Language },
         #[end_layout]
 
+        #[layout(ProjectLayout)]
+            #[route("/projects/:project_id")]
+            ProjectPage { lang: Language, project_id: i64 },
+        #[end_layout]
+
+        //FIXME: fix layout
         #[layout(RootLayout)]
             #[route("/governance/:governance_id")]
             GovernancePage { lang: Language, governance_id: i64 },
-            #[route("/profile")]
-            ProfilePage { lang: Language },
-            
-            #[route("/projects/:project_id")]
-            ProjectPage { lang: Language, project_id: i64 },
-            #[route("/projects")]
-            ProjectListPage { lang: Language },
-            #[route("/coming-soon")]
-            ComingSoonPage { lang: Language },
         #[end_layout]
     #[end_nest]
 

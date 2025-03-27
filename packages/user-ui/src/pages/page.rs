@@ -27,7 +27,7 @@ pub fn MainPage(lang: Language) -> Element {
     let deliberation_reviews = data.reviews;
 
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center",
+        div { class: "flex flex-col w-full justify-center items-center pt-80",
             div { class: "flex flex-col w-full justify-center items-center gap-100",
                 div { class: "flex flex-col w-full justify-center items-center gap-150",
                     div { class: "flex flex-col w-full justify-center items-center gap-86",
@@ -59,7 +59,7 @@ pub fn MainSection(lang: Language) -> Element {
     rsx! {
         div {
             id: "service",
-            class: "flex flex-col w-full justify-center items-center pt-[80px]",
+            class: "flex flex-col w-full justify-center items-center",
             div { class: "flex flex-col w-full max-w-1300 items-start justify-start max-[500px]:px-10 gap-50",
                 div { class: "relative flex flex-col w-full max-[500px]:h-fit h-320 max-[500px]:p-25 p-65 justify-center items-start rounded-2xl gap-10 overflow-hidden ",
                     div {

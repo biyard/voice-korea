@@ -22,11 +22,11 @@ pub fn ProfilePage(lang: Language) -> Element {
     let project = ctrl.projects()?;
 
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center",
-            div { class: "flex flex-col max-w-[1300px] w-full justify-start items-start gap-[60px]",
+        div { class: "flex flex-col w-full justify-center items-center mt-80",
+            div { class: "flex flex-col max-w-1300 w-full justify-start items-start gap-60",
                 ProfileBanner { lang, profile: project.user }
 
-                div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
+                div { class: "flex flex-col w-full justify-start items-start gap-40",
                     div { class: "flex flex-row w-full justify-start items-start",
                         ClickableType {
                             type_name: "{tr.designed_project}",
@@ -44,7 +44,7 @@ pub fn ProfilePage(lang: Language) -> Element {
                         }
                     }
 
-                    div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                    div { class: "flex flex-col w-full justify-start items-start gap-10",
                         // SearchBox {
                         //     placeholder: "{tr.search}",
                         //     value: keyword,
@@ -82,7 +82,7 @@ pub fn ClickableType(
 ) -> Element {
     rsx! {
         div {
-            class: if clicked { "flex flex-row px-[20px] py-[10px] bg-white border-b border-b-black cursor-pointer" } else { "flex flex-row px-[20px] py-[10px] bg-white cursor-pointer" },
+            class: if clicked { "flex flex-row px-20 py-10 bg-white border-b border-b-black cursor-pointer" } else { "flex flex-row px-20 py-10 bg-white cursor-pointer" },
             onclick: move |e: Event<MouseData>| {
                 onclick.call(e);
             },
@@ -103,8 +103,8 @@ pub fn ProfileBanner(lang: Language, profile: User) -> Element {
     };
 
     rsx! {
-        div { class: "relative flex flex-col w-full h-[200px] justify-start items-center",
-            div { class: "relative flex flex-row w-full h-[150px] justify-end items-center rounded-[16px] py-[52px] px-[73px] gap-[48px] overflow-hidden",
+        div { class: "relative flex flex-col w-full h-200 justify-start items-center",
+            div { class: "relative flex flex-row w-full h-150 justify-end items-center rounded-2xl py-52 px-73 gap-48 overflow-hidden",
                 div {
                     class: "absolute inset-0 bg-cover bg-center rounded-2xl",
                     style: "background-image: url({banner_url});",
@@ -122,19 +122,17 @@ pub fn ProfileBanner(lang: Language, profile: User) -> Element {
             //     div { class: "font-normal text-white text-[14px] z-1", "{tr.token}" }
             // }
             }
-            div { class: "absolute flex flex-row justify-center items-center left-[40px] bottom-[0px] rounded-[100px] bg-white w-[100px] h-[100px]",
+            div { class: "absolute flex flex-row justify-center items-center left-48 bottom-0 rounded-[100px] bg-white w-100 h-100",
                 div {
-                    div { class: "w-[80px] h-[80px] rounded-[100px] bg-[#d9d9d9]" }
+                    div { class: "w-80 h-80 rounded-[100px] bg-profile-gray" }
                 }
             }
-            div { class: "absolute right-[0px] bottom-[10px]",
-                div { class: "font-normal text-[#222222] text-[14px]", "{tr.create_account} {date}" }
+            div { class: "absolute right-0 bottom-10",
+                div { class: "font-normal text-text-black text-sm", "{tr.create_account} {date}" }
             }
-            div { class: "absolute flex flex-row w-fit gap-[13px] left-[160px] bottom-[0px]",
-                div { class: "font-bold text-[#000000] text-[28px] leading-[32px]",
-                    "{nickname}"
-                }
-                div { class: "flex flex-row w-[33px] h-[33px]", Badge {} }
+            div { class: "absolute flex flex-row w-fit gap-13 left-160 bottom-0",
+                div { class: "font-bold text-black text-[28px] leading-32", "{nickname}" }
+                div { class: "flex flex-row w-33 h-33", Badge {} }
             }
         }
     }

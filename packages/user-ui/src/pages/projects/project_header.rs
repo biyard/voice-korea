@@ -4,17 +4,14 @@ use by_components::icons::alignments::AlignJustify;
 use dioxus_translate::{translate, Language};
 
 use crate::{
-    components::{
-        header::GoogleLoginPopup,
-        icons::{self},
-    },
+    components::{header::GoogleLoginPopup, icons},
     routes::Route,
     service::{popup_service::PopupService, user_service::UserService},
 };
 
 #[component]
-pub fn MainHeader(lang: Language) -> Element {
-    let translates: HeaderTranslate = translate(&lang);
+pub fn ProjectHeader(lang: Language) -> Element {
+    let tr: ProjectHeaderTranslate = translate(&lang);
 
     let user_service: UserService = use_context();
     let mut popup_service: PopupService = use_context();
@@ -23,7 +20,7 @@ pub fn MainHeader(lang: Language) -> Element {
 
     let onclick = {
         let email = email.clone();
-        move |_| {
+        move |_e: Event<MouseData>| {
             tracing::debug!("signup button clicked");
 
             if email != "" {
@@ -40,28 +37,28 @@ pub fn MainHeader(lang: Language) -> Element {
                     }
                 })
                 .with_id("google_login")
-                .with_title(translates.login);
+                .with_title(tr.login);
         }
     };
 
     rsx! {
         div { class: "block max-[1300px]:!hidden",
-            MainDesktopHeader { lang, email: email.clone(), onclick: onclick.clone() }
+            ProjectDesktopHeader { lang, email: email.clone(), onclick: onclick.clone() }
         }
         div { class: "hidden max-[1300px]:!block",
-            MainMobileHeader { lang, email, onclick }
+            ProjectMobileHeader { lang, email, onclick }
         }
     }
 }
 
 #[component]
-pub fn MainMobileHeader(
+pub fn ProjectMobileHeader(
     lang: Language,
     email: String,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
     let nav = use_navigator();
-    let translates: HeaderTranslate = translate(&lang);
+    let translates: ProjectHeaderTranslate = translate(&lang);
     let mut expanded = use_signal(|| false);
     let custom_class = "fixed top-0 left-0 z-100";
 
@@ -87,59 +84,53 @@ pub fn MainMobileHeader(
         if expanded() {
             div { class: "fixed top-70 left-0 w-full h-full grow bg-white flex flex-col items-start text-black z-100 px-20 py-[20px]",
                 div { class: "flex flex-col font-bold justify-start items-start text-key-gray text-15 leading-19",
-                    A { lang, href: "/#service",
-                        button {
-                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
-                            onclick: move |_| {
-                                expanded.set(false);
-                            },
-                            {translates.service}
-                        }
+                    button {
+                        class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                        onclick: move |_| {
+                            nav.push(Route::ComingSoonPage { lang });
+                            expanded.set(false);
+                        },
+                        {translates.space}
                     }
-                    A { lang, href: "/#project",
-                        button {
-                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
-                            onclick: move |_| {
-                                expanded.set(false);
-                            },
-                            {translates.project}
-                        }
+                    button {
+                        class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                        onclick: move |_| {
+                            nav.push(Route::ComingSoonPage { lang });
+                            expanded.set(false);
+                        },
+                        {translates.reward}
                     }
-                    A { lang, href: "/#institution",
-                        button {
-                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
-                            onclick: move |_| {
-                                expanded.set(false);
-                            },
-                            {translates.organization}
-                        }
+                    button {
+                        class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                        onclick: move |_| {
+                            nav.push(Route::ComingSoonPage { lang });
+                            expanded.set(false);
+                        },
+                        {translates.participant}
                     }
-                    A { lang, href: "/#price",
-                        button {
-                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
-                            onclick: move |_| {
-                                expanded.set(false);
-                            },
-                            {translates.plan}
-                        }
+                    button {
+                        class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                        onclick: move |_| {
+                            nav.push(Route::ComingSoonPage { lang });
+                            expanded.set(false);
+                        },
+                        {translates.deliberation_committee}
                     }
-                    A { lang, href: "/#inquiry",
-                        button {
-                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
-                            onclick: move |_| {
-                                expanded.set(false);
-                            },
-                            {translates.contact}
-                        }
+                    button {
+                        class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                        onclick: move |_| {
+                            nav.push(Route::ComingSoonPage { lang });
+                            expanded.set(false);
+                        },
+                        {translates.data_room}
                     }
-                    A { lang, href: "/#footer",
-                        button {
-                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
-                            onclick: move |_| {
-                                expanded.set(false);
-                            },
-                            {translates.guide}
-                        }
+                    button {
+                        class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                        onclick: move |_| {
+                            nav.push(Route::ComingSoonPage { lang });
+                            expanded.set(false);
+                        },
+                        {translates.activity_details}
                     }
 
                     button {
@@ -174,12 +165,12 @@ pub fn MainMobileHeader(
 }
 
 #[component]
-pub fn MainDesktopHeader(
+pub fn ProjectDesktopHeader(
     lang: Language,
     email: String,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
-    let translates: HeaderTranslate = translate(&lang);
+    let tr: ProjectHeaderTranslate = translate(&lang);
 
     rsx! {
         div { class: "fixed top-0 left-0 w-screen h-80 overflow-hidden flex items-center justify-center z-100 bg-white",
@@ -194,24 +185,48 @@ pub fn MainDesktopHeader(
                 }
                 //TODO: Add more menus
                 div { class: "flex font-bold justify-center items-center text-key-gray text-15 leading-19 gap-45",
-                    A { lang, href: "/#service", {translates.service} }
-                    A { lang, href: "/#project", {translates.project} }
-                    A { lang, href: "/#institution", {translates.organization} }
-                    A { lang, href: "/#price", {translates.plan} }
-                    A { lang, href: "/#inquiry", {translates.contact} }
-                    A { lang, href: "/#footer", {translates.guide} }
+                    Link {
+                        //TODO: Change Target
+                        to: Route::ComingSoonPage { lang },
+                        {tr.space}
+                    }
+                    Link {
+                        //TODO: Change Target
+                        to: Route::ComingSoonPage { lang },
+                        {tr.reward}
+                    }
+                    Link {
+                        //TODO: Change Target
+                        to: Route::ComingSoonPage { lang },
+                        {tr.participant}
+                    }
+                    Link {
+                        //TODO: Change Target
+                        to: Route::ComingSoonPage { lang },
+                        {tr.deliberation_committee}
+                    }
+                    Link {
+                        //TODO: Change Target
+                        to: Route::ComingSoonPage { lang },
+                        {tr.data_room}
+                    }
+                    Link {
+                        //TODO: Change Target
+                        to: Route::ComingSoonPage { lang },
+                        {tr.activity_details}
+                    }
 
                     div { class: "cursor-pointer", onclick,
                         if email == "" {
-                            "{translates.login}"
+                            "{tr.login}"
                         } else {
-                            "{translates.logout}"
+                            "{tr.logout}"
                         }
                     }
 
                     if email == "" {
                         div { class: "flex flex-row w-fit h-fit justify-center items-center rounded-lg px-5 py-10 bg-white border border-key-gray",
-                            "{translates.deliberation_design}"
+                            "{tr.deliberation_design}"
                         }
                     } else {
                         Link {
@@ -225,36 +240,8 @@ pub fn MainDesktopHeader(
     }
 }
 
-#[component]
-pub fn A(children: Element, lang: Language, href: String) -> Element {
-    let current_path: Route = use_route();
-    let is_home = matches!(current_path, Route::MainPage { .. });
-
-    rsx! {
-        if is_home {
-            a { class: "cursor-pointer", href, {children} }
-        } else {
-            Link { class: "cursor-pointer", to: Route::MainPage { lang }, {children} }
-        }
-    }
-}
-
 translate! {
-    HeaderTranslate;
-
-    service: {
-        ko: "서비스 소개",
-        en: "Main Page"
-    },
-
-    organization: {
-        ko: "정책 결정 기관",
-        en: "Policy Making organization"
-    },
-    project: {
-        ko: "프로젝트",
-        en: "Project"
-    },
+    ProjectHeaderTranslate;
 
     login: {
         ko: "로그인",
@@ -266,28 +253,43 @@ translate! {
         en: "Logout"
     },
 
-    plan: {
-        ko: "플랜",
-        en: "Plan"
-    },
+    space: {
+        ko: "참여 공간",
+        en: "Participation Space"
+    }
 
-    contact: {
-        ko: "문의하기",
-        en: "Contact"
-    },
+    reward: {
+        ko: "참여 보상",
+        en: "Participation Reward"
+    }
 
-    guide: {
-        ko: "가이드",
-        en: "Guide"
-    },
+    participant: {
+        ko: "참여자",
+        en: "Participant"
+    }
 
-    my_profile: {
-        ko: "나의 프로필",
-        en: "My Profile"
+    deliberation_committee: {
+        ko: "공론 위원회",
+        en: "Deliberation Committee"
+    }
+
+    data_room: {
+        ko: "자료실",
+        en: "Data Room"
+    }
+
+    activity_details: {
+        ko: "활동 내역",
+        en: "Activity Details"
     }
 
     deliberation_design: {
         ko: "공론 조사 설계",
         en: "Deliberation Design"
+    }
+
+    my_profile: {
+        ko: "나의 프로필",
+        en: "My Profile"
     }
 }

@@ -23,7 +23,7 @@ pub fn ProjectPage(lang: Language, project_id: ReadOnlySignal<i64>) -> Element {
 
     rsx! {
         // TODO(mobile): tab view implemented to fit mobile size
-        div { class: "flex flex-col w-full justify-center items-center",
+        div { class: "flex flex-col w-full justify-center items-center mt-80",
             ProjectHeader { lang, deliberation, active_tab: active_tab.clone() }
             div { class: "w-full flex flex-col justify-center items-center",
                 SuspenseBoundary {
@@ -63,8 +63,8 @@ pub fn ProjectDetails(
     project_id: ReadOnlySignal<i64>,
 ) -> Element {
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center bg-[#F7F7F7]",
-            div { class: "flex flex-col max-w-[1300px] w-full",
+        div { class: "flex flex-col w-full justify-center items-center bg-box-gray",
+            div { class: "flex flex-col max-w-1300 w-full",
                 match active_tab() {
                     Tab::BasicInfo => rsx! {
                         BasicInfo { lang, project_id }
