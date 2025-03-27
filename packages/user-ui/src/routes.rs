@@ -4,15 +4,18 @@ use dioxus_translate::Language;
 #[allow(unused)]
 use crate::layout::{RootLayout, RootLayoutWithFooter};
 
-use crate::pages::*;
+use crate::pages::{layout::MainRootLayout, *};
 
 #[derive(Clone, Routable)]
 #[rustfmt::skip]
 pub enum Route {
     #[nest("/:lang")]
-        #[layout(RootLayoutWithFooter)]
+        #[layout(MainRootLayout)]
             #[route("/")]
             MainPage { lang: Language },
+        #[end_layout]
+
+        #[layout(RootLayoutWithFooter)]
             #[nest("/users")]
                 #[route("/")]
                 UserLoginPage { lang: Language },

@@ -13,20 +13,26 @@ pub fn ReviewSection(lang: Language, deliberation_reviews: Vec<Review>) -> Eleme
     let tr: ReviewSectionTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center py-100 bg-gradient-to-b from-[#f1f3fa] to-[#a6e0d3] gap-30",
-            div { class: "font-bold text-[28px] leading-32 text-text-gray", "{tr.participation_review}" }
-            div { class: "flex flex-row w-full justify-center items-center gap-20",
-                div { class: "bg-button-primary rounded-lg px-10 py-8",
-                    LeftArrow { stroke: "white" }
+        div {
+            id: "review",
+            class: "flex flex-col w-full justify-center items-center",
+            div { class: "flex flex-col w-full justify-center items-center py-100 bg-gradient-to-b from-[#f1f3fa] to-[#a6e0d3] gap-30",
+                div { class: "font-bold text-[28px] leading-32 text-text-gray",
+                    "{tr.participation_review}"
                 }
-                div { class: "flex flex-row w-full max-w-1300",
-                    div { class: "grid max-[600px]:grid-cols-1 max-[1100px]:grid-cols-2 grid-cols-3 w-full gap-20",
-                        for review in deliberation_reviews {
-                            ReviewItem { review }
+                div { class: "flex flex-row w-full justify-center items-center gap-20",
+                    div { class: "bg-button-primary rounded-lg px-10 py-8",
+                        LeftArrow { stroke: "white" }
+                    }
+                    div { class: "flex flex-row w-full max-w-1300",
+                        div { class: "grid max-[600px]:grid-cols-1 max-[1100px]:grid-cols-2 grid-cols-3 w-full gap-20",
+                            for review in deliberation_reviews {
+                                ReviewItem { review }
+                            }
                         }
                     }
+                    div { class: "bg-button-primary rounded-lg px-10 py-8", RightArrow {} }
                 }
-                div { class: "bg-button-primary rounded-lg px-10 py-8", RightArrow {} }
             }
         }
     }
