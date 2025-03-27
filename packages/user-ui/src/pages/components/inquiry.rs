@@ -27,18 +27,18 @@ pub fn InquirySection(
         div {
             id: "inquiry",
             class: "flex flex-col w-full justify-center items-center",
-            div { class: "max-[1000px]:px-[15px] max-[400px]:mt-[200px] flex flex-col w-full max-w-1080 h-full justify-center items-center gap-[50px]",
-                div { class: "flex flex-col gap-[30px]",
-                    div { class: "font-bold text-[28px] leading-[32px] text-[#555462]",
+            div { class: "max-[1000px]:px-15 max-[400px]:mt-200 flex flex-col w-full max-w-1080 h-full justify-center items-center gap-[50px]",
+                div { class: "flex flex-col gap-30",
+                    div { class: "font-bold text-[28px] leading-32 text-text-gray",
                         "{tr.inquiry_title}"
                     }
-                    div { class: "font-semibold text-[15px] leading-[22px] text-[#555462] whitespace-pre-line text-center",
+                    div { class: "font-semibold text-[15px] leading-22 text-text-gray whitespace-pre-line text-center",
                         "{tr.inquiry_description}"
                     }
                 }
 
-                div { class: "flex max-[1000px]:flex-col max-[1000px]:gap-[50px] flex-row w-full justify-between items-center",
-                    div { class: "flex flex-col gap-[32px]",
+                div { class: "flex max-[1000px]:flex-col max-[1000px]:gap-50 flex-row w-full justify-between items-center",
+                    div { class: "flex flex-col gap-32",
                         SolutionInfoComponent {
                             asset: blockchain_info_1,
                             description: "{tr.blockchain_info_1}",
@@ -53,10 +53,10 @@ pub fn InquirySection(
                         }
                     }
 
-                    div { class: "flex flex-col max-[600px]:w-full w-[530px] gap-[30px]",
-                        div { class: "flex flex-col w-full gap-[20px]",
-                            div { class: "flex flex-col w-full gap-[10px]",
-                                div { class: "font-semibold text-[15px] text-[#222222]",
+                    div { class: "flex flex-col max-[600px]:w-full w-530 gap-30",
+                        div { class: "flex flex-col w-full gap-20",
+                            div { class: "flex flex-col w-full gap-10",
+                                div { class: "font-semibold text-[15px] text-text-black",
                                     "{tr.name}"
                                 }
                                 InputBox {
@@ -68,10 +68,10 @@ pub fn InquirySection(
                                 }
                             }
 
-                            div { class: "flex flex-col w-full gap-[10px]",
-                                div { class: "flex flex-row gap-[3px] font-semibold text-[15px] items-center",
+                            div { class: "flex flex-col w-full gap-10",
+                                div { class: "flex flex-row gap-3 font-semibold text-[15px] items-center",
                                     div { class: "text-red-500", "*" }
-                                    div { class: "text-[#222222]", "{tr.email}" }
+                                    div { class: "text-text-black", "{tr.email}" }
                                 }
                                 InputBox {
                                     placeholder: "{tr.email_hint}",
@@ -82,16 +82,14 @@ pub fn InquirySection(
                                 }
 
                                 if email_error() {
-                                    div { class: "font-normal text-[14px] text-[#eb5757]",
-                                        "{tr.email_error}"
-                                    }
+                                    div { class: "font-normal text-sm text-error", "{tr.email_error}" }
                                 }
                             }
 
-                            div { class: "flex flex-col w-full gap-[10px]",
-                                div { class: "flex flex-row gap-[3px] font-semibold text-[15px] items-center",
+                            div { class: "flex flex-col w-full gap-10",
+                                div { class: "flex flex-row gap-3 font-semibold text-[15px] items-center",
                                     div { class: "text-red-500", "*" }
-                                    div { class: "text-[#222222]", "{tr.message}" }
+                                    div { class: "text-text-black", "{tr.message}" }
                                 }
                                 TextArea {
                                     placeholder: "{tr.message_hint}",
@@ -102,15 +100,13 @@ pub fn InquirySection(
                                 }
 
                                 if message_error() {
-                                    div { class: "font-normal text-[14px] text-[#eb5757]",
-                                        "{tr.message_error}"
-                                    }
+                                    div { class: "font-normal text-sm text-error", "{tr.message_error}" }
                                 }
                             }
                         }
 
                         button {
-                            class: "flex flex-row w-full justify-center items-center bg-[#8095ea] rounded-[12px] px-[16px] py-[12px] font-semibold text-[16px] text-white cursor-pointer",
+                            class: "flex flex-row w-full justify-center items-center bg-button-primary rounded-xl px-16 py-12 font-semibold text-base text-white cursor-pointer",
                             onclick: move |_| {
                                 let name = name();
                                 let email = email();
@@ -143,10 +139,10 @@ pub fn InquirySection(
 #[component]
 pub fn SolutionInfoComponent(asset: Asset, description: String) -> Element {
     rsx! {
-        div { class: "flex flex-row max-[450px]:w-full w-[420px] h-[104px] rounded-[12px] bg-white shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-[35px] py-[10px] items-center justify-start gap-[25px]",
+        div { class: "flex flex-row max-[450px]:w-full w-420 h-104 rounded-xl bg-white shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-35 py-10 items-center justify-start gap-25",
             img { src: asset, width: 60, height: 60 }
 
-            div { class: "font-bold text-[15px] text-[#555462] leading-[22px]", "{description}" }
+            div { class: "font-bold text-15 text-text-gray leading-22", "{description}" }
         }
     }
 }

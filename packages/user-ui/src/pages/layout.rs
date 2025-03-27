@@ -19,7 +19,7 @@ pub fn MainRootLayout(lang: Language) -> Element {
                 rsx! { "error : " }
             },
             div { class: "flex flex-col w-screen min-h-screen justify-center items-center bg-white text-black",
-                div { class: "w-full flex flex-col max-w-[1300px] px-[10px]",
+                div { class: "w-full flex flex-col max-w-1300 px-10",
                     MainHeader { lang: lang.clone() }
                 }
                 div { class: "w-full flex flex-col justify-center items-center",
