@@ -2,6 +2,8 @@
 
 @theme static {
   /* App-specific colors */
+  --spacing: 1px;
+  
   --color-error: #FF0000;
   --color-gray-border: #E0E0E0;
 }
