@@ -39,6 +39,7 @@ jobs:
             export GOOGLE_PASS=${{ secrets.TEST_GOOGLE_PASSWORD }}
             npx playwright test tests/users/home_overflow.spec.ts
             npx playwright test tests/users/google.spec.ts
+            npx playwright test tests/users/project_page.spec.ts
           fi
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
