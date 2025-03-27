@@ -1,3 +1,5 @@
+pub mod comments;
+pub mod inquiries;
 pub mod landing;
 pub mod metadata;
 pub mod organizations;
@@ -60,6 +62,14 @@ impl Version2Controller {
                 "/deliberations/:deliberation-id/comments",
                 deliberations::_id::comments::DeliberationCommentController::new(pool.clone())
                     .route(),
+            )
+            .nest(
+                "/inquiries",
+                inquiries::InquiryController::new(pool.clone()).route(),
+            )
+            .nest(
+                "/comments",
+                comments::CommentController::new(pool.clone()).route(),
             )
             .nest(
                 "/deliberations/:deliberation-id/responses",

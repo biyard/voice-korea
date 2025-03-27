@@ -1,3 +1,5 @@
+#![allow(dead_code, unused)]
+
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
@@ -18,32 +20,84 @@ use crate::routes::Route;
 use super::controller;
 #[component]
 pub fn MainPage(lang: Language) -> Element {
-    let ctrl = controller::Controller::init(lang.clone())?;
+    let mut ctrl = controller::Controller::init(lang.clone())?;
     let data = ctrl.data()?;
     let deliberations = data.projects;
     let institutions = data.organizations;
     let deliberation_reviews = data.reviews;
 
+    let comments = ctrl.get_comments();
+    let page = ctrl.page();
+    let total_pages = ctrl.total_pages();
+
     rsx! {
-        // TODO(mobile): dashboard implemented to fit mobile size
-        div { class: "flex flex-col w-full justify-center items-center gap-[100px]",
-            div { class: "flex flex-col w-full justify-center items-center gap-[150px]",
-                div { class: "flex flex-col w-full justify-center items-center gap-[50px]",
-                    MainBanner { lang }
-
-                    ContentSection { lang, deliberations, institutions }
-
-                    PriceSection { lang }
+        div { class: "flex flex-col w-full justify-center items-center pt-80",
+            div { class: "flex flex-col w-full justify-center items-center gap-100",
+                div { class: "flex flex-col w-full justify-center items-center gap-150",
+                    div { class: "flex flex-col w-full justify-center items-center gap-86",
+                        div { class: "flex flex-col w-full justify-center items-center gap-120",
+                            MainSection { lang }
+                            DeliberationProjectCard { lang, deliberations }
+                            DeliberationInstitution { lang, institutions }
+                        }
+                        PriceSection { lang }
+                    }
+                    InquirySection {
+                        lang,
+                        send_inquiry: move |(name, email, message): (String, String, String)| async move {
+                            ctrl.send_inquiry(name, email, message).await;
+                        },
+                    }
                 }
 
-                InquirySection {
+                ReviewSection {
                     lang,
-                    send_inquiry: move |(name, email, message): (String, String, String)| {
-                        ctrl.send_inquiry(name, email, message);
+                    comments,
+                    page,
+                    total_pages,
+                    set_page: move |page: i64| {
+                        ctrl.set_page(page as usize);
                     },
                 }
             }
-            ReviewSection { lang, deliberation_reviews }
+        }
+    }
+}
+
+#[component]
+pub fn MainSection(lang: Language) -> Element {
+    let nav = use_navigator();
+    let background_url = asset!("/public/images/main_image.jpeg").to_string();
+    let console_url = &crate::config::get().console_url;
+    let tr: MainBannerTranslate = translate(&lang);
+    rsx! {
+        div {
+            id: "service",
+            class: "flex flex-col w-full justify-center items-center",
+            div { class: "flex flex-col w-full max-w-1300 items-start justify-start max-[500px]:px-10 gap-50",
+                div { class: "relative flex flex-col w-full max-[500px]:h-fit h-320 max-[500px]:p-25 p-65 justify-center items-start rounded-2xl gap-10 overflow-hidden ",
+                    div {
+                        class: "absolute inset-0 bg-cover bg-center opacity-80 rounded-2xl",
+                        style: "background-image: url({background_url});",
+                    }
+                    div { class: "relative font-bold text-[40px] leading-58 text-white",
+                        "{tr.title}"
+                    }
+                    div { class: "relative font-medium text-16 leading-24 text-white whitespace-pre-line mb-12",
+                        "{tr.description}"
+                    }
+                    //TODO:Go to public opinion survey page
+                    button {
+                        class: "relative flex flex-row px-16 py-12 bg-[#5b373b] border border-white rounded-xl font-semibold text-base text-white cursor-pointer",
+                        onclick: move |_| {
+                            nav.push(format!("{}", console_url));
+                        },
+                        "{tr.button}"
+                    }
+                }
+
+                DeliberationFeature { lang }
+            }
         }
     }
 }
@@ -52,110 +106,113 @@ pub fn MainPage(lang: Language) -> Element {
 pub fn PriceSection(lang: Language) -> Element {
     let tr: PriceSectionTranslate = translate(&lang);
     rsx! {
-        div { class: "flex flex-col w-full h-[620px] justify-center items-center",
-
-            div { class: "relative flex flex-col w-full h-full justify-center items-center",
-                div { class: "relative flex flex-row w-full h-full max-w-[1300px] justify-center items-center",
-                    div {
-                        class: "absolute top-0 left-[80px] w-[550px] h-[620px] rounded-[12px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-[40px] py-[25px] bg-transparent",
-                        style: "z-index: 10;",
-                        div { class: "flex flex-col w-full gap-[32px]",
-                            div { class: "flex flex-col w-full gap-[40px]",
-                                div { class: "flex flex-col w-full gap-[20px]",
-                                    div { class: "font-bold text-[28px] text-[#222222] leading-[32px]",
-                                        "{tr.free_title}"
+        div {
+            id: "price",
+            class: "flex flex-col w-full justify-center items-center",
+            div { class: "flex flex-col w-full max-w-1300 h-fit justify-center items-center px-10",
+                div { class: "max-[1300px]:flex max-[1300px]:flex-col max-[1300px]:h-full h-[620px] relative flex flex-col w-full  justify-center items-center",
+                    div { class: "max-[1300px]:flex max-[1300px]:flex-col relative flex flex-row w-full h-full max-w-1300 justify-center items-center",
+                        div {
+                            class: "absolute top-0 left-80 w-550 h-620 rounded-xl shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-40 py-25 bg-transparent max-[1300px]:relative max-[1300px]:w-full max-[1300px]:h-auto max-[1300px]:top-auto max-[1300px]:left-auto",
+                            style: "z-index: 10;",
+                            div { class: "flex flex-col w-full gap-32",
+                                div { class: "flex flex-col w-full gap-40",
+                                    div { class: "flex flex-col w-full gap-20",
+                                        div { class: "font-bold text-[28px] text-text-black leading-32",
+                                            "{tr.free_title}"
+                                        }
+                                        div { class: "font-normal text-[15px] text-text-gray leading-22",
+                                            "{tr.free_description}"
+                                        }
                                     }
-                                    div { class: "font-normal text-[15px] text-[#555462] leading-[22px]",
-                                        "{tr.free_description}"
+
+                                    div { class: "flex flex-col w-full gap-35",
+                                        div { class: "flex flex-row gap-5 items-center",
+                                            div { class: "font-semibold text-[40px] text-text-black",
+                                                "0"
+                                            }
+                                            div { class: "font-medium text-xl text-light-gray",
+                                                "{tr.won}"
+                                            }
+                                        }
+                                        div { class: "flex flex-col w-full gap-5",
+                                            InfoBox {
+                                                label: "{tr.free_info_label_1}",
+                                                description: "{tr.free_info_description_1}",
+                                            }
+                                            InfoBox {
+                                                label: "{tr.free_info_label_2}",
+                                                description: "{tr.free_info_description_2}",
+                                            }
+                                            InfoBox {
+                                                label: "{tr.free_info_label_3}",
+                                                description: "{tr.free_info_description_3}",
+                                            }
+                                        }
                                     }
                                 }
 
-                                div { class: "flex flex-col w-full gap-[35px]",
-                                    div { class: "flex flex-row gap-[5px] items-center",
-                                        div { class: "font-semibold text-[40px] text-[#222222]",
-                                            "0"
-                                        }
-                                        div { class: "font-medium text-[20px] text-[#7c8292]",
-                                            "{tr.won}"
-                                        }
-                                    }
-                                    div { class: "flex flex-col w-full gap-[5px]",
-                                        InfoBox {
-                                            label: "{tr.free_info_label_1}",
-                                            description: "{tr.free_info_description_1}",
-                                        }
-                                        InfoBox {
-                                            label: "{tr.free_info_label_2}",
-                                            description: "{tr.free_info_description_2}",
-                                        }
-                                        InfoBox {
-                                            label: "{tr.free_info_label_3}",
-                                            description: "{tr.free_info_description_3}",
-                                        }
-                                    }
+                                div {
+                                    class: "flex flex-row w-full h-50 justify-center items-center rounded-[100px] bg-button-primary font-semibold text-white text-[15px] cursor-pointer",
+                                    onclick: move |_| {
+                                        tracing::debug!("start button clicked");
+                                    },
+                                    "{tr.start}"
                                 }
-                            }
-
-                            div {
-                                class: "flex flex-row w-full h-[50px] justify-center items-center rounded-[100px] bg-[#8095ea] font-semibold text-white text-[15px] cursor-pointer",
-                                onclick: move |_| {
-                                    tracing::debug!("start button clicked");
-                                },
-                                "{tr.start}"
                             }
                         }
-                    }
 
-                    div {
-                        class: "absolute top-0 right-[80px] w-[550px] h-[620px] rounded-[12px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-[40px] py-[25px] bg-transparent",
-                        style: "z-index: 10;",
-                        div { class: "flex flex-col w-full gap-[32px]",
-                            div { class: "flex flex-col w-full gap-[40px]",
-                                div { class: "flex flex-col w-full gap-[20px]",
-                                    div { class: "font-bold text-[28px] text-[#222222] leading-[32px]",
-                                        "{tr.premium_title}"
+                        div {
+                            class: "absolute top-0 right-80 w-550 h-620 rounded-xl shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-40 py-25 bg-transparent max-[1300px]:relative max-[1300px]:w-full max-[1300px]:h-auto max-[1300px]:top-auto max-[1300px]:right-auto max-[1300px]:left-auto",
+                            style: "z-index: 10;",
+                            div { class: "flex flex-col w-full gap-32",
+                                div { class: "flex flex-col w-full gap-40",
+                                    div { class: "flex flex-col w-full gap-20",
+                                        div { class: "font-bold text-[28px] text-text-black leading-32",
+                                            "{tr.premium_title}"
+                                        }
+                                        div { class: "font-normal text-[15px] text-text-gray leading-22",
+                                            "{tr.premium_description}"
+                                        }
                                     }
-                                    div { class: "font-normal text-[15px] text-[#555462] leading-[22px]",
-                                        "{tr.premium_description}"
+
+                                    div { class: "flex flex-col w-full gap-35",
+                                        div { class: "flex flex-row gap-5 items-center",
+                                            div { class: "font-semibold text-[40px] text-text-black",
+                                                "2,990"
+                                            }
+                                            div { class: "font-medium text-xl text-light-gray",
+                                                "{tr.won}"
+                                            }
+                                        }
+                                        div { class: "flex flex-col w-full gap-5",
+                                            InfoBox {
+                                                label: "{tr.premium_info_label_1}",
+                                                description: "{tr.premium_info_description_1}",
+                                            }
+                                            InfoBox {
+                                                label: "{tr.premium_info_label_2}",
+                                                description: "{tr.premium_info_description_2}",
+                                            }
+                                            InfoBox {
+                                                label: "{tr.premium_info_label_3}",
+                                                description: "{tr.premium_info_description_3}",
+                                            }
+                                            InfoBox {
+                                                label: "{tr.premium_info_label_4}",
+                                                description: "{tr.premium_info_description_4}",
+                                            }
+                                        }
                                     }
                                 }
 
-                                div { class: "flex flex-col w-full gap-[35px]",
-                                    div { class: "flex flex-row gap-[5px] items-center",
-                                        div { class: "font-semibold text-[40px] text-[#222222]",
-                                            "2,990"
-                                        }
-                                        div { class: "font-medium text-[20px] text-[#7c8292]",
-                                            "{tr.won}"
-                                        }
-                                    }
-                                    div { class: "flex flex-col w-full gap-[5px]",
-                                        InfoBox {
-                                            label: "{tr.premium_info_label_1}",
-                                            description: "{tr.premium_info_description_1}",
-                                        }
-                                        InfoBox {
-                                            label: "{tr.premium_info_label_2}",
-                                            description: "{tr.premium_info_description_2}",
-                                        }
-                                        InfoBox {
-                                            label: "{tr.premium_info_label_3}",
-                                            description: "{tr.premium_info_description_3}",
-                                        }
-                                        InfoBox {
-                                            label: "{tr.premium_info_label_4}",
-                                            description: "{tr.premium_info_description_4}",
-                                        }
-                                    }
+                                div {
+                                    class: "flex flex-row w-full h-50 justify-center items-center rounded-[100px] bg-button-primary font-semibold text-white text-[15px] cursor-pointer",
+                                    onclick: move |_| {
+                                        tracing::debug!("start button clicked");
+                                    },
+                                    "{tr.start}"
                                 }
-                            }
-
-                            div {
-                                class: "flex flex-row w-full h-[50px] justify-center items-center rounded-[100px] bg-[#8095ea] font-semibold text-white text-[15px] cursor-pointer",
-                                onclick: move |_| {
-                                    tracing::debug!("start button clicked");
-                                },
-                                "{tr.start}"
                             }
                         }
                     }
@@ -168,14 +225,14 @@ pub fn PriceSection(lang: Language) -> Element {
 #[component]
 pub fn InfoBox(label: String, description: String) -> Element {
     rsx! {
-        div { class: "flex flex-row gap-[10px] w-full justify-start items-center",
-            div { class: "w-[24px] h-[24px]",
+        div { class: "flex flex-row gap-10 w-full justify-start items-center",
+            div { class: "w-24 h-24",
                 Check { width: "24", height: "24" }
             }
             div {
-                class: "text-[15px] text-[#555462] leading-[22px] gap-[10px]",
+                class: "text-[15px] text-text-gray leading-22 gap-10",
                 style: "word-wrap: break-word;",
-                span { class: "font-bold mr-[3px]", "{label}" }
+                span { class: "font-bold mr-3", "{label}" }
                 span { class: "font-normal", "{description}" }
             }
         }
@@ -183,58 +240,42 @@ pub fn InfoBox(label: String, description: String) -> Element {
 }
 
 #[component]
-pub fn ContentSection(
-    lang: Language,
-    deliberations: Vec<DeliberationProject>,
-    institutions: Vec<OrganizationSummary>,
-) -> Element {
-    rsx! {
-        div { class: "flex flex-col w-full justify-center items-center gap-[120px]",
-            div { class: "flex flex-col w-full max-w-[1300px] justify-center items-center px-[10px]",
-                div { class: "flex flex-col w-full justify-start items-start gap-[120px]",
-                    OpinionFeature { lang }
-                    OpinionProject { lang, deliberations }
-                }
-            }
-
-        // OpinionInstitution { lang, institutions }
-        }
-    }
-}
-
-#[component]
-pub fn OpinionInstitution(lang: Language, institutions: Vec<OrganizationSummary>) -> Element {
+pub fn DeliberationInstitution(lang: Language, institutions: Vec<OrganizationSummary>) -> Element {
     let tr: OpinionInstitutionTranslate = translate(&lang);
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center py-[120px] bg-gradient-to-b from-[#dbeae8] to-[#ffffff]",
-            div { class: "flex flex-col w-full max-w-[1300px] justify-center items-center px-[10px] gap-[30px]",
-                div { class: "flex flex-col w-full gap-[10px]",
-                    div { class: "font-bold text-[28px] text-[#555462] leading-[32px]",
-                        "{tr.institution}"
+        div {
+            id: "institution",
+            class: "flex flex-col w-full justify-center items-center",
+            div { class: "flex flex-col w-full justify-center items-center py-120 bg-gradient-to-b from-gradient-green to-white",
+                div { class: "flex flex-col w-full max-w-1300 justify-center items-center px-10 gap-30",
+                    div { class: "flex flex-col w-full gap-10",
+                        div { class: "font-bold text-[28px] text-text-gray leading-32",
+                            "{tr.institution}"
+                        }
+                        div { class: "font-normal text-[15px] text-text-gray leading-22",
+                            "{tr.institution_description}"
+                        }
                     }
-                    div { class: "font-normal text-[15px] text-[#555462] leading-[22.5px]",
-                        "{tr.institution_description}"
-                    }
-                }
-                div { class: "flex flex-col w-full gap-[40px]",
-                    div { class: "grid grid-cols-5 gap-[20px]",
-                        for institution in institutions {
-                            Link {
-                                to: Route::GovernancePage {
-                                    lang,
-                                    governance_id: institution.id,
-                                },
-                                InstitutionBox { lang, institution }
+                    div { class: "flex flex-col w-full gap-40",
+                        div { class: "grid max-[500px]:grid-cols-1 max-[700px]:grid-cols-2 max-[1000px]:grid-cols-3 max-[1300px]:grid-cols-4 grid-cols-5 gap-20",
+                            for institution in institutions {
+                                Link {
+                                    to: Route::GovernancePage {
+                                        lang,
+                                        governance_id: institution.id,
+                                    },
+                                    InstitutionBox { lang, institution }
+                                }
                             }
                         }
                     }
-                }
-                div { class: "flex flex-row w-full justify-center items-center",
-                    MoreButton {
-                        lang,
-                        onclick: move |_| {
-                            tracing::debug!("more button clicked");
-                        },
+                    div { class: "flex flex-row w-full justify-center items-center",
+                        MoreButton {
+                            lang,
+                            onclick: move |_| {
+                                tracing::debug!("more button clicked");
+                            },
+                        }
                     }
                 }
             }
@@ -243,49 +284,53 @@ pub fn OpinionInstitution(lang: Language, institutions: Vec<OrganizationSummary>
 }
 
 #[component]
-pub fn OpinionProject(lang: Language, deliberations: Vec<DeliberationProject>) -> Element {
+pub fn DeliberationProjectCard(lang: Language, deliberations: Vec<DeliberationProject>) -> Element {
     let tr: OpinionProjectTranslate = translate(&lang);
     let nav = use_navigator();
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start gap-[40px]",
-            div { class: "flex flex-col gap-[30px] w-full",
-                div { class: "flex flex-col gap-[10px]",
-                    div { class: "font-bold text-[28px] text-[#555462] leading-[32px]",
-                        "{tr.project}"
+        div {
+            id: "project",
+            class: "flex flex-col w-full justify-center items-center",
+            div { class: "flex flex-col w-full max-w-1300 justify-start items-start gap-40",
+                div { class: "flex flex-col gap-30 w-full",
+                    div { class: "flex flex-col gap-10",
+                        div { class: "font-bold text-[28px] text-text-gray leading-32",
+                            "{tr.project}"
+                        }
+                        div { class: "font-normal text-[15px] text-text-gray leading-22",
+                            "{tr.project_description}"
+                        }
                     }
-                    div { class: "font-normal text-[15px] text-[#555462] leading-[22px]",
-                        "{tr.project_description}"
-                    }
-                }
 
-                div { class: "grid grid-cols-3 gap-[20px]",
-                    for deliberation in deliberations.clone() {
-                        div {
-                            class: "cursor-pointer",
-                            onclick: {
-                                let project_id = deliberation.clone().id.clone();
-                                move |_| {
-                                    nav.push(Route::ProjectPage {
-                                        lang,
-                                        project_id,
-                                    });
+                    div { class: "grid max-[600px]:grid-cols-1 max-[1000px]:grid-cols-2 grid-cols-3 gap-20",
+                        for deliberation in deliberations.clone() {
+                            div {
+                                class: "cursor-pointer",
+                                onclick: {
+                                    let project_id = deliberation.clone().id.clone();
+                                    move |_| {
+                                        nav.push(Route::ProjectPage {
+                                            lang,
+                                            project_id,
+                                        });
+                                    }
+                                },
+                                ProjectBox {
+                                    lang,
+                                    deliberation: deliberation.clone().into(),
                                 }
-                            },
-                            ProjectBox {
-                                lang,
-                                deliberation: deliberation.clone().into(),
                             }
                         }
                     }
-                }
 
-                div { class: "flex flex-wrap  justify-center items-center" }
-                div { class: "flex flex-row w-full justify-center items-center",
-                    MoreButton {
-                        lang,
-                        onclick: move |_| {
-                            nav.push(Route::ProjectListPage { lang });
-                        },
+                    div { class: "flex flex-wrap  justify-center items-center" }
+                    div { class: "flex flex-row w-full justify-center items-center",
+                        MoreButton {
+                            lang,
+                            onclick: move |_| {
+                                nav.push(Route::ProjectListPage { lang });
+                            },
+                        }
                     }
                 }
             }
@@ -298,7 +343,7 @@ pub fn MoreButton(lang: Language, onclick: EventHandler<MouseEvent>) -> Element 
     let tr: MoreButtonTranslate = translate(&lang);
     rsx! {
         div {
-            class: "flex flex-row px-[20px] py-[12px] bg-[#8095ea] font-semibold text-[16px] text-white cursor-pointer rounded-[12px]",
+            class: "flex flex-row px-20 py-12 bg-button-primary font-semibold text-base text-white cursor-pointer rounded-xl",
             onclick: move |e: Event<MouseData>| {
                 onclick.call(e);
             },
@@ -308,16 +353,16 @@ pub fn MoreButton(lang: Language, onclick: EventHandler<MouseEvent>) -> Element 
 }
 
 #[component]
-pub fn OpinionFeature(lang: Language) -> Element {
+pub fn DeliberationFeature(lang: Language) -> Element {
     let decentralized = asset!("/public/images/decentralized.png");
     let shield = asset!("public/images/shield.png");
     let sound = asset!("public/images/sound.png");
 
     let tr: OpinionFeatureTranslate = translate(&lang);
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center gap-[32px]",
-            div { class: "font-bold text-[28px] text-[#555462] leading-[32px]", "{tr.title}" }
-            div { class: "flex flex-row w-full justify-center items-center gap-[20px]",
+        div { class: "flex flex-col w-full justify-center items-center gap-32",
+            div { class: "font-bold text-[28px] text-text-gray leading-32", "{tr.title}" }
+            div { class: "flex flex-row max-[1000px]:flex-col w-full justify-center items-center gap-20",
                 FeatureBox {
                     title: tr.sub_title_1,
                     description: tr.sub_description_1,
@@ -334,7 +379,7 @@ pub fn OpinionFeature(lang: Language) -> Element {
                     asset: sound,
                 }
             }
-            div { class: "font-semibold text-[15px] text-[#555462] leading-[22px] text-center whitespace-pre-line",
+            div { class: "font-semibold text-[15px] text-text-gray leading-22 text-center whitespace-pre-line",
                 "{tr.description}"
             }
         }
@@ -345,10 +390,10 @@ pub fn OpinionFeature(lang: Language) -> Element {
 pub fn FeatureBox(title: String, description: String, asset: Asset) -> Element {
     rsx! {
         div {
-            class: "flex flex-col w-[310px] justify-start items-start px-[24px] py-[34px] rounded-xl gap-[20px]",
+            class: "flex flex-col max-[1000px]:w-full max-[1000px]:max-w-600 w-310 justify-start items-start px-24 py-34 rounded-xl gap-20",
             style: "box-shadow: 0px 8px 20px rgba(148, 128, 214, 0.5);",
-            div { class: "font-bold text-[18px] text-[#222222]", "{title}" }
-            div { class: "font-normal text-[15px] text-[#555462]", "{description}" }
+            div { class: "font-bold text-lg text-text-black", "{title}" }
+            div { class: "font-normal text-[15px] text-text-gray", "{description}" }
             div { class: "flex flex-row w-full justify-end items-end",
                 img { src: asset, width: 48, height: 48 }
             }
@@ -361,21 +406,21 @@ pub fn MainBanner(lang: Language) -> Element {
     let background_url = asset!("/public/images/main_image.jpeg").to_string();
     let tr: MainBannerTranslate = translate(&lang);
     rsx! {
-        div { class: "flex flex-col w-full max-w-[1300px] px-[10px]",
-            div { class: "relative flex flex-col w-full h-[320px] justify-center items-start rounded-2xl p-[65px] gap-[10px] overflow-hidden ",
+        div { class: "flex flex-col w-full max-w-1300 px-10",
+            div { class: "relative flex flex-col w-full max-[500px]:h-fit h-320 max-[500px]:p-25 p-65 justify-center items-start rounded-2xl gap-10 overflow-hidden ",
                 div {
                     class: "absolute inset-0  bg-cover bg-center opacity-80 rounded-2xl",
                     style: "background-image: url({background_url});",
                 }
-                div { class: "relative font-bold text-[40px] leading-[58px] text-white",
+                div { class: "relative font-bold text-[40px] leading-58 text-white",
                     "{tr.title}"
                 }
-                div { class: "relative font-medium text-[16px] leading-6 text-white whitespace-pre-line mb-[10px]",
+                div { class: "relative font-medium text-16 leading-24 text-white whitespace-pre-line mb-12",
                     "{tr.description}"
                 }
                 //TODO:Go to public opinion survey page
                 button {
-                    class: "relative flex flex-row px-[16px] py-[12px] bg-[#5b373b] border border-white rounded-[12px] font-semibold text-[16px] text-white cursor-pointer",
+                    class: "relative flex flex-row px-16 py-12 bg-[#5b373b] border border-white rounded-xl font-semibold text-base text-white cursor-pointer",
                     onclick: move |_| {},
                     "{tr.button}"
                 }

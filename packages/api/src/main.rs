@@ -7,13 +7,13 @@ use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Control
 use deliberation_comment::DeliberationComment;
 use deliberation_resources::deliberation_resource::DeliberationResource;
 use discussions::Discussion;
-use models::step::Step;
 use models::{
     deliberation::Deliberation, deliberation_report::DeliberationReport,
     deliberation_response::DeliberationResponse, deliberation_user::DeliberationUser,
     deliberation_vote::DeliberationVote, invitation::Invitation, response::SurveyResponse,
     review::Review, v2::Institution,
 };
+use models::{inquiry::Inquiry, step::Step};
 use models::{organization::Organization, *};
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
@@ -71,6 +71,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
         Discussion,
         DeliberationResource,
         DeliberationComment,
+        Inquiry,
     );
 
     tracing::info!("Migration done");

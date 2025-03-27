@@ -2,7 +2,6 @@ use bdk::prelude::*;
 
 pub mod components;
 pub mod config;
-pub mod layout;
 pub mod pages;
 
 pub mod service {

@@ -12,13 +12,14 @@ ifneq ("$(PROFILE)","default")
 endif
 
 API_URL ?= https://voice-korea-api.dev.biyard.co
+CONSOLE_URL ?= https://console.dev.voice-korea.com
 ACCESS_KEY_ID ?= $(shell aws configure get aws_access_key_id $(AWS_FLAG))
 SECRET_ACCESS_KEY ?= $(shell aws configure get aws_secret_access_key $(AWS_FLAG))
 REGION ?= $(shell aws configure get region)
 RUSTFLAGS ?= -D warnings
 RUST_LOG ?= debug
 
-BUILD_ENV ?= ENV=$(ENV) VERSION=$(VERSION) COMMIT=$(COMMIT) RUST_LOG=$(RUST_LOG) AWS_REGION=${REGION} AWS_ACCESS_KEY_ID=${ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${SECRET_ACCESS_KEY} TABLE_NAME=$(VOICE_KOREA_TABLE_NAME) BASE_URL=$(BASE_URL) API_URL=${API_URL} RUSTFLAGS="${RUSTFLAGS}"
+BUILD_ENV ?= ENV=$(ENV) VERSION=$(VERSION) COMMIT=$(COMMIT) RUST_LOG=$(RUST_LOG) AWS_REGION=${REGION} AWS_ACCESS_KEY_ID=${ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${SECRET_ACCESS_KEY} TABLE_NAME=$(VOICE_KOREA_TABLE_NAME) BASE_URL=$(BASE_URL) API_URL=${API_URL} CONSOLE_URL=${CONSOLE_URL} RUSTFLAGS="${RUSTFLAGS}"
 
 ifeq ("$(ENV)","local")
 	MODE = development

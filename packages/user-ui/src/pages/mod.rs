@@ -1,6 +1,9 @@
 mod components;
 mod controller;
 mod i18n;
+pub mod layout;
+pub mod main_footer;
+pub mod main_header;
 pub mod page;
 
 mod coming_soon;

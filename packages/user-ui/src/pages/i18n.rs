@@ -16,6 +16,11 @@ translate! {
         ko: "참여 후기",
         en: "Participation Review"
     }
+
+    anonymity: {
+        ko: "익명",
+        en: "Anonymity"
+    }
 }
 
 translate! {

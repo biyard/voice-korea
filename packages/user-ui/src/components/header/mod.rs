@@ -264,17 +264,17 @@ pub fn Header(lang: Language) -> Element {
     };
 
     rsx! {
-        header { class: "flex justify-between my-6.5 h-[30px]",
+        header { class: "flex justify-between my-25 h-30 items-center",
             Link {
-                class: "flex flex-row items-center justify-around gap-1 h-full",
+                class: "flex flex-row items-center justify-around gap-4 h-full",
                 to: Route::MainPage {
                     lang: lang.clone(),
                 },
                 icons::Logo {}
-                div { class: "font-extrabold text-base text-[#34333e]", "VOICE KOREA" }
+                div { class: "font-extrabold text-base text-logo", "VOICE KOREA" }
             }
             //TODO: Add more menus
-            div { class: "flex font-bold justify-center items-center text-[#35343f] text-[15px] leading-[18.75px] gap-[45px]",
+            div { class: "flex font-bold justify-center items-center text-key-gray text-15 leading-19 gap-45",
                 Link {
                     //TODO: Change Target
                     to: Route::ComingSoonPage { lang },
@@ -323,12 +323,12 @@ pub fn Header(lang: Language) -> Element {
                 }
 
                 if email == "" {
-                    div { class: "flex flex-row w-[105px] h-[30px] justify-center items-center rounded-lg px-[5px] py-[10px] bg-white border border-[#35343f]",
+                    div { class: "flex flex-row w-fit h-fit justify-center items-center rounded-lg px-5 py-10 bg-white border border-key-gray",
                         "{translates.public_opinion_design}"
                     }
                 } else {
                     Link {
-                        class: "cursor-pointer w-[28px] h-[28px] rounded-full bg-[#D9D9D9]",
+                        class: "cursor-pointer w-28 h-28 rounded-full bg-profile-gray",
                         to: Route::ProfilePage { lang },
                     }
                 }

@@ -18,9 +18,9 @@ pub fn ProjectListPage(lang: Language) -> Element {
     tracing::debug!("deliberation projects: {:?}", projects);
 
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center",
-            div { class: "max-w-[1300px] mt-[60px] flex flex-col w-full justify-start items-start gap-[20px]",
-                div { class: "flex flex-row w-full justify-start items-start gap-[15px]",
+        div { class: "flex flex-col w-full justify-center items-center mt-80",
+            div { class: "max-w-1300 mt-60 flex flex-col w-full justify-start items-start gap-20",
+                div { class: "flex flex-row w-full justify-start items-start gap-15",
                     SearchProject {
                         lang,
                         onsearch: move |title: String| {
@@ -30,7 +30,7 @@ pub fn ProjectListPage(lang: Language) -> Element {
 
                     div { class: " w-full flex flex-row justify-end items-center",
                         details { class: "dropdown w-fit",
-                            summary { class: "btn text-[#222222] w-[150px] bg-transparent border border-[#E6E6E6] flex flex-row justify-between items-center hover:bg-[#E6E6E6] rounded-[8px] px-[15px] py-[10px]",
+                            summary { class: "btn text-text-black w-150 bg-transparent border border-input-border-gray flex flex-row justify-between items-center hover:bg-input-border-gray rounded-lg px-15 py-10",
 
                                 {ctrl.sorter().translate(&lang)}
                                 ChevronDown {
@@ -40,11 +40,11 @@ pub fn ProjectListPage(lang: Language) -> Element {
                                 }
                             }
                             ul {
-                                class: "menu dropdown-content bg-white rounded-[12px] z-[1] shadow overflow-hidden w-full",
+                                class: "menu dropdown-content bg-white rounded-xl z-[1] shadow overflow-hidden w-full",
                                 padding: "0px",
                                 for option in ProjectSorter::VARIANTS {
                                     li {
-                                        class: "hover:bg-[#E6E6E6] px-[20px] py-[15px] cursor-pointer overflow-hidden",
+                                        class: "hover:bg-input-border-gray px-20 py-15 cursor-pointer overflow-hidden",
                                         role: "button",
                                         onclick: move |_| {
                                             ctrl.sorter.set(*option);
@@ -69,11 +69,11 @@ pub fn SearchProject(lang: Language, onsearch: EventHandler<String>) -> Element 
 
     rsx! {
         // text write area
-        div { class: "max-w-[1300px] min-h-[48px] w-full relative border-[1px] border-[#E6E6E6] rounded-[8px] flex justify-start items-center px-[10px]",
-            Search { class: "[&>path]:stroke-[#AFAFAF] [&>circle]:stroke-[#AFAFAF]" }
+        div { class: "max-w-1300 min-h-48 w-full relative border-1 border-input-border-gray rounded-lg flex justify-start items-center px-10",
+            Search { class: "[&>path]:stroke-icon-gray [&>circle]:stroke-icon-gray" }
             // text input area
             input {
-                class: "w-full h-[48px] p-[10px] font-semibold text-[15px] leading-normal outline-none",
+                class: "w-full h-48 p-10 font-semibold text-[15px] leading-normal outline-none",
                 placeholder: tr.search,
                 value: "{keyword()}",
                 oninput: move |e| {
@@ -97,12 +97,12 @@ pub fn DeliberationList(lang: Language, projects: Vec<DeliberationProjectSummary
     let tr: ProjectListTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center gap-[10px]",
-            div { class: "flex flex-row w-full justify-start items-start font-semibold text-[18px] text-black",
+        div { class: "flex flex-col w-full justify-center items-center gap-10",
+            div { class: "flex flex-row w-full justify-start items-start font-semibold text-lg text-black",
                 "{tr.project}"
             }
 
-            div { class: "w-full grid grid-cols-3 gap-[20px]",
+            div { class: "w-full grid grid-cols-3 gap-20",
                 for deliberation in projects.clone() {
                     div {
                         class: "cursor-pointer",
