@@ -11,34 +11,34 @@ use crate::{
 #[component]
 pub fn ProjectBox(lang: Language, deliberation: DeliberationProjectSummary) -> Element {
     let project_url = asset!("/public/images/project.png").to_string();
-    let institution_badge_url = asset!("/public/images/institution_badge.png").to_string();
+    // let institution_badge_url = asset!("/public/images/institution_badge.png").to_string();
     let tr: ProjectBoxTranslate = translate(&lang);
 
     rsx! {
         div {
             class: "flex flex-col justify-end items-end rounded-[30px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)]",
             style: "background-image: url('{project_url}'); background-size: cover; height: 450px; width: 100%;",
-            div { class: "flex flex-col w-full justify-start items-start rounded-[20px] bg-white px-[16px] pt-[20px] pb-[12px]",
+            div { class: "flex flex-col w-full justify-start items-start rounded-[20px] bg-white px-16 pt-20 pb-12",
                 div { class: "flex flex-col gap-[16px] w-full",
-                    div { class: "flex flex-col gap-[8px]",
-                        div { class: "font-bold text-[18px] text-[#222222] h-[30px] truncate",
+                    div { class: "flex flex-col gap-8",
+                        div { class: "font-bold text-lg text-text-black h-30 truncate",
                             "{deliberation.title}"
                         }
-                        div { class: "flex flex-col gap-[12px]",
-                            div { class: "font-normal text-[#555462] text-[14px] h-[20px] truncate",
+                        div { class: "flex flex-col gap-12",
+                            div { class: "font-normal text-text-gray text-sm h-20 truncate",
                                 "{deliberation.description}"
                             }
-                            div { class: "flex flex-col gap-[8px]",
-                                div { class: "flex flex-row gap-[4px]",
-                                    img {
-                                        src: institution_badge_url,
-                                        width: 24,
-                                        height: 24,
-                                    }
-                                    div { class: "font-semibold text-[#222222] text-[14px]",
-                                        "Organizations"
-                                    }
-                                }
+                            div { class: "flex flex-col gap-8",
+                                // div { class: "flex flex-row gap-4",
+                                //     img {
+                                //         src: institution_badge_url,
+                                //         width: 24,
+                                //         height: 24,
+                                //     }
+                                //     div { class: "font-semibold text-text-black text-sm",
+                                //         "Organizations"
+                                //     }
+                                // }
 
                                 Label { name: deliberation.project_area.translate(&lang) }
                             }
@@ -46,25 +46,25 @@ pub fn ProjectBox(lang: Language, deliberation: DeliberationProjectSummary) -> E
                     }
 
                     div { class: "flex flex-row w-full justify-between items-center",
-                        div { class: "flex flex-row gap-[6px]",
+                        div { class: "flex flex-row gap-6",
                             User { width: "18", height: "18" }
-                            div { class: "flex flex-row gap-[4px]",
-                                div { class: "font-normal text-[14px] text-[#222222] leading-[17px]",
+                            div { class: "flex flex-row gap-4",
+                                div { class: "font-normal text-sm text-text-black leading-17",
                                     "{tr.participant}"
                                 }
-                                div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
+                                div { class: "font-bold text-sm text-text-black leading-17",
                                     {deliberation.participants.to_formatted_string(&Locale::en)}
                                 }
                             }
                         }
 
-                        div { class: "flex flex-row gap-[6px]",
+                        div { class: "flex flex-row gap-6",
                             Vote { width: "18", height: "18" }
-                            div { class: "flex flex-row gap-[4px]",
-                                div { class: "font-normal text-[14px] text-[#222222] leading-[17px]",
+                            div { class: "flex flex-row gap-4",
+                                div { class: "font-normal text-sm text-text-black leading-17",
                                     "{tr.vote}"
                                 }
-                                div { class: "font-bold text-[14px] text-[#222222] leading-[17px]",
+                                div { class: "font-bold text-sm text-text-black leading-17",
                                     {deliberation.votes.to_formatted_string(&Locale::en)}
                                 }
                             }
@@ -79,7 +79,7 @@ pub fn ProjectBox(lang: Language, deliberation: DeliberationProjectSummary) -> E
 #[component]
 pub fn Label(name: String) -> Element {
     rsx! {
-        div { class: "inline-block w-fit p-[7px] border-[2px] border-[#7c8292] bg-white font-medium text-[14px] leading-[22.4px] text-[#555462] rounded-[100px]",
+        div { class: "inline-block w-fit px-12 py-7 border-2 border-light-gray bg-white font-medium text-sm leading-22 text-text-gray rounded-[100px]",
             "{name}"
         }
     }
