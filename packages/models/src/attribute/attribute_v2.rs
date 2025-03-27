@@ -1,4 +1,5 @@
 #![allow(unused_variables)]
+use crate::RegionCode;
 #[allow(unused)]
 use crate::Result;
 use bdk::prelude::*;
@@ -101,6 +102,31 @@ pub enum RegionV2 {
     Gyeongnam = 55,
     #[translate(ko = "제주")]
     Jeju = 64,
+}
+
+impl From<RegionV2> for RegionCode {
+    fn from(region: RegionV2) -> Self {
+        match region {
+            RegionV2::Seoul => 2,
+            RegionV2::Busan => 51,
+            RegionV2::Daegu => 53,
+            RegionV2::Incheon => 32,
+            RegionV2::Gwangju => 62,
+            RegionV2::Daejeon => 42,
+            RegionV2::Ulsan => 52,
+            RegionV2::Sejong => 44,
+            RegionV2::Gyeonggi => 31,
+            RegionV2::Gangwon => 33,
+            RegionV2::Chungbuk => 43,
+            RegionV2::Chungnam => 41,
+            RegionV2::Jeonbuk => 63,
+            RegionV2::Jeonnam => 61,
+            RegionV2::Gyeongbuk => 54,
+            RegionV2::Gyeongnam => 55,
+            RegionV2::Jeju => 64,
+            _ => 0,
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default, ApiModel, Translate)]

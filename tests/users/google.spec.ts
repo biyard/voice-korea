@@ -12,20 +12,31 @@ const timeouts = {
   url: parseInt(process.env.URL_TIMEOUT || "7000", 10)
 };
 
-test('Google OAuth Login and Save Session', async () => {
-    const browser = await chromium.launch({ 
-        headless: false, 
-        args: [
-            '--disable-blink-features=AutomationControlled',
-            '--no-sandbox',
-            '--disable-web-security',
-            '--disable-infobars',
-            '--disable-extensions',
-            '--start-maximized',
-            '--window-size=1280,720'
-        ]
-    });
+let browserInstance: any = null;
 
+async function getBrowserInstance() {
+    if (!browserInstance) {
+        browserInstance = await chromium.launch({
+            headless: true,
+            args: [
+                '--disable-blink-features=AutomationControlled',
+                '--no-sandbox',
+                '--disable-web-security',
+                '--disable-infobars',
+                '--disable-extensions',
+                '--start-maximized',
+                '--window-size=1280,720'
+            ]
+        });
+    }
+    return browserInstance;
+}
+
+test.describe.configure({ mode: 'serial' });
+
+test('Google OAuth Login and Save Session', async () => {
+
+    const browser = await getBrowserInstance();
     const context = await browser.newContext();
     const page = await context.newPage();
 
@@ -88,8 +99,15 @@ test('Google OAuth Login and Save Session', async () => {
     console.log('Google OAuth login session saved!');
 
 
+    await context.close();
+    // await browser.close();
+
+});
 
 
-    await browser.close();
-
+test.afterAll(async () => {
+    if (browserInstance) {
+        await browserInstance.close();
+        browserInstance = null;
+    }
 });
