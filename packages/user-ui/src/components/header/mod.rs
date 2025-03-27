@@ -321,8 +321,16 @@ pub fn Header(lang: Language) -> Element {
                         "{translates.logout}"
                     }
                 }
-                div { class: "flex flex-row w-fit h-fit justify-center items-center rounded-lg px-[5px] py-[10px] bg-white border border-[#35343f]",
-                    "{translates.public_opinion_design}"
+
+                if email == "" {
+                    div { class: "flex flex-row w-fit h-fit justify-center items-center rounded-lg px-[5px] py-[10px] bg-white border border-[#35343f]",
+                        "{translates.public_opinion_design}"
+                    }
+                } else {
+                    Link {
+                        class: "cursor-pointer w-[28px] h-[28px] rounded-full bg-[#D9D9D9]",
+                        to: Route::ProfilePage { lang },
+                    }
                 }
             }
         }
