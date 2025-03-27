@@ -1,5 +1,6 @@
 use bdk::prelude::*;
 
+use by_components::icons::alignments::AlignJustify;
 use dioxus_translate::{translate, Language};
 
 use crate::{
@@ -14,6 +15,7 @@ use crate::{
 #[component]
 pub fn MainHeader(lang: Language) -> Element {
     let translates: HeaderTranslate = translate(&lang);
+
     let user_service: UserService = use_context();
     let mut popup_service: PopupService = use_context();
 
@@ -41,6 +43,143 @@ pub fn MainHeader(lang: Language) -> Element {
                 .with_title(translates.login);
         }
     };
+
+    rsx! {
+        div { class: "block max-[1300px]:!hidden",
+            MainDesktopHeader { lang, email: email.clone(), onclick: onclick.clone() }
+        }
+        div { class: "hidden max-[1300px]:!block",
+            MainMobileHeader { lang, email, onclick }
+        }
+    }
+}
+
+#[component]
+pub fn MainMobileHeader(
+    lang: Language,
+    email: String,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
+    let nav = use_navigator();
+    let translates: HeaderTranslate = translate(&lang);
+    let mut expanded = use_signal(|| false);
+    let custom_class = "fixed top-0 left-0 z-100";
+
+    rsx! {
+        div { class: "{custom_class} w-full h-70 flex flex-row items-center justify-between bg-white px-[20px]",
+            button {
+                class: "cursor-pointer flex flex-row items-center justify-around gap-4 h-full w-fit",
+                onclick: move |_| {
+                    nav.push(Route::MainPage { lang });
+                    expanded.set(false);
+                },
+                icons::Logo {}
+                div { class: "font-extrabold text-base text-logo", "VOICE KOREA" }
+            }
+            button {
+                onclick: move |_| {
+                    expanded.set(!expanded());
+                },
+                AlignJustify { class: "cursor-pointer w-[30px] h-[30px] text-black" }
+            }
+        }
+
+        if expanded() {
+            div { class: "fixed top-70 left-0 w-full h-full grow bg-white flex flex-col items-start text-black z-100 px-20 py-[20px]",
+                div { class: "flex flex-col font-bold justify-start items-start text-key-gray text-15 leading-19",
+                    A { lang, href: "/#service",
+                        button {
+                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                            onclick: move |_| {
+                                expanded.set(false);
+                            },
+                            {translates.service}
+                        }
+                    }
+                    A { lang, href: "/#project",
+                        button {
+                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                            onclick: move |_| {
+                                expanded.set(false);
+                            },
+                            {translates.project}
+                        }
+                    }
+                    A { lang, href: "/#institution",
+                        button {
+                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                            onclick: move |_| {
+                                expanded.set(false);
+                            },
+                            {translates.organization}
+                        }
+                    }
+                    A { lang, href: "/#price",
+                        button {
+                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                            onclick: move |_| {
+                                expanded.set(false);
+                            },
+                            {translates.plan}
+                        }
+                    }
+                    A { lang, href: "/#inquiry",
+                        button {
+                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                            onclick: move |_| {
+                                expanded.set(false);
+                            },
+                            {translates.contact}
+                        }
+                    }
+                    A { lang, href: "/#footer",
+                        button {
+                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                            onclick: move |_| {
+                                expanded.set(false);
+                            },
+                            {translates.guide}
+                        }
+                    }
+
+                    button {
+                        class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                        onclick: move |e: Event<MouseData>| {
+                            onclick.call(e);
+                            expanded.set(false);
+                        },
+                        div {
+                            if email == "" {
+                                "{translates.login}"
+                            } else {
+                                "{translates.logout}"
+                            }
+                        }
+                    }
+
+                    if email != "" {
+                        button {
+                            class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
+                            onclick: move |_| {
+                                nav.push(Route::ProfilePage { lang });
+                                expanded.set(false);
+                            },
+                            {translates.my_profile}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn MainDesktopHeader(
+    lang: Language,
+    email: String,
+    onclick: EventHandler<MouseEvent>,
+) -> Element {
+    let translates: HeaderTranslate = translate(&lang);
 
     rsx! {
         div { class: "fixed top-0 left-0 backdrop-blur-[20px] w-screen h-80 overflow-hidden flex items-center justify-center z-100",
@@ -141,6 +280,11 @@ translate! {
         ko: "가이드",
         en: "Guide"
     },
+
+    my_profile: {
+        ko: "나의 프로필",
+        en: "My Profile"
+    }
 
     public_opinion_design: {
         ko: "공론 조사 설계",

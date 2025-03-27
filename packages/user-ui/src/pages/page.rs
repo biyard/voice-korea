@@ -230,18 +230,18 @@ pub fn DeliberationInstitution(lang: Language, institutions: Vec<OrganizationSum
         div {
             id: "institution",
             class: "flex flex-col w-full justify-center items-center",
-            div { class: "flex flex-col w-full justify-center items-center py-120 bg-gradient-to-b from-[#dbeae8] to-[#ffffff]",
-                div { class: "flex flex-col w-full max-w-[1300px] justify-center items-center px-[10px] gap-[30px]",
-                    div { class: "flex flex-col w-full gap-[10px]",
-                        div { class: "font-bold text-[28px] text-[#555462] leading-[32px]",
+            div { class: "flex flex-col w-full justify-center items-center py-120 bg-gradient-to-b from-gradient-green to-white",
+                div { class: "flex flex-col w-full max-w-1300 justify-center items-center px-10 gap-30",
+                    div { class: "flex flex-col w-full gap-10",
+                        div { class: "font-bold text-[28px] text-text-gray leading-32",
                             "{tr.institution}"
                         }
-                        div { class: "font-normal text-[15px] text-[#555462] leading-[22.5px]",
+                        div { class: "font-normal text-[15px] text-text-gray leading-22",
                             "{tr.institution_description}"
                         }
                     }
-                    div { class: "flex flex-col w-full gap-[40px]",
-                        div { class: "grid grid-cols-5 gap-[20px]",
+                    div { class: "flex flex-col w-full gap-40",
+                        div { class: "grid max-[500px]:grid-cols-1 max-[700px]:grid-cols-2 max-[1000px]:grid-cols-3 max-[1300px]:grid-cols-4 grid-cols-5 gap-20",
                             for institution in institutions {
                                 Link {
                                     to: Route::GovernancePage {
