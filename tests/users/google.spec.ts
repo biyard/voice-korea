@@ -105,9 +105,9 @@ test('Google OAuth Login and Save Session', async () => {
 });
 
 
-test.afterAll(async () => {
-    if (browserInstance) {
-        await browserInstance.close();
-        browserInstance = null;
-    }
-});
+// test.afterAll(async () => {
+//     if (browserInstance) {
+//         await browserInstance.close();
+//         browserInstance = null;
+//     }
+// });
