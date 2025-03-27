@@ -3,6 +3,7 @@ mod auth;
 pub mod error;
 mod group;
 mod groups;
+mod inquiries;
 mod metadata;
 mod organizations;
 mod pagination;
@@ -54,6 +55,7 @@ pub mod prelude {
     pub use crate::error::*;
     pub use crate::group::*;
     pub use crate::groups::*;
+    pub use crate::inquiries::*;
     pub use crate::invitations::*;
     pub use crate::metadata::*;
     pub use crate::organizations::*;

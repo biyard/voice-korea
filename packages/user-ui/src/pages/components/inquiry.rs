@@ -108,23 +108,26 @@ pub fn InquirySection(
                         button {
                             class: "flex flex-row w-full justify-center items-center bg-button-primary rounded-xl px-16 py-12 font-semibold text-base text-white cursor-pointer",
                             onclick: move |_| {
-                                let name = name();
-                                let email = email();
-                                let message = message();
+                                let name_value = name();
+                                let email_value = email();
+                                let message_value = message();
                                 let re = Regex::new(r"^[a-zA-Z0-9+-\_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
                                     .unwrap();
-                                if !re.is_match(&email) {
+                                if !re.is_match(&email_value) {
                                     email_error.set(true);
                                 } else {
                                     email_error.set(false);
                                 }
-                                if message == "" {
+                                if message_value == "" {
                                     message_error.set(true);
                                 } else {
                                     message_error.set(false);
                                 }
                                 if !email_error() && !message_error() {
-                                    send_inquiry.call((name, email, message));
+                                    send_inquiry.call((name_value, email_value, message_value));
+                                    email.set("".to_string());
+                                    message.set("".to_string());
+                                    name.set("".to_string());
                                 }
                             },
                             "{tr.inquiry}"

@@ -20,11 +20,15 @@ use crate::routes::Route;
 use super::controller;
 #[component]
 pub fn MainPage(lang: Language) -> Element {
-    let ctrl = controller::Controller::init(lang.clone())?;
+    let mut ctrl = controller::Controller::init(lang.clone())?;
     let data = ctrl.data()?;
     let deliberations = data.projects;
     let institutions = data.organizations;
     let deliberation_reviews = data.reviews;
+
+    let comments = ctrl.get_comments();
+    let page = ctrl.page();
+    let total_pages = ctrl.total_pages();
 
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center pt-80",
@@ -40,13 +44,21 @@ pub fn MainPage(lang: Language) -> Element {
                     }
                     InquirySection {
                         lang,
-                        send_inquiry: move |(name, email, message): (String, String, String)| {
-                            ctrl.send_inquiry(name, email, message);
+                        send_inquiry: move |(name, email, message): (String, String, String)| async move {
+                            ctrl.send_inquiry(name, email, message).await;
                         },
                     }
                 }
 
-                ReviewSection { lang, deliberation_reviews }
+                ReviewSection {
+                    lang,
+                    comments,
+                    page,
+                    total_pages,
+                    set_page: move |page: i64| {
+                        ctrl.set_page(page as usize);
+                    },
+                }
             }
         }
     }
