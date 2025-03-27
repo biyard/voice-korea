@@ -66,7 +66,9 @@ pub fn MainPage(lang: Language) -> Element {
 
 #[component]
 pub fn MainSection(lang: Language) -> Element {
+    let nav = use_navigator();
     let background_url = asset!("/public/images/main_image.jpeg").to_string();
+    let console_url = &crate::config::get().console_url;
     let tr: MainBannerTranslate = translate(&lang);
     rsx! {
         div {
@@ -87,7 +89,9 @@ pub fn MainSection(lang: Language) -> Element {
                     //TODO:Go to public opinion survey page
                     button {
                         class: "relative flex flex-row px-16 py-12 bg-[#5b373b] border border-white rounded-xl font-semibold text-base text-white cursor-pointer",
-                        onclick: move |_| {},
+                        onclick: move |_| {
+                            nav.push(format!("{}", console_url));
+                        },
                         "{tr.button}"
                     }
                 }

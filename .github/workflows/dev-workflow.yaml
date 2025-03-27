@@ -57,6 +57,7 @@ jobs:
           FIREBASE_APP_ID: "${{ secrets.FIREBASE_APP_ID }}"
           FIREBASE_MEASUREMENT_ID: "${{ secrets.FIREBASE_MEASUREMENT_ID }}"
           API_URL: https://voice-korea-api.dev.biyard.co
+          CONSOLE_URL: https://console.dev.voice-korea.com
           ENV: dev
           STACK: voice-korea-user-dev-stack
           SERVICE: user-ui

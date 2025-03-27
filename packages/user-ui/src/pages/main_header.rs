@@ -179,7 +179,9 @@ pub fn MainDesktopHeader(
     email: String,
     onclick: EventHandler<MouseEvent>,
 ) -> Element {
+    let nav = use_navigator();
     let tr: HeaderTranslate = translate(&lang);
+    let console_url = &crate::config::get().console_url;
 
     rsx! {
         div { class: "fixed top-0 left-0 w-screen h-80 overflow-hidden flex items-center justify-center z-100 bg-white",
@@ -210,7 +212,11 @@ pub fn MainDesktopHeader(
                     }
 
                     if email == "" {
-                        div { class: "flex flex-row w-fit h-fit justify-center items-center rounded-lg px-5 py-10 bg-white border border-key-gray",
+                        div {
+                            class: "cursor-pointer flex flex-row w-fit h-fit justify-center items-center rounded-lg px-5 py-10 bg-white border border-key-gray",
+                            onclick: move |_| {
+                                nav.push(format!("{}", console_url));
+                            },
                             "{tr.deliberation_design}"
                         }
                     } else {

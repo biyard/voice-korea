@@ -18,6 +18,7 @@ pub struct Config {
     pub commit: &'static str,
     pub log_level: Level,
     pub api_url: &'static str,
+    pub console_url: &'static str,
 
     pub firebase: FirebaseConfig,
 }
@@ -36,6 +37,8 @@ impl Default for Config {
                 _ => Level::INFO,
             },
             api_url: option_env!("API_URL").unwrap_or("https://voice-korea-api.dev.biyard.co"),
+            console_url: option_env!("CONSOLE_URL")
+                .unwrap_or("https://console.dev.voice-korea.com"),
             firebase: FirebaseConfig {
                 api_key: option_env!("FIREBASE_API_KEY")
                     .expect("You must set FIREBASE_API_KEY")
