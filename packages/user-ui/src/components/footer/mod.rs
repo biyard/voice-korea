@@ -15,42 +15,42 @@ pub fn Footer(lang: Language) -> Element {
     let survey_participation = asset!("/public/images/survey_participation.png");
 
     rsx! {
-        footer { class: "flex flex-col w-full justify-center items-center  bg-[#1f1d2c]",
-            div { class: "flex flex-col w-full justify-center items-center pt-[80px] pb-[135px] gap-[50px]",
-                div { class: "flex flex-col w-full justify-center items-center gap-[10px]",
-                    div { class: "font-bold text-[28px] leading-8 text-white", "{tr.guideline}" }
-                    div { class: "font-normal text-[15px] text-center leading-[22px] text-white whitespace-pre-line",
+        footer { class: "flex flex-col w-full justify-center items-center  bg-footer",
+            div { class: "flex flex-col w-full justify-center items-center pt-80 pb-135 gap-50",
+                div { class: "flex flex-col w-full justify-center items-center gap-10",
+                    div { class: "font-bold text-[28px] leading-32 text-white", "{tr.guideline}" }
+                    div { class: "font-normal text-[15px] text-center leading-22 text-white whitespace-pre-line",
                         "{tr.guideline_desc}"
                     }
                 }
 
-                div { class: "flex max-[750px]:flex-col flex-row justify-center items-center gap-[20px]",
-                    div { class: "flex flex-col gap-[20px] justify-center items-center",
+                div { class: "flex max-[750px]:flex-col flex-row justify-center items-center gap-20",
+                    div { class: "flex flex-col gap-20 justify-center items-center",
                         img { src: "{survey_design}", width: 310, height: 200 }
-                        div { class: "flex flex-row w-[220px] justify-center items-center gap-[5px] px-[16px] py-[12px] bg-transparent border border-white rounded-[12px]",
-                            div { class: "w-[24px] h-[24px]",
+                        div { class: "flex flex-row w-fit justify-center items-center gap-5 px-16 py-12 bg-transparent border border-white rounded-xl",
+                            div { class: "w-24 h-24",
                                 Upload { width: "24", height: "24", fill: "none" }
                             }
                             button {
-                                class: "font-semibold text-white text-[16px] leading-6 cursor-pointer",
+                                class: "font-semibold text-white text-base leading-24 cursor-pointer",
                                 //TODO: Go to public opinion survey participation guide
                                 onclick: move |_| {},
                                 "{tr.public_opinion_participation_guide}"
                             }
                         }
                     }
-                    div { class: "flex flex-col gap-[20px] justify-center items-center",
+                    div { class: "flex flex-col gap-20 justify-center items-center",
                         img {
                             src: "{survey_participation}",
                             width: 310,
                             height: 200,
                         }
-                        div { class: "flex flex-row w-[250px] justify-center items-center gap-[5px] px-[16px] py-[12px] bg-transparent border border-white rounded-[12px]",
-                            div { class: "w-[24px] h-[24px]",
+                        div { class: "flex flex-row w-fit justify-center items-center gap-5 px-16 py-12 bg-transparent border border-white rounded-xl",
+                            div { class: "w-24 h-24",
                                 Upload { width: "24", height: "24", fill: "none" }
                             }
                             button {
-                                class: "font-semibold text-white text-[16px] leading-6 cursor-pointer",
+                                class: "font-semibold text-white text-base leading-24 cursor-pointer",
                                 //TODO: Go to the Public Opinion Survey Design Guide
                                 onclick: move |_| {},
                                 "{tr.public_opinion_survey_design_console_guide}"
@@ -59,15 +59,15 @@ pub fn Footer(lang: Language) -> Element {
                     }
                 }
             }
-            div { class: "flex flex-row w-full h-[1px] bg-white opacity-5" }
-            div { class: "flex flex-row w-full max-[600px]:gap-1 gap-30 py-10 justify-center items-center text-sm font-semibold text-white/50",
+            div { class: "flex flex-row w-full h-1 bg-white opacity-5" }
+            div { class: "flex flex-row w-full max-[600px]:gap-4 gap-120 py-40 justify-center items-center text-sm font-semibold text-white/50",
                 div { "© 2025 Biyard. All Rights Reserved." }
-                div { class: "font-extrabold text-base flex gap-1",
+                div { class: "font-extrabold text-base flex gap-4",
                     icons::Logo { class: "fill-white/50" }
                     "VOICE KOREA"
                 }
                 //TODO: Add more menus
-                div { class: "flex gap-5",
+                div { class: "flex gap-20",
                     Link {
                         //TODO: Change Target
                         to: Route::MainPage {
