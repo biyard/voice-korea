@@ -9,18 +9,21 @@ use crate::{
 };
 
 #[component]
-pub fn ReviewSection(lang: Language, public_opinion_reviews: Vec<Review>) -> Element {
+pub fn ReviewSection(lang: Language, deliberation_reviews: Vec<Review>) -> Element {
     let tr: ReviewSectionTranslate = translate(&lang);
+
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center py-[100px] bg-gradient-to-b from-[#f1f3fa] to-[#a6e0d3] gap-[30px]",
             div { class: "font-bold text-[28px] leading-[32px] text-[#555462]",
                 "{tr.participation_review}"
             }
             div { class: "flex flex-row w-full justify-center items-center gap-[20px]",
-                div { class: "bg-[#8095ea] rounded-[8px] px-[10px] py-[8px]", LeftArrow {} }
+                div { class: "bg-[#8095ea] rounded-[8px] px-[10px] py-[8px]",
+                    LeftArrow { stroke: "#ffffff" }
+                }
                 div { class: "flex flex-row w-full max-w-[1300px]",
-                    div { class: "grid grid-cols-3 gap-[20px]",
-                        for review in public_opinion_reviews {
+                    div { class: "w-full grid gap-[20px] grid-cols-3",
+                        for review in deliberation_reviews.clone() {
                             ReviewItem { review }
                         }
                     }

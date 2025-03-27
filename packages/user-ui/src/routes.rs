@@ -33,6 +33,12 @@ pub enum Route {
             ComingSoonPage { lang: Language },
         #[end_layout]
     #[end_nest]
+
+    #[nest("/:lang")]
+        #[route("/education/:resource_id")]
+        EducationPage { lang: Language, resource_id: i64 },
+    #[end_nest]
+    
     #[redirect("/", || Route::MainPage { lang: Language::Ko })]
     #[route("/:..route")]
     NotFoundPage {

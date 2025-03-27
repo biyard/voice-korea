@@ -23,6 +23,7 @@ pub struct DeliberationBasicInfo {
     pub steps: Vec<Step>,
 
     #[api_model(one_to_many = deliberation_users, foreign_key = deliberation_id)]
+    #[serde(default)]
     pub members: Vec<DeliberationUser>,
 
     #[api_model(many_to_many = deliberation_resources, table_name = resources, foreign_primary_key = resource_id, foreign_reference_key = deliberation_id)]

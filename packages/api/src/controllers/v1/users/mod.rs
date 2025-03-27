@@ -75,12 +75,20 @@ impl UserController {
     }
 
     pub async fn get_user(
-        State(_ctrl): State<UserController>,
+        State(ctrl): State<UserController>,
         Extension(_auth): Extension<Option<Authorization>>,
-        Path(id): Path<String>,
+        Path(id): Path<i64>,
     ) -> Result<Json<User>> {
         tracing::debug!("get_user {:?}", id);
-        Ok(Json(User::default()))
+
+        let user = User::query_builder()
+            .id_equals(id)
+            .query()
+            .map(User::from)
+            .fetch_one(&ctrl.pool)
+            .await?;
+
+        Ok(Json(user))
     }
 
     pub async fn list_user(
@@ -191,15 +199,15 @@ impl UserController {
     }
 
     pub async fn login(&self, body: UserLoginRequest) -> Result<JsonWithHeaders<User>> {
-        let user = self
-            .repo
-            .find_one(&UserReadAction::new().get_user(
-                body.email.clone(),
-                get_hash_string(body.password.as_bytes()),
-            ))
+        let user = User::query_builder()
+            .email_equals(body.email.clone())
+            .password_equals(get_hash_string(body.password.as_bytes()))
+            .query()
+            .map(User::from)
+            .fetch_one(&self.pool)
             .await
             .map_err(|e| {
-                tracing::error!("Failed to find user: {}", e);
+                tracing::error!("Failed to find user: {}", e,);
                 ApiError::AuthKeyNotMatch("check your password".to_string())
             })?;
 

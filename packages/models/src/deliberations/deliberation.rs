@@ -3,6 +3,7 @@ use crate::deliberation_response::DeliberationResponse;
 use crate::deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
 
 use bdk::prelude::*;
+use chrono::Utc;
 use validator::Validate;
 
 use crate::deliberation_report::DeliberationReport;
@@ -50,13 +51,14 @@ pub struct Deliberation {
     pub resources: Vec<ResourceFile>,
 
     #[api_model(one_to_many = deliberation_reports, foreign_key = deliberation_id)]
+    #[serde(default)]
     pub reports: Vec<DeliberationReport>,
 
     #[api_model(many_to_many = deliberation_surveys, table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = deliberation_id)]
     #[serde(default)]
     pub surveys: Vec<SurveyV2>,
     // Third page of creating a deliberation
-    #[api_model(many_to_many = deliberations_users, table_name = users, foreign_primary_key = user_id, foreign_reference_key = deliberation_id)]
+    #[api_model(many_to_many = deliberation_users, table_name = users, foreign_primary_key = user_id, foreign_reference_key = deliberation_id)]
     #[serde(default)]
     pub members: Vec<DeliberationUser>,
     #[api_model(one_to_many = deliberation_votes, foreign_key = deliberation_id)]
@@ -78,5 +80,39 @@ pub struct Deliberation {
     #[serde(default)]
     pub responses: Vec<DeliberationResponse>,
     #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id, aggregator = count)]
+    #[serde(default)]
     pub response_count: i64,
+}
+
+#[derive(Translate, PartialEq, Default, Debug)]
+pub enum DeliberationStatus {
+    #[default]
+    #[translate(ko = "준비", en = "Ready")]
+    Ready,
+    #[translate(ko = "진행", en = "InProgress")]
+    InProgress,
+    #[translate(ko = "마감", en = "Finish")]
+    Finish,
+}
+
+impl Deliberation {
+    pub fn status(&self) -> DeliberationStatus {
+        let started_at = self.started_at;
+        let ended_at = self.ended_at;
+
+        let now = Utc::now();
+        let current = now.timestamp();
+
+        if started_at > 10000000000 {
+            return DeliberationStatus::default();
+        }
+
+        if started_at > current {
+            DeliberationStatus::Ready
+        } else if ended_at < current {
+            DeliberationStatus::Finish
+        } else {
+            DeliberationStatus::InProgress
+        }
+    }
 }

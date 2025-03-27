@@ -1,6 +1,7 @@
 pub mod landing;
 pub mod metadata;
 pub mod organizations;
+pub mod profile;
 pub mod projects;
 pub mod reviews;
 
@@ -33,6 +34,10 @@ impl Version2Controller {
             .nest(
                 "/landing",
                 landing::LandingController::new(pool.clone()).route()?,
+            )
+            .nest(
+                "/profile",
+                profile::ProfileController::new(pool.clone()).route()?,
             )
             .nest(
                 "/projects",

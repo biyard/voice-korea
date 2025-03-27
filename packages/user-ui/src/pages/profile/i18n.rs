@@ -55,6 +55,11 @@ translate! {
         ko: "명 참여",
         en: " Participation"
     }
+
+    organization: {
+        ko: "조직",
+        en: "Organization"
+    }
 }
 
 translate! {
