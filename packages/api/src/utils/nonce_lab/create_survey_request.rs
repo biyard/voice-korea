@@ -1,4 +1,3 @@
-use attribute_v2::RegionV2;
 use models::{
     response::{AgeV3, Attribute},
     *,
@@ -112,26 +111,7 @@ impl From<PanelV2> for NonceLabQuota {
                     gender.push(g);
                 }
                 Attribute::Region(region_v2) => {
-                    let r = match region_v2 {
-                        RegionV2::Seoul => 02 as RegionCode,
-                        RegionV2::Busan => 051 as RegionCode,
-                        RegionV2::Daegu => 053 as RegionCode,
-                        RegionV2::Incheon => 032 as RegionCode,
-                        RegionV2::Gwangju => 062 as RegionCode,
-                        RegionV2::Daejeon => 042 as RegionCode,
-                        RegionV2::Ulsan => 052 as RegionCode,
-                        RegionV2::Sejong => 044 as RegionCode,
-                        RegionV2::Gyeonggi => 031 as RegionCode,
-                        RegionV2::Gangwon => 033 as RegionCode,
-                        RegionV2::Chungbuk => 043 as RegionCode,
-                        RegionV2::Chungnam => 041 as RegionCode,
-                        RegionV2::Jeonbuk => 063 as RegionCode,
-                        RegionV2::Jeonnam => 061 as RegionCode,
-                        RegionV2::Gyeongbuk => 054 as RegionCode,
-                        RegionV2::Gyeongnam => 055 as RegionCode,
-                        RegionV2::Jeju => 064 as RegionCode,
-                        _ => 0 as RegionCode,
-                    };
+                    let r = region_v2.into();
                     region.push(r);
                 }
                 Attribute::Salary(salary_v2) => {
