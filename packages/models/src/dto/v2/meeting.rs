@@ -28,8 +28,12 @@ pub struct MeetingInfo {
     pub media_region: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AttendeeInfo {
+    #[serde(rename = "AttendeeId")]
     pub attendee_id: String,
-    pub external_user_id: String,
+    #[serde(rename = "JoinToken")]
     pub join_token: String,
+    #[serde(rename = "ExternalUserId")]
+    pub external_user_id: String,
 }
