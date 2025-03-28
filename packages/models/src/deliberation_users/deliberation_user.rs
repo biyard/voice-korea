@@ -14,6 +14,7 @@ pub struct DeliberationUser {
     pub updated_at: i64,
 
     #[api_model(many_to_one = users, action = create)]
+    #[serde(default)]
     pub user_id: i64,
     #[api_model(many_to_one = organizations)]
     pub organization_id: i64,

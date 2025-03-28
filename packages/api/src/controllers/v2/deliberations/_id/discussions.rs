@@ -79,7 +79,7 @@ impl DiscussionController {
                     ended_at: None,
                     name: None,
                     description: None,
-                    meeting_id: Some(meeting.id),
+                    meeting_id: Some(meeting.meeting_id.unwrap_or_default()),
                 },
             )
             .await

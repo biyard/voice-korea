@@ -221,15 +221,12 @@ pub fn Video(
                 div { class: "flex flex-row w-full justify-end items-end",
                     div {
                         class: "cursor-pointer flex flex-row min-w-[240px] px-[10px] py-[8px] justify-center items-center bg-[#8095EA] rounded-[8px]",
+                        onclick: move |_| {
+                            start_meeting.call(discussion.id);
+                        },
                         visibility: if get_discussion_status(discussion.started_at, discussion.ended_at)
     != DiscussionStatus::InProgress { "hidden" },
-                        div {
-                            class: "font-medium text-[16px] text-white",
-                            onclick: move |_| {
-                                start_meeting.call(discussion.id);
-                            },
-                            "{tr.involved}"
-                        }
+                        div { class: "font-medium text-[16px] text-white", "{tr.involved}" }
                     }
                 }
             }
@@ -357,9 +354,12 @@ impl Controller {
 
     pub async fn start_meeting(&self, discussion_id: i64) {
         let project_id = self.project_id();
-        let _ = Discussion::get_client(&crate::config::get().api_url)
+        let meeting = Discussion::get_client(&crate::config::get().api_url)
             .start_meeting(project_id, discussion_id)
-            .await;
+            .await
+            .unwrap_or_default();
+
+        tracing::debug!("meeting: {:?}", meeting);
     }
 
     pub async fn download_file(&self, name: String, url: Option<String>) {
