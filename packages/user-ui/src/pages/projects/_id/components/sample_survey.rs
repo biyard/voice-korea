@@ -66,7 +66,7 @@ pub fn SampleSurvey(
     rsx! {
         div {
             id: "sample-survey",
-            class: "flex flex-col w-full h-fit justify-center items-center",
+            class: "max-[1000px]:px-30 flex flex-col w-full h-fit justify-center items-center",
             ..attributes,
 
             if step == SurveyStep::Display {

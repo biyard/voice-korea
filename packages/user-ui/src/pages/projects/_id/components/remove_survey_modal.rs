@@ -8,20 +8,20 @@ pub fn RemoveSurveyModal(
 ) -> Element {
     let tr: RemoveSurveyModalTranslate = translate(&lang);
     rsx! {
-        div { class: "flex flex-col min-w-[600px] max-[600px]:min-w-[350px] justify-start items-start gap-[40px]",
-            div { class: "font-medium text-[14px] text-[#222222] leading-[22px] whitespace-pre-line",
+        div { class: "flex flex-col min-w-600 max-[600px]:min-w-320 justify-start items-start gap-40",
+            div { class: "font-medium text-base text-text-black leading-22 whitespace-pre-line",
                 "{tr.description}"
             }
-            div { class: "flex flex-row w-full justify-start items-center gap-[20px]",
+            div { class: "flex flex-row w-full justify-start items-center gap-20",
                 div {
-                    class: "cursor-pointer flex flex-row bg-[#8095EA] rounded-[8px] px-[14px] py-[8px] font-semibold text-white text-[16px]",
+                    class: "cursor-pointer flex flex-row bg-button-primary rounded-lg px-14 py-8 font-semibold text-white text-base",
                     onclick: move |e: Event<MouseData>| {
                         onclose.call(e);
                     },
                     "{tr.maintain}"
                 }
                 div {
-                    class: "cursor-pointer flex flex-row bg-white px-[14px] py-[8px] font-semibold text-[#222222] text-[16px]",
+                    class: "cursor-pointer flex flex-row bg-white px-14 py-8 font-semibold text-text-black text-base",
                     onclick: move |e: Event<MouseData>| {
                         onremove.call(e);
                     },

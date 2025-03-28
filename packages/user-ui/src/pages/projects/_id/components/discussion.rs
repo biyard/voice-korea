@@ -54,11 +54,11 @@ pub fn DiscussionPage(
     rsx! {
         div {
             id: "discussion",
-            class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
+            class: "max-[1000px]:px-30 flex flex-col w-full h-fit bg-box-gray gap-20",
             ..attributes,
             // header
-            div { class: "w-full flex flex-row justify-between items-center mt-[28px]",
-                div { class: " font-semibold text-[20px]", "{tab_title}" }
+            div { class: "w-full flex flex-row max-[500px]:flex-col max-[500px]:items-start max-[500px]:justify-start max-[500px]:gap-5 justify-between items-center mt-28",
+                div { class: " font-semibold text-xl", "{tab_title}" }
                 div { class: "font-medium text-[15px] text-black",
                     {
                         format!(
@@ -71,7 +71,7 @@ pub fn DiscussionPage(
             }
 
             // information section
-            div { class: "flex flex-col gap-[10px]",
+            div { class: "flex flex-col gap-10",
 
                 // introduction section
                 DiscussionIntroduction {
@@ -90,17 +90,17 @@ pub fn DiscussionPage(
                 }
 
                 //Related Data
-                div { class: "w-full flex flex-col rounded-[8px] mb-[40px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
+                div { class: "w-full flex flex-col rounded-lg mb-40 bg-white justify-start items-center py-14 px-20",
                     // title and button
-                    div { class: "w-full flex justify-start items-center gap-[13px]",
-                        div { class: "w-[180px] flex flex-row items-center text-[16px] font-bold",
+                    div { class: "w-full flex justify-start items-center gap-13",
+                        div { class: "w-180 flex flex-row items-center text-base font-bold",
                             span { "{tr.related_materials_title}" }
                         }
                         //file
-                        div { class: "flex flex-wrap flex-1 justify-start items-center gap-[8px]",
+                        div { class: "flex flex-wrap flex-1 justify-start items-center gap-8",
                             for resource in files {
                                 div {
-                                    class: "cursor-pointer flex flex-row justify-start items-center rounded-[100px] bg-[#7C8292] gap-[4px] px-[12px] py-[4px]",
+                                    class: "cursor-pointer flex flex-row justify-start items-center rounded-[100px] bg-light-gray gap-4 px-12 py-4",
                                     onclick: {
                                         let files = resource.files.clone();
                                         move |_| {
@@ -117,11 +117,9 @@ pub fn DiscussionPage(
                                     Download2 {
                                         width: "18",
                                         height: "18",
-                                        class: " [&>path]:fill-[#ffffff]",
+                                        class: " [&>path]:fill-white",
                                     }
-                                    div { class: "font-medium text-[14px] text-white",
-                                        {resource.title}
-                                    }
+                                    div { class: "font-medium text-sm text-white", {resource.title} }
                                 }
                             }
                         }
@@ -142,9 +140,9 @@ pub fn VideoDiscussion(
     let tr: DiscussionTranslate = translate(&lang);
 
     rsx! {
-        div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-start py-[14px] px-[20px]",
+        div { class: "w-full flex flex-col rounded-lg bg-white justify-start items-start py-14 px-20",
             div {
-                class: "w-full flex justify-start items-center text-[16px] font-bold cursor-pointer",
+                class: "w-full flex justify-start items-center text-base font-bold cursor-pointer",
                 onclick: move |_| {
                     clicked_video.set(!clicked_video());
                 },
@@ -160,10 +158,10 @@ pub fn VideoDiscussion(
 
             if clicked_video() {
                 //line
-                hr { class: "w-full h-[1px] mt-[12px] mb-[12px] border-[#eee]" }
+                hr { class: "w-full h-1 mt-12 mb-12 border-line-gray" }
 
                 for (index , discussion) in discussions.iter().enumerate() {
-                    div { class: "flex flex-col w-full gap-[20px]",
+                    div { class: "flex flex-col w-full gap-20",
                         Video {
                             lang,
                             discussion: discussion.clone(),
@@ -187,26 +185,24 @@ pub fn Video(
     let tr: DiscussionTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-row w-full justify-start items-start gap-[20px] rounded-[8px]",
-            div { class: "w-[240px]",
+        div { class: "flex flex-row w-full justify-start items-start gap-20 rounded-lg",
+            div { class: "w-240",
                 img { src: asset!("/public/images/video.png"), width: 240 }
             }
 
             div { class: "flex flex-col w-full justify-between items-start",
-                div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
-                    div { class: "flex flex-col w-full gap-[5px]",
-                        div { class: "font-medium text-[14px] text-black leading-[17px]",
+                div { class: "flex flex-col w-full justify-start items-start gap-10",
+                    div { class: "flex flex-col w-full gap-5",
+                        div { class: "font-medium text-sm text-black leading-17",
                             {
                                 get_discussion_status(discussion.started_at, discussion.ended_at)
                                     .translate(&lang)
                             }
                         }
-                        div { class: "font-bold text-[18px] text-black leading-[22px]",
-                            "{discussion.name}"
-                        }
+                        div { class: "font-bold text-lg text-black leading-22", "{discussion.name}" }
                     }
 
-                    div { class: "font-medium text-[14px] text-[#6D6D6D]",
+                    div { class: "font-medium text-sm text-review-gray",
                         {
                             format!(
                                 "{} · {} {}",
@@ -220,11 +216,11 @@ pub fn Video(
 
                 div { class: "flex flex-row w-full justify-end items-end",
                     div {
-                        class: "cursor-pointer flex flex-row min-w-[240px] px-[10px] py-[8px] justify-center items-center bg-[#8095EA] rounded-[8px]",
+                        class: "cursor-pointer flex flex-row min-w-240 px-10 py-8 justify-center items-center bg-button-primary rounded-lg",
                         visibility: if get_discussion_status(discussion.started_at, discussion.ended_at)
     != DiscussionStatus::InProgress { "hidden" },
                         div {
-                            class: "font-medium text-[16px] text-white",
+                            class: "font-medium text-base text-white",
                             onclick: move |_| {
                                 start_meeting.call(discussion.id);
                             },
@@ -236,7 +232,7 @@ pub fn Video(
         }
 
         if enable_bottom_line {
-            div { class: "flex flex-row w-full h-[1px] justify-start items-start bg-[#eeeeee]" }
+            div { class: "flex flex-row w-full h-1 justify-start items-start bg-line-gray" }
         }
     }
 }
@@ -251,9 +247,9 @@ pub fn DiscussionIntroduction(
     let tr: DiscussionTranslate = translate(&lang);
 
     rsx! {
-        div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-start py-[14px] px-[20px]",
+        div { class: "w-full flex flex-col rounded-lg bg-white justify-start items-start py-14 px-20",
             div {
-                class: "w-full flex justify-start items-center text-[16px] font-bold cursor-pointer",
+                class: "w-full flex justify-start items-center text-base font-bold cursor-pointer",
                 onclick: move |_| {
                     clicked_contents.set(!clicked_contents());
                 },
@@ -269,10 +265,10 @@ pub fn DiscussionIntroduction(
 
             if clicked_contents() {
                 //line
-                hr { class: "w-full h-[1px] mt-[12px] mb-[12px] border-[#eee]" }
+                hr { class: "w-full h-1 mt-12 mb-12 border-line-gray" }
 
-                div { class: "flex flex-col w-full justify-start items-start gap-[20px]",
-                    div { class: "font-bold text-[18px] text-black", "{description}" }
+                div { class: "flex flex-col w-full justify-start items-start gap-20",
+                    div { class: "font-bold text-lg text-black", "{description}" }
 
                     //table
 
@@ -290,24 +286,24 @@ pub fn DiscussionTable(lang: Language, discussion: DiscussionSummary) -> Element
     let tr: DiscussionTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-3/5 justify-start items-start border rounded-lg border-[#BFC8D9]",
-            div { class: "flex flex-row min-h-[55px] w-full justify-center items-center border-b border-b-[#BFC8D9] font-semibold text-[14px] text-[#7C8292]",
+        div { class: "flex flex-col w-3/5 justify-start items-start border rounded-lg border-discussion-border-gray",
+            div { class: "flex flex-row min-h-55 w-full justify-center items-center border-b border-b-discussion-border-gray font-semibold text-sm text-light-gray",
                 {formatted_timestamp(discussion.started_at)}
             }
-            div { class: "flex flex-row min-h-[55px] w-full justify-center items-center border-b border-b-[#BFC8D9] font-semibold text-[14px] text-[#7C8292]",
-                div { class: "flex flex-row min-w-[200px] justify-center items-center",
+            div { class: "flex flex-row min-h-55 w-full justify-center items-center border-b border-b-discussion-border-gray font-semibold text-sm text-light-gray",
+                div { class: "flex flex-row min-w-200 justify-center items-center",
                     "{tr.time}"
                 }
-                div { class: "flex flex-row min-w-[200px] justify-center items-center",
+                div { class: "flex flex-row min-w-200 justify-center items-center",
                     "{tr.activity}"
                 }
                 div { class: "flex flex-row flex-1 justify-center items-center", "{tr.content}" }
             }
-            div { class: "flex flex-row min-h-[55px] w-full justify-center items-center font-semibold text-[14px] text-[#222222]",
-                div { class: "flex flex-row min-w-[200px] justify-center items-center",
+            div { class: "flex flex-row min-h-55 w-full justify-center items-center font-semibold text-sm text-text-black",
+                div { class: "flex flex-row min-w-200 justify-center items-center",
                     {format_time_range(discussion.started_at, discussion.ended_at)}
                 }
-                div { class: "flex flex-row min-w-[200px] justify-center items-center",
+                div { class: "flex flex-row min-w-200 justify-center items-center",
                     "{discussion.name}"
                 }
                 div { class: "flex flex-row flex-1 justify-center items-center",
