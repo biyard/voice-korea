@@ -82,15 +82,15 @@ pub fn SampleSurveyInfo(
                         }
                         if clicked1() {
                             //line
-                            hr { class: "w-full h-[1px] mt-[12px] mb-[12px] border-[#eee]" }
-                            div { class: "w-full justify-start mt-[15px] mb-[20px] font-bold text-[18px]",
+                            hr { class: "w-full h-1 mt-12 mb-12 border-line-gray" }
+                            div { class: "w-full justify-start mt-15 mb-20 font-bold text-lg",
                                 "{title}"
                             }
                             div { class: "w-full flex justify-start text-[15px]", "{description}" }
-                            div { class: "w-full mt-[20px] flex flex-row justify-start gap-[40px]",
+                            div { class: "w-full mt-20 flex flex-row justify-start gap-40",
                                 for member in survey.members {
-                                    div { class: "flex flex-row justify-start gap-[8px]",
-                                        img { class: "w-[40px] h-[40px] bg-[#D9D9D9] rounded-full" }
+                                    div { class: "flex flex-row justify-start gap-8",
+                                        img { class: "w-40 h-40 bg-profile-gray rounded-full" }
                                         div { class: "flex flex-col justify-start",
                                             p { class: "font-semibold text-[15px] justify-start",
                                                 {member.role.translate(&lang)}
@@ -105,7 +105,7 @@ pub fn SampleSurveyInfo(
 
                 // information section when survey completed
                 div {
-                    class: "flex flex-col w-full gap-[10px]",
+                    class: "flex flex-col w-full gap-10",
                     style: if survey_completed { "" } else { "display: none;" },
                     SampleLinkComponent {
                         lang,
@@ -124,15 +124,15 @@ pub fn SampleSurveyInfo(
                 }
             }
 
-            div { class: "flex flex-row w-full justify-center mb-[40px]",
+            div { class: "flex flex-row w-full justify-center mb-40",
                 div {
                     style: if survey.surveys.is_empty() || survey_completed { "display: none;" } else { "" },
                     class: format!(
-                        "flex flex-row px-[15px] py-[13px] {} rounded-[8px] font-bold text-white text-[16px]",
+                        "flex flex-row px-15 py-13 {} rounded-lg font-bold text-white text-base",
                         if status == SurveyStatus::InProgress {
-                            "bg-[#8095EA] cursor-pointer"
+                            "bg-button-primary cursor-pointer"
                         } else {
-                            "bg-[#B4B4B4] cursor-not-allowed"
+                            "bg-hint-gray cursor-not-allowed"
                         },
                     ),
                     onclick: move |_| {
@@ -155,11 +155,11 @@ pub fn SampleLinkComponent(
 ) -> Element {
     let tr: SampleSurveyTranslate = translate(&lang);
     rsx! {
-        div { class: "flex flex-row w-full justify-between items-center px-[20px] py-[9px] bg-white rounded-[8px]",
-            div { class: "font-bold text-[16px] text-[#222222]", "{title}" }
-            div { class: "flex flex-row justify-start items-center gap-[5px]",
+        div { class: "flex flex-row w-full justify-between items-center px-20 py-9 bg-white rounded-lg",
+            div { class: "font-bold text-base text-text-black", "{title}" }
+            div { class: "flex flex-row justify-start items-center gap-5",
                 div {
-                    class: "cursor-pointer font-semibold text-[#2A60D3] text-[14px] underline",
+                    class: "cursor-pointer font-semibold text-optional-blue text-sm underline",
                     onclick: move |e: Event<MouseData>| {
                         onclick.call(e);
                     },
