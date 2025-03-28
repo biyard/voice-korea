@@ -42,11 +42,11 @@ pub fn SampleSurveyInfo(
     };
 
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
-            div { class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
+        div { class: "flex flex-col w-full justify-start items-start gap-10",
+            div { class: "flex flex-col w-full h-fit bg-box-gray gap-20",
 
                 // header
-                div { class: "w-full flex flex-row justify-between items-center mt-[28px]",
+                div { class: "w-full flex max-[500px]:flex-col max-[500px]:items-start max-[500px]:justify-start max-[500px]:gap-5 flex-row justify-between items-center mt-28",
                     div { class: " font-semibold text-[20px]", "{tab_title}" }
                     div { class: "font-medium text-[15px] text-black",
                         {
@@ -62,12 +62,12 @@ pub fn SampleSurveyInfo(
                 // information section
                 div {
                     style: if survey_completed { "display: none;" } else { "" },
-                    class: "flex flex-col gap-[10px]",
+                    class: "flex flex-col gap-10",
 
                     // introduction section
-                    div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
+                    div { class: "w-full flex flex-col rounded-lg bg-white justify-start items-center py-14 px-20",
                         div {
-                            class: "w-full flex justify-start items-center text-[16px] font-bold cursor-pointer",
+                            class: "w-full flex justify-start items-center text-base font-bold cursor-pointer",
                             onclick: move |_| {
                                 clicked1.set(!clicked1());
                             },
