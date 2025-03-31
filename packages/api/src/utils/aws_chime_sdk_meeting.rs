@@ -162,16 +162,12 @@ impl ChimeMeetingService {
     pub async fn make_pipeline(
         &self,
         meeting: Meeting,
-        meeting_name: String,
+        _meeting_name: String,
     ) -> Result<String, ApiError> {
         // FIXME: Use env var
         // let bucket_name = std::env::var("AWS_MEDIA_PIPELINE_BUCKET_NAME").unwrap();
-        let bucket_name = "voicekorea-chime".to_string(); // for testing
-        let object_key = format!(
-            "recordings/{}#{}",
-            meeting_name,
-            meeting.meeting_id.unwrap_or_default()
-        );
+        let bucket_name = crate::config::get().chime_bucket_name.to_string();
+
         let client_request_token = uuid::Uuid::new_v4().to_string();
 
         let resp = match self
@@ -181,7 +177,7 @@ impl ChimeMeetingService {
             .source_type(MediaPipelineSourceType::ChimeSdkMeeting)
             .source_arn(meeting.meeting_arn.unwrap_or_default())
             .sink_type(MediaPipelineSinkType::S3Bucket)
-            .sink_arn(format!("arn:aws:s3:::{}/{}", bucket_name, object_key))
+            .sink_arn(format!("arn:aws:s3:::{}", bucket_name))
             // .chime_sdk_meeting_configuration(sink_configuration)
             .send()
             .await
@@ -195,7 +191,13 @@ impl ChimeMeetingService {
 
         tracing::debug!("create_media_capture_pipeline response: {:?}", resp);
 
-        Ok("pipeline_id".to_string())
+        let pipeline_id = resp
+            .media_capture_pipeline
+            .as_ref()
+            .and_then(|p| p.media_pipeline_id.clone())
+            .unwrap_or_default();
+
+        Ok(pipeline_id)
         // Ok(pipeline_id)
     }
 

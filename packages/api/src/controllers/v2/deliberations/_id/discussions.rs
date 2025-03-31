@@ -144,6 +144,84 @@ impl DiscussionController {
         Ok(discussion)
     }
 
+    async fn start_recording(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
+        let client = crate::utils::aws_chime_sdk_meeting::ChimeMeetingService::new().await;
+
+        let discussion = Discussion::query_builder()
+            .id_equals(id)
+            .query()
+            .map(Discussion::from)
+            .fetch_optional(&self.pool)
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?;
+
+        if discussion.meeting_id.is_none() {
+            return Err(ApiError::DiscussionNotFound);
+        }
+
+        let meeting_id = discussion.meeting_id.unwrap();
+
+        let meeting = client.get_meeting_info(&meeting_id).await?;
+
+        let pipeline_id = match client.make_pipeline(meeting, discussion.name).await {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::error!("failed to create pipeline: {:?}", e);
+                return Err(ApiError::AwsChimeError(e.to_string()));
+            }
+        };
+
+        let discussion = match self
+            .repo
+            .update(
+                id,
+                DiscussionRepositoryUpdateRequest {
+                    deliberation_id: None,
+                    started_at: None,
+                    ended_at: None,
+                    name: None,
+                    description: None,
+                    meeting_id: None,
+                    pipeline_id: Some(pipeline_id),
+                },
+            )
+            .await
+        {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::error!("start recording {}", e);
+                return Err(ApiError::DynamoUpdateException(e.to_string()));
+            }
+        };
+        Ok(discussion)
+    }
+
+    async fn end_recording(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
+        let client = crate::utils::aws_chime_sdk_meeting::ChimeMeetingService::new().await;
+
+        let discussion = Discussion::query_builder()
+            .id_equals(id)
+            .query()
+            .map(Discussion::from)
+            .fetch_optional(&self.pool)
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?;
+
+        if discussion.meeting_id.is_none() {
+            return Err(ApiError::DiscussionNotFound);
+        }
+
+        if discussion.pipeline_id == "" {
+            return Err(ApiError::PipelineNotFound);
+        }
+
+        let _ = client.end_pipeline(&discussion.pipeline_id).await?;
+
+        //FIXME: store s3 mp4 file to db
+
+        Ok(discussion)
+    }
+
     // TODO(api): if you want start (activate) meeting, you should using amazon-chime-sdk-js in client side.
     //       this code is just for create meeting room and get meeting id not for online link.
     async fn start_meeting(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
@@ -182,6 +260,7 @@ impl DiscussionController {
                     name: None,
                     description: None,
                     meeting_id: Some(meeting.meeting_id.unwrap_or_default()),
+                    pipeline_id: None,
                 },
             )
             .await
@@ -231,6 +310,7 @@ impl DiscussionController {
                 name,
                 description,
                 None,
+                "".to_string(),
             )
             .await?
             .ok_or(ApiError::DeliberationNotFound)?;
@@ -401,6 +481,16 @@ impl DiscussionController {
 
             DiscussionByIdAction::ParticipantMeeting(_) => {
                 let res = ctrl.participant_meeting(id, auth).await?;
+                Ok(Json(res))
+            }
+
+            DiscussionByIdAction::StartRecording(_) => {
+                let res = ctrl.start_recording(id, auth).await?;
+                Ok(Json(res))
+            }
+
+            DiscussionByIdAction::EndRecording(_) => {
+                let res = ctrl.end_recording(id, auth).await?;
                 Ok(Json(res))
             }
         }

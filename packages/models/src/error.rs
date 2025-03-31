@@ -203,6 +203,12 @@ pub enum ApiError {
     DiscussionNotFound,
 
     #[translate(
+        ko = "예약 정보를 찾을 수 없습니다.",
+        en = "Cannot find the reservation information."
+    )]
+    PipelineNotFound,
+
+    #[translate(
         ko = "AWS Chime 서비스 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
         en = "AWS Chime service error occurred. Please try again later."
     )]

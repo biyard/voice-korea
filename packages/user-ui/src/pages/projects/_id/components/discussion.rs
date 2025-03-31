@@ -86,6 +86,7 @@ pub fn DiscussionPage(
                 VideoDiscussion {
                     lang,
                     discussions,
+                    is_recording: (ctrl.is_recording)(),
                     start_meeting: move |id: i64| async move {
                         let _ = ctrl.start_meeting(id).await;
                         let meeting_info = (ctrl.meeting_info)();
@@ -176,6 +177,13 @@ pub fn DiscussionPage(
                         );
                         let _ = eval(&js);
                     },
+
+                    start_recording: move |discussion_id: i64| async move  {
+                        ctrl.start_recording(discussion_id).await;
+                    },
+                    end_recording: move |discussion_id: i64| async move {
+                        ctrl.end_recording(discussion_id).await;
+                    }
                 }
 
                 //Related Data
@@ -226,6 +234,10 @@ pub fn VideoDiscussion(
     lang: Language,
     discussions: Vec<DiscussionSummary>,
     start_meeting: EventHandler<i64>,
+    is_recording: bool,
+
+    start_recording: EventHandler<i64>,
+    end_recording: EventHandler<i64>,
 ) -> Element {
     let mut clicked_video = use_signal(|| true);
     let tr: DiscussionTranslate = translate(&lang);
@@ -259,45 +271,62 @@ pub fn VideoDiscussion(
                             enable_bottom_line: index != discussions.len() - 1,
                             start_meeting,
                         }
+
+                        //FIXME: fix to real UI
+                        div { class: "flex gap-4 mt-4 mb-4 px-[20px]",
+                            button {
+                                class: "px-4 py-2 bg-blue-500 text-white rounded",
+                                onclick: move |_| {
+                                    let _ = eval(r#"
+                                        if (window._toggleAudio) {
+                                            window._toggleAudio();
+                                        }
+                                    "#);
+                                },
+                                "마이크 On/Off"
+                            }
+                            button {
+                                class: "px-4 py-2 bg-purple-500 text-white rounded",
+                                onclick: move |_| {
+                                    let _ = eval(r#"
+                                        if (window._toggleVideo) {
+                                            window._toggleVideo();
+                                        }
+                                    "#);
+                                },
+                                "비디오 On/Off"
+                            }
+                            button {
+                                class: "px-4 py-2 bg-green-500 text-white rounded",
+                                onclick: move |_| {
+                                    let _ = eval(r#"
+                                        if (window._toggleShared) {
+                                            window._toggleShared();
+                                        }
+                                    "#);
+                                },
+                                "화면 공유 On/Off"
+                            }
+
+                            button {
+                                class: "px-4 py-2 bg-red-500 text-white rounded",
+                                onclick: {
+                                    let discussion_id = discussion.id;
+                                    move |_| {
+                                    if is_recording {
+                                        end_recording.call(discussion_id);
+                                    } else {
+                                        start_recording.call(discussion_id);
+                                    }
+                                }
+                                },
+                                if is_recording {"화면 녹화 중지"} else {"화면 녹화"}
+                            }
+                        }
                     }
                 }
 
-                //FIXME: fix to real UI
-                div { class: "flex gap-4 mt-4 mb-4 px-[20px]",
-                    button {
-                        class: "px-4 py-2 bg-blue-500 text-white rounded",
-                        onclick: |_| {
-                            let _ = eval(r#"
-                                if (window._toggleAudio) {
-                                    window._toggleAudio();
-                                }
-                            "#);
-                        },
-                        "마이크 On/Off"
-                    }
-                    button {
-                        class: "px-4 py-2 bg-purple-500 text-white rounded",
-                        onclick: |_| {
-                            let _ = eval(r#"
-                                if (window._toggleVideo) {
-                                    window._toggleVideo();
-                                }
-                            "#);
-                        },
-                        "비디오 On/Off"
-                    }
-                    button {
-                        class: "px-4 py-2 bg-green-500 text-white rounded",
-                        onclick: |_| {
-                            let _ = eval(r#"
-                                if (window._toggleShared) {
-                                    window._toggleShared();
-                                }
-                            "#);
-                        },
-                        "화면 공유 On/Off"
-                    }
-                }
+
 
                 div { id: "video-grid", class: "flex flex-wrap justify-start items-start w-full px-[20px]" }
             }
@@ -453,6 +482,8 @@ pub struct Controller {
 
     meeting_info: Signal<MeetingInfo>,
     attendee_info: Signal<AttendeeInfo>,
+
+    is_recording: Signal<bool>,
 }
 
 impl Controller {
@@ -481,9 +512,37 @@ impl Controller {
 
             meeting_info: use_signal(|| MeetingInfo::default()),
             attendee_info: use_signal(|| AttendeeInfo::default()),
+
+            is_recording: use_signal(|| false),
         };
 
         Ok(ctrl)
+    }
+
+    pub async fn start_recording(&mut self, discussion_id: i64) {
+        let project_id = self.project_id();
+
+        let _ = Discussion::get_client(&crate::config::get().api_url)
+            .start_recording(project_id, discussion_id)
+            .await
+            .unwrap_or_default();
+
+        self.is_recording.set(true);
+    }
+
+    pub async fn end_recording(&mut self, discussion_id: i64) {
+        let project_id = self.project_id();
+
+        let is_recording = self.is_recording();
+
+        if is_recording {
+            let _ = Discussion::get_client(&crate::config::get().api_url)
+                .end_recording(project_id, discussion_id)
+                .await
+                .unwrap_or_default();
+
+            self.is_recording.set(false);
+        }
     }
 
     pub async fn start_meeting(&mut self, discussion_id: i64) {

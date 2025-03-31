@@ -172,6 +172,7 @@ impl DeliberationController {
                     name,
                     description,
                     None,
+                    "".to_string(),
                 )
                 .await?
                 .ok_or(ApiError::DeliberationDiscussionException)?;
