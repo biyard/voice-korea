@@ -160,6 +160,12 @@ pub enum ApiError {
     DeliberationPanelException,
 
     #[translate(
+        ko = "참가자 생성에 실패했습니다.",
+        en = "Failed to create participant."
+    )]
+    CreateUserFailed(String),
+
+    #[translate(
         ko = "선택된 공론이 정상인지 확인해주세요.",
         en = "Please check if the selected deliberation is normal."
     )]

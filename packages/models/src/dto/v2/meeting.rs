@@ -1,6 +1,8 @@
-use serde::{Deserialize, Serialize};
+use bdk::prelude::*;
+use validator::Validate;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Validate)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/meeting/:discussion_id", database = skip)]
 pub struct MediaPlacementInfo {
     #[serde(rename = "AudioHostUrl")]
     pub audio_host_url: String,
@@ -18,7 +20,8 @@ pub struct MediaPlacementInfo {
     pub turn_control_url: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Validate)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/meeting/:discussion_id", database = skip)]
 pub struct MeetingInfo {
     #[serde(rename = "MeetingId")]
     pub meeting_id: String,
@@ -28,7 +31,8 @@ pub struct MeetingInfo {
     pub media_region: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Validate)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/meeting/:discussion_id", database = skip)]
 pub struct AttendeeInfo {
     #[serde(rename = "AttendeeId")]
     pub attendee_id: String,
@@ -36,4 +40,10 @@ pub struct AttendeeInfo {
     pub join_token: String,
     #[serde(rename = "ExternalUserId")]
     pub external_user_id: String,
+}
+
+#[api_model(base = "/v2/deliberations/:deliberation-id/meeting/:discussion_id", database = skip, read_action = find_one)]
+pub struct MeetingData {
+    pub meeting: MeetingInfo,
+    pub attendee: AttendeeInfo,
 }

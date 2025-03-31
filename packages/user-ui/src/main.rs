@@ -63,9 +63,10 @@ fn App() -> Element {
 
         // document::Script { src: "https://cdn.quilljs.com/1.3.6/quill.min.js" }
         document::Style { r#type: "text/tailwindcss", {css} }
+        document::Script { src: asset!("/public/dep.js") }
         document::Script { src: "https://d3js.org/d3.v7.min.js" }
         document::Script { src: "https://unpkg.com/@tailwindcss/browser@4.0.12/dist/index.global.js" }
-        document::Script { src: "https://cdn.jsdelivr.net/npm/amazon-chime-sdk-js@3.27.1/build/index.min.js" }
+        document::Script { src: "https://cdn.jsdelivr.net/npm/@rayvid/amazon-chime-sdk-js@2.1.4/build/index.min.js" }
         Router::<Route> {}
     }
 }
