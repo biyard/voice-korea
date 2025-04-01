@@ -5,22 +5,11 @@ use aws_sdk_chimesdkmediapipelines::{
     Client as MediaPipelinesClient, //Error as MediaPipelinesError,
 };
 use aws_sdk_chimesdkmeetings::{
-    types::MediaPlacement,
     //Error as MeetingsError
+    types::{Attendee, Meeting},
     Client as MeetingsClient,
 };
-use models::error::ApiError;
-
-#[derive(Debug)]
-pub struct MeetingInfo {
-    pub id: String,
-    pub name: String,
-    pub media_region: String,
-    pub arn: String,
-    pub client_request_token: String,
-    pub media_placement: Option<MediaPlacement>,
-    pub attendees: Vec<AttendeeInfo>,
-}
+use models::{dto::MeetingInfo, error::ApiError};
 
 #[derive(Debug)]
 pub struct AttendeeInfo {
@@ -42,9 +31,52 @@ impl ChimeMeetingService {
         Self { client, pipeline }
     }
 
-    pub async fn create_meeting(&self, meeting_name: &str) -> Result<MeetingInfo, ApiError> {
+    pub async fn get_meeting_info(&self, meeting_id: &str) -> Result<Meeting, ApiError> {
+        let meeting = match self
+            .client
+            .get_meeting()
+            .meeting_id(meeting_id)
+            .send()
+            .await
+        {
+            Ok(v) => v.meeting.unwrap(),
+            Err(e) => {
+                tracing::error!("get_meeting error: {:?}", e);
+                return Err(ApiError::AwsChimeError(e.to_string()));
+            }
+        };
+
+        Ok(meeting)
+    }
+
+    pub async fn get_attendee_info(
+        &self,
+        meeting_id: &str,
+        attendee_id: &str,
+    ) -> Result<Attendee, ApiError> {
+        let attendee = match self
+            .client
+            .get_attendee()
+            .meeting_id(meeting_id)
+            .attendee_id(attendee_id)
+            .send()
+            .await
+        {
+            Ok(v) => v.attendee.unwrap(),
+            Err(e) => {
+                tracing::error!("get_attendee error: {:?}", e);
+                return Err(ApiError::AwsChimeError(e.to_string()));
+            }
+        };
+
+        Ok(attendee)
+    }
+
+    pub async fn create_meeting(&self, meeting_name: &str) -> Result<Meeting, ApiError> {
+        let _ = meeting_name;
         let client_request_token = uuid::Uuid::new_v4().to_string();
         let conf = crate::config::get();
+
         let resp = match self
             .client
             .create_meeting()
@@ -68,23 +100,8 @@ impl ChimeMeetingService {
                 return Err(ApiError::AwsChimeError("no meeting".to_string()));
             }
         };
-        tracing::debug!(
-            "create_meeting response: {:?} {}",
-            meeting.clone(),
-            client_request_token.clone()
-        );
 
-        Ok(MeetingInfo {
-            id: meeting.meeting_id.unwrap_or_default(),
-            name: meeting
-                .external_meeting_id
-                .unwrap_or(meeting_name.to_string()),
-            media_region: meeting.media_region.unwrap_or("ap-northeast-2".to_string()),
-            media_placement: meeting.media_placement,
-            client_request_token,
-            arn: meeting.meeting_arn.unwrap_or_default(),
-            attendees: vec![],
-        })
+        Ok(meeting)
     }
 
     pub async fn create_attendee(
@@ -96,7 +113,7 @@ impl ChimeMeetingService {
             .client
             .create_attendee()
             .external_user_id(external_user_id)
-            .meeting_id(meeting.id.clone())
+            .meeting_id(meeting.meeting_id.clone())
             .send()
             .await
         {
@@ -122,11 +139,11 @@ impl ChimeMeetingService {
         })
     }
 
-    pub async fn end_meeting(&self, meeting: &MeetingInfo) -> Result<(), ApiError> {
+    pub async fn end_meeting(&self, meeting: &Meeting) -> Result<(), ApiError> {
         let resp = match self
             .client
             .delete_meeting()
-            .meeting_id(meeting.id.clone())
+            .meeting_id(meeting.meeting_id.clone().unwrap_or_default())
             .send()
             .await
         {
@@ -142,11 +159,15 @@ impl ChimeMeetingService {
         Ok(())
     }
 
-    pub async fn make_pipeline(&self, meeting: MeetingInfo) -> Result<String, ApiError> {
+    pub async fn make_pipeline(
+        &self,
+        meeting: Meeting,
+        _meeting_name: String,
+    ) -> Result<String, ApiError> {
         // FIXME: Use env var
         // let bucket_name = std::env::var("AWS_MEDIA_PIPELINE_BUCKET_NAME").unwrap();
-        let bucket_name = "voicekorea-chime".to_string(); // for testing
-        let object_key = format!("recordings/{}#{}", meeting.name, meeting.id);
+        let bucket_name = crate::config::get().chime_bucket_name.to_string();
+
         let client_request_token = uuid::Uuid::new_v4().to_string();
 
         let resp = match self
@@ -154,9 +175,9 @@ impl ChimeMeetingService {
             .create_media_capture_pipeline()
             .client_request_token(client_request_token)
             .source_type(MediaPipelineSourceType::ChimeSdkMeeting)
-            .source_arn(meeting.arn)
+            .source_arn(meeting.meeting_arn.unwrap_or_default())
             .sink_type(MediaPipelineSinkType::S3Bucket)
-            .sink_arn(format!("arn:aws:s3:::{}/{}", bucket_name, object_key))
+            .sink_arn(format!("arn:aws:s3:::{}", bucket_name))
             // .chime_sdk_meeting_configuration(sink_configuration)
             .send()
             .await
@@ -170,7 +191,13 @@ impl ChimeMeetingService {
 
         tracing::debug!("create_media_capture_pipeline response: {:?}", resp);
 
-        Ok("pipeline_id".to_string())
+        let pipeline_id = resp
+            .media_capture_pipeline
+            .as_ref()
+            .and_then(|p| p.media_pipeline_id.clone())
+            .unwrap_or_default();
+
+        Ok(pipeline_id)
         // Ok(pipeline_id)
     }
 

@@ -181,6 +181,7 @@ jobs:
           AUTH_TYPE: jwt
           JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
           BUCKET_NAME: voice-korea.dev.biyard.co
+          CHIME_BUCKET: chime-metadata.dev.voice-korea.com
           ENABLE_S3: false
           ENABLE_FARGATE: false
           ENABLE_DYNAMO: false

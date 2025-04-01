@@ -11,7 +11,11 @@ use by_types::QueryResponse;
 use deliberation::Deliberation;
 use discussion_resources::DiscussionResource;
 use discussions::*;
-use models::*;
+use models::{
+    discussion_participants::DiscussionParticipant,
+    dto::{MediaPlacementInfo, MeetingInfo},
+    *,
+};
 use sqlx::{postgres::PgRow, Postgres, Transaction};
 
 use crate::utils::app_claims::AppClaims;
@@ -47,19 +51,195 @@ impl DiscussionController {
         Ok(QueryResponse { total_count, items })
     }
 
-    // TODO(api): if you want start (activate) meeting, you should using amazon-chime-sdk-js in client side.
-    //       this code is just for create meeting room and get meeting id not for online link.
-    async fn start_meeting(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
+    async fn participant_meeting(
+        &self,
+        id: i64,
+        auth: Option<Authorization>,
+    ) -> Result<Discussion> {
         let client = crate::utils::aws_chime_sdk_meeting::ChimeMeetingService::new().await;
+        let pr = DiscussionParticipant::get_repository(self.pool.clone());
 
-        let name = Discussion::query_builder()
+        let user_id = match auth {
+            Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
+            _ => 0,
+        };
+
+        if user_id == 0 {
+            return Err(ApiError::NoUser);
+        }
+
+        let discussion = Discussion::query_builder()
             .id_equals(id)
             .query()
             .map(Discussion::from)
             .fetch_optional(&self.pool)
             .await?
-            .ok_or(ApiError::DiscussionNotFound)?
-            .name;
+            .ok_or(ApiError::DiscussionNotFound)?;
+
+        if discussion.meeting_id.is_none() {
+            return Err(ApiError::AwsChimeError("Not Found Meeting ID".to_string()));
+        }
+
+        let participant = DiscussionParticipant::query_builder()
+            .discussion_id_equals(discussion.id)
+            .user_id_equals(user_id)
+            .query()
+            .map(DiscussionParticipant::from)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        if participant.is_some() {
+            return Ok(discussion);
+        }
+
+        let meeting_id = discussion.meeting_id.unwrap();
+        let meeting = client.get_meeting_info(&meeting_id).await?;
+
+        let mp = meeting.media_placement().ok_or(ApiError::AwsChimeError(
+            "Missing media_placement".to_string(),
+        ))?;
+
+        let meeting = MeetingInfo {
+            meeting_id,
+            media_region: meeting.media_region.clone().unwrap_or_default(),
+            media_placement: MediaPlacementInfo {
+                audio_host_url: mp.audio_host_url().unwrap_or_default().to_string(),
+                audio_fallback_url: mp.audio_fallback_url().unwrap_or_default().to_string(),
+                screen_data_url: mp.screen_data_url().unwrap_or_default().to_string(),
+                screen_sharing_url: mp.screen_sharing_url().unwrap_or_default().to_string(),
+                screen_viewing_url: mp.screen_viewing_url().unwrap_or_default().to_string(),
+                signaling_url: mp.signaling_url().unwrap_or_default().to_string(),
+                turn_control_url: mp.turn_control_url().unwrap_or_default().to_string(),
+            },
+        };
+
+        // NOTE: if not found participant, create participants in discussion.
+        let participant = match client
+            .create_attendee(&meeting, user_id.to_string().as_str())
+            .await
+        {
+            Ok(rst) => rst,
+            Err(e) => {
+                tracing::error!("create attendee {}", e);
+                return Err(ApiError::AwsChimeError(e.to_string()));
+            }
+        };
+
+        match pr.insert(id, user_id, participant.attendee_id).await {
+            Ok(d) => d,
+            Err(e) => {
+                tracing::error!("insert db failed after create participant {}", e);
+                return Err(ApiError::CreateUserFailed(e.to_string()));
+            }
+        };
+
+        let discussion = Discussion::query_builder()
+            .id_equals(id)
+            .query()
+            .map(Discussion::from)
+            .fetch_optional(&self.pool)
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?;
+
+        Ok(discussion)
+    }
+
+    async fn start_recording(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
+        let client = crate::utils::aws_chime_sdk_meeting::ChimeMeetingService::new().await;
+
+        let discussion = Discussion::query_builder()
+            .id_equals(id)
+            .query()
+            .map(Discussion::from)
+            .fetch_optional(&self.pool)
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?;
+
+        if discussion.meeting_id.is_none() {
+            return Err(ApiError::DiscussionNotFound);
+        }
+
+        let meeting_id = discussion.meeting_id.unwrap();
+
+        let meeting = client.get_meeting_info(&meeting_id).await?;
+
+        let pipeline_id = match client.make_pipeline(meeting, discussion.name).await {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::error!("failed to create pipeline: {:?}", e);
+                return Err(ApiError::AwsChimeError(e.to_string()));
+            }
+        };
+
+        let discussion = match self
+            .repo
+            .update(
+                id,
+                DiscussionRepositoryUpdateRequest {
+                    deliberation_id: None,
+                    started_at: None,
+                    ended_at: None,
+                    name: None,
+                    description: None,
+                    meeting_id: None,
+                    pipeline_id: Some(pipeline_id),
+                },
+            )
+            .await
+        {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::error!("start recording {}", e);
+                return Err(ApiError::DynamoUpdateException(e.to_string()));
+            }
+        };
+        Ok(discussion)
+    }
+
+    async fn end_recording(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
+        let client = crate::utils::aws_chime_sdk_meeting::ChimeMeetingService::new().await;
+
+        let discussion = Discussion::query_builder()
+            .id_equals(id)
+            .query()
+            .map(Discussion::from)
+            .fetch_optional(&self.pool)
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?;
+
+        if discussion.meeting_id.is_none() {
+            return Err(ApiError::DiscussionNotFound);
+        }
+
+        if discussion.pipeline_id == "" {
+            return Err(ApiError::PipelineNotFound);
+        }
+
+        let _ = client.end_pipeline(&discussion.pipeline_id).await?;
+
+        //FIXME: store s3 mp4 file to db
+
+        Ok(discussion)
+    }
+
+    // TODO(api): if you want start (activate) meeting, you should using amazon-chime-sdk-js in client side.
+    //       this code is just for create meeting room and get meeting id not for online link.
+    async fn start_meeting(&self, id: i64, _auth: Option<Authorization>) -> Result<Discussion> {
+        let client = crate::utils::aws_chime_sdk_meeting::ChimeMeetingService::new().await;
+
+        let discussion = Discussion::query_builder()
+            .id_equals(id)
+            .query()
+            .map(Discussion::from)
+            .fetch_optional(&self.pool)
+            .await?
+            .ok_or(ApiError::DiscussionNotFound)?;
+
+        if discussion.meeting_id.is_some() {
+            return Ok(discussion);
+        }
+
+        let name = discussion.name;
 
         let meeting = match client.create_meeting(&name).await {
             Ok(rst) => rst,
@@ -79,7 +259,8 @@ impl DiscussionController {
                     ended_at: None,
                     name: None,
                     description: None,
-                    meeting_id: Some(meeting.id),
+                    meeting_id: Some(meeting.meeting_id.unwrap_or_default()),
+                    pipeline_id: None,
                 },
             )
             .await
@@ -129,6 +310,7 @@ impl DiscussionController {
                 name,
                 description,
                 None,
+                "".to_string(),
             )
             .await?
             .ok_or(ApiError::DeliberationNotFound)?;
@@ -294,6 +476,21 @@ impl DiscussionController {
 
             DiscussionByIdAction::StartMeeting(_) => {
                 let res = ctrl.start_meeting(id, auth).await?;
+                Ok(Json(res))
+            }
+
+            DiscussionByIdAction::ParticipantMeeting(_) => {
+                let res = ctrl.participant_meeting(id, auth).await?;
+                Ok(Json(res))
+            }
+
+            DiscussionByIdAction::StartRecording(_) => {
+                let res = ctrl.start_recording(id, auth).await?;
+                Ok(Json(res))
+            }
+
+            DiscussionByIdAction::EndRecording(_) => {
+                let res = ctrl.end_recording(id, auth).await?;
                 Ok(Json(res))
             }
         }

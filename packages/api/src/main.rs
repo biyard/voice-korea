@@ -10,8 +10,8 @@ use discussions::Discussion;
 use models::{
     deliberation::Deliberation, deliberation_report::DeliberationReport,
     deliberation_response::DeliberationResponse, deliberation_user::DeliberationUser,
-    deliberation_vote::DeliberationVote, invitation::Invitation, response::SurveyResponse,
-    review::Review, v2::Institution,
+    deliberation_vote::DeliberationVote, discussion_participants::DiscussionParticipant,
+    invitation::Invitation, response::SurveyResponse, review::Review, v2::Institution,
 };
 use models::{inquiry::Inquiry, step::Step};
 use models::{organization::Organization, *};
@@ -63,6 +63,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
         Institution,
         Deliberation,
         DeliberationReport,
+        DiscussionParticipant,
         Review,
         DeliberationResponse,
         DeliberationUser,

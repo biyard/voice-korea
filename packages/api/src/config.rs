@@ -11,6 +11,7 @@ pub struct Config {
     pub nonce_lab: NonceLabConfig,
     pub server_key: &'static str,
     pub bucket_name: &'static str,
+    pub chime_bucket_name: &'static str,
     pub presigned_url_expiration: u64,
 }
 
@@ -39,6 +40,7 @@ impl Default for Config {
             },
             server_key: option_env!("SERVER_KEY").expect("SERVER_KEY required"),
             bucket_name: option_env!("BUCKET_NAME").expect("BUCKET_NAME required"),
+            chime_bucket_name: option_env!("CHIME_BUCKET").expect("CHIME_BUCKET required"),
             presigned_url_expiration: option_env!("PRESIGNED_URL_EXPIRATION")
                 .unwrap_or((60 * 5).to_string().as_str())
                 .parse()

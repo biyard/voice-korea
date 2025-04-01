@@ -24,6 +24,9 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    fallback: {
+      buffer: require.resolve("buffer"),
+    },
   },
   plugins: [
     new webpack.ProvidePlugin({

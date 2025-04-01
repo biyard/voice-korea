@@ -160,6 +160,12 @@ pub enum ApiError {
     DeliberationPanelException,
 
     #[translate(
+        ko = "참가자 생성에 실패했습니다.",
+        en = "Failed to create participant."
+    )]
+    CreateUserFailed(String),
+
+    #[translate(
         ko = "선택된 공론이 정상인지 확인해주세요.",
         en = "Please check if the selected deliberation is normal."
     )]
@@ -195,6 +201,12 @@ pub enum ApiError {
 
     #[translate(ko = "토론을 찾을 수 없습니다.", en = "Cannot find the discussion.")]
     DiscussionNotFound,
+
+    #[translate(
+        ko = "예약 정보를 찾을 수 없습니다.",
+        en = "Cannot find the reservation information."
+    )]
+    PipelineNotFound,
 
     #[translate(
         ko = "AWS Chime 서비스 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",

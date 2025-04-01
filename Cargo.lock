@@ -5952,6 +5952,7 @@ dependencies = [
  "num-format",
  "regex",
  "rest-api",
+ "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
