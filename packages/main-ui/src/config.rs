@@ -22,7 +22,8 @@ impl Default for Config {
                 Some("error") => Level::ERROR,
                 _ => Level::INFO,
             },
-            api_url: option_env!("API_URL").unwrap_or("https://voice-korea-api.dev.biyard.co"),
+            api_url: option_env!("API_URL")
+                .unwrap_or("https://voice-korea-api.dev.voice-korea.com"),
         }
     }
 }

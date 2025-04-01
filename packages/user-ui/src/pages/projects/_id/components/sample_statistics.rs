@@ -23,16 +23,16 @@ pub fn SampleStatistics(
     let answers = responses.answers;
 
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start gap-[10px] mt-[28px] mb-[40px]",
-            div { class: "flex flex-row justify-start items-center gap-[8px]",
+        div { class: "flex flex-col w-full justify-start items-start gap-10 mt-28 mb-40",
+            div { class: "flex flex-row justify-start items-center gap-8",
                 div {
-                    class: "cursor-pointer w-[24px] h-[24px]",
+                    class: "cursor-pointer w-24 h-24",
                     onclick: move |e: Event<MouseData>| {
                         onprev.call(e);
                     },
                     LeftArrow { stroke: "black" }
                 }
-                div { class: "font-semibold text-[#222222] text-[20px]", "{tr.response_per_question}" }
+                div { class: "font-semibold text-text-black text-xl", "{tr.response_per_question}" }
             }
             for (i , (_key , (title , parsed_question))) in answers.iter().enumerate() {
                 match parsed_question {
@@ -112,49 +112,49 @@ pub fn ObjectiveBox(
     }));
 
     rsx! {
-        div { class: "flex flex-col w-full  bg-white px-[40px] py-[20px] rounded-[8px] gap-[20px]",
+        div { class: "flex flex-col w-full  bg-white px-40 py-20 rounded-lg gap-20",
             div { class: "flex flex-col w-full justify-start items-start",
                 div { class: "flex flex-row w-full justify-between items-center",
-                    div { class: "flex flex-row justify-start items-center gap-[20px]",
-                        div { class: "flex flex-row justify-start items-center gap-[5px]",
+                    div { class: "flex flex-row justify-start items-center gap-20",
+                        div { class: "flex flex-row justify-start items-center gap-5",
                             if is_single {
-                                div { class: "font-semibold text-[16px] text-[#eb5757]",
+                                div { class: "font-semibold text-base text-necessary-red",
                                     "{tr.necessary}"
                                 }
                             } else {
-                                div { class: "font-semibold text-[16px] text-[#2a60d3]",
+                                div { class: "font-semibold text-base text-optional-blue",
                                     "{tr.plural}"
                                 }
                             }
-                            div { class: "font-semibold text-[#222222] text-[16px] leading-[22.5px]",
+                            div { class: "font-semibold text-text-black text-16 leading-22",
                                 "{title}"
                             }
                         }
                     }
                 }
-                div { class: "flex flex-row w-full h-[1px] justify-start items-start bg-[#ebeff5] my-[7px]" }
+                div { class: "flex flex-row w-full h-1 justify-start items-start bg-quiz-border my-7" }
             }
 
-            div { class: "flex flex-row w-full justify-between items-start",
-                div { class: "flex flex-col flex-1 justify-start items-start gap-[20px]",
+            div { class: "flex max-[1100px]:flex-col max-[1100px]:gap-20 flex-row w-full justify-between items-start",
+                div { class: "flex flex-col flex-1 justify-start items-start gap-20",
                     for (i , answer) in answers.clone().iter().enumerate() {
-                        div { class: "flex flex-col w-full justify-start items-start gap-[5px]",
-                            div { class: "font-medium text-[#2d2d2d] text-[15px] leading-[22.5px]",
+                        div { class: "flex flex-col w-full justify-start items-start gap-5",
+                            div { class: "font-medium text-text-quiz-black text-[15px] leading-22",
                                 "{answer}"
                             }
 
-                            div { class: "flex flex-row w-full justify-start items-center gap-[20px]",
+                            div { class: "flex flex-row w-full justify-start items-center gap-20",
                                 if total_answers() != 0 {
                                     HorizontalBar {
                                         id: format!("horizontal_bar_{}{}", index, i),
                                         value: answer_count[i],
                                         height: "23px",
                                         max_value: total_answers() as i64,
-                                        class: "flex flex-row flex-1 bg-[#EEEEEE] rounded-[6px] overflow-hidden",
+                                        class: "flex flex-row flex-1 bg-line-gray rounded-md",
                                     }
                                 }
 
-                                div { class: "w-[200px] font-medium text-[#2d2d2d] text-[15px] leading-[22.5px]",
+                                div { class: "w-200 font-medium text-text-quiz-black text-[15px] leading-22",
                                     {
                                         format!(
                                             "{:?}{} ({:.2}%)",
@@ -176,7 +176,7 @@ pub fn ObjectiveBox(
                     id: format!("pie_chart_{index}"),
                     width: "500px",
                     height: "500px",
-                    class: "w-[500px] max-[1300px]:w-[300px] max-[800px]:hidden sm:block",
+                    class: "max-[1300px]:min-w-300 max-[800px]:hidden sm:block",
                     data: pie_charts(),
                 }
             }
@@ -189,25 +189,25 @@ pub fn SubjectiveBox(lang: Language, title: String, answers: Vec<String>) -> Ele
     let tr: SampleSurveyTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-full  bg-white px-[40px] py-[20px] rounded-[8px] gap-[20px]",
+        div { class: "flex flex-col w-full  bg-white px-40 py-20 rounded-lg gap-20",
             div { class: "flex flex-col w-full justify-start items-start",
                 div { class: "flex flex-row w-full justify-between items-center",
-                    div { class: "flex flex-row justify-start items-center gap-[20px]",
-                        div { class: "font-semibold text-[#222222] text-[16px] leading-[22.5px]",
+                    div { class: "flex flex-row justify-start items-center gap-20",
+                        div { class: "font-semibold text-text-black text-base leading-22",
                             "{title}"
                         }
                     }
                 }
-                div { class: "flex flex-row w-full h-[1px] justify-start items-start bg-[#ebeff5] my-[7px]" }
+                div { class: "flex flex-row w-full h-1 justify-start items-start bg-quiz-border my-7" }
             }
 
-            div { class: "flex flex-col w-full justify-start items-start gap-[5px]",
-                div { class: "font-medium text-[#2d2d2d] text-[15px]", "{tr.subjective_answer}" }
+            div { class: "flex flex-col w-full justify-start items-start gap-5",
+                div { class: "font-medium text-text-quiz-black text-15", "{tr.subjective_answer}" }
 
-                div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                div { class: "flex flex-col w-full justify-start items-start gap-10",
                     for answer in answers.clone() {
-                        div { class: "flex flex-row w-full justify-start items-center px-[15px] py-[10px] rounded-[4px] bg-[#f7f7f7]",
-                            div { class: "font-medium text-[#222222] text-[15px] leading-[22.5px]",
+                        div { class: "flex flex-row w-full justify-start items-center px-15 py-10 rounded-4 bg-box-gray",
+                            div { class: "font-medium text-text-black text-[15px] leading-22",
                                 "{answer}"
                             }
                         }

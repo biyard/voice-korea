@@ -62,8 +62,8 @@ export ENABLE_FARGATE=false
 export ENABLE_DYNAMO=false
 export ENABLE_RDS=false
 export ENABLE_LAMBDA=true
-export BASE_DOMAIN=biyard.co
-export DOMAIN=voice-korea-api.dev.biyard.co
+export BASE_DOMAIN=voice-korea.com
+export DOMAIN=voice-korea-api.dev.voice-korea.com
 
 export RDS_ADMIN_PASSWORD=""
 export DATABASE_TYPE=postgres

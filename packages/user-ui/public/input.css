@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@utility no-scrollbar {
+  scrollbar-width: none;
+}
+
 @theme static {
   /* App-specific colors */
   --spacing: 1px;
@@ -12,16 +16,25 @@
   --color-box-gray: #F7F7F7;
   --color-input-border-gray: #E6E6E6;
   --color-icon-gray: #AFAFAF;
+  --color-line-gray: #EEEEEE;
+  --color-quiz-border: #EBEFF5;
+  --color-discussion-border-gray: #BFC8D9;
+  --color-hint-gray: #B4B4B4;
 
   --color-footer: #1F1D2C;
 
   --color-logo: #34333E;
   
   --color-text-black: #222222;
+  --color-text-quiz-black: #2D2D2D;
 
   --color-button-primary: #8095EA;
 
   --color-error: #EB5757;
 
   --color-gradient-green: #DBEAE8;
+
+  --color-necessary-red: #EB5757;
+
+  --color-optional-blue: #2A60D3;
 }

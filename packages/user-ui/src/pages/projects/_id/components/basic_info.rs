@@ -36,11 +36,11 @@ pub fn BasicInfo(
     rsx! {
         div {
             id: "basic-info",
-            class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px]",
+            class: "max-[1000px]:px-30 flex flex-col w-full h-fit bg-box-gray gap-20",
             ..attributes,
             // header
-            div { class: "w-full flex flex-row justify-between items-center mt-[28px]",
-                div { class: " font-semibold text-[20px]", "{tab_title}" }
+            div { class: "w-full flex max-[500px]:flex-col max-[500px]:items-start max-[500px]:justify-start max-[500px]:gap-5 flex-row justify-between items-center mt-28",
+                div { class: " font-semibold text-xl", "{tab_title}" }
                 div { class: "font-medium text-[15px] text-black",
                     {
                         format!(
@@ -52,12 +52,12 @@ pub fn BasicInfo(
                 }
             }
             // information section
-            div { class: "flex flex-col gap-[10px]",
+            div { class: "flex flex-col gap-10",
 
                 // introduction section
-                div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
+                div { class: "w-full flex flex-col rounded-lg bg-white justify-start items-center py-14 px-20",
                     div {
-                        class: "w-full flex justify-start items-center text-[16px] font-bold cursor-pointer",
+                        class: "w-full flex justify-start items-center text-base font-bold cursor-pointer",
                         onclick: move |_| {
                             clicked1.set(!clicked1());
                         },
@@ -72,15 +72,15 @@ pub fn BasicInfo(
                     }
                     if clicked1() {
                         //line
-                        hr { class: "w-full h-[1px] mt-[12px] mb-[12px] border-[#eee]" }
-                        div { class: "w-full justify-start mt-[15px] mb-[20px] font-bold text-[18px]",
+                        hr { class: "w-full h-1 mt-12 mb-12 border-line-gray" }
+                        div { class: "w-full justify-start mt-15 mb-20 font-bold text-lg",
                             "{info.title}"
                         }
                         div { class: "w-full flex justify-start text-[15px]", "{info.description}" }
-                        div { class: "w-full mt-[20px] flex flex-row justify-start gap-[40px]",
+                        div { class: "w-full mt-20 flex flex-row justify-start gap-40",
                             for member in info.members {
-                                div { class: "flex flex-row justify-start gap-[8px]",
-                                    img { class: "w-[40px] h-[40px] bg-[#D9D9D9] rounded-full" }
+                                div { class: "flex flex-row justify-start gap-8",
+                                    img { class: "w-40 h-40 bg-profile-gray rounded-full" }
                                     div { class: "flex flex-col justify-center",
                                         p { class: "font-semibold text-[15px] justify-start",
                                             {member.role.translate(&lang)}
@@ -92,17 +92,17 @@ pub fn BasicInfo(
                     }
                 }
                 //Related Data
-                div { class: "w-full flex flex-col rounded-[8px] mb-[40px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
+                div { class: "w-full flex flex-col rounded-lg mb-40 bg-white justify-start items-center py-14 px-20",
                     // title and button
-                    div { class: "w-full flex justify-start items-center gap-[13px]",
-                        div { class: "w-[180px] flex flex-row items-center text-[16px] font-bold",
+                    div { class: "w-full flex justify-start items-center gap-13",
+                        div { class: "w-180 flex flex-row items-center text-base font-bold",
                             span { "{tr.related_materials_title}" }
                         }
                         //file
-                        div { class: "flex flex-wrap flex-1 justify-start items-center gap-[8px]",
+                        div { class: "flex flex-wrap flex-1 justify-start items-center gap-8",
                             for resource in info.resources {
                                 div {
-                                    class: "cursor-pointer flex flex-row justify-start items-center rounded-[100px] bg-[#7C8292] gap-[4px] px-[12px] py-[4px]",
+                                    class: "cursor-pointer flex flex-row justify-start items-center rounded-[100px] bg-light-gray gap-4 px-12 py-4",
                                     onclick: {
                                         let files = resource.files.clone();
                                         move |_| {
@@ -119,11 +119,9 @@ pub fn BasicInfo(
                                     Download2 {
                                         width: "18",
                                         height: "18",
-                                        class: " [&>path]:fill-[#ffffff]",
+                                        class: " [&>path]:fill-white",
                                     }
-                                    div { class: "font-medium text-[14px] text-white",
-                                        {resource.title}
-                                    }
+                                    div { class: "font-medium text-sm text-white", {resource.title} }
                                 }
                             }
                         }

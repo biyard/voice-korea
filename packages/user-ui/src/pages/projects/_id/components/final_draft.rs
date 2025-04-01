@@ -59,13 +59,13 @@ pub fn FinalDraft(
     rsx! {
         div {
             id: "final-draft",
-            class: "flex flex-col w-full h-fit bg-[#F7F7F7] gap-[20px] mt-[28px] mb-[40px]",
+            class: "max-[1000px]:px-30 flex flex-col w-full h-fit bg-box-gray gap-20 mt-28 mb-40",
             ..attributes,
             // header
             div { class: "w-full flex flex-row justify-between items-center",
-                p { class: "font-semibold text-[20px]", "{tab_title}" }
+                p { class: "font-semibold text-xl", "{tab_title}" }
                 div {
-                    class: "cursor-pointer flex flex-row w-[200px] justify-center items-center bg-[#8095EA] rounded-[8px] px-[16px] py-[14px] font-bold text-white text-[16px]",
+                    class: "max-[600px]:hidden cursor-pointer flex flex-row w-200 justify-center items-center bg-button-primary rounded-lg px-16 py-14 font-bold text-white text-base",
                     visibility: if !clicked_update() && members.clone().iter().any(|member| member.user_id == user_id) { "flex" } else { "hidden" },
                     onclick: move |_| {
                         clicked_update.set(true);
@@ -92,42 +92,43 @@ pub fn FinalDraft(
                         clicked_update.set(false);
                     },
                 }
-            }
-            // information section
-            div { class: "flex flex-col gap-[10px]",
+            } else {
+                // information section
+                div { class: "flex flex-col gap-10",
 
-                // introduction section
-                if !clicked_update() {
-                    div { class: "w-full flex flex-col rounded-[8px] bg-[#ffffff] justify-start items-center py-[14px] px-[20px]",
-                        div {
-                            class: "w-full flex justify-start items-center text-[16px] font-bold cursor-pointer",
-                            onclick: move |_| {
-                                clicked_draft.set(!clicked_draft());
-                            },
-                            div { class: "w-full flex flex-row justify-between items-center",
-                                span { "{title()}" }
-                                if clicked_draft() {
-                                    TriangleUp {}
-                                } else {
-                                    TriangleDown {}
+                    // introduction section
+                    if !clicked_update() {
+                        div { class: "w-full flex flex-col rounded-lg bg-white justify-start items-center py-14 px-20",
+                            div {
+                                class: "w-full flex justify-start items-center text-base font-bold cursor-pointer",
+                                onclick: move |_| {
+                                    clicked_draft.set(!clicked_draft());
+                                },
+                                div { class: "w-full flex flex-row justify-between items-center",
+                                    span { "{title()}" }
+                                    if clicked_draft() {
+                                        TriangleUp {}
+                                    } else {
+                                        TriangleDown {}
+                                    }
                                 }
                             }
-                        }
-                        if clicked_draft() {
-                            //line
-                            hr { class: "w-full h-[1px] mt-[12px] mb-[12px] border-[#eee]" }
-                            div {
-                                class: "ql-snow rich-text-editor w-full report-description ",
-                                dangerous_inner_html: content(),
-                                style: "user-select: none; pointer-events: none;",
-                            }
-                            div { class: "w-full mt-[20px] flex flex-row justify-start gap-[40px]",
-                                for member in members.clone() {
-                                    div { class: "flex flex-row justify-start gap-[8px]",
-                                        img { class: "w-[40px] h-[40px] bg-[#D9D9D9] rounded-full" }
-                                        div { class: "flex flex-col justify-center",
-                                            p { class: "font-semibold text-[15px] justify-start",
-                                                {member.role.translate(&lang)}
+                            if clicked_draft() {
+                                //line
+                                hr { class: "w-full h-1 mt-12 mb-12 border-line-gray" }
+                                div {
+                                    class: "ql-snow rich-text-editor w-full report-description ",
+                                    dangerous_inner_html: content(),
+                                    style: "user-select: none; pointer-events: none;",
+                                }
+                                div { class: "w-full mt-20 flex max-[700px]:flex-col max-[700px]:gap-10 flex-row justify-start gap-40",
+                                    for member in members.clone() {
+                                        div { class: "flex flex-row justify-start gap-8",
+                                            img { class: "w-40 h-40 bg-profile-gray rounded-full" }
+                                            div { class: "flex flex-col justify-center",
+                                                p { class: "font-semibold text-[15px] justify-start",
+                                                    {member.role.translate(&lang)}
+                                                }
                                             }
                                         }
                                     }
@@ -136,49 +137,49 @@ pub fn FinalDraft(
                         }
                     }
                 }
-            }
 
-            div { class: "flex flex-col w-full gap-[20px]",
-                //chart section
-                for (i , (_key , (title , parsed_question))) in answers.iter().enumerate() {
-                    match parsed_question {
-                        ParsedQuestion::SingleChoice { answers, response_count } => {
-                            rsx! {
-                                div { class: "flex flex-col w-full",
-                                    ObjectiveBox {
-                                        lang,
-                                        title,
-                                        answers: answers.clone(),
-                                        answer_count: response_count.clone(),
-                                        index: i,
+                div { class: "flex flex-col w-full gap-20",
+                    //chart section
+                    for (i , (_key , (title , parsed_question))) in answers.iter().enumerate() {
+                        match parsed_question {
+                            ParsedQuestion::SingleChoice { answers, response_count } => {
+                                rsx! {
+                                    div { class: "flex flex-col w-full",
+                                        ObjectiveBox {
+                                            lang,
+                                            title,
+                                            answers: answers.clone(),
+                                            answer_count: response_count.clone(),
+                                            index: i,
+                                        }
                                     }
                                 }
                             }
-                        }
-                        ParsedQuestion::MultipleChoice { answers, response_count } => {
-                            rsx! {
-                                div { class: "flex flex-col w-full",
-                                    ObjectiveBox {
-                                        lang,
-                                        title,
-                                        answers: answers.clone(),
-                                        answer_count: response_count.clone(),
-                                        index: i,
+                            ParsedQuestion::MultipleChoice { answers, response_count } => {
+                                rsx! {
+                                    div { class: "flex flex-col w-full",
+                                        ObjectiveBox {
+                                            lang,
+                                            title,
+                                            answers: answers.clone(),
+                                            answer_count: response_count.clone(),
+                                            index: i,
+                                        }
                                     }
                                 }
                             }
-                        }
-                        ParsedQuestion::ShortAnswer { answers } => {
-                            rsx! {
-                                div { class: "flex flex-col w-full",
-                                    SubjectiveBox { lang, title, answers: answers.clone() }
+                            ParsedQuestion::ShortAnswer { answers } => {
+                                rsx! {
+                                    div { class: "flex flex-col w-full",
+                                        SubjectiveBox { lang, title, answers: answers.clone() }
+                                    }
                                 }
                             }
-                        }
-                        ParsedQuestion::Subjective { answers } => {
-                            rsx! {
-                                div { class: "flex flex-col w-full",
-                                    SubjectiveBox { lang, title, answers: answers.clone() }
+                            ParsedQuestion::Subjective { answers } => {
+                                rsx! {
+                                    div { class: "flex flex-col w-full",
+                                        SubjectiveBox { lang, title, answers: answers.clone() }
+                                    }
                                 }
                             }
                         }
@@ -202,11 +203,11 @@ pub fn EditDraft(
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
-            div { class: "flex flex-col min-w-[500px] w-full justify-center items-center gap-[15px]",
-                div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
-                    div { class: "font-semibold text-[15px] text-[#222222]", "{tr.name}" }
+            div { class: "flex flex-col min-w-350 w-full justify-center items-center gap-15",
+                div { class: "flex flex-col w-full justify-start items-start gap-10",
+                    div { class: "font-semibold text-[15px] text-text-black", "{tr.name}" }
                     InputBox {
-                        class: "flex flex-row w-full rounded-[10px] px-[15px] py-[10px] placeholder-[#b4b4b4] bg-transparent text-[#222222] border border-gray-300 focus:outline-none focus:border focus:border-[#8095ea]",
+                        class: "flex flex-row w-full rounded-[10px] px-15 py-10 placeholder-hint-gray bg-transparent text-text-black border border-gray-300 focus:outline-none focus:border focus:border-button-primary",
                         placeholder: tr.name_hint,
                         value: title,
                         onchange: move |value: String| {
@@ -214,8 +215,8 @@ pub fn EditDraft(
                         },
                     }
                 }
-                div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
-                    div { class: "font-semibold text-[15px] text-[#222222]", "{tr.description}" }
+                div { class: "flex flex-col w-full justify-start items-start gap-10",
+                    div { class: "font-semibold text-[15px] text-text-black", "{tr.description}" }
                     RichText {
                         content,
                         onchange: move |value: String| {
@@ -225,7 +226,7 @@ pub fn EditDraft(
                 }
 
                 div {
-                    class: "cursor-pointer flex flex-row w-[200px] justify-center items-center bg-[#8095EA] rounded-[8px] px-[16px] py-[14px] font-bold text-white text-[16px]",
+                    class: "cursor-pointer flex flex-row w-200 justify-center items-center bg-button-primary rounded-lg px-16 py-14 font-bold text-white text-base",
                     onclick: move |e: Event<MouseData>| {
                         update_draft.call(e);
                     },
@@ -266,49 +267,49 @@ pub fn ObjectiveBox(
     }));
 
     rsx! {
-        div { class: "flex flex-col w-full  bg-white px-[40px] py-[20px] rounded-[8px] gap-[20px]",
+        div { class: "flex flex-col w-full  bg-white px-40 py-20 rounded-lg gap-20",
             div { class: "flex flex-col w-full justify-start items-start",
                 div { class: "flex flex-row w-full justify-between items-center",
-                    div { class: "flex flex-row justify-start items-center gap-[20px]",
-                        div { class: "flex flex-row justify-start items-center gap-[5px]",
+                    div { class: "flex flex-row justify-start items-center gap-20",
+                        div { class: "flex flex-row justify-start items-center gap-5",
                             if is_single {
-                                div { class: "font-semibold text-[16px] text-[#eb5757]",
+                                div { class: "font-semibold text-base text-necessary-red",
                                     "{tr.necessary}"
                                 }
                             } else {
-                                div { class: "font-semibold text-[16px] text-[#2a60d3]",
+                                div { class: "font-semibold text-base text-optional-blue",
                                     "{tr.plural}"
                                 }
                             }
-                            div { class: "font-semibold text-[#222222] text-[16px] leading-[22.5px]",
+                            div { class: "font-semibold text-text-black text-base leading-22",
                                 "{title}"
                             }
                         }
                     }
                 }
-                div { class: "flex flex-row w-full h-[1px] justify-start items-start bg-[#ebeff5] my-[7px]" }
+                div { class: "flex flex-row w-full h-1 justify-start items-start bg-quiz-border my-7" }
             }
 
             div { class: "flex flex-row w-full justify-between items-start",
-                div { class: "flex flex-col flex-1 justify-start items-start gap-[20px]",
+                div { class: "flex flex-col flex-1 justify-start items-start gap-20",
                     for (i , answer) in answers.clone().iter().enumerate() {
-                        div { class: "flex flex-col w-full justify-start items-start gap-[5px]",
-                            div { class: "font-medium text-[#2d2d2d] text-[15px] leading-[22.5px]",
+                        div { class: "flex flex-col w-full justify-start items-start gap-5",
+                            div { class: "font-medium text-text-quiz-black text-[15px] leading-22",
                                 "{answer}"
                             }
 
-                            div { class: "flex flex-row w-full justify-start items-center gap-[20px]",
+                            div { class: "flex flex-row w-full justify-start items-center gap-20",
                                 if total_answers() != 0 {
                                     HorizontalBar {
                                         id: format!("horizontal_bar_{}{}", index, i),
                                         value: answer_count[i],
                                         height: "23px",
                                         max_value: total_answers() as i64,
-                                        class: "flex flex-row flex-1 bg-[#EEEEEE] rounded-[6px] overflow-hidden",
+                                        class: "flex flex-row flex-1 bg-line-gray rounded-[6px] overflow-hidden",
                                     }
                                 }
 
-                                div { class: "w-[200px] font-medium text-[#2d2d2d] text-[15px] leading-[22.5px]",
+                                div { class: "w-200 font-medium text-text-quiz-black text-[15px] leading-22",
                                     {
                                         format!(
                                             "{:?}{} ({:.2}%)",
@@ -330,7 +331,7 @@ pub fn ObjectiveBox(
                     id: format!("pie_chart_{index}"),
                     width: "500px",
                     height: "500px",
-                    class: "w-[500px] max-[1300px]:w-[300px] max-[800px]:hidden sm:block",
+                    class: "w-500 max-[1300px]:w-300 max-[800px]:hidden sm:block",
                     data: pie_charts(),
                 }
             }
@@ -343,25 +344,25 @@ pub fn SubjectiveBox(lang: Language, title: String, answers: Vec<String>) -> Ele
     let tr: FinalDraftTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-full  bg-white px-[40px] py-[20px] rounded-[8px] gap-[20px]",
+        div { class: "flex flex-col w-full  bg-white px-40 py-20 rounded-lg gap-20",
             div { class: "flex flex-col w-full justify-start items-start",
                 div { class: "flex flex-row w-full justify-between items-center",
-                    div { class: "flex flex-row justify-start items-center gap-[20px]",
-                        div { class: "font-semibold text-[#222222] text-[16px] leading-[22.5px]",
+                    div { class: "flex flex-row justify-start items-center gap-20",
+                        div { class: "font-semibold text-text-black text-base leading-22",
                             "{title}"
                         }
                     }
                 }
-                div { class: "flex flex-row w-full h-[1px] justify-start items-start bg-[#ebeff5] my-[7px]" }
+                div { class: "flex flex-row w-full h-1 justify-start items-start bg-quiz-border my-7" }
             }
 
-            div { class: "flex flex-col w-full justify-start items-start gap-[5px]",
-                div { class: "font-medium text-[#2d2d2d] text-[15px]", "{tr.subjective_answer}" }
+            div { class: "flex flex-col w-full justify-start items-start gap-5",
+                div { class: "font-medium text-text-quiz-black text-[15px]", "{tr.subjective_answer}" }
 
-                div { class: "flex flex-col w-full justify-start items-start gap-[10px]",
+                div { class: "flex flex-col w-full justify-start items-start gap-10",
                     for answer in answers.clone() {
-                        div { class: "flex flex-row w-full justify-start items-center px-[15px] py-[10px] rounded-[4px] bg-[#f7f7f7]",
-                            div { class: "font-medium text-[#222222] text-[15px] leading-[22.5px]",
+                        div { class: "flex flex-row w-full justify-start items-center px-15 py-10 rounded-[4px] bg-box-gray",
+                            div { class: "font-medium text-text-black text-[15px] leading-22",
                                 "{answer}"
                             }
                         }

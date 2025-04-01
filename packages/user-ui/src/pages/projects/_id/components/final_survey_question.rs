@@ -24,16 +24,16 @@ pub fn FinalSurveyQuestion(
     let survey_title = survey.name;
 
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start gap-[10px] mt-[28px]",
-            div { class: "flex flex-row w-full justify-start items-center gap-[8px] mb-[10px]",
+        div { class: "max-[1000px]:px-30 flex flex-col w-full justify-start items-start gap-10 mt-28",
+            div { class: "flex flex-row w-full justify-start items-center gap-8 mb-10",
                 div {
-                    class: "cursor-pointer w-[24px] h-[24px]",
+                    class: "cursor-pointer w-24 h-24",
                     onclick: move |e: Event<MouseData>| {
                         onprev.call(e);
                     },
                     LeftArrow { stroke: "black" }
                 }
-                div { class: "font-semibold text-[#222222] text-[20px]", "{survey_title}" }
+                div { class: "font-semibold text-text-black text-20", "{survey_title}" }
             }
 
             for (i , question) in survey.questions.iter().enumerate() {
@@ -115,9 +115,9 @@ pub fn FinalSurveyQuestion(
                 }
             }
 
-            div { class: "flex flex-row w-full justify-center items-center mb-[40px]",
+            div { class: "flex flex-row w-full justify-center items-center mb-40",
                 div {
-                    class: "cursor-pointer flex flex-row justify-center items-center w-[200px] py-[13px] font-bold text-white text-[16px] bg-[#8095EA] rounded-[8px]",
+                    class: "cursor-pointer flex flex-row justify-center items-center w-200 py-13 font-bold text-white text-base bg-button-primary rounded-lg",
                     onclick: move |e: Event<MouseData>| {
                         onsend.call(e);
                     },
