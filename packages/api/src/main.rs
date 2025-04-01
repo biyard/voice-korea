@@ -7,11 +7,47 @@ use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Control
 use deliberation_comment::DeliberationComment;
 use deliberation_resources::deliberation_resource::DeliberationResource;
 use discussions::Discussion;
+use models::elearnings::elearning::Elearning;
 use models::{
-    deliberation::Deliberation, deliberation_report::DeliberationReport,
-    deliberation_response::DeliberationResponse, deliberation_user::DeliberationUser,
-    deliberation_vote::DeliberationVote, invitation::Invitation, response::SurveyResponse,
-    review::Review, v2::Institution,
+    areas::area::Area, deliberation::Deliberation,
+    deliberation_basic_infos::deliberation_basic_info::DeliberationBasicInfo,
+    deliberation_report::DeliberationReport, deliberation_response::DeliberationResponse,
+    deliberation_user::DeliberationUser, deliberation_vote::DeliberationVote,
+    invitation::Invitation, response::SurveyResponse, review::Review, v2::Institution,
+};
+use models::{
+    deliberation_basic_info_members::deliberation_basic_info_member::DeliberationBasicInfoMember,
+    deliberation_content_members::deliberation_content_member::DeliberationContentMember,
+};
+use models::{
+    deliberation_basic_info_resources::deliberation_basic_info_resource::DeliberationBasicInfoResource,
+    deliberation_sample_survey_members::deliberation_sample_survey_member::DeliberationSampleSurveyMember,
+};
+use models::{
+    deliberation_basic_info_surveys::deliberation_basic_info_survey::DeliberationBasicInfoSurvey,
+    deliberation_sample_survey_surveys::deliberation_sample_survey_survey::DeliberationSampleSurveySurvey,
+};
+use models::{
+    deliberation_contents::deliberation_content::DeliberationContent,
+    deliberation_discussion_members::deliberation_discussion_member::DeliberationDiscussionMember,
+};
+use models::{
+    deliberation_discussion_resources::deliberation_discussion_resource::DeliberationDiscussionResource,
+    deliberation_discussions::deliberation_discussion::DeliberationDiscussion,
+};
+use models::{
+    deliberation_draft_members::deliberation_draft_member::DeliberationDraftMember,
+    deliberation_draft_resources::deliberation_draft_resource::DeliberationDraftResource,
+    deliberation_draft_surveys::deliberation_draft_survey::DeliberationDraftSurvey,
+    deliberation_drafts::deliberation_draft::DeliberationDraft,
+};
+use models::{
+    deliberation_final_survey_members::deliberation_final_survey_member::DeliberationFinalSurveyMember,
+    deliberation_final_surveys::deliberation_final_survey::DeliberationFinalSurvey,
+};
+use models::{
+    deliberation_final_survey_surveys::deliberation_final_survey_survey::DeliberationFinalSurveySurvey,
+    deliberation_sample_surveys::deliberation_sample_survey::DeliberationSampleSurvey,
 };
 use models::{inquiry::Inquiry, step::Step};
 use models::{organization::Organization, *};
@@ -54,6 +90,27 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
         ResourceFile,
         PanelV2,
         SurveyV2,
+        Area,
+        DeliberationBasicInfo,
+        DeliberationBasicInfoMember,
+        DeliberationBasicInfoResource,
+        DeliberationBasicInfoSurvey,
+        DeliberationContent,
+        DeliberationContentMember,
+        DeliberationSampleSurvey,
+        DeliberationSampleSurveyMember,
+        DeliberationSampleSurveySurvey,
+        Elearning,
+        DeliberationDiscussion,
+        DeliberationDiscussionMember,
+        DeliberationDiscussionResource,
+        DeliberationFinalSurveyMember,
+        DeliberationFinalSurveySurvey,
+        DeliberationFinalSurvey,
+        DeliberationDraftMember,
+        DeliberationDraftResource,
+        DeliberationDraftSurvey,
+        DeliberationDraft,
         OrganizationMember,
         PanelSurveys,
         SurveyResponse,

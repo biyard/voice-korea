@@ -1,4 +1,5 @@
 use models::{
+    attribute_v2::{GenderV2, RegionV2, SalaryV2},
     response::{AgeV3, Attribute},
     *,
 };
@@ -80,43 +81,24 @@ impl From<PanelV2> for NonceLabQuota {
             ..
         }: PanelV2,
     ) -> Self {
-        let mut age: Vec<NonceLabAge> = vec![];
-        let mut gender: Vec<u8> = vec![];
-        let mut region: Vec<RegionCode> = vec![];
-        let mut salary: Vec<SalaryTier> = vec![];
+        let mut age = None;
+        let mut gender = None;
+        let mut region = None;
+        let mut salary = None;
 
         for attribute in attributes.clone() {
             match attribute {
                 Attribute::Age(age_v3) => {
-                    match age_v3 {
-                        AgeV3::Specific(v) => {
-                            let a = NonceLabAge::Specific(v);
-                            age.push(a);
-                        }
-                        AgeV3::Range {
-                            inclusive_min,
-                            inclusive_max,
-                        } => {
-                            let a = NonceLabAge::Range {
-                                inclusive_min,
-                                inclusive_max,
-                            };
-                            age.push(a);
-                        }
-                        AgeV3::None => {}
-                    };
+                    age = Some(age_v3);
                 }
                 Attribute::Gender(gender_v2) => {
-                    let g = gender_v2 as u8;
-                    gender.push(g);
+                    gender = Some(gender_v2);
                 }
                 Attribute::Region(region_v2) => {
-                    let r = region_v2.into();
-                    region.push(r);
+                    region = Some(region_v2);
                 }
                 Attribute::Salary(salary_v2) => {
-                    let s = salary_v2 as SalaryTier;
-                    salary.push(s);
+                    salary = Some(salary_v2);
                 }
                 Attribute::None => {}
             }
@@ -125,10 +107,53 @@ impl From<PanelV2> for NonceLabQuota {
         NonceLabQuota {
             id: None,
             attribute: Some(NonceLabAttribute {
-                salary_tier: salary,
-                region_code: region,
-                gender_code: gender,
-                age,
+                salary_tier: match salary {
+                    None => None,
+                    Some(v) => match v {
+                        SalaryV2::None => None,
+                        t => Some(t as SalaryTier),
+                    },
+                },
+                region_code: match region {
+                    None => None,
+                    Some(c) => match c {
+                        RegionV2::None => None,
+                        c => match c {
+                            RegionV2::Seoul => Some(02 as RegionCode),
+                            RegionV2::Busan => Some(051 as RegionCode),
+                            RegionV2::Daegu => Some(053 as RegionCode),
+                            RegionV2::Incheon => Some(032 as RegionCode),
+                            RegionV2::Gwangju => Some(062 as RegionCode),
+                            RegionV2::Daejeon => Some(042 as RegionCode),
+                            RegionV2::Ulsan => Some(052 as RegionCode),
+                            RegionV2::Sejong => Some(044 as RegionCode),
+                            RegionV2::Gyeonggi => Some(031 as RegionCode),
+                            RegionV2::Gangwon => Some(033 as RegionCode),
+                            RegionV2::Chungbuk => Some(043 as RegionCode),
+                            RegionV2::Chungnam => Some(041 as RegionCode),
+                            RegionV2::Jeonbuk => Some(063 as RegionCode),
+                            RegionV2::Jeonnam => Some(061 as RegionCode),
+                            RegionV2::Gyeongbuk => Some(054 as RegionCode),
+                            RegionV2::Gyeongnam => Some(055 as RegionCode),
+                            RegionV2::Jeju => Some(064 as RegionCode),
+                            _ => Some(0 as RegionCode),
+                        },
+                    },
+                },
+                gender_code: match gender {
+                    None => None,
+                    Some(c) => match c {
+                        GenderV2::None => None,
+                        c => Some(c as u8),
+                    },
+                },
+                age: match age {
+                    None => None,
+                    Some(a) => match a {
+                        AgeV3::None => None,
+                        a => Some(a.try_into().expect("Invalid Age")),
+                    },
+                },
             }),
             panel: None,
             quota: user_count,
@@ -139,11 +164,11 @@ impl From<PanelV2> for NonceLabQuota {
 #[derive(Serialize, serde::Deserialize, Debug)]
 pub struct NonceLabAttribute {
     // e.g. 1, 2, 3, 4, 5
-    pub salary_tier: Vec<SalaryTier>,
+    pub salary_tier: Option<SalaryTier>,
     // e.g. 02(Seoul), 051(Busan) and so on.
-    pub region_code: Vec<RegionCode>,
-    pub gender_code: Vec<u8>,
-    pub age: Vec<NonceLabAge>,
+    pub region_code: Option<RegionCode>,
+    pub gender_code: Option<u8>,
+    pub age: Option<NonceLabAge>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]

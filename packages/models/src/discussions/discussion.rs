@@ -29,6 +29,10 @@ pub struct Discussion {
     #[api_model(summary, action = create, action_by_id = update)]
     pub description: String,
 
+    #[api_model(summary, action = create, action_by_id = update)]
+    #[serde(default)]
+    pub maximum_count: i64,
+
     #[api_model(summary, action_by_id = update, version = v0.3)]
     // FIXME: action_by_id = update is anti-pattern
     pub meeting_id: Option<String>,

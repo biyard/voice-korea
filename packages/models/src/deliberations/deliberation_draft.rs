@@ -9,7 +9,7 @@ use crate::{
 
 // TODO(web): using resource for basic info tab.
 // TODO(api): implement query survey response.
-#[api_model(base = "/v2/projects/:deliberation-id/draft", table = deliberations, read_action = read)]
+#[api_model(base = "/v2/projects/:deliberation-id/drafts", table = deliberations, read_action = read)]
 pub struct DeliberationDraft {
     #[api_model(summary, primary_key)]
     pub id: i64,
