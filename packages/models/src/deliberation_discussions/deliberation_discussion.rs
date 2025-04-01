@@ -6,8 +6,9 @@ use crate::deliberation_user::DeliberationUser;
 use crate::discussions::Discussion;
 use crate::ResourceFile;
 
+//FIXME: fix to wording when discussion function is implemented
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberations/:deliberation-id/discussions", table = deliberation_discussions)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/ideas", table = deliberation_discussions)]
 pub struct DeliberationDiscussion {
     #[api_model(summary, primary_key)]
     pub id: i64,

@@ -20,6 +20,13 @@ pub mod deliberations {
         pub mod comments;
         pub mod discussions;
         pub mod responses;
+
+        pub mod contents;
+        pub mod drafts;
+        pub mod final_surveys;
+        pub mod ideas;
+        pub mod infos;
+        pub mod sample_surveys;
     }
 }
 
@@ -53,6 +60,38 @@ impl Version2Controller {
             .nest(
                 "/surveys/:survey-id/responses",
                 surveys::_id::responses::SurveyResponseController::route(pool.clone())?,
+            )
+            .nest(
+                "/deliberations/:deliberation-id/contents",
+                deliberations::_id::contents::DeliberationContentController::new(pool.clone())
+                    .route(),
+            )
+            .nest(
+                "/deliberations/:deliberation-id/drafts",
+                deliberations::_id::drafts::DeliberationDraftController::new(pool.clone()).route(),
+            )
+            .nest(
+                "/deliberations/:deliberation-id/final-surveys",
+                deliberations::_id::final_surveys::DeliberationFinalSurveyController::new(
+                    pool.clone(),
+                )
+                .route(),
+            )
+            .nest(
+                "/deliberations/:deliberation-id/ideas",
+                deliberations::_id::ideas::DeliberationIdeaController::new(pool.clone()).route(),
+            )
+            .nest(
+                "/deliberations/:deliberation-id/infos",
+                deliberations::_id::infos::DeliberationBasicInfoController::new(pool.clone())
+                    .route(),
+            )
+            .nest(
+                "/deliberations/:deliberation-id/sample-surveys",
+                deliberations::_id::sample_surveys::DeliberationSampleSurveyController::new(
+                    pool.clone(),
+                )
+                .route(),
             )
             .nest(
                 "/deliberations/:deliberation-id/discussions",
