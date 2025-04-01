@@ -90,7 +90,7 @@ pub struct Deliberation {
     #[api_model(one_to_many = deliberation_discussions, foreign_key = deliberation_id)]
     #[serde(default)]
     pub deliberation_discussions: Vec<DeliberationDiscussion>,
-    #[api_model(one_to_many = deliberation_sample_surveys, foreign_key = deliberation_id)]
+    #[api_model(one_to_many = deliberation_final_surveys, foreign_key = deliberation_id)]
     #[serde(default)]
     pub final_surveys: Vec<DeliberationFinalSurvey>,
     #[api_model(one_to_many = deliberation_drafts, foreign_key = deliberation_id)]
