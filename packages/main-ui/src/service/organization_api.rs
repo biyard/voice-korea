@@ -24,7 +24,7 @@ impl OrganizationApi {
             endpoint: use_signal(|| {
                 format!(
                     "{}",
-                    option_env!("API_URL").unwrap_or("https://voice-korea-api.dev.biyard.co")
+                    option_env!("API_URL").unwrap_or("https://voice-korea-api.dev.voice-korea.com")
                 )
             }),
             login_service,
