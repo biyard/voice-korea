@@ -36,12 +36,12 @@ pub fn ProjectHeader(
     let ended_at = formatted_timestamp(deliberation.ended_at);
 
     rsx! {
-        div { class: "max-w-[1300px] h-[300px] mb-[40px] flex flex-row w-full justify-center items-center gap-[40px]",
+        div { class: " max-w-1300 h-fit mb-40 flex max-[1000px]:flex-col-reverse flex-row w-full justify-center items-center gap-40 px-10",
             // TODO: connect to data and UI
             //data section
-            div { class: "w-full max-w-[720px] h-[260px] flex flex-col justify-center",
+            div { class: "w-full max-w-720 h-260 flex flex-col justify-center",
                 div { class: "flex flex-col justify-start",
-                    div { class: "w-full h-[24px] flex justify-start items-center font-semibold text-[18px] gap-[8px]",
+                    div { class: "w-full h-24 flex justify-start items-center font-semibold text-lg gap-8",
                         match deliberation_status(deliberation.started_at, deliberation.ended_at) {
                             ProjectStatus::Ready => rsx! {
                                 Waiting {}
@@ -55,17 +55,17 @@ pub fn ProjectHeader(
                         }
                         div { "{started_at} ~ {ended_at}" }
                     }
-                    div { class: "w-full flex justify-start items-center font-semibold text-[32px] leading-[60px]",
+                    div { class: "w-full flex justify-start items-center font-semibold text-[32px] leading-60",
                         "{deliberation.title}"
                     }
-                    div { class: "w-full flex justify-start items-center font-md text-[14px] gap-[4px]",
-                        div { class: "py-[2px] px-[12px] leading-[22px] flex justify-center items-center border border-[#222] rounded-[100px]",
+                    div { class: "w-full flex justify-start items-center font-md text-sm gap-4",
+                        div { class: "py-2 px-12 leading-22 flex justify-center items-center border border-text-black rounded-[100px]",
                             div { {deliberation.project_area.translate(&lang)} }
                         }
                     }
-                    div { class: "w-full my-[20px] flex flex-row justify-start items-center gap-[8px]",
+                    div { class: "w-full my-20 flex flex-row justify-start items-center gap-8",
                         img {
-                            class: "w-[50px] h-[50px]",
+                            class: "w-50 h-50",
                             src: asset!("/public/images/organization.png"),
                         }
                         div {
@@ -74,20 +74,20 @@ pub fn ProjectHeader(
                             }
                         }
                     }
-                    div { class: "flex flex-row justify-start items-center gap-[60px]",
-                        div { class: "w-hug h-[59px] flex flex-col justify-center items-center",
+                    div { class: "flex flex-row justify-start items-center gap-60",
+                        div { class: "w-hug h-59 flex flex-col justify-center items-center",
                             div { class: "justify-center items-center font-semibold text-[24px]",
                                 "{deliberation.participants}"
                             }
-                            div { class: "justify-center items-center font-md text-[14px]",
+                            div { class: "justify-center items-center font-md text-sm",
                                 "{tr.participant}"
                             }
                         }
-                        div { class: "w-hug h-[59px] flex flex-col justify-center items-center",
+                        div { class: "w-hug h-59 flex flex-col justify-center items-center",
                             div { class: "justify-center items-center font-semibold text-[24px]",
                                 "{deliberation.votes}"
                             }
-                            div { class: "justify-center items-center font-md text-[14px]",
+                            div { class: "justify-center items-center font-md text-sm",
                                 "{tr.vote}"
                             }
                         }
@@ -95,28 +95,28 @@ pub fn ProjectHeader(
                 }
             }
             //img section
-            div { class: "flex justify-center items-center",
+            div { class: "block",
                 img {
-                    class: "w-[540px] h-[300px] rounded-[12px]",
+                    class: "w-540 h-300 rounded-xl",
                     src: asset!("/public/images/section_image.png"),
                     alt: "Header Section Image",
                 }
             }
         }
         //menu
-        div { class: "flex flex-col w-full justify-center items-center bg-[#f7f7f7]",
-            div { class: "flex flex-col max-w-[1300px] w-full",
+        div { class: "flex flex-col w-full justify-center items-center bg-box-gray whitespace-nowrap",
+            div { class: "flex flex-col max-w-1300 w-full",
                 // Tab menu
-                div { class: "w-full h-[42px] flex flex-row justify-between items-center",
+                div { class: "w-full h-42 flex flex-row justify-between items-center overflow-x-auto max-[1300px]:no-scrollbar",
                     for tab in Tab::all() {
-                        div { class: "flex flex-col items-center w-[160px]",
+                        div { class: "flex flex-col items-center min-w-160",
                             div {
-                                class: "w-[160px] h-[30px] flex justify-center items-center font-md text-[15px] cursor-pointer",
-                                class: if *active_tab_value == tab { " font-semibold" } else { "text-[#222]" },
+                                class: "w-160 h-30 flex justify-center items-center font-md text-[15px] cursor-pointer",
+                                class: if *active_tab_value == tab { " font-semibold" } else { "text-text-black" },
                                 onclick: move |_| set_active_tab(tab),
                                 p { {tab.translate(&lang)} }
                             }
-                            div { class: if *active_tab_value == tab { "w-full h-[2px] bg-[#8095EA]" } else { "w-full h-[2px] bg-transparent" } }
+                            div { class: if *active_tab_value == tab { "w-full h-2 bg-button-primary" } else { "w-full h-2 bg-transparent" } }
                         }
                         if tab != Tab::FinalDraft {
                             RightArrow { color: "#B4B4B4" }
@@ -124,7 +124,7 @@ pub fn ProjectHeader(
                     }
                 }
                 // line
-                div { class: "w-full h-[1px] bg-[#eee]" }
+                div { class: "w-full h-1 bg-line-gray" }
             }
         }
     }
