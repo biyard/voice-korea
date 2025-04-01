@@ -35,7 +35,7 @@ fn App() -> Element {
     UserService::init();
 
     let conf = config::get();
-    let css = include_str!("../public/input.css");
+    let css = include_str!("../public/theme.css");
 
     rsx! {
         FirebaseProvider {

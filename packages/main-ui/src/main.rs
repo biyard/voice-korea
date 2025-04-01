@@ -34,7 +34,7 @@ fn App() -> Element {
     OpinionApi::init();
     MetadataApi::init();
 
-    let css = include_str!("../public/input.css");
+    let css = include_str!("../public/theme.css");
 
     rsx! {
         document::Link {
