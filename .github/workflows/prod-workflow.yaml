@@ -58,8 +58,8 @@ jobs:
           ENV: dev
           STACK: voice-korea-api-dev-stack
           SERVICE: api
-          BASE_DOMAIN: biyard.co
-          DOMAIN: voice-korea-api.dev.biyard.co
+          BASE_DOMAIN: voice-korea.com
+          DOMAIN: voice-korea-api.dev.voice-korea.com
           AUTH_TYPE: jwt
           JWT_SECRET_KEY: ${{ secrets.DEV_JWT_SECRET_KEY }}
           BUCKET_NAME: voice-korea.dev.biyard.co
@@ -108,7 +108,7 @@ jobs:
           REGION: ap-northeast-2
           ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          API_URL: https://voice-korea-api.dev.biyard.co
+          API_URL: https://voice-korea-api.dev.voice-korea.com
           ENV: dev
           STACK: voice-korea-dev-stack
           SERVICE: main-ui
