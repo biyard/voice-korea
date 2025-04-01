@@ -174,8 +174,8 @@ jobs:
           ENV: dev
           STACK: voice-korea-api-dev-stack
           SERVICE: api
-          BASE_DOMAIN: biyard.co
-          DOMAIN: voice-korea-api.dev.biyard.co
+          BASE_DOMAIN: voice-korea.com
+          DOMAIN: voice-korea-api.dev.voice-korea.com
           DATABASE_TYPE: postgres
           DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
           AUTH_TYPE: jwt
