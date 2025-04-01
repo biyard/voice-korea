@@ -79,6 +79,7 @@ impl DiscussionController {
                     ended_at: None,
                     name: None,
                     description: None,
+                    maximum_count: None,
                     meeting_id: Some(meeting.id),
                 },
             )
@@ -104,6 +105,7 @@ impl DiscussionController {
             name,
             description,
             resources,
+            maximum_count,
         }: DiscussionCreateRequest,
     ) -> Result<Discussion> {
         let user_id = match auth {
@@ -128,6 +130,7 @@ impl DiscussionController {
                 ended_at,
                 name,
                 description,
+                maximum_count,
                 None,
             )
             .await?
@@ -402,9 +405,10 @@ mod discussion_tests {
                 org_id,
                 now,
                 now + 1000,
-                ProjectArea::City,
+                "".to_string(),
                 format!("test deliberation {now}"),
                 "test description".to_string(),
+                ProjectArea::City,
                 vec![],
                 vec![],
                 vec![],
@@ -444,6 +448,7 @@ mod discussion_tests {
                 ended_at,
                 name.clone(),
                 description.clone(),
+                0,
                 vec![],
             )
             .await

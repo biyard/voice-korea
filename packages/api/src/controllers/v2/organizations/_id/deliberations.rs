@@ -69,6 +69,7 @@ impl DeliberationController {
             steps,
             elearning,
             discussions,
+            thumbnail_image,
         }: DeliberationCreateRequest,
     ) -> Result<Deliberation> {
         if started_at >= ended_at {
@@ -94,9 +95,10 @@ impl DeliberationController {
                 org_id,
                 started_at,
                 ended_at,
-                project_area,
+                thumbnail_image,
                 title,
                 description,
+                project_area,
             )
             .await?
             .ok_or(ApiError::DeliberationException)?;
@@ -161,6 +163,7 @@ impl DeliberationController {
             name,
             resources,
             started_at,
+            maximum_count,
         } in discussions
         {
             let discussion = d
@@ -171,6 +174,7 @@ impl DeliberationController {
                     ended_at,
                     name,
                     description,
+                    maximum_count,
                     None,
                 )
                 .await?
@@ -362,9 +366,10 @@ mod tests {
                 org_id,
                 now,
                 now + 1000,
-                ProjectArea::City,
+                "".to_string(),
                 format!("test deliberation {now}"),
                 "test description".to_string(),
+                ProjectArea::City,
                 vec![],
                 vec![],
                 vec![],

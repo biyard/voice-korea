@@ -14,11 +14,21 @@ mod public_opinion;
 mod resource;
 pub mod tab;
 // mod public_survey;
+pub mod areas;
+pub mod deliberation_basic_infos;
+pub mod deliberation_contents;
+pub mod deliberation_discussions;
+pub mod deliberation_drafts;
+pub mod deliberation_final_surveys;
+pub mod deliberation_sample_surveys;
+pub mod elearnings;
+
 pub mod deliberation_comments;
 pub mod deliberation_comments_likes;
 pub mod deliberation_reports;
 pub mod deliberation_resources;
 pub mod deliberation_responses;
+
 pub mod deliberation_surveys;
 pub mod deliberation_users;
 pub mod deliberation_votes;

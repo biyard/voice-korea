@@ -701,6 +701,7 @@ impl Controller {
                 ended_at: meeting.end_date,
                 name: meeting.title.clone(),
                 description: meeting.description.clone(),
+                maximum_count: meeting.users,
                 resources: discussion_resources
                     .iter()
                     .map(|resource| resource.id)
@@ -713,9 +714,10 @@ impl Controller {
                 org_id.unwrap().id,
                 deliberation_time.0,
                 deliberation_time.1,
-                informations.deliberation_type.unwrap_or_default(),
+                "".to_string(), //FIXME: fix to real thumbnail
                 informations.title.unwrap_or_default(),
                 informations.description.unwrap_or_default(),
+                informations.deliberation_type.unwrap_or_default(),
                 informations
                     .documents
                     .iter()

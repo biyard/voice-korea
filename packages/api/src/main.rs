@@ -7,11 +7,18 @@ use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Control
 use deliberation_comment::DeliberationComment;
 use deliberation_resources::deliberation_resource::DeliberationResource;
 use discussions::Discussion;
+use models::deliberation_contents::deliberation_content::DeliberationContent;
+use models::deliberation_discussions::deliberation_discussion::DeliberationDiscussion;
+use models::deliberation_drafts::deliberation_draft::DeliberationDraft;
+use models::deliberation_final_surveys::deliberation_final_survey::DeliberationFinalSurvey;
+use models::deliberation_sample_surveys::deliberation_sample_survey::DeliberationSampleSurvey;
+use models::elearnings::elearning::Elearning;
 use models::{
-    deliberation::Deliberation, deliberation_report::DeliberationReport,
-    deliberation_response::DeliberationResponse, deliberation_user::DeliberationUser,
-    deliberation_vote::DeliberationVote, invitation::Invitation, response::SurveyResponse,
-    review::Review, v2::Institution,
+    areas::area::Area, deliberation::Deliberation,
+    deliberation_basic_infos::deliberation_basic_info::DeliberationBasicInfo,
+    deliberation_report::DeliberationReport, deliberation_response::DeliberationResponse,
+    deliberation_user::DeliberationUser, deliberation_vote::DeliberationVote,
+    invitation::Invitation, response::SurveyResponse, review::Review, v2::Institution,
 };
 use models::{inquiry::Inquiry, step::Step};
 use models::{organization::Organization, *};
@@ -54,6 +61,14 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
         ResourceFile,
         PanelV2,
         SurveyV2,
+        Area,
+        DeliberationBasicInfo,
+        DeliberationContent,
+        DeliberationSampleSurvey,
+        Elearning,
+        DeliberationDiscussion,
+        DeliberationFinalSurvey,
+        DeliberationDraft,
         OrganizationMember,
         PanelSurveys,
         SurveyResponse,
