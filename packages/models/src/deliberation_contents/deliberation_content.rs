@@ -6,9 +6,8 @@ use crate::deliberation_user::DeliberationUser;
 use crate::elearnings::elearning::{self, Elearning};
 use crate::Question;
 
-// NOTE: comments read only model
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberation-contents", table = deliberation_contents)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/contents", table = deliberation_contents)]
 pub struct DeliberationContent {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -32,7 +31,7 @@ pub struct DeliberationContent {
     #[api_model(summary, many_to_one = deliberations)]
     pub deliberation_id: i64,
 
-    #[api_model(summary, many_to_many = content_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = content_id)]
+    #[api_model(summary, many_to_many = deliberation_content_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = content_id)]
     #[serde(default)]
     pub members: Vec<DeliberationUser>,
 

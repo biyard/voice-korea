@@ -5,9 +5,8 @@ use validator::Validate;
 use crate::deliberation_user::DeliberationUser;
 use crate::SurveyV2;
 
-// NOTE: comments read only model
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberation-final-surveys", table = deliberation_final_surveys)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/final-surveys", table = deliberation_final_surveys)]
 pub struct DeliberationFinalSurvey {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -38,11 +37,11 @@ pub struct DeliberationFinalSurvey {
     #[serde(default)]
     pub point: i64,
 
-    #[api_model(summary, many_to_many = final_survey_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = final_survey_id)]
+    #[api_model(summary, many_to_many = deliberation_final_survey_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = final_survey_id)]
     #[serde(default)]
     pub members: Vec<DeliberationUser>,
 
-    #[api_model(summary, many_to_many = final_surveys, foreign_table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = final_survey_id)]
+    #[api_model(summary, many_to_many = deliberation_final_survey_surveys, foreign_table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = final_survey_id)]
     #[serde(default)]
     pub surveys: Vec<SurveyV2>,
 }

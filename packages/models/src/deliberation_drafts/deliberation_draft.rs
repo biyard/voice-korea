@@ -6,7 +6,7 @@ use bdk::prelude::*;
 use validator::Validate;
 
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberation-drafts", table = deliberation_drafts)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/drafts", table = deliberation_drafts)]
 pub struct DeliberationDraft {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -30,15 +30,15 @@ pub struct DeliberationDraft {
     #[api_model(summary, many_to_one = deliberations)]
     pub deliberation_id: i64,
 
-    #[api_model(summary, many_to_many = draft_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = draft_id)]
+    #[api_model(summary, many_to_many = deliberation_draft_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = draft_id)]
     #[serde(default)]
     pub members: Vec<DeliberationUser>,
 
-    #[api_model(summary, many_to_many = draft_resources, foreign_table_name = resources, foreign_primary_key = resource_id, foreign_reference_key = draft_id)]
+    #[api_model(summary, many_to_many = deliberation_draft_resources, foreign_table_name = resources, foreign_primary_key = resource_id, foreign_reference_key = draft_id)]
     #[serde(default)]
     pub resources: Vec<ResourceFile>,
 
-    #[api_model(summary, many_to_many = draft_surveys, foreign_table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = draft_id)]
+    #[api_model(summary, many_to_many = deliberation_draft_surveys, foreign_table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = draft_id)]
     #[serde(default)]
     pub surveys: Vec<SurveyV2>,
 }

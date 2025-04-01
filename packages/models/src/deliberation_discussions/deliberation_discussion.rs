@@ -7,7 +7,7 @@ use crate::discussions::Discussion;
 use crate::ResourceFile;
 
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberation-contents", table = deliberation_discussions)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/discussions", table = deliberation_discussions)]
 pub struct DeliberationDiscussion {
     #[api_model(summary, primary_key)]
     pub id: i64,
