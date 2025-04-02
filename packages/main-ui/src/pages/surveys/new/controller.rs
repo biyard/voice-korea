@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::pages::surveys::components::setting_reward_modal::SettingRewardModal;
 use bdk::prelude::btracing;
 use dioxus::prelude::*;
@@ -40,10 +42,114 @@ pub struct Controller {
     point: Signal<i64>,
 
     survey_id: Signal<Option<i64>>,
+
+    attribute_options: Signal<HashMap<String, Vec<String>>>,
 }
 
 impl Controller {
     pub fn new(lang: dioxus_translate::Language, survey_id: Option<i64>) -> Self {
+        let mut attribute_options: HashMap<String, Vec<String>> = HashMap::new();
+
+        attribute_options.insert(
+            "성별".to_string(),
+            vec!["남성".to_string(), "여성".to_string()],
+        );
+        attribute_options.insert(
+            "Gender".to_string(),
+            vec!["male".to_string(), "female".to_string()],
+        );
+
+        attribute_options.insert(
+            "지역".to_string(),
+            vec![
+                "서울".to_string(),
+                "부산".to_string(),
+                "대구".to_string(),
+                "인천".to_string(),
+                "광주".to_string(),
+                "대전".to_string(),
+                "울산".to_string(),
+                "세종".to_string(),
+                "경기".to_string(),
+                "강원".to_string(),
+                "충북".to_string(),
+                "충남".to_string(),
+                "전북".to_string(),
+                "전남".to_string(),
+                "경북".to_string(),
+                "경남".to_string(),
+                "제주".to_string(),
+            ],
+        );
+        attribute_options.insert(
+            "Region".to_string(),
+            vec![
+                "seoul".to_string(),
+                "busan".to_string(),
+                "daegu".to_string(),
+                "incheon".to_string(),
+                "gwangju".to_string(),
+                "daejeon".to_string(),
+                "ulsan".to_string(),
+                "sejong".to_string(),
+                "gyeonggi".to_string(),
+                "gangwon".to_string(),
+                "chungbuk".to_string(),
+                "chungnam".to_string(),
+                "jeonbuk".to_string(),
+                "jeonnam".to_string(),
+                "gyeongbuk".to_string(),
+                "gyeongnam".to_string(),
+                "jeju".to_string(),
+            ],
+        );
+
+        attribute_options.insert(
+            "연봉".to_string(),
+            vec![
+                "2400만원 이하".to_string(),
+                "2400만원 ~ 5000만원".to_string(),
+                "5000만원 ~ 8000만원".to_string(),
+                "8000만원 ~ 10000만원".to_string(),
+                "10000만원 이상".to_string(),
+            ],
+        );
+        attribute_options.insert(
+            "Salary".to_string(),
+            vec![
+                "Less than 24 million won".to_string(),
+                "24 million won ~ 50 million won".to_string(),
+                "50 million won ~ 80 million won".to_string(),
+                "80 million won ~ 100 million won".to_string(),
+                "More than 100 million won".to_string(),
+            ],
+        );
+
+        attribute_options.insert(
+            "나이".to_string(),
+            vec![
+                "17세 이하".to_string(),
+                "18~29세".to_string(),
+                "30대".to_string(),
+                "40대".to_string(),
+                "50대".to_string(),
+                "60대".to_string(),
+                "70대 이상".to_string(),
+            ],
+        );
+        attribute_options.insert(
+            "Age".to_string(),
+            vec![
+                "Under 17 years old".to_string(),
+                "18-29 years old".to_string(),
+                "30-39 years old".to_string(),
+                "40-49 years old".to_string(),
+                "50-59 years old".to_string(),
+                "60-69 years old".to_string(),
+                "Over 70s".to_string(),
+            ],
+        );
+
         let translates: SurveyNewTranslate = translate(&lang);
 
         let login_service: LoginService = use_context();
@@ -77,6 +183,8 @@ impl Controller {
 
             estimate_time: use_signal(|| 0),
             point: use_signal(|| 0),
+
+            attribute_options: use_signal(|| attribute_options),
         };
 
         let survey_resource: Resource<Option<SurveyV2>> = use_resource({
@@ -119,6 +227,10 @@ impl Controller {
         use_context_provider(|| ctrl);
 
         ctrl
+    }
+
+    pub fn get_attribute_options(&self) -> HashMap<String, Vec<String>> {
+        (self.attribute_options)()
     }
 
     pub fn get_survey_id(&self) -> Option<i64> {
