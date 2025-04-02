@@ -14,6 +14,8 @@ use crate::{
 
 use serde::{Deserialize, Serialize};
 
+use super::i18n::DeliberationNewTranslate;
+
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Default)]
 pub struct MeetingInfo {
     pub meeting_type: MeetingType,
@@ -41,8 +43,6 @@ pub struct DeliberationInformation {
     pub documents: Vec<ResourceFile>,
     pub projects: Vec<SurveyV2Summary>,
 }
-
-use super::i18n::DeliberationNewTranslate;
 
 #[derive(Debug, Clone, Copy, DioxusController)]
 pub struct Controller {
@@ -76,12 +76,11 @@ pub struct Controller {
 
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub enum CurrentStep {
-    PublicOpinionComposition, // 공론 구성 및 기간
-    InputInformation,         //필수정보 입력
-    CommitteeComposition,     //공론 위원회 구성
-    PanelComposition,         //참여자 패널 구성
-    DiscussionSetting,        //토론 설정
-    Preview,                  //전체 미리보기
+    SettingInfo,          // 공론 개요 설정
+    CompositionCommittee, // 공론 위원회 구성
+    CompositionPanel,     // 참여자 패널 구성
+    DeliberationSchedule, // 공론 절차 및 일정
+    Preview,              // 최종 검토
 }
 
 impl Controller {
@@ -189,37 +188,43 @@ impl Controller {
         let ctrl = Self {
             user,
             popup_service: use_signal(|| popup_service),
-            current_step: use_signal(|| CurrentStep::PublicOpinionComposition),
+            current_step: use_signal(|| CurrentStep::SettingInfo),
             deliberation_sequences: use_signal(|| {
                 // TODO: refactor this @henry
                 vec![
                     StepCreateRequest {
                         step_type: StepType::GeneralPost,
-                        name: translates.information_provided.to_string(),
+                        name: translates.basic_information.to_string(),
                         started_at: 0,
                         ended_at: 0,
                     },
                     StepCreateRequest {
-                        step_type: StepType::VideoConference,
-                        name: translates.discussion_and_deliberation.to_string(),
+                        step_type: StepType::SampleSurvey,
+                        name: translates.sample_survey.to_string(),
                         started_at: 0,
                         ended_at: 0,
                     },
                     StepCreateRequest {
                         step_type: StepType::Post,
-                        name: translates.derive_opinions.to_string(),
+                        name: translates.deliberation.to_string(),
                         started_at: 0,
                         ended_at: 0,
                     },
                     StepCreateRequest {
-                        step_type: StepType::Vote,
-                        name: translates.reach_consensus.to_string(),
+                        step_type: StepType::VideoConference,
+                        name: translates.discussion.to_string(),
+                        started_at: 0,
+                        ended_at: 0,
+                    },
+                    StepCreateRequest {
+                        step_type: StepType::Survey,
+                        name: translates.vote.to_string(),
                         started_at: 0,
                         ended_at: 0,
                     },
                     StepCreateRequest {
                         step_type: StepType::Report,
-                        name: translates.analysis_result.to_string(),
+                        name: translates.final_recommendation.to_string(),
                         started_at: 0,
                         ended_at: 0,
                     },
@@ -268,85 +273,10 @@ impl Controller {
                 }]
             }),
             discussion_resources: use_signal(|| vec![]),
-            //FIXME: fix to connect api
-            // total_attributes: use_signal(|| {
-            //     vec![
-            //         AttributeResponse {
-            //             id: "1".to_string(),
-            //             name: Some("직업".to_string()),
-            //             attribute: vec![AttributeItemInfo {
-            //                 id: "1".to_string(),
-            //                 name: "개발자".to_string(),
-            //             }],
-            //         },
-            //         AttributeResponse {
-            //             id: "2".to_string(),
-            //             name: Some("성별".to_string()),
-            //             attribute: vec![AttributeItemInfo {
-            //                 id: "1".to_string(),
-            //                 name: "여성".to_string(),
-            //             }],
-            //         },
-            //         AttributeResponse {
-            //             id: "3".to_string(),
-            //             name: Some("나이".to_string()),
-            //             attribute: vec![
-            //                 AttributeItemInfo {
-            //                     id: "1".to_string(),
-            //                     name: "20대".to_string(),
-            //                 },
-            //                 AttributeItemInfo {
-            //                     id: "2".to_string(),
-            //                     name: "30대".to_string(),
-            //                 },
-            //                 AttributeItemInfo {
-            //                     id: "3".to_string(),
-            //                     name: "40대".to_string(),
-            //                 },
-            //                 AttributeItemInfo {
-            //                     id: "4".to_string(),
-            //                     name: "50대".to_string(),
-            //                 },
-            //                 AttributeItemInfo {
-            //                     id: "5".to_string(),
-            //                     name: "60대".to_string(),
-            //                 },
-            //             ],
-            //         },
-            //         AttributeResponse {
-            //             id: "4".to_string(),
-            //             name: Some("학력".to_string()),
-            //             attribute: vec![AttributeItemInfo {
-            //                 id: "1".to_string(),
-            //                 name: "대학원".to_string(),
-            //             }],
-            //         },
-            //         AttributeResponse {
-            //             id: "5".to_string(),
-            //             name: Some("거주지".to_string()),
-            //             attribute: vec![AttributeItemInfo {
-            //                 id: "1".to_string(),
-            //                 name: "서울".to_string(),
-            //             }],
-            //         },
-            //         AttributeResponse {
-            //             id: "6".to_string(),
-            //             name: Some("국적".to_string()),
-            //             attribute: vec![AttributeItemInfo {
-            //                 id: "1".to_string(),
-            //                 name: "국내".to_string(),
-            //             }],
-            //         },
-            //     ]
-            // }),
         };
         use_context_provider(|| ctrl);
         Ok(ctrl)
     }
-
-    // pub fn get_total_attributes(&self) -> Vec<AttributeResponse> {
-    //     (self.total_attributes)()
-    // }
 
     pub fn update_deliberation_info(&mut self, index: usize, opinion: StepCreateRequest) {
         let mut sequences = self.get_deliberation_sequences();

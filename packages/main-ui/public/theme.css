@@ -4,4 +4,21 @@
   
   --color-error: #FF0000;
   --color-gray-border: #E0E0E0;
+  --color-text-black: #222222;
+
+  --color-text-gray: #6D6D6D; 
+  --color-hint-gray: #B4B4B4;
+  --color-background-gray: #F7F7F7;
+  --color-label-border-gray: #BFC8D9;
+  --color-table-text-gray: #555462;
+  --color-delete-border-gray: #ADADAD;
+  --color-period-border-gray: #EBEFF5;
+
+  --color-third: #7C8292;
+  --color-focus: #8095EA;
+  --color-hover: #2A60D3;
+
+  --color-label-black: #35343F;
+
+  --color-necessary: #EB5757;
 }

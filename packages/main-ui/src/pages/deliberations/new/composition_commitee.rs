@@ -4,7 +4,6 @@ use models::{deliberation_user::DeliberationUserCreateRequest, OrganizationMembe
 
 use crate::pages::deliberations::new::{
     components::role_dropdown::RoleDropdown, controller::CurrentStep,
-    i18n::CompositionCommitteeTranslate,
 };
 
 #[component]
@@ -19,7 +18,7 @@ pub fn CompositionCommitee(
 
     onstep: EventHandler<CurrentStep>,
 ) -> Element {
-    let translate: CompositionCommitteeTranslate = translate(&lang);
+    let tr: CompositionCommitteeTranslate = translate(&lang);
 
     let admins = get_role_list(members.clone(), committees.clone(), Role::Admin);
     let deliberation_admins =
@@ -30,21 +29,21 @@ pub fn CompositionCommitee(
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
-            div { class: "font-medium text-[16px] text-[#222222] mb-[10px]",
-                "{translate.composition_committee_title}"
+            div { class: "font-medium text-base text-text-black mb-10",
+                "{tr.composition_committee_title}"
             }
 
-            div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white px-[40px] py-[24px]",
-                div { class: "font-bold text-[#222222] text-lg mb-[3px]", "{translate.division_roles}" }
-                div { class: "font-normal text-[#6d6d6d] text-sm mb-[20px]",
-                    "{translate.composition_committee_description}"
+            div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white px-40 py-24",
+                div { class: "font-bold text-text-black text-lg mb-3", "{tr.division_roles}" }
+                div { class: "font-normal text-text-gray text-sm mb-20",
+                    "{tr.composition_committee_description}"
                 }
                 // selection box
-                div { class: "flex flex-col w-full justify-start items-center mb-[40px]",
+                div { class: "flex flex-col w-full justify-start items-center mb-40",
                     RoleDropdown {
                         id: "admin_dropdown",
-                        label: translate.opinion_designer_label.to_string(),
-                        hint: translate.opinion_designer_hint.to_string(),
+                        label: tr.opinion_designer_label.to_string(),
+                        hint: tr.opinion_designer_hint.to_string(),
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: admins.clone(),
@@ -64,8 +63,8 @@ pub fn CompositionCommitee(
                     }
                     RoleDropdown {
                         id: "deliberation_admin_dropdown",
-                        label: translate.specific_opinion_designer_label.to_string(),
-                        hint: translate.specific_opinion_designer_hint.to_string(),
+                        label: tr.specific_opinion_designer_label.to_string(),
+                        hint: tr.specific_opinion_designer_hint.to_string(),
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: deliberation_admins.clone(),
@@ -85,8 +84,8 @@ pub fn CompositionCommitee(
                     }
                     RoleDropdown {
                         id: "analyst_admin_dropdown",
-                        label: translate.analyst_label.to_string(),
-                        hint: translate.analyst_hint.to_string(),
+                        label: tr.analyst_label.to_string(),
+                        hint: tr.analyst_hint.to_string(),
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: analysts.clone(),
@@ -106,8 +105,8 @@ pub fn CompositionCommitee(
                     }
                     RoleDropdown {
                         id: "moderator_admin_dropdown",
-                        label: translate.intermediary_label.to_string(),
-                        hint: translate.intermediary_hint.to_string(),
+                        label: tr.intermediary_label.to_string(),
+                        hint: tr.intermediary_hint.to_string(),
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: moderators.clone(),
@@ -127,8 +126,8 @@ pub fn CompositionCommitee(
                     }
                     RoleDropdown {
                         id: "speaker_admin_dropdown",
-                        label: translate.lecturer_label.to_string(),
-                        hint: translate.lecturer_hint.to_string(),
+                        label: tr.lecturer_label.to_string(),
+                        hint: tr.lecturer_hint.to_string(),
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: speakers.clone(),
@@ -149,7 +148,7 @@ pub fn CompositionCommitee(
                 }
             }
 
-            div { class: "flex flex-row w-full justify-end items-center font-normal text-[#6d6d6d] text-[14px] mt-[5px]",
+            div { class: "flex flex-row w-full justify-end items-center font-normal text-text-gray text-sm mt-5",
                 {
                     format!(
                         "총 {}명 / 공론 설계자 {}명, 특정 공론 설계자 {}명, 분석가 {}명, 중개자 {}명, 강연자 {}명",
@@ -164,25 +163,25 @@ pub fn CompositionCommitee(
                 }
             }
 
-            div { class: "flex flex-row w-full justify-end items-end mt-[40px] mb-[50px]",
+            div { class: "flex flex-row w-full justify-end items-end mt-40 mb-50",
                 div {
-                    class: "flex flex-row w-[70px] h-[55px] rounded-[4px] justify-center items-center bg-white border border-[#bfc8d9] font-semibold text-[16px] text-[#555462] mr-[20px]",
+                    class: "flex flex-row w-70 h-55 rounded-sm justify-center items-center bg-white border border-label-border-gray font-semibold text-base text-table-text-gray mr-20",
                     onclick: move |_| {
-                        onstep.call(CurrentStep::InputInformation);
+                        onstep.call(CurrentStep::SettingInfo);
                     },
-                    "{translate.backward}"
+                    "{tr.backward}"
                 }
                 div {
-                    class: "flex flex-row w-[105px] h-[55px] rounded-[4px] justify-center items-center bg-white border border-[#bfc8d9] font-semibold text-[16px] text-[#555462] mr-[20px]",
+                    class: "flex flex-row w-105 h-55 rounded-sm justify-center items-center bg-white border border-label-border-gray font-semibold text-base text-table-text-gray mr-20",
                     onclick: move |_| {},
-                    "{translate.temporary_save}"
+                    "{tr.temporary_save}"
                 }
                 div {
-                    class: "cursor-pointer flex flex-row w-[110px] h-[55px] rounded-[4px] justify-center items-center bg-[#2a60d3] font-semibold text-[16px] text-white",
+                    class: "cursor-pointer flex flex-row w-110 h-55 rounded-sm justify-center items-center bg-hover font-semibold text-base text-white",
                     onclick: move |_| {
-                        onstep.call(CurrentStep::PanelComposition);
+                        onstep.call(CurrentStep::CompositionPanel);
                     },
-                    "{translate.next}"
+                    "{tr.next}"
                 }
             }
         }
@@ -206,4 +205,73 @@ pub fn get_role_list(
         .collect();
 
     members
+}
+
+translate! {
+    CompositionCommitteeTranslate;
+
+    composition_committee_title: {
+        ko: "공론 위원회 구성",
+        en: "Composition of a public opinion committee"
+    }
+    composition_committee_description: {
+        ko: "공론위원회는 다양한 의견을 수렴하고 합의된 결정을 도출하는 역할을 합니다. 각 역할의 담당자를 설정해주세요.",
+        en: "The Public Opinion Committee's role is to collect diverse opinions and arrive at a consensus decision. Please set a person in charge of each role."
+    }
+    opinion_designer_label: {
+        ko: "공론 설계자",
+        en: "Public Opinion Designer"
+    }
+    opinion_designer_hint: {
+        ko: "공론 설계자 선택",
+        en: "Select Public Opinion Designer"
+    }
+    specific_opinion_designer_label: {
+        ko: "특정 공론 설계자",
+        en: "Specific Public Opinion Designer"
+    }
+    specific_opinion_designer_hint: {
+        ko: "특정 공론 설계자 선택",
+        en: "Select Specific Public Opinion Designer"
+    }
+    analyst_label: {
+        ko: "분석가",
+        en: "Analyst"
+    }
+    analyst_hint: {
+        ko: "분석가 선택",
+        en: "Select Analyst"
+    }
+    intermediary_label: {
+        ko: "중개자",
+        en: "Intermediary"
+    }
+    intermediary_hint: {
+        ko: "중개자 선택",
+        en: "Select Intermediary"
+    }
+    lecturer_label: {
+        ko: "강연자",
+        en: "Lecturer"
+    }
+    lecturer_hint: {
+        ko: "강연자 선택",
+        en: "Select Lecturer"
+    }
+    division_roles: {
+        ko: "역할 분담",
+        en: "Division of Roles"
+    }
+    backward: {
+        ko: "뒤로",
+        en: "Backward"
+    }
+    temporary_save: {
+        ko: "임시저장",
+        en: "Temporary Save"
+    }
+    next: {
+        ko: "다음으로",
+        en: "Next"
+    }
 }

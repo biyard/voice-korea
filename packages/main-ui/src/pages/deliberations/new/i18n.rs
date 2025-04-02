@@ -1,15 +1,6 @@
 use dioxus_translate::translate;
 
 translate! {
-    PreviewComponentTranslate;
-
-    update: {
-        ko: "수정하기",
-        en: "Update"
-    }
-}
-
-translate! {
     DeliberationNewTranslate;
 
     organization_management: {
@@ -74,6 +65,10 @@ translate! {
         ko: "공론관리 목록으로",
         en: "To public opinion management list"
     }
+    backward: {
+        ko: "뒤로",
+        en: "Backward"
+    }
     temporary_save: {
         ko: "임시저장",
         en: "Temporary Save"
@@ -104,25 +99,55 @@ translate! {
         en: "Report"
     }
 
-    information_provided: {
-        ko: "정보 제공",
-        en: "Information Provided"
+    basic_information: {
+        ko: "기본 정보",
+        en: "Basic Information"
     }
-    discussion_and_deliberation: {
-        ko: "토론 및 숙의",
-        en: "Discussion And Deliberation"
+    sample_survey: {
+        ko: "표본 조사",
+        en: "Sample Survey"
     }
-    derive_opinions: {
-        ko: "의견 도출",
-        en: "Derive Opinions"
+    deliberation: {
+        ko: "숙의",
+        en: "Deliberation"
     }
-    reach_consensus: {
-        ko: "합의 도출",
-        en: "Reach Consensus"
+    discussion: {
+        ko: "토론",
+        en: "Discussion"
     }
-    analysis_result: {
-        ko: "결과 분석",
-        en: "Analysis Result"
+    final_recommendation: {
+        ko: "최종 권고안",
+        en: "Final Recommendation"
+    }
+
+    setup_deliberation_outline: {
+        ko: "공론 개요 설정",
+        en: "Setting up a public opinion outline"
+    }
+    composition_of_deliberation: {
+        ko: "공론 위원회 구성",
+        en: "Composition of a public opinion committee"
+    }
+    composition_of_panel: {
+        ko: "참여자 패널 구성",
+        en: "Participant panel composition"
+    }
+    deliberation_procedures_and_schedule: {
+        ko: "공론 절차 및 일정",
+        en: "Deliberation procedures and schedule"
+    }
+    final_review: {
+        ko: "최종 검토",
+        en: "Final Review"
+    }
+}
+
+translate! {
+    PreviewComponentTranslate;
+
+    update: {
+        ko: "수정하기",
+        en: "Update"
     }
 }
 
@@ -277,111 +302,6 @@ translate! {
 }
 
 translate! {
-    CompositionCommitteeTranslate;
-    composition_committee_title: {
-        ko: "공론 위원회 구성",
-        en: "Composition of a public opinion committee"
-    }
-    composition_committee_description: {
-        ko: "공론위원회는 다양한 의견을 수렴하고 합의된 결정을 도출하는 역할을 합니다. 각 역할의 담당자를 설정해주세요.",
-        en: "The Public Opinion Committee's role is to collect diverse opinions and arrive at a consensus decision. Please set a person in charge of each role."
-    }
-    opinion_designer_label: {
-        ko: "공론 설계자",
-        en: "Public Opinion Designer"
-    }
-    opinion_designer_hint: {
-        ko: "공론 설계자 선택",
-        en: "Select Public Opinion Designer"
-    }
-    specific_opinion_designer_label: {
-        ko: "특정 공론 설계자",
-        en: "Specific Public Opinion Designer"
-    }
-    specific_opinion_designer_hint: {
-        ko: "특정 공론 설계자 선택",
-        en: "Select Specific Public Opinion Designer"
-    }
-    analyst_label: {
-        ko: "분석가",
-        en: "Analyst"
-    }
-    analyst_hint: {
-        ko: "분석가 선택",
-        en: "Select Analyst"
-    }
-    intermediary_label: {
-        ko: "중개자",
-        en: "Intermediary"
-    }
-    intermediary_hint: {
-        ko: "중개자 선택",
-        en: "Select Intermediary"
-    }
-    lecturer_label: {
-        ko: "강연자",
-        en: "Lecturer"
-    }
-    lecturer_hint: {
-        ko: "강연자 선택",
-        en: "Select Lecturer"
-    }
-    division_roles: {
-        ko: "역할 분담",
-        en: "Division of Roles"
-    }
-    backward: {
-        ko: "뒤로",
-        en: "Backward"
-    }
-    temporary_save: {
-        ko: "임시저장",
-        en: "Temporary Save"
-    }
-    next: {
-        ko: "다음으로",
-        en: "Next"
-    }
-}
-
-translate! {
-    CompositionPanelTranslate;
-
-    faired_people_allocated: {
-        ko: "공평한 인원수 배정",
-        en: "Fair number of people allocated"
-    }
-    proportional_people_allocated: {
-        ko: "인원수 비례 배정",
-        en: "Proportional allocation of number of people"
-    }
-    participant_panel_composition: {
-        ko: "참여자 패널 구성",
-        en: "Participant Panel Composition"
-    }
-    backward: {
-        ko: "뒤로",
-        en: "Backward"
-    }
-    temporary_save: {
-        ko: "임시저장",
-        en: "Temporary Save"
-    }
-    next: {
-        ko: "다음으로",
-        en: "Next"
-    }
-    create_panel: {
-        ko: "패널 새로 만들기",
-        en: "Create New Panel"
-    }
-    add_attribute: {
-        ko: "속성 추가하기",
-        en: "Add Attribute"
-    }
-}
-
-translate! {
     AddAttributeModalTranslate;
 
     add_attribute_modal_title: {
@@ -453,55 +373,6 @@ translate! {
     select_attribute: {
         ko: "속성 선택",
         en: "Select Attribute"
-    }
-}
-
-translate! {
-    SettingTotalPanelTranslate;
-
-    setting_total_panel_title: {
-        ko: "전체 패널 설정",
-        en: "Total Panel Settings"
-    }
-    setting_total_panel_description: {
-        ko: "공론위원회는 다양한 의견을 수렴하고 합의된 결정을 도출하는 역할을 합니다. 각 역할의 담당자를 선정해주세요.",
-        en: "The Public Opinion Committee's role is to collect diverse opinions and arrive at a consensus decision. Please select a person in charge of each role."
-    }
-    total_panel: {
-        ko: "전체 패널",
-        en: "Total Panel"
-    }
-    faired_people_allocated: {
-        ko: "공평한 인원수 배정",
-        en: "Fair number of people allocated"
-    }
-    proportional_people_allocated: {
-        ko: "인원수 비례 배정",
-        en: "Proportional allocation of number of people"
-    }
-    total_members: {
-        ko: "총 인원",
-        en: "Total Members"
-    }
-    select_panel: {
-        ko: "패널 선택",
-        en: "Select Panel"
-    }
-    panel_hint: {
-        ko: "패널을 선택해주세요",
-        en: "Select a panel"
-    }
-    unit: {
-        ko: "명",
-        en: "Unit"
-    }
-    input_panel_count: {
-        ko: "패널 수 입력",
-        en: "Input Panel Count"
-    }
-    sampling: {
-        ko: "샘플링",
-        en: "Sampling"
     }
 }
 
