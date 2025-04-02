@@ -75,7 +75,7 @@ pub fn MainSection(lang: Language) -> Element {
             id: "service",
             class: "flex flex-col w-full justify-center items-center",
             div { class: "flex flex-col w-full max-w-1300 items-start justify-start max-[500px]:px-10 gap-50",
-                div { class: "relative flex flex-col w-full max-[500px]:h-fit h-320 max-[500px]:p-25 p-65 justify-center items-start rounded-2xl gap-10 overflow-hidden ",
+                div { class: "relative flex flex-col w-full max-[500px]:h-fit h-320 max-[500px]:p-25 p-65 justify-center items-start rounded-2xl gap-10 overflow-hidden",
                     div {
                         class: "absolute inset-0 bg-cover bg-center opacity-80 rounded-2xl",
                         style: "background-image: url({background_url});",
@@ -290,7 +290,7 @@ pub fn DeliberationProjectCard(lang: Language, deliberations: Vec<DeliberationPr
     rsx! {
         div {
             id: "project",
-            class: "flex flex-col w-full justify-center items-center",
+            class: "flex flex-col w-full justify-center items-center px-10",
             div { class: "flex flex-col w-full max-w-1300 justify-start items-start gap-40",
                 div { class: "flex flex-col gap-30 w-full",
                     div { class: "flex flex-col gap-10",
