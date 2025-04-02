@@ -53,7 +53,7 @@ pub fn InputIntroduction(
                 class: "flex flex-col w-full justify-start items-start px-[40px] py-[24px] bg-white rounded-[8px]",
                 style: "box-shadow: 0 4px 6px rgba(53, 70, 177, 0.05);",
 
-                div { class: "flex flex-row font-bold text-lg leading-6",
+                div { class: "flex flex-row font-bold text-lg leading-24",
                     div { class: "text-[#eb5757]", "*" }
                     div { class: "text-[#3a3a3a]", "{translate.input_introduction}" }
                 }

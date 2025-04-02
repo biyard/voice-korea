@@ -142,6 +142,55 @@ translate! {
 }
 
 translate! {
+    SettingAttributeTranslate;
+
+    composition_participant: {
+        ko: "참여자 구성",
+        en: "Participant Composition"
+    }
+    participant_attribute_setting: {
+        ko: "참여자 속성 설정",
+        en: "Participant Attribute Setting"
+    }
+    participant_attribute_setting_info: {
+        ko: "공론에 참여할 패널과 샘플링할 인원을 설정합니다.",
+        en: "Set the panel to participate in the public discussion and the number of people to sample."
+    }
+    total_people: {
+        ko: "총 인원",
+        en: "Total Number of People"
+    }
+    total_people_hint: {
+        ko: "총 인원 입력",
+        en: "Input Total Number of People"
+    }
+    attribute_group: {
+        ko: "속성 그룹",
+        en: "Attribute Group"
+    }
+    enter_contents: {
+        ko: "내용 입력",
+        en: "Enter Contents"
+    }
+    gender: {
+        ko: "성별",
+        en: "Gender"
+    }
+    region: {
+        ko: "지역",
+        en: "Region"
+    }
+    salary: {
+        ko: "연봉",
+        en: "Salary"
+    }
+    age: {
+        ko: "나이",
+        en: "Age"
+    }
+}
+
+translate! {
     SettingPanelTranslate;
 
     composition_panel: {

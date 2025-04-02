@@ -6,10 +6,8 @@ use crate::{
     pages::surveys::{
         models::current_step::CurrentStep,
         new::{
-            controller::Controller,
-            create_survey::CreateSurvey,
-            i18n::SurveyNewTranslate,
-            setting_panel::{PanelRequest, SettingPanel},
+            controller::Controller, create_survey::CreateSurvey, i18n::SurveyNewTranslate,
+            setting_attribute::SettingAttribute,
         },
     },
     routes::Route,
@@ -20,6 +18,8 @@ pub fn SurveyCreatePage(lang: Language, survey_id: Option<i64>) -> Element {
     let translates: SurveyNewTranslate = translate(&lang);
     // FIXME: impelement handling with survey_id
     let mut ctrl = Controller::new(lang, survey_id);
+
+    let attribute_options = ctrl.get_attribute_options();
 
     rsx! {
         div { class: "flex flex-col gap-[40px] items-end justify-start mb-[40px]",
@@ -43,15 +43,22 @@ pub fn SurveyCreatePage(lang: Language, survey_id: Option<i64>) -> Element {
                     onnext: move |req| ctrl.handle_survey_request(req),
                     onchange: move |req| ctrl.change_survey_request(req),
                 }
-                SettingPanel {
+
+                SettingAttribute {
                     lang,
                     survey_id,
+                    attribute_options,
                     visibility: ctrl.get_current_step() == CurrentStep::SettingPanel,
-                    onnext: move |req: PanelRequest| async move {
-                        ctrl.open_setting_reward_modal(lang, req).await;
-                    },
-                    onback: move || ctrl.change_step(CurrentStep::CreateSurvey),
                 }
+                        // SettingPanel {
+            //     lang,
+            //     survey_id,
+            //     visibility: ctrl.get_current_step() == CurrentStep::SettingPanel,
+            //     onnext: move |req: PanelRequest| async move {
+            //         ctrl.open_setting_reward_modal(lang, req).await;
+            //     },
+            //     onback: move || ctrl.change_step(CurrentStep::CreateSurvey),
+            // }
             }
         }
     }
