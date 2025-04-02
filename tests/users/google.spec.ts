@@ -25,7 +25,7 @@ async function getBrowserInstance() {
                 '--disable-infobars',
                 '--disable-extensions',
                 '--start-maximized',
-                '--window-size=1280,720'
+                '--window-size=1300, 1280'
             ]
         });
     }

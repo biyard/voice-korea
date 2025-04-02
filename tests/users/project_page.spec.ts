@@ -2,9 +2,9 @@ import { test, expect } from '@playwright/test';
 
 const devMobileViewports = [
     { device: 'iPhone 12', width: 390, height: 844 },
-    // { device: 'Samsung Galaxy S20', width: 412, height: 915 },
-    // { device: 'Pixel 5', width: 393, height: 851 },
-    // { device: 'iPad Mini', width: 768, height: 1024 },
+    { device: 'Samsung Galaxy S20', width: 412, height: 915 },
+    { device: 'Pixel 5', width: 393, height: 851 },
+    { device: 'iPad Mini', width: 768, height: 1024 },
 ];
 
 test.describe('UI Mobile Responsiveness & Project Page Tests', () => {
@@ -15,7 +15,7 @@ test.describe('UI Mobile Responsiveness & Project Page Tests', () => {
             await page.goto('https://dev.voice-korea.com/en/projects');
 
             const bodyOverflowX = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
-            expect(bodyOverflowX).toBeTruthy();
+            expect(bodyOverflowX).toBeFalsy();
 
             await page.screenshot({ path: `screenshots/ui-${viewport.device}.png`, fullPage: true });
         });
