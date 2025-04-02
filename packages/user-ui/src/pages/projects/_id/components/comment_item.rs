@@ -47,13 +47,13 @@ pub fn CommentItem(
                 div { class: "flex flex-col w-full justify-start items-start gap-[20px] px-[40px]",
                     div { class: "font-medium text-[16px] text-[#222222]", {comment.comment} }
                     div { class: "flex flex-row w-full justify-between items-end",
-                        div { class: " flex flex-row gap-[40px]",
+                        div { class: " flex flex-row gap-40 max-[500px]:gap-10",
                             div {
-                                class: "cursor-pointer flex flex-row gap-[8px] w-fit justify-start items-center",
+                                class: "cursor-pointer flex flex-row gap-[8px] w-fit justify-start items-center max-[500px]:gap-4",
                                 onclick: move |_| {
                                     show_comments.set(!show_comments());
                                 },
-                                div { class: "font-medium text-[16px] text-[#2A60D3] leading-[24px]",
+                                div { class: "font-medium text-[16px] text-[#2A60D3] leading-[24px] max-[500px]:text-sm",
                                     {format!("{} {} {}", tr.reply, comment.replies, tr.unit)}
                                 }
                                 if show_comments() {
@@ -75,12 +75,12 @@ pub fn CommentItem(
                                 onclick: move |_| {
                                     show_reply.set(!show_reply());
                                 },
-                                div { class: "font-medium text-[16px] text-[#222222] leading-[24px]",
+                                div { class: "font-medium text-[16px] text-[#222222] leading-[24px] max-[500px]:text-sm",
                                     "{tr.reply_comment}"
                                 }
                             }
                         }
-                        div { class: "flex flex-row justify-center gap-[40px]",
+                        div { class: "flex flex-row justify-center gap-40 max-[500px]:gap-20",
                             div { class: "flex flex-row w-fit justify-start items-center gap-[8px]",
                                 SquareChat {}
                                 p { "{comment.replies}" }

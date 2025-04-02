@@ -17,7 +17,7 @@ pub fn MainFooter(lang: Language) -> Element {
             id: "footer",
             class: "flex flex-col w-full justify-center items-center  bg-footer",
             div { class: "flex flex-col w-full justify-center items-center pt-80 pb-135 gap-50",
-                div { class: "flex flex-col w-full justify-center items-center gap-10",
+                div { class: "flex flex-col w-full justify-center items-center gap-10 max-[500px]:px-10",
                     div { class: "font-bold text-[28px] leading-32 text-white", "{tr.guideline}" }
                     div { class: "font-normal text-[15px] text-center leading-22 text-white whitespace-pre-line",
                         "{tr.guideline_desc}"
@@ -60,7 +60,7 @@ pub fn MainFooter(lang: Language) -> Element {
                 }
             }
             div { class: "flex flex-row w-full h-1 bg-white opacity-5" }
-            div { class: "flex flex-row w-full max-[600px]:gap-4 gap-120 py-40 justify-center items-center text-sm font-semibold text-white/50",
+            div { class: "flex flex-row w-full max-[600px]:gap-4 gap-120 py-40 justify-center items-center text-sm font-semibold text-white/50 max-[500px]:flex-col",
                 div { "© 2025 Biyard. All Rights Reserved." }
                 div { class: "font-extrabold text-base flex gap-4",
                     icons::Logo { class: "fill-white/50" }
