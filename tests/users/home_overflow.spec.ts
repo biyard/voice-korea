@@ -14,7 +14,7 @@ test.describe('UI Mobile Responsiveness', () => {
       await page.goto('https://dev.voice-korea.com/en/');
 
       const bodyOverflowX = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
-      expect(bodyOverflowX).toBeTruthy();
+      expect(bodyOverflowX).toBeFalsy();
 
       await page.screenshot({ path: `screenshots/ui-${viewport.device}.png`, fullPage: true });
     });
