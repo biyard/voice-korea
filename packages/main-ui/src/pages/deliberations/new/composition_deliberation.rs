@@ -1,9 +1,15 @@
-use crate::components::{
-    calendar::Calendar,
-    icons::{ArrowRight, BottomDropdownArrow, CalendarIcon, MenuDial, TopDropdownArrow, Trash},
+use crate::{
+    components::{
+        calendar::Calendar,
+        icons::{ArrowRight, BottomDropdownArrow, CalendarIcon, MenuDial, TopDropdownArrow, Trash},
+    },
+    pages::deliberations::new::{
+        basic_info::BasicInfo, controller::CurrentStep, deliberation::Deliberation,
+        discussion::Discussion, recommendation::Recommendation, sample_survey::SampleSurvey,
+        vote::Vote,
+    },
 };
 
-use super::controller::CurrentStep;
 use chrono::{TimeZone, Utc};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
@@ -30,6 +36,17 @@ pub struct PeriodDeliberationProcedureTranslate {
     last_day: String,
 }
 
+#[derive(Debug, Clone, PartialEq, Copy)]
+pub enum DeliberationStep {
+    None,
+    BasicInfo,
+    SampleSurvey,
+    Deliberation,
+    Discussion,
+    Vote,
+    Recommendation,
+}
+
 #[component]
 pub fn CompositionDeliberation(
     lang: Language,
@@ -40,14 +57,109 @@ pub fn CompositionDeliberation(
     ondelete: EventHandler<usize>,
     onstep: EventHandler<CurrentStep>,
 ) -> Element {
+    let mut deliberation_step = use_signal(|| DeliberationStep::None);
+
+    rsx! {
+        CompositionSchedule {
+            lang,
+            deliberation_sequences,
+            check_sequence,
+            deliberation_step: deliberation_step(),
+
+            onadd,
+            onupdate,
+            ondelete,
+            onstep,
+            change_deliberation_step: move |step| {
+                deliberation_step.set(step);
+            },
+        }
+
+        BasicInfo {
+            lang,
+            visibility: deliberation_step() == DeliberationStep::BasicInfo,
+            change_step: move |step| {
+                deliberation_step.set(step);
+                onstep.call(CurrentStep::DeliberationSchedule);
+            },
+        }
+
+        SampleSurvey {
+            lang,
+            visibility: deliberation_step() == DeliberationStep::SampleSurvey,
+            change_step: move |step| {
+                deliberation_step.set(step);
+                onstep.call(CurrentStep::DeliberationSchedule);
+            },
+        }
+
+        Deliberation {
+            lang,
+            visibility: deliberation_step() == DeliberationStep::Deliberation,
+            change_step: move |step| {
+                deliberation_step.set(step);
+                onstep.call(CurrentStep::DeliberationSchedule);
+            },
+        }
+
+        Discussion {
+            lang,
+            visibility: deliberation_step() == DeliberationStep::Discussion,
+            change_step: move |step| {
+                deliberation_step.set(step);
+                onstep.call(CurrentStep::DeliberationSchedule);
+            },
+        }
+
+        Vote {
+            lang,
+            visibility: deliberation_step() == DeliberationStep::Vote,
+            change_step: move |step| {
+                deliberation_step.set(step);
+                onstep.call(CurrentStep::DeliberationSchedule);
+            },
+        }
+
+        Recommendation {
+            lang,
+            visibility: deliberation_step() == DeliberationStep::Recommendation,
+            change_step: move |step| {
+                deliberation_step.set(step);
+                onstep.call(CurrentStep::DeliberationSchedule);
+            },
+        }
+    }
+}
+
+#[component]
+pub fn CompositionSchedule(
+    lang: Language,
+    deliberation_sequences: Vec<StepCreateRequest>,
+    check_sequence: bool,
+    deliberation_step: DeliberationStep,
+
+    onadd: EventHandler<MouseEvent>,
+    onupdate: EventHandler<(usize, StepCreateRequest)>,
+    ondelete: EventHandler<usize>,
+    onstep: EventHandler<CurrentStep>,
+    change_deliberation_step: EventHandler<DeliberationStep>,
+) -> Element {
     let tr: CompositionDeliberationTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start",
+        div {
+            class: format!(
+                "flex flex-col w-full justify-start items-start {}",
+                if deliberation_step != DeliberationStep::None { "hidden" } else { "" },
+            ),
             div { class: "font-medium text-base text-black mb-10", "{tr.organization_and_period_title}" }
             OrganizationDeliberationProcedure {
                 deliberation_sequences: deliberation_sequences.clone(),
                 lang,
+                change_deliberation_step: move |step: DeliberationStep| {
+                    change_deliberation_step.call(step);
+                    onstep.call(CurrentStep::EditContent);
+                },
                 onadd,
                 ondelete,
                 onupdate,
@@ -251,6 +363,7 @@ pub fn OrganizationDeliberationProcedure(
     onadd: EventHandler<MouseEvent>,
     onupdate: EventHandler<(usize, StepCreateRequest)>,
     ondelete: EventHandler<usize>,
+    change_deliberation_step: EventHandler<DeliberationStep>,
 ) -> Element {
     let mut composition_clicked = use_signal(|| false);
 
@@ -288,7 +401,26 @@ pub fn OrganizationDeliberationProcedure(
             //sequence
             div { class: "flex flex-wrap w-full justify-start items-center mt-20",
                 for (index , sequence) in deliberation_sequences.iter().enumerate() {
-                    div { class: "flex flex-row w-184 h-55 justify-start items-center p-15 border border-label-border-gray rounded-sm",
+                    div {
+                        class: "cursor-pointer flex flex-row w-184 h-55 justify-start items-center p-15 border border-label-border-gray rounded-sm",
+                        onclick: {
+                            let step_type = sequence.step_type.clone();
+                            move |_| {
+                                if step_type == StepType::GeneralPost {
+                                    change_deliberation_step.call(DeliberationStep::BasicInfo);
+                                } else if step_type == StepType::SampleSurvey {
+                                    change_deliberation_step.call(DeliberationStep::SampleSurvey);
+                                } else if step_type == StepType::Post {
+                                    change_deliberation_step.call(DeliberationStep::Deliberation);
+                                } else if step_type == StepType::VideoConference {
+                                    change_deliberation_step.call(DeliberationStep::Discussion);
+                                } else if step_type == StepType::Survey {
+                                    change_deliberation_step.call(DeliberationStep::Vote);
+                                } else {
+                                    change_deliberation_step.call(DeliberationStep::Recommendation);
+                                }
+                            }
+                        },
                         if sequence.name != "" {
                             "{index + 1}. {sequence.name}"
                         } else {

@@ -13,12 +13,14 @@
   --color-table-text-gray: #555462;
   --color-delete-border-gray: #ADADAD;
   --color-period-border-gray: #EBEFF5;
+  --color-header-gray: #9B9B9B;
 
   --color-third: #7C8292;
   --color-focus: #8095EA;
   --color-hover: #2A60D3;
 
   --color-label-black: #35343F;
+  --color-header-black: #3A3A3A;
 
   --color-necessary: #EB5757;
 }

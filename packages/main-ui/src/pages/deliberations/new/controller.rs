@@ -81,6 +81,8 @@ pub enum CurrentStep {
     CompositionPanel,     // 참여자 패널 구성
     DeliberationSchedule, // 공론 절차 및 일정
     Preview,              // 최종 검토
+
+    EditContent,
 }
 
 impl Controller {

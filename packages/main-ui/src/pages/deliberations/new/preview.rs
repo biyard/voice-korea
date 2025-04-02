@@ -2,7 +2,7 @@ use bdk::prelude::*;
 
 use super::controller::CurrentStep;
 
-// TODO: implement setting deliberation
+// TODO: implement preview
 #[component]
 pub fn Preview(lang: Language, onstep: EventHandler<CurrentStep>) -> Element {
     let tr: PreviewTranslate = translate(&lang);
