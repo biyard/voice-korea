@@ -61,6 +61,8 @@ pub struct Controller {
     pub committees: Signal<Vec<DeliberationUserCreateRequest>>,
 
     //step 3
+    pub selected_panels: Signal<Vec<PanelV2Summary>>,
+
     //step 4
     //step 5
     deliberation_sequences: Signal<Vec<StepCreateRequest>>,
@@ -70,8 +72,7 @@ pub struct Controller {
     pub surveys: Resource<Vec<SurveyV2Summary>>,
     pub metadatas: Resource<Vec<ResourceFileSummary>>,
     pub search_keyword: Signal<String>,
-    pub panels: Resource<Vec<PanelV2Summary>>,
-    pub selected_panels: Signal<Vec<PanelV2Summary>>,
+
     // total_attributes: Signal<Vec<AttributeResponse>>,
     pub discussions: Signal<Vec<MeetingInfo>>,
     pub discussion_resources: Signal<Vec<ResourceFileSummary>>,
@@ -151,24 +152,6 @@ impl Controller {
             }
         })?;
 
-        let panels = use_server_future(move || {
-            let page = 1;
-            let size = 20;
-            async move {
-                let org_id = user.get_selected_org();
-                if org_id.is_none() {
-                    tracing::error!("Organization ID is missing");
-                    return vec![];
-                }
-                let endpoint = crate::config::get().api_url;
-                let res = PanelV2::get_client(endpoint)
-                    .query(org_id.unwrap().id, PanelV2Query::new(size).with_page(page))
-                    .await;
-
-                res.unwrap_or_default().items
-            }
-        })?;
-
         let ctrl = Self {
             user,
             popup_service: use_signal(|| popup_service),
@@ -242,7 +225,6 @@ impl Controller {
             surveys,
             search_keyword,
             metadatas,
-            panels,
             selected_panels: use_signal(|| vec![]),
             committees: use_signal(|| vec![]),
 
@@ -385,32 +367,14 @@ impl Controller {
         (self.deliberation_informations)().projects
     }
 
-    //step 3
+    //step 1
     pub fn get_committees(&self) -> Vec<DeliberationUserCreateRequest> {
         (self.committees)()
     }
 
-    //step 4
+    //step 2
     pub fn get_selected_panels(&self) -> Vec<PanelV2Summary> {
         (self.selected_panels)()
-    }
-
-    pub fn add_selected_panel(&mut self, panel: PanelV2Summary) {
-        self.selected_panels.push(panel);
-    }
-
-    pub fn remove_selected_panel(&mut self, panel_id: i64) {
-        self.selected_panels.retain(|panel| !(panel.id == panel_id));
-    }
-
-    pub fn clear_selected_panel(&mut self) {
-        self.selected_panels.set(vec![]);
-    }
-
-    pub fn change_selected_panel_by_index(&mut self, index: usize, value: u64) {
-        self.selected_panels.with_mut(|panels| {
-            panels[index].user_count = value;
-        });
     }
 
     //step 5
@@ -492,71 +456,6 @@ impl Controller {
             }
         }
     }
-
-    // pub fn open_create_panel_modal(&self, lang: Language, translates: CompositionPanelTranslate) {
-    //     let mut popup_service = (self.popup_service)().clone();
-    //     let attributes = self.total_attributes;
-    //     popup_service
-    //         .open(rsx! {
-    //             CreateNewPanelModal {
-    //                 attributes: attributes.clone(),
-    //                 lang: lang.clone(),
-    //                 onsave: move |panel_name: String| {
-    //                     tracing::debug!("panel name: {panel_name}");
-    //                 },
-    //                 onclick: {
-    //                     move |panel_name: String| {
-    //                         tracing::debug!("panel name: {panel_name}");
-    //                         popup_service
-    //                             .open(rsx! {
-    //                                 AddAttributeModal {
-    //                                     lang,
-    //                                     onclose: move |_e: MouseEvent| {
-    //                                         popup_service.close();
-    //                                     },
-    //                                 }
-    //                             })
-    //                             .with_id("add_attribute")
-    //                             .with_title(translates.add_attribute);
-    //                     }
-    //                 },
-    //                 onclose: move |_e: MouseEvent| {
-    //                     popup_service.close();
-    //                 },
-    //             }
-    //         })
-    //         .with_id("create_panel")
-    //         .with_title(translates.create_panel);
-    // }
-
-    // pub fn open_send_alerm_modal(&self, lang: Language) {
-    //     let translates: PreviewTranslate = translate(&lang);
-    //     let mut popup_service = (self.popup_service)().clone();
-    //     let ctrl = self.clone();
-    //     popup_service
-    //         .open(rsx! {
-    //             SendAlertModal {
-    //                 lang,
-    //                 onclose: move |_e: MouseEvent| {
-    //                     popup_service.close();
-    //                 },
-    //                 onclick: move |_| {
-    //                     async move {
-    //                         match ctrl.create_deliberation().await {
-    //                             Ok(_) => {
-    //                                 popup_service.close();
-    //                             }
-    //                             Err(e) => {
-    //                                 tracing::error!("Create Deliberation Failed Reason: {:?}", e);
-    //                             }
-    //                         }
-    //                     }
-    //                 },
-    //             }
-    //         })
-    //         .with_id("send_alert")
-    //         .with_title(translates.send_alerm);
-    // }
 
     pub fn get_period(&self) -> (u64, u64) {
         let sequences = self.get_deliberation_sequences();

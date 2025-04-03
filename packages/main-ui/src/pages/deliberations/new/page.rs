@@ -15,7 +15,7 @@ use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::deliberation::DeliberationCreateRequest;
 use models::step::StepCreateRequest;
-use models::{PanelV2Summary, Role};
+use models::Role;
 
 #[component]
 pub fn OpinionCreatePage(lang: Language) -> Element {
@@ -23,7 +23,6 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
     let mut ctrl = Controller::new(lang)?;
     let _surveys = ctrl.surveys()?;
     let _metadatas = ctrl.metadatas()?;
-    let panels = ctrl.panels()?;
 
     let sequences = ctrl.get_deliberation_sequences();
     let check_sequence = ctrl.check_deliberation_info();
@@ -31,7 +30,6 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
     let _resources = ctrl.resources();
     let step = ctrl.get_current_step();
     let _selected_surveys = ctrl.selected_surveys();
-    let selected_panels = ctrl.get_selected_panels();
     let _discussions = ctrl.get_discussions();
     let _discussion_resources = ctrl.get_discussion_resources();
 
@@ -102,21 +100,13 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
             } else if step == CurrentStep::CompositionPanel {
                 CompositionPanel {
                     lang,
-                    panels,
-                    selected_panels,
-                    add_panel: move |panel: PanelV2Summary| {
-                        ctrl.add_selected_panel(panel);
+                    req: req.clone(),
+                    onprev: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                        ctrl.change_request(req);
+                        ctrl.change_step(step);
                     },
-                    remove_panel: move |id: i64| {
-                        ctrl.remove_selected_panel(id);
-                    },
-                    clear_panel: move |_| {
-                        ctrl.clear_selected_panel();
-                    },
-                    change_selected_panel_by_index: move |(index, value): (usize, u64)| {
-                        ctrl.change_selected_panel_by_index(index, value);
-                    },
-                    onstep: move |step: CurrentStep| {
+                    onnext: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                        ctrl.change_request(req);
                         ctrl.change_step(step);
                     },
                 }
