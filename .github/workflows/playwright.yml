@@ -19,6 +19,8 @@ jobs:
         run: npm ci
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+      - name: Decode and restore auth.json
+        run: echo "${{ secrets.VOICE_KOREA_STORAGE_STATE }}" | base64 --decode > auth.json
       - name: Run Playwright tests (Skip secret-dependent tests on PRs)
         env:
           WAIT_TIMEOUT: 5000

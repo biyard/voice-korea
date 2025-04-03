@@ -2,14 +2,14 @@ import { test, expect, chromium } from '@playwright/test';
 import fs from 'fs';
 
 const credentials = {
-    email: process.env.GOOGLE_EMAIL || 'testemail@gmail.com', 
-    pass: process.env.GOOGLE_PASS || 'thepassword' 
+    email: process.env.GOOGLE_EMAIL || 'testemail@gmail.com',
+    pass: process.env.GOOGLE_PASS || 'thepassword'
 };
 
 const timeouts = {
-  wait: parseInt(process.env.WAIT_TIMEOUT || "2000", 10),
-  visible: parseInt(process.env.VISIBLE_TIMEOUT || "5000", 10),
-  url: parseInt(process.env.URL_TIMEOUT || "7000", 10)
+    wait: parseInt(process.env.WAIT_TIMEOUT || "2000", 10),
+    visible: parseInt(process.env.VISIBLE_TIMEOUT || "5000", 10),
+    url: parseInt(process.env.URL_TIMEOUT || "7000", 10)
 };
 
 let browserInstance: any = null;
@@ -17,7 +17,7 @@ let browserInstance: any = null;
 async function getBrowserInstance() {
     if (!browserInstance) {
         browserInstance = await chromium.launch({
-            headless: true,
+            headless: false,
             args: [
                 '--disable-blink-features=AutomationControlled',
                 '--no-sandbox',
@@ -43,7 +43,11 @@ test('Google OAuth Login and Save Session', async () => {
     await page.goto('https://dev.voice-korea.com/en/');
     await page.screenshot({ path: 'screenshots/users/google-001/01-load-page.png' });
 
-    const googleSignInButton = page.getByText("Login");
+    const hamburger = page.getByRole('button').filter({ hasText: /^$/ })
+    await expect(hamburger).toBeVisible();
+    await hamburger.click();
+
+    const googleSignInButton = page.getByRole('button', { name: 'Login' })
     await expect(googleSignInButton).toBeVisible();
     await googleSignInButton.click();
     await page.screenshot({ path: 'screenshots/users/google-001/02-click-login.png' });
@@ -89,7 +93,7 @@ test('Google OAuth Login and Save Session', async () => {
         await popup.screenshot({ path: 'screenshots/users/google-001/06-unverified-app.png' });
     }
 
-    await page.waitForLoadState('domcontentloaded');
+    // await page.waitForLoadState('domcontentloaded');
 
     await page.screenshot({ path: 'screenshots/users/google-001/07-login-success.png' });
 

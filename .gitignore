@@ -90,4 +90,6 @@ target-*/
 
 /storage
 
+*auth.json
+
 /packages/user-ui/public/dep.js
