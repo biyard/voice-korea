@@ -144,7 +144,7 @@ pub fn DeliberationPage(lang: Language) -> Element {
                         div { class: "flex flex-row w-full min-h-[55px] justify-start items-center",
                             div { class: "flex flex-row w-[120px] min-w-[120px] h-full justify-center items-center",
                                 div { class: "text-[#555462] font-semibold text-[14px]",
-                                    {deliberation.project_area.translate(&lang)}
+                                    {deliberation.project_area[0].translate(&lang)} // FIXME: fix this value to vec<ProjectArea>
                                 }
                             }
                             div { class: "flex flex-row flex-1 h-full justify-center items-center",
