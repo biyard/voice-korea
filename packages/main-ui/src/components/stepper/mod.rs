@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
-#[derive(Props, Clone, PartialEq)] // Props를 구현
+#[derive(Props, Clone, PartialEq)]
 pub struct StepperProps {
-    current_step: usize, // Props로 전달할 필드
+    current_step: usize,
     steps: Vec<String>,
 }
 
