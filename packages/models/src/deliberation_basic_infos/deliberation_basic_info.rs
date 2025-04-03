@@ -6,7 +6,7 @@ use bdk::prelude::*;
 use validator::Validate;
 
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberations/:deliberation-id/infos", table = deliberation_basic_infos)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/infos", table = deliberation_basic_infos, action = [create(users = Vec<i64>, resources = Vec<i64>, surveys = Vec<i64>)])]
 pub struct DeliberationBasicInfo {
     #[api_model(summary, primary_key)]
     pub id: i64,

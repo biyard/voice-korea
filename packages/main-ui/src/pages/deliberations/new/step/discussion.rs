@@ -1,17 +1,21 @@
+#![allow(dead_code, unused)]
 use bdk::prelude::*;
 
 use crate::components::icons::ArrowLeft;
 
 use super::composition_deliberation::DeliberationStep;
 
-// TODO: implement deliberation
+// TODO: implement discussion
 #[component]
-pub fn Deliberation(
+pub fn Discussion(
     lang: Language,
     visibility: bool,
-    change_step: EventHandler<DeliberationStep>,
+
+    onprev: EventHandler<DeliberationStep>,
+    onnext: EventHandler<DeliberationStep>,
 ) -> Element {
-    let tr: DeliberationTranslate = translate(&lang);
+    let _ctrl = Controller::new(lang)?;
+    let tr: DiscussionTranslate = translate(&lang);
 
     rsx! {
         div {
@@ -26,11 +30,11 @@ pub fn Deliberation(
             div { class: "flex flex-row w-full justify-start items-center mb-25 gap-10",
                 div {
                     onclick: move |_| {
-                        change_step.call(DeliberationStep::None);
+                        onprev.call(DeliberationStep::None);
                     },
                     ArrowLeft { width: "24", height: "24", color: "#3a3a3a" }
                 }
-                div { class: "text-header-black font-semibold text-[28px] mr-20", "{tr.deliberation}" }
+                div { class: "text-header-black font-semibold text-[28px] mr-20", "{tr.discussion}" }
             }
 
             div { class: "flex flex-col w-full justify-start items-start",
@@ -39,7 +43,7 @@ pub fn Deliberation(
                     div {
                         class: "cursor-pointer flex flex-row px-20 py-14 rounded-sm justify-center items-center bg-white border border-label-border-gray font-semibold text-base text-table-text-gray mr-20",
                         onclick: move |_| {
-                            change_step.call(DeliberationStep::None);
+                            onprev.call(DeliberationStep::None);
                         },
                         "{tr.backward}"
                     }
@@ -51,7 +55,7 @@ pub fn Deliberation(
                     div {
                         class: "cursor-pointer flex flex-row px-20 py-14 rounded-sm justify-center items-center bg-hover font-semibold text-base text-white",
                         onclick: move |_| {
-                            change_step.call(DeliberationStep::None);
+                            onnext.call(DeliberationStep::None);
                         },
                         "{tr.next}"
                     }
@@ -61,8 +65,20 @@ pub fn Deliberation(
     }
 }
 
+#[derive(Debug, Clone, Copy, DioxusController)]
+pub struct Controller {
+    lang: Language,
+}
+
+impl Controller {
+    pub fn new(lang: Language) -> std::result::Result<Self, RenderError> {
+        let ctrl = Self { lang };
+        Ok(ctrl)
+    }
+}
+
 translate! {
-    DeliberationTranslate;
+    DiscussionTranslate;
 
     backward: {
         ko: "뒤로",
@@ -94,8 +110,8 @@ translate! {
         en: "Post Setting"
     }
 
-    deliberation: {
-        ko: "숙의",
-        en: "Deliberation"
+    discussion: {
+        ko: "토론",
+        en: "Discussion"
     }
 }

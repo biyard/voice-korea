@@ -1,20 +1,27 @@
+#![allow(dead_code, unused)]
 use crate::{
     components::{
         calendar::Calendar,
         icons::{ArrowRight, BottomDropdownArrow, CalendarIcon, MenuDial, TopDropdownArrow, Trash},
     },
     pages::deliberations::new::{
-        basic_info::BasicInfo, controller::CurrentStep, deliberation::Deliberation,
-        discussion::Discussion, recommendation::Recommendation, sample_survey::SampleSurvey,
-        vote::Vote,
+        controller::CurrentStep,
+        step::{
+            basic_info::BasicInfo, deliberation::Deliberation, discussion::Discussion,
+            recommendation::Recommendation, sample_survey::SampleSurvey, vote::Vote,
+        },
     },
 };
 
+use by_components::icons::edit::Edit1;
+use by_macros::DioxusController;
 use chrono::{TimeZone, Utc};
 use dioxus::prelude::*;
 use dioxus_logger::tracing;
 use dioxus_translate::{translate, Language};
-use models::{prelude::step_type::StepType, step::StepCreateRequest};
+use models::{
+    deliberation::DeliberationCreateRequest, prelude::step_type::StepType, step::StepCreateRequest,
+};
 use std::str::FromStr;
 
 #[derive(Props, Clone, PartialEq)]
@@ -24,6 +31,7 @@ pub struct OrganizationDeliberationProcedureTranslate {
     no_contents: String,
     no_selection: String,
     remove: String,
+    edit: String,
 }
 
 #[derive(Props, Clone, PartialEq)]
@@ -50,83 +58,189 @@ pub enum DeliberationStep {
 #[component]
 pub fn CompositionDeliberation(
     lang: Language,
-    deliberation_sequences: Vec<StepCreateRequest>,
-    check_sequence: bool,
-    onadd: EventHandler<MouseEvent>,
-    onupdate: EventHandler<(usize, StepCreateRequest)>,
-    ondelete: EventHandler<usize>,
-    onstep: EventHandler<CurrentStep>,
+    visibility: bool,
+
+    req: DeliberationCreateRequest,
+
+    onprev: EventHandler<(DeliberationCreateRequest, CurrentStep)>,
+    onnext: EventHandler<(DeliberationCreateRequest, CurrentStep)>,
 ) -> Element {
+    let mut ctrl = Controller::new(lang)?;
     let mut deliberation_step = use_signal(|| DeliberationStep::None);
+    let deliberation_sequences = ctrl.get_deliberation_sequences();
+    let check_sequence = ctrl.check_deliberation_info();
+
+    use_effect({
+        let req = req.clone();
+        move || {
+            let steps = req.steps.clone();
+
+            if !steps.is_empty() {
+                ctrl.set_deliberation_sequences(steps);
+            }
+        }
+    });
 
     rsx! {
-        CompositionSchedule {
-            lang,
-            deliberation_sequences,
-            check_sequence,
-            deliberation_step: deliberation_step(),
+        div {
+            class: format!(
+                "flex flex-col w-full justify-start items-start {}",
+                if !visibility { "hidden" } else { "" },
+            ),
 
-            onadd,
-            onupdate,
-            ondelete,
-            onstep,
-            change_deliberation_step: move |step| {
-                deliberation_step.set(step);
-            },
-        }
+            CompositionSchedule {
+                lang,
+                deliberation_sequences: ctrl.get_deliberation_sequences(),
+                check_sequence,
+                deliberation_step: deliberation_step(),
 
-        BasicInfo {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::BasicInfo,
-            change_step: move |step| {
-                deliberation_step.set(step);
-                onstep.call(CurrentStep::DeliberationSchedule);
-            },
-        }
+                onadd: move |_| {
+                    let _ = ctrl.add_deliberation_info();
+                },
+                onupdate: move |(index, opinion): (usize, StepCreateRequest)| {
+                    let _ = ctrl.update_deliberation_info(index, opinion);
+                },
+                ondelete: move |index: usize| {
+                    let _ = ctrl.delete_deliberation_info(index);
+                },
+                onprev: {
+                    let new_req = {
+                        let mut r = req.clone();
+                        r = ctrl.change_deliberation_sequences(req.clone());
+                        r
+                    };
+                    move |step: CurrentStep| {
+                        onprev.call((new_req.clone(), step));
+                    }
+                },
+                onnext: {
+                    let new_req = {
+                        let mut r = req.clone();
+                        r = ctrl.change_deliberation_sequences(req.clone());
+                        r
+                    };
+                    move |step: CurrentStep| {
+                        onnext.call((new_req.clone(), step));
+                    }
+                },
+                change_deliberation_step: move |step| {
+                    deliberation_step.set(step);
+                },
+            }
 
-        SampleSurvey {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::SampleSurvey,
-            change_step: move |step| {
-                deliberation_step.set(step);
-                onstep.call(CurrentStep::DeliberationSchedule);
-            },
-        }
+            BasicInfo {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::BasicInfo,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
 
-        Deliberation {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::Deliberation,
-            change_step: move |step| {
-                deliberation_step.set(step);
-                onstep.call(CurrentStep::DeliberationSchedule);
-            },
-        }
+            SampleSurvey {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::SampleSurvey,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
 
-        Discussion {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::Discussion,
-            change_step: move |step| {
-                deliberation_step.set(step);
-                onstep.call(CurrentStep::DeliberationSchedule);
-            },
-        }
+            Deliberation {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::Deliberation,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
 
-        Vote {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::Vote,
-            change_step: move |step| {
-                deliberation_step.set(step);
-                onstep.call(CurrentStep::DeliberationSchedule);
-            },
-        }
+            Discussion {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::Discussion,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
 
-        Recommendation {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::Recommendation,
-            change_step: move |step| {
-                deliberation_step.set(step);
-                onstep.call(CurrentStep::DeliberationSchedule);
-            },
+            Vote {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::Vote,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
+
+            Recommendation {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::Recommendation,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
         }
     }
 }
@@ -141,7 +255,8 @@ pub fn CompositionSchedule(
     onadd: EventHandler<MouseEvent>,
     onupdate: EventHandler<(usize, StepCreateRequest)>,
     ondelete: EventHandler<usize>,
-    onstep: EventHandler<CurrentStep>,
+    onprev: EventHandler<CurrentStep>,
+    onnext: EventHandler<CurrentStep>,
     change_deliberation_step: EventHandler<DeliberationStep>,
 ) -> Element {
     let tr: CompositionDeliberationTranslate = translate(&lang);
@@ -158,7 +273,7 @@ pub fn CompositionSchedule(
                 lang,
                 change_deliberation_step: move |step: DeliberationStep| {
                     change_deliberation_step.call(step);
-                    onstep.call(CurrentStep::EditContent);
+                    onnext.call(CurrentStep::EditContent);
                 },
                 onadd,
                 ondelete,
@@ -170,6 +285,7 @@ pub fn CompositionSchedule(
                         .to_string(),
                     no_contents: tr.no_contents.to_string(),
                     no_selection: tr.no_selection.to_string(),
+                    edit: tr.edit.to_string(),
                     remove: tr.remove.to_string(),
                 },
             }
@@ -191,7 +307,7 @@ pub fn CompositionSchedule(
                 div {
                     class: "flex flex-row w-70 h-55 rounded-sm justify-center items-center bg-white border border-label-border-gray font-semibold text-base text-table-text-gray mr-20",
                     onclick: move |_| {
-                        onstep.call(CurrentStep::CompositionPanel);
+                        onprev.call(CurrentStep::CompositionPanel);
                     },
                     "{tr.backward}"
                 }
@@ -206,7 +322,7 @@ pub fn CompositionSchedule(
                     onclick: {
                         move |_| {
                             if check_sequence {
-                                onstep.call(CurrentStep::Preview);
+                                onnext.call(CurrentStep::Preview);
                             } else {
                                 tracing::error!("opinion info is empty");
                             }
@@ -441,83 +557,179 @@ pub fn OrganizationDeliberationProcedure(
                     div { class: "flex flex-row w-full h-1 bg-period-border-gray mt-10 mb-20" }
                     div { class: "flex flex-col w-full justify-start items-start ",
                         for (index , sequence) in deliberation_sequences.iter().enumerate() {
-                            div { class: "flex flex-row w-full justify-start items-center mb-20",
+                            div { class: "flex flex-row w-full justify-start items-center mb-20 gap-10",
                                 MenuDial { width: "24", height: "24" }
-                                div { class: "ml-10 mr-35 w-260 text-base font-medium text-black",
-                                    if sequence.name != "" {
-                                        "{sequence.name}"
-                                    } else {
-                                        "{i18n.no_contents}"
+                                div { class: "flex flex-row w-full focus:outline-none h-55 justify-start items-center bg-background-gray rounded-sm px-15",
+                                    div { class: "font-medium text-base text-text-black ",
+                                        {sequence.name.clone()}
                                     }
                                 }
-                                select {
-                                    class: "focus:outline-none w-200 h-55 justify-start items-start p-15 bg-background-gray rounded-sm mr-10",
-                                    value: sequence.step_type.to_string(),
-                                    onchange: {
-                                        let sequence = sequence.clone();
-                                        move |e: Event<FormData>| {
-                                            let mut value = sequence.clone();
-                                            let opinion_type = StepType::from_str(e.value().as_str()).ok();
-                                            value.step_type = opinion_type.unwrap_or_default();
-                                            onupdate.call((index, value));
-                                        }
-                                    },
-                                    // option {
-                                    //     value: "",
-                                    //     disabled: true,
-                                    //     selected: sequence.step_type.is_none(),
-                                    //     "{i18n.no_selection}"
-                                    // }
-                                    for option_type in StepType::VARIANTS.iter() {
-                                        option {
-                                            value: option_type.translate(&lang),
-                                            selected: sequence.step_type == option_type.clone(),
-                                            "{option_type.translate(&lang)}"
-                                        }
-                                    }
-                                }
-                                div { class: "flex flex-row w-full focus:outline-none h-55 justify-start items-center bg-background-gray rounded-sm px-15 mr-40",
-                                    input {
-                                        class: "flex flex-row w-full justify-start items-center bg-transparent focus:outline-none",
-                                        r#type: "text",
-                                        placeholder: "{i18n.no_contents}",
-                                        value: sequence.name.clone(),
-                                        oninput: {
-                                            let sequence = sequence.clone();
-                                            move |e: FormEvent| {
-                                                let mut value = sequence.clone();
-                                                value.name = e.value();
-                                                onupdate.call((index, value));
-                                            }
-                                        },
+                                div { class: "focus:outline-none min-w-200 h-55 justify-start items-start p-15 bg-background-gray rounded-sm",
+                                    div { class: "font-medium text-base text-text-black ",
+                                        {sequence.step_type.translate(&lang)}
                                     }
                                 }
                                 div {
-                                    class: "flex flex-row w-108 h-55 justify-start items-center bg-white border border-label-border-gray rounded-lg px-15 cursor-pointer",
-                                    onclick: move |_| {
-                                        ondelete.call(index);
+                                    class: "cursor-pointer flex flex-row w-fit min-w-85 p-15 justify-center items-center gap-5 border border-label-border-gray rounded-lg",
+                                    onclick: {
+                                        let step_type = sequence.step_type.clone();
+                                        move |_| {
+                                            if step_type == StepType::GeneralPost {
+                                                change_deliberation_step.call(DeliberationStep::BasicInfo);
+                                            } else if step_type == StepType::SampleSurvey {
+                                                change_deliberation_step.call(DeliberationStep::SampleSurvey);
+                                            } else if step_type == StepType::Post {
+                                                change_deliberation_step.call(DeliberationStep::Deliberation);
+                                            } else if step_type == StepType::VideoConference {
+                                                change_deliberation_step.call(DeliberationStep::Discussion);
+                                            } else if step_type == StepType::Survey {
+                                                change_deliberation_step.call(DeliberationStep::Vote);
+                                            } else {
+                                                change_deliberation_step.call(DeliberationStep::Recommendation);
+                                            }
+                                        }
                                     },
-                                    div { class: "font-medium text-text-black text-[15px] mr-2",
-                                        "{i18n.remove}"
+                                    div { class: "font-normal text-base text-text-black w-fit whitespace-nowrap",
+                                        "{i18n.edit}"
                                     }
-                                    Trash { width: "24", height: "24" }
+                                    Edit1 {
+                                        class: "[&>path]:stroke-third",
+                                        width: "24",
+                                        height: "24",
+                                        fill: "none",
+                                    }
                                 }
                             }
-                        }
-                    }
-                    div { class: "relative w-full flex items-center justify-center mt-20 mb-24",
-                        div { class: "border-t border-dashed border-gray-300 w-full" }
-                        button {
-                            class: "absolute bg-background-gray border border-label-border-gray rounded-[100px] w-43 h-43 flex items-center justify-center shadow",
-                            onclick: move |e: Event<MouseData>| {
-                                onadd.call(e);
-                            },
-                            "+"
                         }
                     }
                 }
             }
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy, DioxusController)]
+pub struct Controller {
+    lang: Language,
+    deliberation_sequences: Signal<Vec<StepCreateRequest>>,
+}
+
+impl Controller {
+    pub fn new(lang: Language) -> std::result::Result<Self, RenderError> {
+        let tr: CompositionDeliberationTranslate = translate(&lang);
+        let ctrl = Self {
+            lang,
+            deliberation_sequences: use_signal(|| {
+                vec![
+                    StepCreateRequest {
+                        step_type: StepType::GeneralPost,
+                        name: tr.basic_information.to_string(),
+                        started_at: 0,
+                        ended_at: 0,
+                    },
+                    StepCreateRequest {
+                        step_type: StepType::SampleSurvey,
+                        name: tr.sample_survey.to_string(),
+                        started_at: 0,
+                        ended_at: 0,
+                    },
+                    StepCreateRequest {
+                        step_type: StepType::Post,
+                        name: tr.deliberation.to_string(),
+                        started_at: 0,
+                        ended_at: 0,
+                    },
+                    StepCreateRequest {
+                        step_type: StepType::VideoConference,
+                        name: tr.discussion.to_string(),
+                        started_at: 0,
+                        ended_at: 0,
+                    },
+                    StepCreateRequest {
+                        step_type: StepType::Survey,
+                        name: tr.vote.to_string(),
+                        started_at: 0,
+                        ended_at: 0,
+                    },
+                    StepCreateRequest {
+                        step_type: StepType::Report,
+                        name: tr.final_recommendation.to_string(),
+                        started_at: 0,
+                        ended_at: 0,
+                    },
+                ]
+            }),
+        };
+
+        Ok(ctrl)
+    }
+
+    pub fn update_deliberation_info(&mut self, index: usize, opinion: StepCreateRequest) {
+        let mut sequences = self.get_deliberation_sequences();
+        sequences[index] = opinion;
+        self.deliberation_sequences.set(sequences);
+    }
+
+    pub fn delete_deliberation_info(&mut self, index: usize) {
+        let mut sequences = self.get_deliberation_sequences();
+        sequences.remove(index);
+        self.deliberation_sequences.set(sequences);
+    }
+
+    pub fn add_deliberation_info(&mut self) {
+        let mut sequences = self.get_deliberation_sequences();
+        sequences.push(StepCreateRequest {
+            step_type: StepType::GeneralPost,
+            name: "".to_string(),
+            started_at: 0,
+            ended_at: 0,
+        });
+        self.deliberation_sequences.set(sequences);
+    }
+
+    pub fn check_deliberation_info(&self) -> bool {
+        let sequences = &self.get_deliberation_sequences();
+
+        for sequence in sequences {
+            if sequence.started_at == 0 || sequence.ended_at == 0 {
+                return false;
+            }
+
+            if sequence.started_at > sequence.ended_at {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    pub fn set_deliberation_sequences(&mut self, steps: Vec<StepCreateRequest>) {
+        self.deliberation_sequences.set(steps);
+    }
+
+    pub fn get_deliberation_sequences(&self) -> Vec<StepCreateRequest> {
+        (self.deliberation_sequences)()
+    }
+
+    pub fn change_deliberation_sequences(
+        &self,
+        req: DeliberationCreateRequest,
+    ) -> DeliberationCreateRequest {
+        let mut req = req;
+        req.steps = self.get_deliberation_sequences();
+
+        let deliberation_time = self.get_deliberation_time(req.clone().steps);
+        req.started_at = deliberation_time.0;
+        req.ended_at = deliberation_time.1;
+
+        req
+    }
+
+    pub fn get_deliberation_time(&self, steps: Vec<StepCreateRequest>) -> (i64, i64) {
+        let started_at = steps.iter().map(|s| s.started_at).min().unwrap_or(0);
+        let ended_at = steps.iter().map(|s| s.ended_at).max().unwrap_or(0);
+
+        (started_at, ended_at)
     }
 }
 
@@ -554,6 +766,31 @@ translate! {
         en: "Last day"
     }
 
+    basic_information: {
+        ko: "기본 정보",
+        en: "Basic Information"
+    }
+    sample_survey: {
+        ko: "표본 조사",
+        en: "Sample Survey"
+    }
+    deliberation: {
+        ko: "숙의",
+        en: "Deliberation"
+    }
+    discussion: {
+        ko: "토론",
+        en: "Discussion"
+    }
+    vote: {
+        ko: "투표",
+        en: "Vote"
+    }
+    final_recommendation: {
+        ko: "최종 권고안",
+        en: "Final Recommendation"
+    }
+
     organization_of_procedures: {
         ko: "공론 절차 구성",
         en: "Organization of public opinion procedures"
@@ -565,6 +802,10 @@ translate! {
     no_selection: {
         ko: "선택 없음",
         en: "No Selection"
+    }
+    edit: {
+        ko: "편집",
+        en: "Edit"
     }
     remove: {
         ko: "삭제",

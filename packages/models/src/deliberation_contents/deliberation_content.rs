@@ -3,11 +3,12 @@ use bdk::prelude::*;
 use validator::Validate;
 
 use crate::deliberation_user::DeliberationUser;
+use crate::elearnings::elearning::ElearningCreateRequest;
 use crate::elearnings::elearning::{self, Elearning};
 use crate::Question;
 
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberations/:deliberation-id/contents", table = deliberation_contents)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/contents", table = deliberation_contents, action = [create(users = Vec<i64>, elearnings = Vec<ElearningCreateRequest>)])]
 pub struct DeliberationContent {
     #[api_model(summary, primary_key)]
     pub id: i64,
