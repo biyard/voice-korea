@@ -59,29 +59,61 @@ pub fn MainFooter(lang: Language) -> Element {
                     }
                 }
             }
-            div { class: "flex flex-row w-full h-1 bg-white opacity-5" }
-            div { class: "flex flex-row w-full max-[600px]:gap-4 gap-120 py-40 justify-center items-center text-sm font-semibold text-white/50 max-[500px]:flex-col",
-                div { "© 2025 Biyard. All Rights Reserved." }
-                div { class: "font-extrabold text-base flex gap-4",
-                    icons::Logo { class: "fill-white/50" }
-                    "VOICE KOREA"
+            //desktop footer
+            div { class: "block max-[500px]:!hidden",
+                div { class: "flex flex-row w-full h-1 bg-white opacity-5" }
+                div { class: "flex flex-row w-full max-[600px]:gap-4 gap-120 py-40 justify-center items-center text-sm font-semibold text-white/50",
+                    div { "© 2025 Biyard. All Rights Reserved." }
+                    div { class: "font-extrabold text-base flex gap-4",
+                        icons::Logo { class: "fill-white/50" }
+                        "VOICE KOREA"
+                    }
+                    //TODO: Add more menus
+                    div { class: "flex gap-20",
+                        Link {
+                            //TODO: Change Target
+                            to: Route::MainPage {
+                                lang: lang.clone(),
+                            },
+                            "{tr.policy}"
+                        }
+                        Link {
+                            //TODO: Change Target
+                            to: Route::MainPage {
+                                lang: lang.clone(),
+                            },
+                            "{tr.terms}"
+                        }
+                    }
                 }
-                //TODO: Add more menus
-                div { class: "flex gap-20",
-                    Link {
-                        //TODO: Change Target
-                        to: Route::MainPage {
-                            lang: lang.clone(),
-                        },
-                        "{tr.policy}"
+            }
+
+            //mobile footer
+            div { class: "hidden max-[500px]:!block",
+                div { class: "flex flex-row w-full h-1 bg-white opacity-5" }
+                div { class: "flex flex-col w-full gap-20 py-20 justify-center items-center text-sm font-semibold text-white/50",
+                    div { class: "font-extrabold text-base flex gap-4",
+                        icons::Logo { class: "fill-white/50" }
+                        "VOICE KOREA"
                     }
-                    Link {
-                        //TODO: Change Target
-                        to: Route::MainPage {
-                            lang: lang.clone(),
-                        },
-                        "{tr.terms}"
+                    //TODO: Add more menus
+                    div { class: "flex gap-20",
+                        Link {
+                            //TODO: Change Target
+                            to: Route::MainPage {
+                                lang: lang.clone(),
+                            },
+                            "{tr.policy}"
+                        }
+                        Link {
+                            //TODO: Change Target
+                            to: Route::MainPage {
+                                lang: lang.clone(),
+                            },
+                            "{tr.terms}"
+                        }
                     }
+                    div { "© 2025 Biyard. All Rights Reserved." }
                 }
             }
         }

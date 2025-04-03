@@ -45,7 +45,7 @@ pub fn ReviewSection(
                         }
                     }
                     div { class: "flex flex-row w-full max-w-1300",
-                        div { class: "grid max-[600px]:grid-cols-1 max-[1100px]:grid-cols-2 grid-cols-3 w-full gap-20",
+                        div { class: "max-[600px]:!grid-cols-1 grid max-[1100px]:grid-cols-2 grid-cols-3 w-full gap-20",
                             for comment in comments {
                                 ReviewItem { lang, comment }
                             }

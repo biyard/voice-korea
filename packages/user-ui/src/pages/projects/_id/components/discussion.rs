@@ -185,7 +185,7 @@ pub fn Video(
     let tr: DiscussionTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-row w-full justify-start items-start gap-20 rounded-lg",
+        div { class: "flex flex-row w-full justify-start items-start gap-20 rounded-lg max-[500px]:flex-col",
             div { class: "w-240",
                 img { src: asset!("/public/images/video.png"), width: 240 }
             }
@@ -286,11 +286,11 @@ pub fn DiscussionTable(lang: Language, discussion: DiscussionSummary) -> Element
     let tr: DiscussionTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-3/5 justify-start items-start border rounded-lg border-discussion-border-gray",
+        div { class: "flex flex-col w-3/5 justify-start items-start border rounded-lg border-discussion-border-gray max-[1000px]:w-full max-[500px]:hidden",
             div { class: "flex flex-row min-h-55 w-full justify-center items-center border-b border-b-discussion-border-gray font-semibold text-sm text-light-gray",
                 {formatted_timestamp(discussion.started_at)}
             }
-            div { class: "flex flex-row min-h-55 w-full justify-center items-center border-b border-b-discussion-border-gray font-semibold text-sm text-light-gray",
+            div { class: "flex flex-row min-h-55 w-full justify-center items-center border-b border-b-discussion-border-gray font-semibold text-sm text-light-gray max-[500px]:hidden",
                 div { class: "flex flex-row min-w-200 justify-center items-center",
                     "{tr.time}"
                 }
@@ -299,7 +299,7 @@ pub fn DiscussionTable(lang: Language, discussion: DiscussionSummary) -> Element
                 }
                 div { class: "flex flex-row flex-1 justify-center items-center", "{tr.content}" }
             }
-            div { class: "flex flex-row min-h-55 w-full justify-center items-center font-semibold text-sm text-text-black",
+            div { class: "flex flex-row min-h-55 w-full justify-center items-center font-semibold text-sm text-text-black max-[500px]:!hidden",
                 div { class: "flex flex-row min-w-200 justify-center items-center",
                     {format_time_range(discussion.started_at, discussion.ended_at)}
                 }
@@ -308,6 +308,41 @@ pub fn DiscussionTable(lang: Language, discussion: DiscussionSummary) -> Element
                 }
                 div { class: "flex flex-row flex-1 justify-center items-center",
                     "{discussion.description}"
+                }
+            }
+        }
+        //mobile ui
+        div { class: "hidden max-[500px]:block",
+            div { class: "w-full flex flex-col justify-start items-start border rounded-lg border-discussion-border-gray",
+                div { class: "w-full flex flex-row min-h-55 justify-center items-center border-b border-b-discussion-border-gray font-semibold text-sm text-light-gray",
+                    {formatted_timestamp(discussion.started_at)}
+                }
+                //time
+                div { class: "w-full flex flex-row min-h-55 justify-start items-center border-b border-b-discussion-border-gray font-semibold text-sm text-light-gray gap-10",
+                    div { class: "flex flex-row min-w-50 justify-center items-center",
+                        "{tr.time}"
+                    }
+                    div { class: "flex flex-row min-w-200 justify-start items-center text-black font-medium",
+                        {format_time_range(discussion.started_at, discussion.ended_at)}
+                    }
+                }
+                //activity
+                div { class: "w-full flex flex-row min-h-55 justify-start items-center border-b border-b-discussion-border-gray font-semibold text-sm text-light-gray gap-10",
+                    div { class: "flex flex-row min-w-50 justify-center items-center",
+                        "{tr.activity}"
+                    }
+                    div { class: "flex flex-row min-w-200 justify-start items-center text-black font-medium",
+                        "{discussion.name}"
+                    }
+                }
+                //description
+                div { class: "flex flex-row min-h-55 w-full justify-start items-center font-semibold text-sm text-light-gray gap-10",
+                    div { class: "flex flex-row min-w-50 justify-center items-center",
+                        "{tr.content}"
+                    }
+                    div { class: "w-full flex flex-row min-w-200 justify-start items-center text-black font-medium",
+                        "{discussion.description}"
+                    }
                 }
             }
         }
