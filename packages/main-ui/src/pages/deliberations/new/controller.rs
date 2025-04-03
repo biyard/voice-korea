@@ -76,11 +76,11 @@ pub struct Controller {
 
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub enum CurrentStep {
-    SettingInfo,          // 공론 개요 설정
-    CompositionCommittee, // 공론 위원회 구성
-    CompositionPanel,     // 참여자 패널 구성
-    DeliberationSchedule, // 공론 절차 및 일정
-    Preview,              // 최종 검토
+    SettingInfo,          // Setting Deliberation Overview
+    CompositionCommittee, // Composition Deliberation Committee
+    CompositionPanel,     // Composition Participant Panel
+    DeliberationSchedule, // Deliberation Procedure and Schedule
+    Preview,              // Final Recommendation
 
     EditContent,
 }

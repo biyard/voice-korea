@@ -42,8 +42,8 @@ pub fn CompositionCommitee(
                 div { class: "flex flex-col w-full justify-start items-center mb-40",
                     RoleDropdown {
                         id: "admin_dropdown",
-                        label: tr.opinion_designer_label.to_string(),
-                        hint: tr.opinion_designer_hint.to_string(),
+                        label: tr.opinion_designer_label,
+                        hint: tr.opinion_designer_hint,
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: admins.clone(),
@@ -63,8 +63,8 @@ pub fn CompositionCommitee(
                     }
                     RoleDropdown {
                         id: "deliberation_admin_dropdown",
-                        label: tr.specific_opinion_designer_label.to_string(),
-                        hint: tr.specific_opinion_designer_hint.to_string(),
+                        label: tr.specific_opinion_designer_label,
+                        hint: tr.specific_opinion_designer_hint,
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: deliberation_admins.clone(),
@@ -84,8 +84,8 @@ pub fn CompositionCommitee(
                     }
                     RoleDropdown {
                         id: "analyst_admin_dropdown",
-                        label: tr.analyst_label.to_string(),
-                        hint: tr.analyst_hint.to_string(),
+                        label: tr.analyst_label,
+                        hint: tr.analyst_hint,
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: analysts.clone(),
@@ -105,8 +105,8 @@ pub fn CompositionCommitee(
                     }
                     RoleDropdown {
                         id: "moderator_admin_dropdown",
-                        label: tr.intermediary_label.to_string(),
-                        hint: tr.intermediary_hint.to_string(),
+                        label: tr.intermediary_label,
+                        hint: tr.intermediary_hint,
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: moderators.clone(),
@@ -126,8 +126,8 @@ pub fn CompositionCommitee(
                     }
                     RoleDropdown {
                         id: "speaker_admin_dropdown",
-                        label: tr.lecturer_label.to_string(),
-                        hint: tr.lecturer_hint.to_string(),
+                        label: tr.lecturer_label,
+                        hint: tr.lecturer_hint,
                         total_committees: committees.clone(),
                         members: members.clone(),
                         committees: speakers.clone(),
