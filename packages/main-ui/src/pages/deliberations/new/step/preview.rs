@@ -1,3 +1,4 @@
+#![allow(dead_code, unused)]
 use bdk::prelude::*;
 
 use crate::pages::deliberations::new::controller::CurrentStep;
@@ -5,6 +6,7 @@ use crate::pages::deliberations::new::controller::CurrentStep;
 // TODO: implement preview
 #[component]
 pub fn Preview(lang: Language, onstep: EventHandler<CurrentStep>) -> Element {
+    let _ctrl = Controller::new(lang)?;
     let tr: PreviewTranslate = translate(&lang);
 
     rsx! {
@@ -30,6 +32,18 @@ pub fn Preview(lang: Language, onstep: EventHandler<CurrentStep>) -> Element {
                 }
             }
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy, DioxusController)]
+pub struct Controller {
+    lang: Language,
+}
+
+impl Controller {
+    pub fn new(lang: Language) -> std::result::Result<Self, RenderError> {
+        let ctrl = Self { lang };
+        Ok(ctrl)
     }
 }
 

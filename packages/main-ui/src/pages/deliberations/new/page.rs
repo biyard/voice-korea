@@ -14,24 +14,14 @@ use crate::{
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 use models::deliberation::DeliberationCreateRequest;
-use models::step::StepCreateRequest;
 use models::Role;
 
 #[component]
 pub fn OpinionCreatePage(lang: Language) -> Element {
     let tr: DeliberationNewTranslate = translate(&lang.clone());
     let mut ctrl = Controller::new(lang)?;
-    let _surveys = ctrl.surveys()?;
-    let _metadatas = ctrl.metadatas()?;
 
-    let sequences = ctrl.get_deliberation_sequences();
-    let check_sequence = ctrl.check_deliberation_info();
-    let _informations = ctrl.get_deliberation_informations();
-    let _resources = ctrl.resources();
     let step = ctrl.get_current_step();
-    let _selected_surveys = ctrl.selected_surveys();
-    let _discussions = ctrl.get_discussions();
-    let _discussion_resources = ctrl.get_discussion_resources();
 
     let req = ctrl.deliberation_requests();
 
@@ -113,18 +103,13 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
             } else if step == CurrentStep::DeliberationSchedule || step == CurrentStep::EditContent {
                 CompositionDeliberation {
                     lang,
-                    deliberation_sequences: sequences,
-                    check_sequence,
-                    onadd: move |_| {
-                        let _ = ctrl.add_deliberation_info();
+                    req: req.clone(),
+                    onprev: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                        ctrl.change_request(req);
+                        ctrl.change_step(step);
                     },
-                    onupdate: move |(index, opinion): (usize, StepCreateRequest)| {
-                        let _ = ctrl.update_deliberation_info(index, opinion);
-                    },
-                    ondelete: move |index: usize| {
-                        let _ = ctrl.delete_deliberation_info(index);
-                    },
-                    onstep: move |step: CurrentStep| {
+                    onnext: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                        ctrl.change_request(req);
                         ctrl.change_step(step);
                     },
                 }
