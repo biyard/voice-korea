@@ -118,7 +118,6 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
         GroupMemberV2,
         Invitation,
         Institution,
-        Deliberation,
         DeliberationReport,
         Review,
         DeliberationResponse,
@@ -128,6 +127,7 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
         Discussion,
         DeliberationResource,
         DeliberationComment,
+        Deliberation,
         Inquiry,
     );
 
