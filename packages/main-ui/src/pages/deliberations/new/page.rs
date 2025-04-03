@@ -13,7 +13,7 @@ use crate::{
 
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::deliberation_user::DeliberationUserCreateRequest;
+use models::deliberation::DeliberationCreateRequest;
 use models::step::StepCreateRequest;
 use models::{PanelV2Summary, Role};
 
@@ -23,7 +23,6 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
     let mut ctrl = Controller::new(lang)?;
     let _surveys = ctrl.surveys()?;
     let _metadatas = ctrl.metadatas()?;
-    let members = ctrl.members()?;
     let panels = ctrl.panels()?;
 
     let sequences = ctrl.get_deliberation_sequences();
@@ -33,9 +32,10 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
     let step = ctrl.get_current_step();
     let _selected_surveys = ctrl.selected_surveys();
     let selected_panels = ctrl.get_selected_panels();
-    let committees = ctrl.get_committees();
     let _discussions = ctrl.get_discussions();
     let _discussion_resources = ctrl.get_discussion_resources();
+
+    let req = ctrl.deliberation_requests();
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -82,18 +82,20 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
             } else if step == CurrentStep::CompositionCommittee {
                 CompositionCommitee {
                     lang,
-                    members,
-                    committees,
-                    add_committee: move |committee: DeliberationUserCreateRequest| {
-                        ctrl.add_committee(committee);
+                    roles: vec![
+                        Role::Admin,
+                        Role::DeliberationAdmin,
+                        Role::Analyst,
+                        Role::Moderator,
+                        Role::Speaker,
+                    ],
+                    req: req.clone(),
+                    onprev: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                        ctrl.change_request(req);
+                        ctrl.change_step(step);
                     },
-                    remove_committee: move |(user_id, role): (i64, Role)| {
-                        ctrl.remove_committee(user_id, role);
-                    },
-                    clear_committee: move |role: Role| {
-                        ctrl.clear_committee(role);
-                    },
-                    onstep: move |step: CurrentStep| {
+                    onnext: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                        ctrl.change_request(req);
                         ctrl.change_step(step);
                     },
                 }

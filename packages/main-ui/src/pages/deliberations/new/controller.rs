@@ -2,8 +2,12 @@ use bdk::prelude::*;
 use by_macros::DioxusController;
 use chrono::Utc;
 use models::{
-    deliberation::Deliberation, deliberation_user::DeliberationUserCreateRequest,
-    discussions::DiscussionCreateRequest, step::StepCreateRequest, step_type::StepType, *,
+    deliberation::{Deliberation, DeliberationCreateRequest},
+    deliberation_user::DeliberationUserCreateRequest,
+    discussions::DiscussionCreateRequest,
+    step::StepCreateRequest,
+    step_type::StepType,
+    *,
 };
 
 use crate::{
@@ -50,26 +54,25 @@ pub struct Controller {
     current_step: Signal<CurrentStep>,
     user: LoginService,
 
+    deliberation_requests: Signal<DeliberationCreateRequest>,
+
     //step 1
+    //step 2
+    pub committees: Signal<Vec<DeliberationUserCreateRequest>>,
+
+    //step 3
+    //step 4
+    //step 5
     deliberation_sequences: Signal<Vec<StepCreateRequest>>,
 
-    //step 2
     total_fields: Signal<Vec<String>>,
     deliberation_informations: Signal<DeliberationInformation>,
     pub surveys: Resource<Vec<SurveyV2Summary>>,
     pub metadatas: Resource<Vec<ResourceFileSummary>>,
     pub search_keyword: Signal<String>,
-
-    //step 3
-    pub members: Resource<Vec<OrganizationMemberSummary>>,
-    pub committees: Signal<Vec<DeliberationUserCreateRequest>>,
-
-    //step 4
     pub panels: Resource<Vec<PanelV2Summary>>,
     pub selected_panels: Signal<Vec<PanelV2Summary>>,
     // total_attributes: Signal<Vec<AttributeResponse>>,
-
-    //step 5
     pub discussions: Signal<Vec<MeetingInfo>>,
     pub discussion_resources: Signal<Vec<ResourceFileSummary>>,
 }
@@ -148,27 +151,6 @@ impl Controller {
             }
         })?;
 
-        let members = use_server_future(move || {
-            let page = 1;
-            let size = 20;
-            async move {
-                let org_id = user.get_selected_org();
-                if org_id.is_none() {
-                    tracing::error!("Organization ID is missing");
-                    return vec![];
-                }
-                let endpoint = crate::config::get().api_url;
-                let res = OrganizationMember::get_client(endpoint)
-                    .query(
-                        org_id.unwrap().id,
-                        OrganizationMemberQuery::new(size).with_page(page),
-                    )
-                    .await;
-
-                res.unwrap_or_default().items
-            }
-        })?;
-
         let panels = use_server_future(move || {
             let page = 1;
             let size = 20;
@@ -191,6 +173,7 @@ impl Controller {
             user,
             popup_service: use_signal(|| popup_service),
             current_step: use_signal(|| CurrentStep::SettingInfo),
+            deliberation_requests: use_signal(|| DeliberationCreateRequest::default()),
             deliberation_sequences: use_signal(|| {
                 // TODO: refactor this @henry
                 vec![
@@ -259,7 +242,6 @@ impl Controller {
             surveys,
             search_keyword,
             metadatas,
-            members,
             panels,
             selected_panels: use_signal(|| vec![]),
             committees: use_signal(|| vec![]),
@@ -278,6 +260,11 @@ impl Controller {
         };
         use_context_provider(|| ctrl);
         Ok(ctrl)
+    }
+
+    pub fn change_request(&mut self, req: DeliberationCreateRequest) {
+        tracing::debug!("req: {:?}", req);
+        self.deliberation_requests.set(req);
     }
 
     pub fn update_deliberation_info(&mut self, index: usize, opinion: StepCreateRequest) {
@@ -401,20 +388,6 @@ impl Controller {
     //step 3
     pub fn get_committees(&self) -> Vec<DeliberationUserCreateRequest> {
         (self.committees)()
-    }
-
-    pub fn add_committee(&mut self, committee: DeliberationUserCreateRequest) {
-        self.committees.push(committee);
-    }
-
-    pub fn remove_committee(&mut self, user_id: i64, role: Role) {
-        self.committees
-            .retain(|committee| !(committee.user_id == user_id && committee.role == role));
-    }
-
-    pub fn clear_committee(&mut self, role: Role) {
-        self.committees
-            .retain(|committee| !(committee.role == role));
     }
 
     //step 4

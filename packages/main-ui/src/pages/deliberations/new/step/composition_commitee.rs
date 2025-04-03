@@ -1,31 +1,50 @@
+#![allow(dead_code, unused)]
+use by_macros::DioxusController;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
-use models::{deliberation_user::DeliberationUserCreateRequest, OrganizationMemberSummary, Role};
+use models::{
+    deliberation::DeliberationCreateRequest, deliberation_user::DeliberationUserCreateRequest,
+    OrganizationMember, OrganizationMemberQuery, OrganizationMemberSummary, Role,
+};
 
-use crate::pages::deliberations::new::{
-    components::role_dropdown::RoleDropdown, controller::CurrentStep,
+use crate::{
+    pages::deliberations::new::{components::role_dropdown::RoleDropdown, controller::CurrentStep},
+    service::login_service::LoginService,
 };
 
 #[component]
 pub fn CompositionCommitee(
     lang: Language,
-    members: Vec<OrganizationMemberSummary>,
-    committees: Vec<DeliberationUserCreateRequest>,
 
-    add_committee: EventHandler<DeliberationUserCreateRequest>,
-    remove_committee: EventHandler<(i64, Role)>,
-    clear_committee: EventHandler<Role>,
+    roles: Vec<Role>,
+    req: DeliberationCreateRequest,
 
-    onstep: EventHandler<CurrentStep>,
+    onprev: EventHandler<(DeliberationCreateRequest, CurrentStep)>,
+    onnext: EventHandler<(DeliberationCreateRequest, CurrentStep)>,
 ) -> Element {
+    let mut ctrl = Controller::new(lang)?;
     let tr: CompositionCommitteeTranslate = translate(&lang);
 
-    let admins = get_role_list(members.clone(), committees.clone(), Role::Admin);
-    let deliberation_admins =
-        get_role_list(members.clone(), committees.clone(), Role::DeliberationAdmin);
-    let analysts = get_role_list(members.clone(), committees.clone(), Role::Analyst);
-    let moderators = get_role_list(members.clone(), committees.clone(), Role::Moderator);
-    let speakers = get_role_list(members.clone(), committees.clone(), Role::Speaker);
+    let members = ctrl.members()?;
+
+    let mut committee_roles: Signal<Vec<Vec<OrganizationMemberSummary>>> = use_signal(|| vec![]);
+
+    use_effect({
+        let roles = roles.clone();
+        let members = members.clone();
+
+        let committees = req.roles.clone();
+
+        move || {
+            for role in roles.clone() {
+                let members = get_role_list(members.clone(), committees.clone(), role);
+
+                committee_roles.push(members);
+            }
+
+            ctrl.committees.set(committees.clone());
+        }
+    });
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start",
@@ -40,134 +59,73 @@ pub fn CompositionCommitee(
                 }
                 // selection box
                 div { class: "flex flex-col w-full justify-start items-center mb-40",
-                    RoleDropdown {
-                        id: "admin_dropdown",
-                        label: tr.opinion_designer_label,
-                        hint: tr.opinion_designer_hint,
-                        total_committees: committees.clone(),
-                        members: members.clone(),
-                        committees: admins.clone(),
-                        add_committee: move |user_id: i64| {
-                            add_committee
-                                .call(DeliberationUserCreateRequest {
-                                    user_id,
-                                    role: Role::Admin,
-                                });
-                        },
-                        remove_committee: move |user_id: i64| {
-                            remove_committee.call((user_id, Role::Admin));
-                        },
-                        clear_committee: move |_| {
-                            clear_committee.call(Role::Admin);
-                        },
+                    for (i , committee_role) in committee_roles().iter().enumerate() {
+                        RoleDropdown {
+                            id: format!("{}_dropdown", roles[i].to_string()),
+                            label: roles[i].translate(&lang),
+                            hint: "담당자명 입력",
+                            total_committees: ctrl.get_committees(),
+                            members: members.clone(),
+                            committees: committee_role.clone(),
+                            add_committee: {
+                                let role = roles[i].clone();
+                                let members = members.clone();
+                                move |user_id: i64| {
+                                    ctrl.add_committee(DeliberationUserCreateRequest {
+                                        user_id,
+                                        role: role.clone(),
+                                    });
+                                    let mut list = committee_roles();
+                                    if let Some(role_list) = list.get_mut(i) {
+                                        let user = members.iter().find(|m| m.user_id == user_id);
+                                        if let Some(user) = user {
+                                            if !role_list.iter().any(|m| m.user_id == user_id) {
+                                                role_list.push(user.clone());
+                                            }
+                                        }
+                                    }
+                                    committee_roles.set(list);
+                                }
+                            },
+                            remove_committee: {
+                                let role = roles[i].clone();
+                                move |user_id: i64| {
+                                    ctrl.remove_committee(user_id, role.clone());
+                                    let mut list = committee_roles();
+                                    if let Some(role_list) = list.get_mut(i) {
+                                        role_list.retain(|m| m.user_id != user_id);
+                                    }
+                                    committee_roles.set(list);
+                                }
+                            },
+                            clear_committee: {
+                                let role = roles[i].clone();
+                                move |_| {
+                                    ctrl.clear_committee(role.clone());
+                                    let mut list = committee_roles();
+                                    if let Some(role_list) = list.get_mut(i) {
+                                        role_list.clear();
+                                    }
+                                    committee_roles.set(list);
+                                }
+                            },
+                        }
                     }
-                    RoleDropdown {
-                        id: "deliberation_admin_dropdown",
-                        label: tr.specific_opinion_designer_label,
-                        hint: tr.specific_opinion_designer_hint,
-                        total_committees: committees.clone(),
-                        members: members.clone(),
-                        committees: deliberation_admins.clone(),
-                        add_committee: move |user_id: i64| {
-                            add_committee
-                                .call(DeliberationUserCreateRequest {
-                                    user_id,
-                                    role: Role::DeliberationAdmin,
-                                });
-                        },
-                        remove_committee: move |user_id: i64| {
-                            remove_committee.call((user_id, Role::DeliberationAdmin));
-                        },
-                        clear_committee: move |_| {
-                            clear_committee.call(Role::DeliberationAdmin);
-                        },
-                    }
-                    RoleDropdown {
-                        id: "analyst_admin_dropdown",
-                        label: tr.analyst_label,
-                        hint: tr.analyst_hint,
-                        total_committees: committees.clone(),
-                        members: members.clone(),
-                        committees: analysts.clone(),
-                        add_committee: move |user_id: i64| {
-                            add_committee
-                                .call(DeliberationUserCreateRequest {
-                                    user_id,
-                                    role: Role::Analyst,
-                                });
-                        },
-                        remove_committee: move |user_id: i64| {
-                            remove_committee.call((user_id, Role::Analyst));
-                        },
-                        clear_committee: move |_| {
-                            clear_committee.call(Role::Analyst);
-                        },
-                    }
-                    RoleDropdown {
-                        id: "moderator_admin_dropdown",
-                        label: tr.intermediary_label,
-                        hint: tr.intermediary_hint,
-                        total_committees: committees.clone(),
-                        members: members.clone(),
-                        committees: moderators.clone(),
-                        add_committee: move |user_id: i64| {
-                            add_committee
-                                .call(DeliberationUserCreateRequest {
-                                    user_id,
-                                    role: Role::Moderator,
-                                });
-                        },
-                        remove_committee: move |user_id: i64| {
-                            remove_committee.call((user_id, Role::Moderator));
-                        },
-                        clear_committee: move |_| {
-                            clear_committee.call(Role::Moderator);
-                        },
-                    }
-                    RoleDropdown {
-                        id: "speaker_admin_dropdown",
-                        label: tr.lecturer_label,
-                        hint: tr.lecturer_hint,
-                        total_committees: committees.clone(),
-                        members: members.clone(),
-                        committees: speakers.clone(),
-                        add_committee: move |user_id: i64| {
-                            add_committee
-                                .call(DeliberationUserCreateRequest {
-                                    user_id,
-                                    role: Role::Speaker,
-                                });
-                        },
-                        remove_committee: move |user_id: i64| {
-                            remove_committee.call((user_id, Role::Speaker));
-                        },
-                        clear_committee: move |_| {
-                            clear_committee.call(Role::Speaker);
-                        },
-                    }
-                }
-            }
-
-            div { class: "flex flex-row w-full justify-end items-center font-normal text-text-gray text-sm mt-5",
-                {
-                    format!(
-                        "총 {}명 / 공론 설계자 {}명, 특정 공론 설계자 {}명, 분석가 {}명, 중개자 {}명, 강연자 {}명",
-                        admins.len() + deliberation_admins.len() + analysts.len() + moderators.len()
-                            + speakers.len(),
-                        admins.len(),
-                        deliberation_admins.len(),
-                        analysts.len(),
-                        moderators.len(),
-                        speakers.len(),
-                    )
                 }
             }
 
             div { class: "flex flex-row w-full justify-end items-end mt-40 mb-50",
                 div {
                     class: "flex flex-row w-70 h-55 rounded-sm justify-center items-center bg-white border border-label-border-gray font-semibold text-base text-table-text-gray mr-20",
-                    onclick: move |_| {
-                        onstep.call(CurrentStep::SettingInfo);
+                    onclick: {
+                        let new_req = {
+                            let mut r = req.clone();
+                            r.roles = ctrl.get_committees();
+                            r
+                        };
+                        move |_| {
+                            onprev.call((new_req.clone(), CurrentStep::SettingInfo));
+                        }
                     },
                     "{tr.backward}"
                 }
@@ -178,8 +136,15 @@ pub fn CompositionCommitee(
                 }
                 div {
                     class: "cursor-pointer flex flex-row w-110 h-55 rounded-sm justify-center items-center bg-hover font-semibold text-base text-white",
-                    onclick: move |_| {
-                        onstep.call(CurrentStep::CompositionPanel);
+                    onclick: {
+                        let new_req = {
+                            let mut r = req.clone();
+                            r.roles = ctrl.get_committees();
+                            r
+                        };
+                        move |_| {
+                            onnext.call((new_req.clone(), CurrentStep::CompositionPanel));
+                        }
                     },
                     "{tr.next}"
                 }
@@ -205,6 +170,71 @@ pub fn get_role_list(
         .collect();
 
     members
+}
+
+#[derive(Debug, Clone, Copy, DioxusController)]
+pub struct Controller {
+    lang: Language,
+
+    pub members: Resource<Vec<OrganizationMemberSummary>>,
+    pub committees: Signal<Vec<DeliberationUserCreateRequest>>,
+}
+
+impl Controller {
+    pub fn new(lang: Language) -> std::result::Result<Self, RenderError> {
+        let user: LoginService = use_context();
+
+        let members = use_server_future(move || {
+            let page = 1;
+            let size = 20;
+            async move {
+                let org_id = user.get_selected_org();
+                if org_id.is_none() {
+                    tracing::error!("Organization ID is missing");
+                    return vec![];
+                }
+                let endpoint = crate::config::get().api_url;
+                let res = OrganizationMember::get_client(endpoint)
+                    .query(
+                        org_id.unwrap().id,
+                        OrganizationMemberQuery::new(size).with_page(page),
+                    )
+                    .await;
+
+                res.unwrap_or_default().items
+            }
+        })?;
+
+        let ctrl = Self {
+            lang,
+            members,
+            committees: use_signal(move || vec![]),
+        };
+
+        Ok(ctrl)
+    }
+
+    pub fn set_committee(&mut self, committee: Vec<DeliberationUserCreateRequest>) {
+        self.committees.set(committee);
+    }
+
+    pub fn get_committees(&self) -> Vec<DeliberationUserCreateRequest> {
+        (self.committees)()
+    }
+
+    pub fn add_committee(&mut self, committee: DeliberationUserCreateRequest) {
+        self.committees.push(committee);
+    }
+
+    pub fn remove_committee(&mut self, user_id: i64, role: Role) {
+        self.committees
+            .retain(|committee| !(committee.user_id == user_id && committee.role == role));
+    }
+
+    pub fn clear_committee(&mut self, role: Role) {
+        self.committees
+            .retain(|committee| !(committee.role == role));
+    }
 }
 
 translate! {
