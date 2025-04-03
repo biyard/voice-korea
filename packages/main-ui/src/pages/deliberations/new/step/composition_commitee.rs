@@ -15,6 +15,7 @@ use crate::{
 #[component]
 pub fn CompositionCommitee(
     lang: Language,
+    visibility: bool,
 
     roles: Vec<Role>,
     req: DeliberationCreateRequest,
@@ -47,7 +48,11 @@ pub fn CompositionCommitee(
     });
 
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start",
+        div {
+            class: format!(
+                "flex flex-col w-full justify-start items-start {}",
+                if !visibility { "hidden" } else { "" },
+            ),
             div { class: "font-medium text-base text-text-black mb-10",
                 "{tr.composition_committee_title}"
             }

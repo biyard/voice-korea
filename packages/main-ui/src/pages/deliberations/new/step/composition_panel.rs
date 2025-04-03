@@ -16,6 +16,7 @@ use crate::{
 #[component]
 pub fn CompositionPanel(
     lang: Language,
+    visibility: bool,
     req: DeliberationCreateRequest,
 
     onprev: EventHandler<(DeliberationCreateRequest, CurrentStep)>,
@@ -42,7 +43,11 @@ pub fn CompositionPanel(
     });
 
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start",
+        div {
+            class: format!(
+                "flex flex-col w-full justify-start items-start {}",
+                if !visibility { "hidden" } else { "" },
+            ),
             div { class: "flex flex-row w-full justify-between items-center h-40 mb-15",
                 div { class: "font-medium text-base text-text-black mb-10",
                     "{tr.participant_panel_composition}"

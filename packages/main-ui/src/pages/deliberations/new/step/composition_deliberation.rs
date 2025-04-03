@@ -58,6 +58,7 @@ pub enum DeliberationStep {
 #[component]
 pub fn CompositionDeliberation(
     lang: Language,
+    visibility: bool,
 
     req: DeliberationCreateRequest,
 
@@ -81,158 +82,165 @@ pub fn CompositionDeliberation(
     });
 
     rsx! {
-        CompositionSchedule {
-            lang,
-            deliberation_sequences: ctrl.get_deliberation_sequences(),
-            check_sequence,
-            deliberation_step: deliberation_step(),
+        div {
+            class: format!(
+                "flex flex-col w-full justify-start items-start {}",
+                if !visibility { "hidden" } else { "" },
+            ),
 
-            onadd: move |_| {
-                let _ = ctrl.add_deliberation_info();
-            },
-            onupdate: move |(index, opinion): (usize, StepCreateRequest)| {
-                let _ = ctrl.update_deliberation_info(index, opinion);
-            },
-            ondelete: move |index: usize| {
-                let _ = ctrl.delete_deliberation_info(index);
-            },
-            onprev: {
-                let new_req = {
-                    let mut r = req.clone();
-                    r = ctrl.change_deliberation_sequences(req.clone());
-                    r
-                };
-                move |step: CurrentStep| {
-                    onprev.call((new_req.clone(), step));
-                }
-            },
-            onnext: {
-                let new_req = {
-                    let mut r = req.clone();
-                    r = ctrl.change_deliberation_sequences(req.clone());
-                    r
-                };
-                move |step: CurrentStep| {
-                    onnext.call((new_req.clone(), step));
-                }
-            },
-            change_deliberation_step: move |step| {
-                deliberation_step.set(step);
-            },
-        }
+            CompositionSchedule {
+                lang,
+                deliberation_sequences: ctrl.get_deliberation_sequences(),
+                check_sequence,
+                deliberation_step: deliberation_step(),
 
-        BasicInfo {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::BasicInfo,
-            onprev: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
+                onadd: move |_| {
+                    let _ = ctrl.add_deliberation_info();
+                },
+                onupdate: move |(index, opinion): (usize, StepCreateRequest)| {
+                    let _ = ctrl.update_deliberation_info(index, opinion);
+                },
+                ondelete: move |index: usize| {
+                    let _ = ctrl.delete_deliberation_info(index);
+                },
+                onprev: {
+                    let new_req = {
+                        let mut r = req.clone();
+                        r = ctrl.change_deliberation_sequences(req.clone());
+                        r
+                    };
+                    move |step: CurrentStep| {
+                        onprev.call((new_req.clone(), step));
+                    }
+                },
+                onnext: {
+                    let new_req = {
+                        let mut r = req.clone();
+                        r = ctrl.change_deliberation_sequences(req.clone());
+                        r
+                    };
+                    move |step: CurrentStep| {
+                        onnext.call((new_req.clone(), step));
+                    }
+                },
+                change_deliberation_step: move |step| {
                     deliberation_step.set(step);
-                    onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-            onnext: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-        }
+                },
+            }
 
-        SampleSurvey {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::SampleSurvey,
-            onprev: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-            onnext: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-        }
+            BasicInfo {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::BasicInfo,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
 
-        Deliberation {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::Deliberation,
-            onprev: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-            onnext: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-        }
+            SampleSurvey {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::SampleSurvey,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
 
-        Discussion {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::Discussion,
-            onprev: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-            onnext: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-        }
+            Deliberation {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::Deliberation,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
 
-        Vote {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::Vote,
-            onprev: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-            onnext: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-        }
+            Discussion {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::Discussion,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
 
-        Recommendation {
-            lang,
-            visibility: deliberation_step() == DeliberationStep::Recommendation,
-            onprev: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
-            onnext: {
-                let req = req.clone();
-                move |step: DeliberationStep| {
-                    deliberation_step.set(step);
-                    onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
-                }
-            },
+            Vote {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::Vote,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
+
+            Recommendation {
+                lang,
+                visibility: deliberation_step() == DeliberationStep::Recommendation,
+                onprev: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+                onnext: {
+                    let req = req.clone();
+                    move |step: DeliberationStep| {
+                        deliberation_step.set(step);
+                        onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
+                    }
+                },
+            }
         }
     }
 }
@@ -582,7 +590,7 @@ pub fn OrganizationDeliberationProcedure(
                                         }
                                     },
                                     div { class: "font-normal text-base text-text-black w-fit whitespace-nowrap",
-                                        "편집"
+                                        "{i18n.edit}"
                                     }
                                     Edit1 {
                                         class: "[&>path]:stroke-third",

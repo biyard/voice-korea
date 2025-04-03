@@ -60,66 +60,69 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
                 }
             }
 
-            if step == CurrentStep::SettingInfo {
-                SettingDeliberation {
-                    lang,
-                    onstep: move |step: CurrentStep| {
-                        ctrl.change_step(step);
-                    },
-                }
-            } else if step == CurrentStep::CompositionCommittee {
-                CompositionCommitee {
-                    lang,
-                    roles: vec![
-                        Role::Admin,
-                        Role::DeliberationAdmin,
-                        Role::Analyst,
-                        Role::Moderator,
-                        Role::Speaker,
-                    ],
-                    req: req.clone(),
-                    onprev: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
-                        ctrl.change_request(req);
-                        ctrl.change_step(step);
-                    },
-                    onnext: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
-                        ctrl.change_request(req);
-                        ctrl.change_step(step);
-                    },
-                }
-            } else if step == CurrentStep::CompositionPanel {
-                CompositionPanel {
-                    lang,
-                    req: req.clone(),
-                    onprev: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
-                        ctrl.change_request(req);
-                        ctrl.change_step(step);
-                    },
-                    onnext: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
-                        ctrl.change_request(req);
-                        ctrl.change_step(step);
-                    },
-                }
-            } else if step == CurrentStep::DeliberationSchedule || step == CurrentStep::EditContent {
-                CompositionDeliberation {
-                    lang,
-                    req: req.clone(),
-                    onprev: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
-                        ctrl.change_request(req);
-                        ctrl.change_step(step);
-                    },
-                    onnext: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
-                        ctrl.change_request(req);
-                        ctrl.change_step(step);
-                    },
-                }
-            } else {
-                Preview {
-                    lang,
-                    onstep: move |step: CurrentStep| {
-                        ctrl.change_step(step);
-                    },
-                }
+            SettingDeliberation {
+                lang,
+                visibility: step == CurrentStep::SettingInfo,
+                onstep: move |step: CurrentStep| {
+                    ctrl.change_step(step);
+                },
+            }
+
+            CompositionCommitee {
+                lang,
+                visibility: step == CurrentStep::CompositionCommittee,
+                roles: vec![
+                    Role::Admin,
+                    Role::DeliberationAdmin,
+                    Role::Analyst,
+                    Role::Moderator,
+                    Role::Speaker,
+                ],
+                req: req.clone(),
+                onprev: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                    ctrl.change_request(req);
+                    ctrl.change_step(step);
+                },
+                onnext: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                    ctrl.change_request(req);
+                    ctrl.change_step(step);
+                },
+            }
+
+            CompositionPanel {
+                lang,
+                visibility: step == CurrentStep::CompositionPanel,
+                req: req.clone(),
+                onprev: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                    ctrl.change_request(req);
+                    ctrl.change_step(step);
+                },
+                onnext: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                    ctrl.change_request(req);
+                    ctrl.change_step(step);
+                },
+            }
+
+            CompositionDeliberation {
+                lang,
+                visibility: step == CurrentStep::DeliberationSchedule || step == CurrentStep::EditContent,
+                req: req.clone(),
+                onprev: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                    ctrl.change_request(req);
+                    ctrl.change_step(step);
+                },
+                onnext: move |(req, step): (DeliberationCreateRequest, CurrentStep)| {
+                    ctrl.change_request(req);
+                    ctrl.change_step(step);
+                },
+            }
+
+            Preview {
+                lang,
+                visibility: step == CurrentStep::Preview,
+                onstep: move |step: CurrentStep| {
+                    ctrl.change_step(step);
+                },
             }
         }
     }

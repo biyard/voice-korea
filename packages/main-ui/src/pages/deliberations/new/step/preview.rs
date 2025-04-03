@@ -5,12 +5,16 @@ use crate::pages::deliberations::new::controller::CurrentStep;
 
 // TODO: implement preview
 #[component]
-pub fn Preview(lang: Language, onstep: EventHandler<CurrentStep>) -> Element {
+pub fn Preview(lang: Language, visibility: bool, onstep: EventHandler<CurrentStep>) -> Element {
     let _ctrl = Controller::new(lang)?;
     let tr: PreviewTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start",
+        div {
+            class: format!(
+                "flex flex-col w-full justify-start items-start {}",
+                if !visibility { "hidden" } else { "" },
+            ),
             div { class: "font-medium text-base text-text-black mb-10", "{tr.final_review}" }
             div { class: "flex flex-row w-full justify-end items-end mt-40 mb-50",
                 div {

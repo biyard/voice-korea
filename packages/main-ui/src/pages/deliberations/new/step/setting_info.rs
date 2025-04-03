@@ -4,11 +4,19 @@ use crate::{pages::deliberations::new::controller::CurrentStep, routes::Route};
 
 // TODO: implement setting deliberation
 #[component]
-pub fn SettingDeliberation(lang: Language, onstep: EventHandler<CurrentStep>) -> Element {
+pub fn SettingDeliberation(
+    lang: Language,
+    visibility: bool,
+    onstep: EventHandler<CurrentStep>,
+) -> Element {
     let tr: SettingDeliberationTranslate = translate(&lang);
 
     rsx! {
-        div { class: "flex flex-col w-full justify-start items-start",
+        div {
+            class: format!(
+                "flex flex-col w-full justify-start items-start {}",
+                if !visibility { "hidden" } else { "" },
+            ),
             div { class: "font-medium text-base text-text-black mb-10", "{tr.overview}" }
             div { class: "flex flex-row w-full justify-end items-end mt-40 mb-50",
                 Link {
