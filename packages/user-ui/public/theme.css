@@ -6,45 +6,44 @@
   /* App-specific colors */
   --spacing: 1px;
 
-  --color-primary: #8095EA;
-  --color-secondary: #2A60D3;
-  --color-third: #7C8292;
-  --color-key-gray: #35343F;
-  --color-light-gray: #7C8292;
-  --color-profile-gray: #D9D9D9;
-  --color-review-gray: #6D6D6D; 
+  --color-primary: #8095ea;
+  --color-secondary: #2a60d3;
+  --color-third: #7c8292;
+  --color-key-gray: #35343f;
+  --color-light-gray: #7c8292;
+  --color-profile-gray: #d9d9d9;
+  --color-review-gray: #6d6d6d;
   --color-text-gray: #555462;
-  --color-box-gray: #F7F7F7;
-  --color-input-border-gray: #E6E6E6;
-  --color-icon-gray: #AFAFAF;
-  --color-line-gray: #EEEEEE;
-  --color-quiz-border: #EBEFF5;
-  --color-discussion-border-gray: #BFC8D9;
-  --color-hint-gray: #B4B4B4;
+  --color-box-gray: #f7f7f7;
+  --color-input-border-gray: #e6e6e6;
+  --color-icon-gray: #afafaf;
+  --color-line-gray: #eeeeee;
+  --color-quiz-border: #ebeff5;
+  --color-discussion-border-gray: #bfc8d9;
+  --color-hint-gray: #b4b4b4;
 
-  --color-footer: #1F1D2C;
+  --color-footer: #1f1d2c;
 
-  --color-logo: #34333E;
-  
+  --color-logo: #34333e;
+
   --color-text-black: #222222;
-  --color-text-quiz-black: #2D2D2D;
+  --color-text-quiz-black: #2d2d2d;
 
-  --color-button-primary: #8095EA;
+  --color-button-primary: #8095ea;
 
-  --color-error: #EB5757;
+  --color-error: #eb5757;
 
-  --color-gradient-green: #DBEAE8;
+  --color-gradient-green: #dbeae8;
 
-  --color-necessary-red: #EB5757;
+  --color-necessary-red: #eb5757;
 
-  --color-optional-blue: #2A60D3;
-  --color-bg-price-section: #F1F3FA;
+  --color-optional-blue: #2a60d3;
+  --color-bg-price-section: #f1f3fa;
+  --color-netural-9: #1f1e2d;
+
   --breakpoint-desktop: 1300px;
   --breakpoint-tablet: 768px;
   --breakpoint-mobile: 480px;
-  --breakpoint-mobile-small: 320px;
 
   --header-height: 80px;
-  
-
 }
