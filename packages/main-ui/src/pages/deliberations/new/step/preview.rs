@@ -1,6 +1,6 @@
 use bdk::prelude::*;
 
-use super::controller::CurrentStep;
+use crate::pages::deliberations::new::controller::CurrentStep;
 
 // TODO: implement preview
 #[component]

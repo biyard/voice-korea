@@ -4,9 +4,11 @@ use crate::{
         icons::{ArrowRight, BottomDropdownArrow, CalendarIcon, MenuDial, TopDropdownArrow, Trash},
     },
     pages::deliberations::new::{
-        basic_info::BasicInfo, controller::CurrentStep, deliberation::Deliberation,
-        discussion::Discussion, recommendation::Recommendation, sample_survey::SampleSurvey,
-        vote::Vote,
+        controller::CurrentStep,
+        step::{
+            basic_info::BasicInfo, deliberation::Deliberation, discussion::Discussion,
+            recommendation::Recommendation, sample_survey::SampleSurvey, vote::Vote,
+        },
     },
 };
 

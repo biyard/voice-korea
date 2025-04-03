@@ -1,11 +1,10 @@
 #![allow(non_snake_case)]
-use crate::pages::deliberations::new::composition_commitee::CompositionCommitee;
-use crate::pages::deliberations::new::composition_deliberation::CompositionDeliberation;
-use crate::pages::deliberations::new::composition_panel::CompositionPanel;
-
 use crate::pages::deliberations::new::i18n::DeliberationNewTranslate;
-use crate::pages::deliberations::new::preview::Preview;
-use crate::pages::deliberations::new::setting_info::SettingDeliberation;
+use crate::pages::deliberations::new::step::composition_commitee::CompositionCommitee;
+use crate::pages::deliberations::new::step::composition_deliberation::CompositionDeliberation;
+use crate::pages::deliberations::new::step::composition_panel::CompositionPanel;
+use crate::pages::deliberations::new::step::preview::Preview;
+use crate::pages::deliberations::new::step::setting_info::SettingDeliberation;
 use crate::{
     components::{icons::ArrowLeft, stepper::Stepper},
     pages::deliberations::new::controller::{Controller, CurrentStep},

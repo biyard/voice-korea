@@ -4,12 +4,11 @@ use models::PanelV2Summary;
 
 use crate::{
     components::icons::Clear,
-    pages::deliberations::new::components::{
-        panel_dropdown::PanelDropdown, panel_setting_input::PanelSettingInput,
+    pages::deliberations::new::{
+        components::{panel_dropdown::PanelDropdown, panel_setting_input::PanelSettingInput},
+        controller::CurrentStep,
     },
 };
-
-use super::controller::CurrentStep;
 
 #[component]
 pub fn CompositionPanel(
