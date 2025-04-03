@@ -1,4 +1,5 @@
 #![allow(unused_variables, unused)]
+use crate::deliberation_response::DeliberationResponse;
 use crate::deliberation_user::DeliberationUser;
 use crate::ResourceFile;
 use crate::SurveyV2;
@@ -6,7 +7,7 @@ use bdk::prelude::*;
 use validator::Validate;
 
 #[derive(Validate)]
-#[api_model(base = "/v2/deliberations/:deliberation-id/drafts", table = deliberation_drafts)]
+#[api_model(base = "/v2/deliberations/:deliberation-id/drafts", table = deliberation_drafts, action = [create(users = Vec<i64>, resources = Vec<i64>, surveys = Vec<i64>)])]
 pub struct DeliberationDraft {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -41,4 +42,9 @@ pub struct DeliberationDraft {
     #[api_model(summary, many_to_many = deliberation_draft_surveys, foreign_table_name = surveys, foreign_primary_key = survey_id, foreign_reference_key = draft_id)]
     #[serde(default)]
     pub surveys: Vec<SurveyV2>,
+
+    // responses is a list of responses of a user(requester) for surveys.
+    #[api_model(summary, one_to_many = deliberation_responses, foreign_key = deliberation_id, reference_key = deliberation_id)]
+    #[serde(default)]
+    pub responses: Vec<DeliberationResponse>,
 }

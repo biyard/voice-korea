@@ -121,7 +121,12 @@ impl Controller {
                 req.panel_ids,
                 req.steps,
                 req.elearning,
-                req.discussions,
+                req.basic_infos,
+                req.sample_surveys,
+                req.contents,
+                req.deliberation_discussions,
+                req.final_surveys,
+                req.drafts,
             )
             .await
         {
