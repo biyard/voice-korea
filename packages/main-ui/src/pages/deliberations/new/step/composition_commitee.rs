@@ -63,7 +63,7 @@ pub fn CompositionCommitee(
                         RoleDropdown {
                             id: format!("{}_dropdown", roles[i].to_string()),
                             label: roles[i].translate(&lang),
-                            hint: "담당자명 입력",
+                            hint: tr.enter_charge_person,
                             total_committees: ctrl.get_committees(),
                             members: members.clone(),
                             committees: committee_role.clone(),
@@ -240,6 +240,10 @@ impl Controller {
 translate! {
     CompositionCommitteeTranslate;
 
+    enter_charge_person: {
+        ko: "담당자명 입력",
+        en: "Enter the person in charge"
+    }
     composition_committee_title: {
         ko: "공론 위원회 구성",
         en: "Composition of a public opinion committee"
