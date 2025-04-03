@@ -29,39 +29,62 @@ pub fn MainPage(lang: Language) -> Element {
     let comments = ctrl.get_comments();
     let page = ctrl.page();
     let total_pages = ctrl.total_pages();
-
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center pt-80",
-            div { class: "flex flex-col w-full justify-center items-center gap-100",
-                div { class: "flex flex-col w-full justify-center items-center gap-150",
-                    div { class: "flex flex-col w-full justify-center items-center gap-86",
-                        div { class: "flex flex-col w-full justify-center items-center gap-120",
-                            MainSection { lang }
-                            DeliberationProjectCard { lang, deliberations }
-                            DeliberationInstitution { lang, institutions }
-                        }
-                        PriceSection { lang }
-                    }
-                    InquirySection {
-                        lang,
-                        send_inquiry: move |(name, email, message): (String, String, String)| async move {
-                            ctrl.send_inquiry(name, email, message).await;
-                        },
-                    }
-                }
+        div { class: "flex flex-col w-full justify-center items-center gap-120",
 
-                ReviewSection {
-                    lang,
-                    comments,
-                    page,
-                    total_pages,
-                    set_page: move |page: i64| {
-                        ctrl.set_page(page as usize);
-                    },
-                }
+            MainSection { lang }
+            ProjectSection { lang, deliberations }
+            InstitutionSection { lang, institutions }
+            PriceSection { lang }
+            InquirySection {
+                lang,
+                send_inquiry: move |(name, email, message): (String, String, String)| async move {
+                    ctrl.send_inquiry(name, email, message).await;
+                },
+            }
+            ReviewSection {
+                lang,
+                comments,
+                page,
+                total_pages,
+                set_page: move |page: i64| {
+                    ctrl.set_page(page as usize);
+                },
             }
         }
     }
+    // rsx! {
+    //     div { class: "flex flex-col w-full justify-center items-center pt-80",
+    //         div { class: "flex flex-col w-full justify-center items-center gap-100",
+    //             div { class: "flex flex-col w-full justify-center items-center gap-150",
+    //                 div { class: "flex flex-col w-full justify-center items-center gap-86",
+    //                     div { class: "flex flex-col w-full justify-center items-center gap-120",
+    //                         MainSection { lang }
+    //                         DeliberationProjectCard { lang, deliberations }
+    //                         DeliberationInstitution { lang, institutions }
+    //                     }
+    //                     PriceSection { lang }
+    //                 }
+    //                 InquirySection {
+    //                     lang,
+    //                     send_inquiry: move |(name, email, message): (String, String, String)| async move {
+    //                         ctrl.send_inquiry(name, email, message).await;
+    //                     },
+    //                 }
+    //             }
+
+    //             ReviewSection {
+    //                 lang,
+    //                 comments,
+    //                 page,
+    //                 total_pages,
+    //                 set_page: move |page: i64| {
+    //                     ctrl.set_page(page as usize);
+    //                 },
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 #[component]
@@ -74,7 +97,7 @@ pub fn MainSection(lang: Language) -> Element {
         div {
             id: "service",
             class: "flex flex-col w-full justify-center items-center",
-            div { class: "flex flex-col w-full max-w-1300 items-start justify-start max-[500px]:px-10 gap-50",
+            div { class: "flex flex-col w-full max-w-1300 items-start justify-start gap-50",
                 div { class: "relative flex flex-col w-full max-[500px]:h-fit h-320 max-[500px]:p-25 p-65 justify-center items-start rounded-2xl gap-10 overflow-hidden",
                     div {
                         class: "absolute inset-0 bg-cover bg-center opacity-80 rounded-2xl",
@@ -86,7 +109,6 @@ pub fn MainSection(lang: Language) -> Element {
                     div { class: "relative font-medium text-16 leading-24 text-white whitespace-pre-line mb-12",
                         "{tr.description}"
                     }
-                    //TODO:Go to public opinion survey page
                     button {
                         class: "relative flex flex-row px-16 py-12 bg-[#5b373b] border border-white rounded-xl font-semibold text-base text-white cursor-pointer",
                         onclick: move |_| {
@@ -106,120 +128,203 @@ pub fn MainSection(lang: Language) -> Element {
 pub fn PriceSection(lang: Language) -> Element {
     let tr: PriceSectionTranslate = translate(&lang);
     rsx! {
-        div {
+        section {
             id: "price",
-            class: "flex flex-col w-full justify-center items-center",
-            div { class: "flex flex-col w-full max-w-1300 h-fit justify-center items-center px-10",
-                div { class: "max-[1300px]:flex max-[1300px]:flex-col max-[1300px]:h-full h-[620px] relative flex flex-col w-full  justify-center items-center",
-                    div { class: "max-[1300px]:flex max-[1300px]:flex-col relative flex flex-row w-full h-full max-w-1300 justify-center items-center",
-                        div {
-                            class: "absolute top-0 left-80 w-550 h-620 rounded-xl shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-40 py-25 bg-transparent max-[1300px]:relative max-[1300px]:w-full max-[1300px]:h-auto max-[1300px]:top-auto max-[1300px]:left-auto",
-                            style: "z-index: 10;",
-                            div { class: "flex flex-col w-full gap-32",
-                                div { class: "flex flex-col w-full gap-40",
-                                    div { class: "flex flex-col w-full gap-20",
-                                        div { class: "font-bold text-[28px] text-text-black leading-32",
-                                            "{tr.free_title}"
-                                        }
-                                        div { class: "font-normal text-[15px] text-text-gray leading-22",
-                                            "{tr.free_description}"
-                                        }
-                                    }
+            class: "w-full flex justify-center bg-[#F1F3FA] mt-32 mb-70",
+            div { class: "w-full flex flex-row justify-center self-center gap-130",
+                div { class: "flex flex-col w-420 py-60",
+                    div { class: "font-bold text-[28px] text-text-black leading-32 mb-20",
+                        "{tr.free_title}"
+                    }
+                    div { class: "font-normal text-[15px] text-text-gray leading-22 mb-40",
+                        "{tr.free_description}"
+                    }
+                    div { class: "flex flex-row gap-5 items-center mb-34",
+                        div { class: "font-medium text-[40px] text-text-black", "0" }
+                        div { class: "font-medium text-xl text-light-gray", "{tr.won}" }
+                    }
+                    div { class: "flex flex-col w-full gap-14",
+                        InfoBox {
+                            label: "{tr.free_info_label_1}",
+                            description: "{tr.free_info_description_1}",
+                        }
+                        InfoBox {
+                            label: "{tr.free_info_label_2}",
+                            description: "{tr.free_info_description_2}",
+                        }
+                        InfoBox {
+                            label: "{tr.free_info_label_3}",
+                            description: "{tr.free_info_description_3}",
+                        }
+                    }
+                
+                }
+                div { class: "relative w-530",
+                    div { class: "absolute rounded-xl shadow-[0px_8px_20px_0px_rgba(148,176,214,0.50)] px-55 py-16 bg-white left-0 top-1/2 translate-y-[-50%]",
+                        div { class: "flex flex-col w-full gap-20 max-w-420",
+                            div { class: "font-bold text-[28px] text-text-black leading-32",
+                                "{tr.premium_title}"
+                            }
+                            div { class: "font-normal text-[15px] text-text-gray leading-22",
+                                "{tr.premium_description}"
+                            }
 
-                                    div { class: "flex flex-col w-full gap-35",
-                                        div { class: "flex flex-row gap-5 items-center",
-                                            div { class: "font-semibold text-[40px] text-text-black",
-                                                "0"
-                                            }
-                                            div { class: "font-medium text-xl text-light-gray",
-                                                "{tr.won}"
-                                            }
-                                        }
-                                        div { class: "flex flex-col w-full gap-5",
-                                            InfoBox {
-                                                label: "{tr.free_info_label_1}",
-                                                description: "{tr.free_info_description_1}",
-                                            }
-                                            InfoBox {
-                                                label: "{tr.free_info_label_2}",
-                                                description: "{tr.free_info_description_2}",
-                                            }
-                                            InfoBox {
-                                                label: "{tr.free_info_label_3}",
-                                                description: "{tr.free_info_description_3}",
-                                            }
-                                        }
-                                    }
+                            div { class: "flex flex-row gap-5 items-center",
+                                div { class: "font-medium text-[40px] text-text-black",
+                                    "2,990"
                                 }
-
-                                div {
-                                    class: "flex flex-row w-full h-50 justify-center items-center rounded-[100px] bg-button-primary font-semibold text-white text-[15px] cursor-pointer",
-                                    onclick: move |_| {
-                                        tracing::debug!("start button clicked");
-                                    },
-                                    "{tr.start}"
+                                div { class: "font-medium text-xl text-light-gray",
+                                    "{tr.won}"
                                 }
                             }
-                        }
-
-                        div {
-                            class: "absolute top-0 right-80 w-550 h-620 rounded-xl shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-40 py-25 bg-transparent max-[1300px]:relative max-[1300px]:w-full max-[1300px]:h-auto max-[1300px]:top-auto max-[1300px]:right-auto max-[1300px]:left-auto",
-                            style: "z-index: 10;",
-                            div { class: "flex flex-col w-full gap-32",
-                                div { class: "flex flex-col w-full gap-40",
-                                    div { class: "flex flex-col w-full gap-20",
-                                        div { class: "font-bold text-[28px] text-text-black leading-32",
-                                            "{tr.premium_title}"
-                                        }
-                                        div { class: "font-normal text-[15px] text-text-gray leading-22",
-                                            "{tr.premium_description}"
-                                        }
-                                    }
-
-                                    div { class: "flex flex-col w-full gap-35",
-                                        div { class: "flex flex-row gap-5 items-center",
-                                            div { class: "font-semibold text-[40px] text-text-black",
-                                                "2,990"
-                                            }
-                                            div { class: "font-medium text-xl text-light-gray",
-                                                "{tr.won}"
-                                            }
-                                        }
-                                        div { class: "flex flex-col w-full gap-5",
-                                            InfoBox {
-                                                label: "{tr.premium_info_label_1}",
-                                                description: "{tr.premium_info_description_1}",
-                                            }
-                                            InfoBox {
-                                                label: "{tr.premium_info_label_2}",
-                                                description: "{tr.premium_info_description_2}",
-                                            }
-                                            InfoBox {
-                                                label: "{tr.premium_info_label_3}",
-                                                description: "{tr.premium_info_description_3}",
-                                            }
-                                            InfoBox {
-                                                label: "{tr.premium_info_label_4}",
-                                                description: "{tr.premium_info_description_4}",
-                                            }
-                                        }
-                                    }
+                            div { class: "flex flex-col w-full gap-5",
+                                InfoBox {
+                                    label: "{tr.premium_info_label_1}",
+                                    description: "{tr.premium_info_description_1}",
                                 }
-
-                                div {
-                                    class: "flex flex-row w-full h-50 justify-center items-center rounded-[100px] bg-button-primary font-semibold text-white text-[15px] cursor-pointer",
-                                    onclick: move |_| {
-                                        tracing::debug!("start button clicked");
-                                    },
-                                    "{tr.start}"
+                                InfoBox {
+                                    label: "{tr.premium_info_label_2}",
+                                    description: "{tr.premium_info_description_2}",
                                 }
+                                InfoBox {
+                                    label: "{tr.premium_info_label_3}",
+                                    description: "{tr.premium_info_description_3}",
+                                }
+                                InfoBox {
+                                    label: "{tr.premium_info_label_4}",
+                                    description: "{tr.premium_info_description_4}",
+                                }
+                            }
+                            div {
+                                class: "flex flex-row w-full h-50 mt-32 justify-center items-center rounded-[100px] bg-button-primary font-semibold text-white text-[15px] cursor-pointer",
+                                onclick: move |_| {
+                                    tracing::debug!("start button clicked");
+                                },
+                                "{tr.start}"
                             }
                         }
                     }
+                
                 }
             }
+        
         }
     }
+    // rsx! {
+    //     div {
+    //         id: "price",
+    //         class: "flex flex-col w-full justify-center items-center",
+    //         div { class: "flex flex-col w-full max-w-1300 h-fit justify-center items-center px-10",
+    //             div { class: "max-[1300px]:flex max-[1300px]:flex-col max-[1300px]:h-full h-[620px] relative flex flex-col w-full  justify-center items-center",
+    //                 div { class: "max-[1300px]:flex max-[1300px]:flex-col relative flex flex-row w-full h-full max-w-1300 justify-center items-center",
+    //                     div {
+    //                         class: "absolute top-0 left-80 w-550 h-620 rounded-xl shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-40 py-25 bg-transparent max-[1300px]:relative max-[1300px]:w-full max-[1300px]:h-auto max-[1300px]:top-auto max-[1300px]:left-auto",
+    //                         style: "z-index: 10;",
+    //                         div { class: "flex flex-col w-full gap-32",
+    //                             div { class: "flex flex-col w-full gap-40",
+    //                                 div { class: "flex flex-col w-full gap-20",
+    //                                     div { class: "font-bold text-[28px] text-text-black leading-32",
+    //                                         "{tr.free_title}"
+    //                                     }
+    //                                     div { class: "font-normal text-[15px] text-text-gray leading-22",
+    //                                         "{tr.free_description}"
+    //                                     }
+    //                                 }
+
+    //                                 div { class: "flex flex-col w-full gap-35",
+    //                                     div { class: "flex flex-row gap-5 items-center",
+    //                                         div { class: "font-semibold text-[40px] text-text-black",
+    //                                             "0"
+    //                                         }
+    //                                         div { class: "font-medium text-xl text-light-gray",
+    //                                             "{tr.won}"
+    //                                         }
+    //                                     }
+    //                                     div { class: "flex flex-col w-full gap-5",
+    //                                         InfoBox {
+    //                                             label: "{tr.free_info_label_1}",
+    //                                             description: "{tr.free_info_description_1}",
+    //                                         }
+    //                                         InfoBox {
+    //                                             label: "{tr.free_info_label_2}",
+    //                                             description: "{tr.free_info_description_2}",
+    //                                         }
+    //                                         InfoBox {
+    //                                             label: "{tr.free_info_label_3}",
+    //                                             description: "{tr.free_info_description_3}",
+    //                                         }
+    //                                     }
+    //                                 }
+    //                             }
+
+    //                             div {
+    //                                 class: "flex flex-row w-full h-50 justify-center items-center rounded-[100px] bg-button-primary font-semibold text-white text-[15px] cursor-pointer",
+    //                                 onclick: move |_| {
+    //                                     tracing::debug!("start button clicked");
+    //                                 },
+    //                                 "{tr.start}"
+    //                             }
+    //                         }
+    //                     }
+
+    //                     div {
+    //                         class: "absolute top-0 right-80 w-550 h-620 rounded-xl shadow-[0px_8px_20px_rgba(148,176,214,0.25)] px-40 py-25 bg-transparent max-[1300px]:relative max-[1300px]:w-full max-[1300px]:h-auto max-[1300px]:top-auto max-[1300px]:right-auto max-[1300px]:left-auto",
+    //                         style: "z-index: 10;",
+    //                         div { class: "flex flex-col w-full gap-32",
+    //                             div { class: "flex flex-col w-full gap-40",
+    //                                 div { class: "flex flex-col w-full gap-20",
+    //                                     div { class: "font-bold text-[28px] text-text-black leading-32",
+    //                                         "{tr.premium_title}"
+    //                                     }
+    //                                     div { class: "font-normal text-[15px] text-text-gray leading-22",
+    //                                         "{tr.premium_description}"
+    //                                     }
+    //                                 }
+
+    //                                 div { class: "flex flex-col w-full gap-35",
+    //                                     div { class: "flex flex-row gap-5 items-center",
+    //                                         div { class: "font-semibold text-[40px] text-text-black",
+    //                                             "2,990"
+    //                                         }
+    //                                         div { class: "font-medium text-xl text-light-gray",
+    //                                             "{tr.won}"
+    //                                         }
+    //                                     }
+    //                                     div { class: "flex flex-col w-full gap-5",
+    //                                         InfoBox {
+    //                                             label: "{tr.premium_info_label_1}",
+    //                                             description: "{tr.premium_info_description_1}",
+    //                                         }
+    //                                         InfoBox {
+    //                                             label: "{tr.premium_info_label_2}",
+    //                                             description: "{tr.premium_info_description_2}",
+    //                                         }
+    //                                         InfoBox {
+    //                                             label: "{tr.premium_info_label_3}",
+    //                                             description: "{tr.premium_info_description_3}",
+    //                                         }
+    //                                         InfoBox {
+    //                                             label: "{tr.premium_info_label_4}",
+    //                                             description: "{tr.premium_info_description_4}",
+    //                                         }
+    //                                     }
+    //                                 }
+    //                             }
+
+    //                             div {
+    //                                 class: "flex flex-row w-full h-50 justify-center items-center rounded-[100px] bg-button-primary font-semibold text-white text-[15px] cursor-pointer",
+    //                                 onclick: move |_| {
+    //                                     tracing::debug!("start button clicked");
+    //                                 },
+    //                                 "{tr.start}"
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 #[component]
@@ -240,13 +345,13 @@ pub fn InfoBox(label: String, description: String) -> Element {
 }
 
 #[component]
-pub fn DeliberationInstitution(lang: Language, institutions: Vec<OrganizationSummary>) -> Element {
+pub fn InstitutionSection(lang: Language, institutions: Vec<OrganizationSummary>) -> Element {
     let tr: OpinionInstitutionTranslate = translate(&lang);
     rsx! {
         div {
             id: "institution",
             class: "flex flex-col w-full justify-center items-center",
-            div { class: "flex flex-col w-full justify-center items-center py-120 bg-gradient-to-b from-gradient-green to-white",
+            div { class: "flex flex-col w-full justify-center items-center pt-120 bg-gradient-to-b from-gradient-green to-white",
                 div { class: "flex flex-col w-full max-w-1300 justify-center items-center px-10 gap-30",
                     div { class: "flex flex-col w-full gap-10",
                         div { class: "font-bold text-[28px] text-text-gray leading-32",
@@ -257,7 +362,7 @@ pub fn DeliberationInstitution(lang: Language, institutions: Vec<OrganizationSum
                         }
                     }
                     div { class: "flex flex-col w-full gap-40",
-                        div { class: "grid max-[500px]:grid-cols-1 max-[700px]:grid-cols-2 max-[1000px]:grid-cols-3 max-[1300px]:grid-cols-4 grid-cols-5 gap-20",
+                        div { class: "grid mobile:grid-cols-1 tablet:grid-cols-2 grid-cols-3 max-[1300px]:grid-cols-4 grid-cols-5 gap-20",
                             for institution in institutions {
                                 Link {
                                     to: Route::GovernancePage {
@@ -284,56 +389,53 @@ pub fn DeliberationInstitution(lang: Language, institutions: Vec<OrganizationSum
 }
 
 #[component]
-pub fn DeliberationProjectCard(lang: Language, deliberations: Vec<DeliberationProject>) -> Element {
+pub fn ProjectSection(lang: Language, deliberations: Vec<DeliberationProject>) -> Element {
     let tr: OpinionProjectTranslate = translate(&lang);
     let nav = use_navigator();
     rsx! {
-        div {
+        section {
             id: "project",
-            class: "flex flex-col w-full justify-center items-center px-10",
-            div { class: "flex flex-col w-full max-w-1300 justify-start items-start gap-40",
-                div { class: "flex flex-col gap-30 w-full",
-                    div { class: "flex flex-col gap-10",
-                        div { class: "font-bold text-[28px] text-text-gray leading-32",
-                            "{tr.project}"
-                        }
-                        div { class: "font-normal text-[15px] text-text-gray leading-22",
-                            "{tr.project_description}"
-                        }
-                    }
+            class: "relative flex flex-col w-full justify-center items-center",
+            div { class: "absolute w-full bg-primary blur-[250px] h-130" }
+            div { class: "max-w-1300 w-full z-1",
+                div { class: "font-bold text-[28px] text-text-gray leading-32 self-start",
+                    "{tr.project}"
+                }
+                div { class: "font-normal text-[15px] text-text-gray leading-22 self-start mt-10",
+                    "{tr.project_description}"
+                }
 
-                    div { class: "grid max-[600px]:grid-cols-1 max-[1000px]:grid-cols-2 grid-cols-3 gap-20",
-                        for deliberation in deliberations.clone() {
-                            div {
-                                class: "cursor-pointer",
-                                onclick: {
-                                    let project_id = deliberation.clone().id.clone();
-                                    move |_| {
-                                        nav.push(Route::ProjectPage {
-                                            lang,
-                                            project_id,
-                                        });
-                                    }
-                                },
-                                ProjectBox {
-                                    lang,
-                                    deliberation: deliberation.clone().into(),
+                div { class: "grid max-[600px]:grid-cols-1 max-[1000px]:grid-cols-2 grid-cols-3 gap-20 w-full mt-30",
+                    for deliberation in deliberations.iter().take(6).cloned() {
+                        div {
+                            class: "cursor-pointer",
+                            onclick: {
+                                let project_id = deliberation.clone().id.clone();
+                                move |_| {
+                                    nav.push(Route::ProjectPage {
+                                        lang,
+                                        project_id,
+                                    });
                                 }
+                            },
+                            ProjectBox {
+                                lang,
+                                deliberation: deliberation.clone().into(),
                             }
                         }
                     }
+                }
 
-                    div { class: "flex flex-wrap  justify-center items-center" }
-                    div { class: "flex flex-row w-full justify-center items-center",
-                        MoreButton {
-                            lang,
-                            onclick: move |_| {
-                                nav.push(Route::ProjectListPage { lang });
-                            },
-                        }
+                div { class: "flex flex-row w-full justify-center items-center mt-40",
+                    MoreButton {
+                        lang,
+                        onclick: move |_| {
+                            nav.push(Route::ProjectListPage { lang });
+                        },
                     }
                 }
             }
+        
         }
     }
 }

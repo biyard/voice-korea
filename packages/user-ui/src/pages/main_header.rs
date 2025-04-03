@@ -87,7 +87,7 @@ pub fn MainMobileHeader(
         if expanded() {
             div { class: "fixed top-70 left-0 w-full h-full grow bg-white flex flex-col items-start text-black z-100 px-20 py-[20px]",
                 div { class: "flex flex-col font-bold justify-start items-start text-key-gray text-15 leading-19",
-                    A { lang, href: "/#service",
+                    A { lang, href: "#service",
                         button {
                             class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
                             onclick: move |_| {
@@ -96,7 +96,7 @@ pub fn MainMobileHeader(
                             {tr.service}
                         }
                     }
-                    A { lang, href: "/#project",
+                    A { lang, href: "#project",
                         button {
                             class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
                             onclick: move |_| {
@@ -105,7 +105,7 @@ pub fn MainMobileHeader(
                             {tr.project}
                         }
                     }
-                    A { lang, href: "/#institution",
+                    A { lang, href: "#institution",
                         button {
                             class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
                             onclick: move |_| {
@@ -114,7 +114,7 @@ pub fn MainMobileHeader(
                             {tr.organization}
                         }
                     }
-                    A { lang, href: "/#price",
+                    A { lang, href: "#price",
                         button {
                             class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
                             onclick: move |_| {
@@ -123,7 +123,7 @@ pub fn MainMobileHeader(
                             {tr.plan}
                         }
                     }
-                    A { lang, href: "/#inquiry",
+                    A { lang, href: "#inquiry",
                         button {
                             class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
                             onclick: move |_| {
@@ -132,7 +132,7 @@ pub fn MainMobileHeader(
                             {tr.contact}
                         }
                     }
-                    A { lang, href: "/#footer",
+                    A { lang, href: "#footer",
                         button {
                             class: "cursor-pointer flex flex-row w-full h-50 justify-start items-start",
                             onclick: move |_| {
@@ -184,7 +184,7 @@ pub fn MainDesktopHeader(
     let console_url = &crate::config::get().console_url;
 
     rsx! {
-        div { class: "fixed top-0 left-0 w-screen h-80 overflow-hidden flex items-center justify-center z-100 bg-white",
+        div { class: "fixed top-0 left-0 w-screen h-[var(--header-height)] overflow-hidden flex items-center justify-center z-100 bg-white",
             div { class: "flex flex-row w-full max-w-1300 justify-between my-25 h-30 items-center",
                 Link {
                     class: "flex flex-row items-center justify-around gap-4 h-full",
@@ -196,12 +196,12 @@ pub fn MainDesktopHeader(
                 }
                 //TODO: Add more menus
                 div { class: "flex font-bold justify-center items-center text-key-gray text-15 leading-19 gap-45",
-                    A { lang, href: "/#service", {tr.service} }
-                    A { lang, href: "/#project", {tr.project} }
-                    A { lang, href: "/#institution", {tr.organization} }
-                    A { lang, href: "/#price", {tr.plan} }
-                    A { lang, href: "/#inquiry", {tr.contact} }
-                    A { lang, href: "/#footer", {tr.guide} }
+                    A { lang, href: "#service", {tr.service} }
+                    A { lang, href: "#project", {tr.project} }
+                    A { lang, href: "#institution", {tr.organization} }
+                    A { lang, href: "#price", {tr.plan} }
+                    A { lang, href: "#inquiry", {tr.contact} }
+                    A { lang, href: "#footer", {tr.guide} }
 
                     div { class: "cursor-pointer", onclick,
                         if email == "" {

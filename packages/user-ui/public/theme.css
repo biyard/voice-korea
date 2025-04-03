@@ -6,6 +6,9 @@
   /* App-specific colors */
   --spacing: 1px;
 
+  --color-primary: #8095EA;
+  --color-secondary: #2A60D3;
+  --color-third: #7C8292;
   --color-key-gray: #35343F;
   --color-light-gray: #7C8292;
   --color-profile-gray: #D9D9D9;
@@ -35,4 +38,13 @@
   --color-necessary-red: #EB5757;
 
   --color-optional-blue: #2A60D3;
+  --color-bg-price-section: #F1F3FA;
+  --breakpoint-desktop: 1300px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-mobile: 480px;
+  --breakpoint-mobile-small: 320px;
+
+  --header-height: 80px;
+  
+
 }

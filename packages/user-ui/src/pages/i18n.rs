@@ -107,7 +107,7 @@ translate! {
     PriceSectionTranslate;
 
     free_title: {
-        ko: "Free 무료",
+        ko: "Free",
         en: "Free"
     }
 
@@ -151,7 +151,7 @@ translate! {
     }
 
     premium_title: {
-        ko: "Premium 유료",
+        ko: "Premium",
         en: "Premium"
     }
 
