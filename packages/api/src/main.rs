@@ -7,7 +7,6 @@ use controllers::{institutions::m1::InstitutionControllerM1, v2::Version2Control
 use deliberation_comment::DeliberationComment;
 use deliberation_resources::deliberation_resource::DeliberationResource;
 use discussions::Discussion;
-use models::elearnings::elearning::Elearning;
 use models::{
     areas::area::Area, deliberation::Deliberation,
     deliberation_basic_infos::deliberation_basic_info::DeliberationBasicInfo,
@@ -48,6 +47,10 @@ use models::{
 use models::{
     deliberation_final_survey_surveys::deliberation_final_survey_survey::DeliberationFinalSurveySurvey,
     deliberation_sample_surveys::deliberation_sample_survey::DeliberationSampleSurvey,
+};
+use models::{
+    discussion_groups::DiscussionGroup, discussion_resources::DiscussionResource,
+    elearnings::elearning::Elearning,
 };
 use models::{inquiry::Inquiry, step::Step};
 use models::{organization::Organization, *};
@@ -128,6 +131,8 @@ async fn migration(pool: &sqlx::Pool<sqlx::Postgres>) -> Result<()> {
         Discussion,
         DeliberationResource,
         DeliberationComment,
+        DiscussionResource,
+        DiscussionGroup,
         Inquiry,
     );
 
