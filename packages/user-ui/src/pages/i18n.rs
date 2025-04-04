@@ -244,6 +244,11 @@ translate! {
         ko: "투표",
         en: "Vote"
     }
+
+    detail: {
+        ko: "자세히 보기",
+        en: "See Details"
+    }
 }
 
 translate! {
