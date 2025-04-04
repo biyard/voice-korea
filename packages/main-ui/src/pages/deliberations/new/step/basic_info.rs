@@ -289,6 +289,7 @@ pub fn ConnectProject(
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start gap-10",
+            //TODO: implement preview
             div { class: "flex flex-col w-full justify-start items-start",
                 div { class: "text-lg font-bold text-text-black", "{tr.title}" }
                 div { class: "text-sm font-normal text-text-gray", "{tr.description}" }
