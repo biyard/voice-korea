@@ -86,8 +86,8 @@ pub fn GuideSection(lang: Language) -> Element {
                                 class: "[&>path]:stroke-white",
                             }
                         }
-                        button {
-                            class: "font-semibold text-white text-base leading-24 cursor-pointer",
+                        Button {
+                            class: "font-semibold bg-transparent text-white text-base/24",
                             //TODO: Go to public opinion survey participation guide
                             onclick: move |_| {},
                             "{tr.public_opinion_participation_guide}"
@@ -109,8 +109,8 @@ pub fn GuideSection(lang: Language) -> Element {
                                 class: "[&>path]:stroke-white",
                             }
                         }
-                        button {
-                            class: "font-semibold text-white text-base leading-24 cursor-pointer",
+                        Button {
+                            class: "font-semibold bg-transparent text-white text-base/24",
                             //TODO: Go to the Public Opinion Survey Design Guide
                             onclick: move |_| {},
                             "{tr.public_opinion_survey_design_console_guide}"
@@ -246,8 +246,8 @@ pub fn PriceSection(lang: Language) -> Element {
     let tr: PriceSectionTranslate = translate(&lang);
     rsx! {
         section { id: "price", class: "relative w-full flex justify-center",
-            div { class: "absolute w-full bg-[#F1F3FA] left-0 top-1/2 translate-y-[-50%] h-480" }
-            div { class: "w-full flex flex-col tablet:flex-row justify-center self-center gap-30 desktop:gap-130 tablet:px-20 z-1",
+            div { class: "absolute w-full bg-[#F1F3FA] left-0 top-1/2 translate-y-[-50%] h-0 tablet:h-480" }
+            div { class: "w-full flex flex-col tablet:flex-row justify-center self-center gap-30 desktop:gap-130 px-20 tablet:px-20 z-1",
                 div { class: "rounded-xl shadow-[0px_8px_20px_0px_rgba(148,176,214,0.50)] p-30 desktop:px-55 desktop:py-16 bg-white",
                     div { class: "flex flex-col w-full gap-20 desktop:max-w-420 h-full",
                         div { class: "font-bold text-[28px] text-text-black leading-32",

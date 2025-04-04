@@ -4,11 +4,13 @@ use bdk::prelude::*;
 pub fn Button(
     onclick: EventHandler<MouseEvent>,
     #[props(default = "".to_string())] class: String,
+    #[props(default = false)] disabled: bool,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
     children: Element,
 ) -> Element {
     rsx! {
         button {
+            disabled,
             onclick: move |e| {
                 onclick.call(e);
             },
