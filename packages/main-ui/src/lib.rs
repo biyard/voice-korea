@@ -51,6 +51,7 @@ pub mod components {
     pub mod custom_checkbox;
     pub mod drop_zone;
     pub mod dropdown;
+    pub mod expandable_card;
     pub mod file_list;
     pub mod icons;
     pub mod input;
