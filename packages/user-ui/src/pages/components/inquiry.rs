@@ -3,7 +3,7 @@ use dioxus_translate::{translate, Language};
 use regex::Regex;
 
 use crate::{
-    components::{input::InputBox, textarea::TextArea},
+    components::{button::Button, input::InputBox, textarea::TextArea},
     pages::{i18n::InquirySectionTranslate, SectionHeader},
 };
 
@@ -102,8 +102,8 @@ pub fn InquirySection(
                             }
                         }
 
-                        button {
-                            class: "flex flex-row w-full justify-center items-center bg-button-primary rounded-xl px-16 py-12 font-semibold text-base text-white cursor-pointer",
+                        Button {
+                            class: "w-full justify-center items-center rounded-xl px-16 py-12 font-semibold text-base text-white",
                             onclick: move |_| {
                                 let name_value = name();
                                 let email_value = email();

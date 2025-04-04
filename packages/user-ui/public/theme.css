@@ -23,23 +23,20 @@
   --color-hint-gray: #b4b4b4;
 
   --color-footer: #1f1d2c;
-
   --color-logo: #34333e;
-
   --color-text-black: #222222;
   --color-text-quiz-black: #2d2d2d;
-
   --color-button-primary: #8095ea;
-
   --color-error: #eb5757;
-
   --color-gradient-green: #dbeae8;
-
   --color-necessary-red: #eb5757;
-
   --color-optional-blue: #2a60d3;
   --color-bg-price-section: #f1f3fa;
   --color-netural-9: #1f1e2d;
+
+  --color-bt-grey: #ebeff5;
+  --color-bt-primary: #8095ea;
+  --color-bt-disabled: #b4b4b4;
 
   --breakpoint-desktop: 1300px;
   --breakpoint-tablet: 768px;
