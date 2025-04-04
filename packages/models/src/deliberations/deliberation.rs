@@ -112,9 +112,9 @@ pub struct Deliberation {
     #[serde(default)]
     pub discussions: Vec<Discussion>,
     // Second page of creating a deliberation
-    #[api_model(summary, one_to_many = deliberation_project_area, type = INTEGER, action = create, version = v1.1)]
+    #[api_model(summary, one_to_many = deliberation_project_area, type = INTEGER, action = create)]
     #[serde(default)]
-    pub project_area: Vec<ProjectArea>,
+    pub project_area: ProjectArea,
 }
 
 #[derive(Translate, PartialEq, Default, Debug)]
