@@ -184,7 +184,7 @@ pub fn MainDesktopHeader(
     let console_url = &crate::config::get().console_url;
 
     rsx! {
-        div { class: "fixed top-0 left-0 w-screen h-[var(--header-height)] overflow-hidden flex items-center justify-center z-100 bg-white",
+        div { class: "fixed top-0 left-0 w-screen h-[--header-height] overflow-hidden flex items-center justify-center z-100 bg-white",
             div { class: "flex flex-row w-full max-w-1300 justify-between my-25 h-30 items-center",
                 Link {
                     class: "flex flex-row items-center justify-around gap-4 h-full",

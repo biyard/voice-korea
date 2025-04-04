@@ -31,7 +31,7 @@ pub fn MainPage(lang: Language) -> Element {
     let page = ctrl.page();
     let total_pages = ctrl.total_pages();
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center gap-60 tablet:gap-90 desktop:gap-120 [&>section]:scroll-mt-[var(--header-height)]",
+        div { class: "flex flex-col w-full justify-center items-center gap-60 tablet:gap-90 desktop:gap-120 [&>section]:scroll-mt-[--header-height]",
 
             MainSection { lang }
             ProjectSection { lang, deliberations }
