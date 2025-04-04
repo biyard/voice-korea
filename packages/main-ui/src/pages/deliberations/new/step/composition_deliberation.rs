@@ -131,16 +131,17 @@ pub fn CompositionDeliberation(
             BasicInfo {
                 lang,
                 visibility: deliberation_step() == DeliberationStep::BasicInfo,
+                req: req.clone(),
                 onprev: {
                     let req = req.clone();
-                    move |step: DeliberationStep| {
+                    move |(req, step): (DeliberationCreateRequest, DeliberationStep)| {
                         deliberation_step.set(step);
                         onprev.call((req.clone(), CurrentStep::DeliberationSchedule));
                     }
                 },
                 onnext: {
                     let req = req.clone();
-                    move |step: DeliberationStep| {
+                    move |(req, step): (DeliberationCreateRequest, DeliberationStep)| {
                         deliberation_step.set(step);
                         onnext.call((req.clone(), CurrentStep::DeliberationSchedule));
                     }

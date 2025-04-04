@@ -11,3 +11,5 @@ pub mod vote;
 pub mod composition_commitee;
 pub mod composition_deliberation;
 pub mod composition_panel;
+
+pub mod material_upload;

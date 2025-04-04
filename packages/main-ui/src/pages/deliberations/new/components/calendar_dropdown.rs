@@ -30,7 +30,7 @@ pub fn CalendarDropdown(id: String, date: i64, onchange: EventHandler<i64>) -> E
                     }
                     CalendarIcon { width: "28", height: "28" }
                 }
-                nav { class: "invisible border-none rounded w-full absolute right-0 top-full transition-all opacity-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-1 group-focus-within:z-20",
+                nav { class: "absolute top-full right-0 z-20 opacity-0 invisible group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-1 transition-all",
                     Calendar {
                         timestamp: date as u64,
                         update_date: move |timestamp: i64| {
