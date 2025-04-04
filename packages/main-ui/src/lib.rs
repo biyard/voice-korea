@@ -42,6 +42,7 @@ pub mod layouts {
 pub mod components {
     pub mod alert;
     pub mod bar_graph;
+    pub mod block_header;
     pub mod bottom;
     pub mod button;
     pub mod calendar;
@@ -49,6 +50,7 @@ pub mod components {
     pub mod close_label;
     pub mod custom_checkbox;
     pub mod drop_zone;
+    pub mod dropdown;
     pub mod expandable_card;
     pub mod file_list;
     pub mod icons;
@@ -58,6 +60,7 @@ pub mod components {
     pub mod pagination;
     pub mod pi_graph;
     pub mod popup;
+    pub mod section;
     pub mod select;
     pub mod stepper;
     pub mod table_row;

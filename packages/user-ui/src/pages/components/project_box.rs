@@ -4,7 +4,10 @@ use models::deliberation_project::DeliberationProjectSummary;
 use num_format::{Locale, ToFormattedString};
 
 use crate::{
-    components::icons::{user::User, vote::Vote},
+    components::{
+        icons::{user::User, vote::Vote},
+        label::Label,
+    },
     pages::i18n::ProjectBoxTranslate,
 };
 
@@ -16,16 +19,16 @@ pub fn ProjectBox(lang: Language, deliberation: DeliberationProjectSummary) -> E
 
     rsx! {
         div {
-            class: "flex flex-col justify-end items-end rounded-[30px] shadow-[0px_8px_20px_rgba(148,176,214,0.25)]",
+            class: "flex flex-col justify-end items-end overflow-hidden shadow-[0px_8px_20px_rgba(148,176,214,0.25)] rounded-[12px]",
             style: "background-image: url('{project_url}'); background-size: cover; height: 450px; width: 100%;",
-            div { class: "flex flex-col w-full justify-start items-start rounded-[20px] bg-white px-16 pt-20 pb-12",
+            div { class: "flex flex-col w-full justify-start items-start rounded-[12px] bg-white px-16 pt-20 pb-12",
                 div { class: "flex flex-col gap-[16px] w-full",
                     div { class: "flex flex-col gap-8",
-                        div { class: "font-bold text-lg text-text-black h-30 truncate",
+                        div { class: "font-bold text-[16px] leading-normal text-text-black truncate",
                             "{deliberation.title}"
                         }
                         div { class: "flex flex-col gap-12",
-                            div { class: "font-normal text-text-gray text-sm h-20 truncate",
+                            div { class: "font-normal text-text-gray text-sm/22 h-20 truncate",
                                 "{deliberation.description}"
                             }
                             div { class: "flex flex-col gap-8",
@@ -72,15 +75,6 @@ pub fn ProjectBox(lang: Language, deliberation: DeliberationProjectSummary) -> E
                     }
                 }
             }
-        }
-    }
-}
-
-#[component]
-pub fn Label(name: String) -> Element {
-    rsx! {
-        div { class: "inline-block w-fit px-12 py-7 border-2 border-light-gray bg-white font-medium text-sm leading-22 text-text-gray rounded-[100px]",
-            "{name}"
         }
     }
 }
