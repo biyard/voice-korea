@@ -29,7 +29,9 @@ pub fn MainRootLayout(lang: Language) -> Element {
                                 CubeLoader {}
                             }
                         },
-                        div { class: "flex flex-col w-full min-h-lvh", Outlet::<Route> {} }
+                        div { class: "flex flex-col w-full min-h-lvh pt-[--header-height]",
+                            Outlet::<Route> {}
+                        }
                         div { class: "flex flex-row w-full ",
                             MainFooter { lang: lang.clone() }
                         }
