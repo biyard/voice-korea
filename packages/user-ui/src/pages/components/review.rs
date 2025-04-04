@@ -4,7 +4,10 @@ use dioxus_translate::{translate, Language};
 use models::comment::CommentSummary;
 
 use crate::{
-    components::icons::{left_arrow::LeftArrow, right_arrow::RightArrow},
+    components::{
+        button::Button,
+        icons::{left_arrow::LeftArrow, right_arrow::RightArrow},
+    },
     pages::i18n::ReviewSectionTranslate,
     utils::time::format_prev_time,
 };
@@ -30,19 +33,15 @@ pub fn ReviewSection(
                     "{tr.participation_review}"
                 }
                 div { class: "flex flex-row w-full justify-center items-center gap-20 max-w-1300 self-center",
-                    div { class: "bg-button-primary rounded-lg px-6 py-8",
-                        div {
-                            class: format!(
-                                "w-24 h-24 {}",
-                                if page == 1 { "cursor-not-allowed" } else { "cursor-pointer" },
-                            ),
-                            onclick: move |_| {
-                                if page != 1 {
-                                    set_page.call((page - 1) as i64);
-                                }
-                            },
-                            LeftArrow { stroke: "white" }
-                        }
+                    Button {
+                        class: "rounded-lg px-6 py-8",
+                        disabled: page == 1,
+                        onclick: move |_| {
+                            if page != 1 {
+                                set_page.call((page - 1) as i64);
+                            }
+                        },
+                        LeftArrow { stroke: "white" }
                     }
                     div { class: "flex flex-row w-full",
                         div { class: "w-full gap-20 grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3
@@ -52,19 +51,15 @@ pub fn ReviewSection(
                             }
                         }
                     }
-                    div { class: "bg-button-primary rounded-lg px-10 py-8",
-                        div {
-                            class: format!(
-                                "w-24 h-24 {}",
-                                if page >= total_pages { "cursor-not-allowed" } else { "cursor-pointer" },
-                            ),
-                            onclick: move |_| {
-                                if page < total_pages {
-                                    set_page.call((page + 1) as i64);
-                                }
-                            },
-                            RightArrow {}
-                        }
+                    Button {
+                        class: "rounded-lg px-6 py-8",
+                        disabled: page >= total_pages,
+                        onclick: move |_| {
+                            if page < total_pages {
+                                set_page.call((page + 1) as i64);
+                            }
+                        },
+                        RightArrow {}
                     }
                 }
             }
@@ -78,7 +73,7 @@ pub fn ReviewItem(lang: Language, comment: CommentSummary) -> Element {
     let prev_date = format_prev_time(comment.created_at);
 
     rsx! {
-        div { class: "flex flex-col w-full px-32 py-40 min-h-200 bg-white rounded-xl",
+        div { class: "flex flex-col w-full px-32 py-40 min-h-200 bg-white rounded-xl hover:shadow-xl",
             div { class: "flex flex-row gap-8 justify-start items-center mb-20",
                 div { class: "w-40 h-40 bg-profile-gray rounded-[100px]" }
                 div { class: "flex flex-col gap-4",

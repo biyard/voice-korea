@@ -7,10 +7,11 @@ use dioxus_translate::{translate, Language};
 use models::deliberation_project::DeliberationProject;
 use models::organization::OrganizationSummary;
 
+use crate::components::button::Button;
 use crate::components::icons::check::Check;
 use crate::pages::components::inquiry::InquirySection;
 use crate::pages::components::institution_box::InstitutionBox;
-use crate::pages::components::project_box::ProjectBox;
+use crate::pages::components::project_box::ProjectCard;
 use crate::pages::components::review::ReviewSection;
 use crate::pages::i18n::{
     GuideLineTranslate, MainBannerTranslate, MoreButtonTranslate, OpinionFeatureTranslate,
@@ -85,8 +86,8 @@ pub fn GuideSection(lang: Language) -> Element {
                                 class: "[&>path]:stroke-white",
                             }
                         }
-                        button {
-                            class: "font-semibold text-white text-base leading-24 cursor-pointer",
+                        Button {
+                            class: "font-semibold bg-transparent text-white text-base/24",
                             //TODO: Go to public opinion survey participation guide
                             onclick: move |_| {},
                             "{tr.public_opinion_participation_guide}"
@@ -108,8 +109,8 @@ pub fn GuideSection(lang: Language) -> Element {
                                 class: "[&>path]:stroke-white",
                             }
                         }
-                        button {
-                            class: "font-semibold text-white text-base leading-24 cursor-pointer",
+                        Button {
+                            class: "font-semibold bg-transparent text-white text-base/24",
                             //TODO: Go to the Public Opinion Survey Design Guide
                             onclick: move |_| {},
                             "{tr.public_opinion_survey_design_console_guide}"
@@ -143,7 +144,7 @@ pub fn MainSection(lang: Language) -> Element {
                         "{tr.description}"
                     }
                     button {
-                        class: "relative flex flex-row text-sm px-10 py-8 desktop:text-base desktop:px-16 desktop:py-12 bg-[#5b373b] border border-white rounded-xl font-semibold  text-white cursor-pointer",
+                        class: "relative flex flex-row text-sm px-10 py-8 desktop:text-base desktop:px-16 desktop:py-12 bg-[#5b373b] border border-white rounded-xl font-semibold  text-white cursor-pointer hover:bg-gradient-to-t hover:from-black/20 hover:to-black/20",
                         onclick: move |_| {
                             nav.push(format!("{}", console_url));
                         },
@@ -245,8 +246,8 @@ pub fn PriceSection(lang: Language) -> Element {
     let tr: PriceSectionTranslate = translate(&lang);
     rsx! {
         section { id: "price", class: "relative w-full flex justify-center",
-            div { class: "absolute w-full bg-[#F1F3FA] left-0 top-1/2 translate-y-[-50%] h-480" }
-            div { class: "w-full flex flex-col tablet:flex-row justify-center self-center gap-30 desktop:gap-130 tablet:px-20 z-1",
+            div { class: "absolute w-full bg-[#F1F3FA] left-0 top-1/2 translate-y-[-50%] h-0 tablet:h-480" }
+            div { class: "w-full flex flex-col tablet:flex-row justify-center self-center gap-30 desktop:gap-130 px-20 tablet:px-20 z-1",
                 div { class: "rounded-xl shadow-[0px_8px_20px_0px_rgba(148,176,214,0.50)] p-30 desktop:px-55 desktop:py-16 bg-white",
                     div { class: "flex flex-col w-full gap-20 desktop:max-w-420 h-full",
                         div { class: "font-bold text-[28px] text-text-black leading-32",
@@ -276,8 +277,8 @@ pub fn PriceSection(lang: Language) -> Element {
                                 description: "{tr.free_info_description_3}",
                             }
                         }
-                        button {
-                            class: "flex flex-row w-full py-13 mt-32 justify-center items-center rounded-[100px] bg-button-primary font-semibold text-white text-[15px]/25 cursor-pointer",
+                        Button {
+                            class: "w-full py-13 mt-32 rounded-[100px] font-semibold text-white text-[15px]/25",
                             onclick: move |_| {
                                 tracing::debug!("start button clicked");
                             },
@@ -318,8 +319,8 @@ pub fn PriceSection(lang: Language) -> Element {
                                 description: "{tr.premium_info_description_4}",
                             }
                         }
-                        button {
-                            class: "flex flex-row w-full py-13 mt-32 justify-center items-center rounded-[100px] bg-button-primary font-semibold text-white text-[15px]/25 cursor-pointer",
+                        Button {
+                            class: "w-full py-13 mt-32 rounded-[100px] font-semibold text-white text-[15px]/25",
                             onclick: move |_| {
                                 tracing::debug!("start button clicked");
                             },
@@ -403,22 +404,7 @@ pub fn ProjectSection(lang: Language, deliberations: Vec<DeliberationProject>) -
                 }
                 div { class: "grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-20 w-full mt-30 [&>:nth-child(n+3)]:hidden tablet:[&>:nth-child(n+3)]:block tablet:[&>:nth-child(n+5)]:hidden desktop:[&>*]:!block",
                     for deliberation in deliberations.iter().take(6).cloned() {
-                        div {
-                            class: "cursor-pointer",
-                            onclick: {
-                                let project_id = deliberation.clone().id.clone();
-                                move |_| {
-                                    nav.push(Route::ProjectPage {
-                                        lang,
-                                        project_id,
-                                    });
-                                }
-                            },
-                            ProjectBox {
-                                lang,
-                                deliberation: deliberation.clone().into(),
-                            }
-                        }
+                        ProjectCard { lang, deliberation: deliberation.into() }
                     }
                 }
 
@@ -439,8 +425,8 @@ pub fn ProjectSection(lang: Language, deliberations: Vec<DeliberationProject>) -
 pub fn MoreButton(lang: Language, onclick: EventHandler<MouseEvent>) -> Element {
     let tr: MoreButtonTranslate = translate(&lang);
     rsx! {
-        div {
-            class: "flex flex-row px-20 py-12 bg-button-primary font-semibold text-base text-white cursor-pointer rounded-xl",
+        Button {
+            class: "px-20 py-12 font-semibold text-base text-white cursor-pointer rounded-xl",
             onclick: move |e: Event<MouseData>| {
                 onclick.call(e);
             },
