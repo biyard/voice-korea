@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-use dioxus::prelude::*;
+use bdk::prelude::*;
 use dioxus_logger::tracing;
 
 use crate::{
@@ -7,8 +7,6 @@ use crate::{
     routes::Route,
     service::login_service::LoginService,
 };
-
-use super::Language;
 
 #[derive(PartialEq, Props, Clone)]
 pub struct SidebarProps {

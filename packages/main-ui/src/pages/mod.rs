@@ -1,5 +1,7 @@
+mod components;
 mod controller;
 mod i18n;
+mod layout;
 mod page;
 
 pub mod attributes;
@@ -14,4 +16,5 @@ pub mod reset_password;
 pub mod resources;
 pub mod surveys;
 
+pub use layout::*;
 pub use page::*;

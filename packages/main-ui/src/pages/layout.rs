@@ -1,17 +1,15 @@
 #![allow(non_snake_case)]
+use super::*;
 use crate::{
     components::icons::Logout,
     prelude::*,
     service::{login_service::LoginService, popup_service::PopupZone},
 };
 use by_components::loaders::cube_loader::CubeLoader;
+use components::*;
 use dioxus::prelude::*;
 use i18n::RootLayoutTranslate;
 use side_bar::{SelectedMenu, SideBar};
-
-pub mod header;
-pub mod i18n;
-pub mod side_bar;
 
 use dioxus_translate::{translate, Language};
 

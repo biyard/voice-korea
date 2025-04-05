@@ -1,5 +1,4 @@
 pub mod prelude {
-    pub use crate::layouts::root_layout::*;
     pub use crate::routes::*;
     pub use crate::utils::context::*;
 
@@ -33,10 +32,6 @@ pub mod utils {
     pub mod hash;
     pub mod metadata;
     pub mod time;
-}
-
-pub mod layouts {
-    pub mod root_layout;
 }
 
 pub mod components {
