@@ -26,22 +26,15 @@ jobs:
           WAIT_TIMEOUT: 5000
           VISIBLE_TIMEOUT: 10000
           URL_TIMEOUT: 15000
+          GOOGLE_EMAIL: ${{ secrets.TEST_GOOGLE_MAIL }}
+          GOOGLE_PASS: ${{ secrets.TEST_GOOGLE_PASSWORD }}
         run: |
-          echo "Running tests with timeouts:"
-          echo "WAIT_TIMEOUT=$WAIT_TIMEOUT"
-          echo "VISIBLE_TIMEOUT=$VISIBLE_TIMEOUT"
-          echo "URL_TIMEOUT=$URL_TIMEOUT"
-          
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
             echo "Skipping tests that require secrets on pull request."
             npx playwright test tests/users --grep-invert @secret-required
           else
             echo "Running all the tests."
-            export GOOGLE_EMAIL=${{ secrets.TEST_GOOGLE_MAIL }}
-            export GOOGLE_PASS=${{ secrets.TEST_GOOGLE_PASSWORD }}
-            npx playwright test tests/users/home_overflow.spec.ts
-            npx playwright test tests/users/google.spec.ts
-            npx playwright test tests/users/project_page.spec.ts
+            npx playwright test --project 'chromium-*'
           fi
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

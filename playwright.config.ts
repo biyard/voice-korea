@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Read environment variables from file.
@@ -12,33 +12,82 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
+  testDir: "./tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  // workers: 1,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  reporter: "html",
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://127.0.0.1:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
-    storageState: process.env.CI ? 'storage/auth.json' : undefined, 
+    baseURL: "https://dev.voice-korea.com/en",
+    trace: "on-first-retry",
+    storageState: process.env.CI ? "storage/auth.json" : undefined,
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium-desktop",
+      testMatch: /.*\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "chromium-iphone-12",
+      testMatch: /.*\.mspec\.ts/,
+      use: {
+        ...devices["Mobile Chrome"],
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+    {
+      name: "chromium-galaxy-s20",
+      testMatch: /.*\.mspec\.ts/,
+      use: {
+        ...devices["Mobile Chrome"],
+        viewport: { width: 412, height: 915 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+
+    {
+      name: "chromium-pixel-5",
+      testMatch: /.*\.mspec\.ts/,
+      use: {
+        ...devices["Mobile Chrome"],
+        viewport: { width: 393, height: 851 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+    {
+      name: "chromium-ipad-mini",
+      testMatch: /.*\.mspec\.ts/,
+      use: {
+        ...devices["Mobile Chrome"],
+        viewport: { width: 768, height: 1024 },
+        deviceScaleFactor: 2,
+        isMobile: true,
+        hasTouch: true,
+        userAgent:
+          "Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/106.0.0.0 Mobile/15E148 Safari/604.1",
+      },
+    },
+
+    {
+      name: "auth-setup",
+      testMatch: "**/google.setup.ts",
+      use: {
+        ...devices["Desktop Chrome"],
+        headless: false,
+        viewport: {
+          width: 1920,
+          height: 1080,
+        },
+      },
     },
 
     // {

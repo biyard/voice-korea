@@ -45,7 +45,7 @@ pub fn OpinionCreatePage(lang: Language) -> Element {
                 }
 
                 div { class: "flex flex-col w-full justify-start items-center mt-20 mb-80",
-                    div { class: "flex flex-row w-1400 min-w-1400 justify-center items-center",
+                    div { class: "flex flex-row w-full justify-center items-center",
                         Stepper {
                             current_step: if step == CurrentStep::SettingInfo { 1 } else if step == CurrentStep::CompositionCommittee { 2 } else if step == CurrentStep::CompositionPanel { 3 } else if step == CurrentStep::DeliberationSchedule || step == CurrentStep::EditContent { 4 } else { 5 },
                             steps: vec![

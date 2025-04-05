@@ -70,3 +70,9 @@ s3-deploy:
 .PHONY: postgres
 postgres:
 	docker-compose up -d
+
+node_modules:
+	npm i
+
+storage/auth.json: node_modules
+	npx playwright test --project auth-setup
