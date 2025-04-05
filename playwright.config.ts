@@ -82,7 +82,7 @@ export default defineConfig({
       testMatch: "**/google.setup.ts",
       use: {
         ...devices["Desktop Chrome"],
-        headless: false,
+        headless: process.env.HEADLESS ? true : false,
         viewport: {
           width: 1920,
           height: 1080,

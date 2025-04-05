@@ -28,6 +28,7 @@ jobs:
           URL_TIMEOUT: 15000
           GOOGLE_EMAIL: ${{ secrets.TEST_GOOGLE_MAIL }}
           GOOGLE_PASS: ${{ secrets.TEST_GOOGLE_PASSWORD }}
+          HEADLESS: true
         run: |
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
             echo "Skipping tests that require secrets on pull request."
