@@ -7,7 +7,7 @@ const credentials = {
 };
 
 const timeouts = {
-  wait: parseInt(process.env.WAIT_TIMEOUT || "2000", 10),
+  wait: parseInt(process.env.WAIT_TIMEOUT || "5000", 10),
   visible: parseInt(process.env.VISIBLE_TIMEOUT || "5000", 10),
   url: parseInt(process.env.URL_TIMEOUT || "7000", 10),
 };
@@ -34,10 +34,10 @@ async function getBrowserInstance() {
 
 test.describe.configure({ mode: "serial" });
 
-test("Google OAuth Login and Save Session", async () => {
-  const browser = await getBrowserInstance();
-  const context = await browser.newContext();
-  const page = await context.newPage();
+test("Google OAuth Login and Save Session", async ({ page, context }) => {
+  // const browser = await getBrowserInstance();
+  // const context = await browser.newContext();
+  // const page = await context.newPage();
 
   await page.goto("https://dev.voice-korea.com/en/");
   await page.screenshot({
