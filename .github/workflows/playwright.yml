@@ -34,6 +34,7 @@ jobs:
             npx playwright test tests/users --grep-invert @secret-required
           else
             echo "Running all the tests."
+            make storage/auth.json
             npx playwright test --project 'chromium-*'
           fi
       - uses: actions/upload-artifact@v4
