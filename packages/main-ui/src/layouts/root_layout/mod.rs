@@ -46,7 +46,7 @@ pub fn RootLayout(lang: Language) -> Element {
                 //     lang,
                 // }
                 PopupZone {}
-                div { class: "flex flex-row min-w-full max-w-full grow",
+                div { class: "flex flex-row w-screen h-screen overflow-hidden",
                     SideBar {
                         onselected: move |selected: SelectedMenu| {
                             tracing::info!("selected menu {selected:?}");
@@ -55,7 +55,7 @@ pub fn RootLayout(lang: Language) -> Element {
                         selected_menu: (selected_menu)(),
                         lang,
                     }
-                    div { class: "flex flex-col w-full bg-[#f0f2fc] px-[60px] pt-[25px]",
+                    div { class: "flex flex-col w-full overflow-y-scroll bg-[#f0f2fc] px-[60px] pt-[25px]",
                         div { class: "flex flex-row w-full justify-end items-end gap-[5px]",
                             Link {
                                 class: "flex flex-row justify-start items-start",

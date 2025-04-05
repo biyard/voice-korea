@@ -14,7 +14,12 @@ pub fn ExpandableCard(
 
     rsx! {
         div { class: "flex flex-col w-full justify-start items-start rounded-lg bg-white px-40 py-24 gap-10",
-            div { class: "flex flex-row w-full justify-between items-center",
+            div {
+                class: "flex flex-row w-full justify-between items-center cursor-pointer",
+                onclick: move |_| {
+                    clicked.set(!clicked());
+                },
+
                 div { class: "flex flex-col w-full justify-start items-start",
                     div { class: "flex flex-row h-full items-center justify-center",
                         if required {
@@ -26,17 +31,10 @@ pub fn ExpandableCard(
                     }
                     div { class: "text-sm font-normal text-text-gray", "{description}" }
                 }
-                div {
-                    onclick: move |_| {
-                        clicked.set(!clicked());
-                    },
-                    div { class: "cursor-pointer",
-                        if clicked() {
-                            TopDropdownArrow { width: "24", height: "24" }
-                        } else {
-                            BottomDropdownArrow { width: "24", height: "24" }
-                        }
-                    }
+                if clicked() {
+                    TopDropdownArrow { width: "24", height: "24" }
+                } else {
+                    BottomDropdownArrow { width: "24", height: "24" }
                 }
             }
 
