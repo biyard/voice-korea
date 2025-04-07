@@ -24,7 +24,7 @@ pub fn FinalSurveyInfo(
 ) -> Element {
     let tab_title: &str = Tab::FinalSurvey.translate(&lang);
     let mut clicked1 = use_signal(|| true);
-    let status = get_survey_status(survey.started_at, survey.ended_at);
+    let status = get_survey_status(start_date, end_date);
     let tr: FinalSurveyTranslate = translate(&lang);
 
     let title = if survey.surveys.is_empty() {
