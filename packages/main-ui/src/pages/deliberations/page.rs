@@ -80,7 +80,7 @@ pub fn DeliberationPage(lang: Language) -> Element {
                         Search { width: "18", height: "18", color: "#7c8292" }
                     }
                     div { class: "flex flex-row gap-[10px]",
-                        Link { to: Route::OpinionCreatePage { lang },
+                        Link { to: Route::DeliberationNewPage { lang },
                             div { class: "flex flex-row w-[130px] h-[40px] justify-center items-center bg-[#2a60d3] rounded-md gap-[5px]",
                                 div {
                                     class: "text-white font-semibold text-[16px]",

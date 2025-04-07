@@ -2,7 +2,8 @@ use dioxus::prelude::*;
 
 use crate::pages::attributes::AttributePage;
 use crate::pages::create::CreatePage;
-use crate::pages::deliberations::new::page::OpinionCreatePage;
+// use crate::pages::deliberations::new::routes::DeliberationNewRoute;
+use crate::pages::deliberations::new::*;
 use crate::pages::deliberations::page::DeliberationPage;
 use crate::pages::find_email::FindEmailPage;
 use crate::pages::groups::_id::page::GroupDetailPage;
@@ -23,6 +24,9 @@ use dioxus_translate::Language;
 #[derive(Clone, Routable, Debug, PartialEq)]
 #[rustfmt::skip]
 pub enum Route {
+    // #[child("/deliberations/new")]
+    // Nested { child: DeliberationNewRoute},
+
     #[nest("/:lang")]
         #[layout(RootLayout)]
             #[route("/groups")]
@@ -31,12 +35,38 @@ pub enum Route {
             GroupDetailPage { lang: Language, group_id: i64 },
             #[route("/deliberations")]
             DeliberationPage { lang: Language },
-            #[route("/deliberations/new")]
-            OpinionCreatePage { lang: Language },
+
+            #[layout(DeliberationNewLayout)]
+                #[route("/deliberations/new")]
+                DeliberationNewPage { lang: Language },
+                #[route("/deliberations/new/committees")]
+                CompositionCommitee { lang: Language },
+                #[route("/deliberations/new/panels")]
+                CompositionPanel { lang: Language },
+
+                #[nest("/deliberations/new/details")]
+                #[layout(DeliberationDetailSettingLayout)]
+                    #[route("/basic-info")]
+                    DeliberationBasicInfoSettingPage { lang: Language },
+                    #[route("/sample-survey")]
+                    DeliberationSampleSurveySettingPage { lang: Language },
+                    #[route("/deliberation")]
+                    DeliberationSettingPage { lang: Language },
+                    #[route("/discussions")]
+                    DeliberationDiscussionSettingPage { lang: Language },
+                    #[route("/votes")]
+                    DeliberationVoteSettingPage { lang: Language },
+                #[end_layout]
+                #[end_nest]
+
+                #[route("/deliberations/new/review")]
+                Preview { lang: Language },
+            #[end_layout]
+
             #[route("/members")]
             MemberPage { lang: Language },
             #[route("/members/:member_id")]
-            MemberDetailPage { lang: Language, member_id: String },
+            MemberDetailPage { lang: Language, member_id: i64 },
             #[route("/attributes")]
             AttributePage { lang: Language },
             #[route("/panels")]
@@ -87,12 +117,12 @@ impl Route {
             Route::DeliberationPage { lang } if lang == &Language::En => {
                 Some("Public Opinion Survey".to_string())
             }
-            Route::OpinionCreatePage { lang } if lang == &Language::Ko => {
-                Some("공론 조사".to_string())
-            }
-            Route::OpinionCreatePage { lang } if lang == &Language::En => {
-                Some("Public Opinion Survey".to_string())
-            }
+            // Route::OpinionCreatePage { lang } if lang == &Language::Ko => {
+            //     Some("공론 조사".to_string())
+            // }
+            // Route::OpinionCreatePage { lang } if lang == &Language::En => {
+            //     Some("Public Opinion Survey".to_string())
+            // }
             Route::MemberPage { lang } if lang == &Language::Ko => Some("팀원 관리".to_string()),
             Route::MemberPage { lang } if lang == &Language::En => {
                 Some("Member Management".to_string())

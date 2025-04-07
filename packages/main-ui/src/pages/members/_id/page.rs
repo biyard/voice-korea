@@ -23,7 +23,7 @@ use crate::{
 #[derive(Props, Clone, PartialEq)]
 pub struct MemberDetailPageProps {
     lang: Language,
-    member_id: String,
+    member_id: i64,
 }
 
 #[derive(Props, Clone, PartialEq)]

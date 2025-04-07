@@ -1,12 +1,18 @@
 use crate::areas::area::Area;
 use crate::deliberation_basic_infos::deliberation_basic_info::DeliberationBasicInfo;
+use crate::deliberation_basic_infos::deliberation_basic_info::DeliberationBasicInfoCreateRequest;
 use crate::deliberation_comment::DeliberationComment;
 use crate::deliberation_contents::deliberation_content::DeliberationContent;
+use crate::deliberation_contents::deliberation_content::DeliberationContentCreateRequest;
 use crate::deliberation_discussions::deliberation_discussion::DeliberationDiscussion;
+use crate::deliberation_discussions::deliberation_discussion::DeliberationDiscussionCreateRequest;
 use crate::deliberation_draft::DeliberationDraft;
+use crate::deliberation_drafts::deliberation_draft::DeliberationDraftCreateRequest;
 use crate::deliberation_final_surveys::deliberation_final_survey::DeliberationFinalSurvey;
+use crate::deliberation_final_surveys::deliberation_final_survey::DeliberationFinalSurveyCreateRequest;
 use crate::deliberation_response::DeliberationResponse;
 use crate::deliberation_sample_surveys::deliberation_sample_survey::DeliberationSampleSurvey;
+use crate::deliberation_sample_surveys::deliberation_sample_survey::DeliberationSampleSurveyCreateRequest;
 use crate::deliberation_user::{DeliberationUser, DeliberationUserCreateRequest};
 
 use bdk::prelude::*;
@@ -20,7 +26,7 @@ use crate::step::*;
 use crate::{PanelV2, ProjectArea, ResourceFile, SurveyV2};
 
 #[derive(Validate)]
-#[api_model(base = "/v2/organizations/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, panel_ids = Vec<i64>, steps = Vec<StepCreateRequest>, elearning = Vec<i64>, discussions = Vec<DiscussionCreateRequest>)], table = deliberations)]
+#[api_model(base = "/v2/organizations/:org-id/deliberations", action = [create(resource_ids = Vec<i64>, survey_ids = Vec<i64>, roles = Vec<DeliberationUserCreateRequest>, panel_ids = Vec<i64>, steps = Vec<StepCreateRequest>, elearning = Vec<i64>, basic_infos = Vec<DeliberationBasicInfoCreateRequest>, sample_surveys = Vec<DeliberationSampleSurveyCreateRequest>, contents = Vec<DeliberationContentCreateRequest>, deliberation_discussions = Vec<DeliberationDiscussionCreateRequest>, final_surveys = Vec<DeliberationFinalSurveyCreateRequest>, drafts = Vec<DeliberationDraftCreateRequest>)], table = deliberations)]
 pub struct Deliberation {
     #[api_model(summary, primary_key)]
     pub id: i64,

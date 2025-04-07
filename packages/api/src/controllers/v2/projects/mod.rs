@@ -8,15 +8,7 @@ use by_axum::{
     },
 };
 use by_types::QueryResponse;
-use deliberation_project::*;
-use models::{
-    deliberation_content::DeliberationContent,
-    deliberations::{
-        deliberation::Deliberation, deliberation_basic_info::DeliberationBasicInfo,
-        deliberation_draft::DeliberationDraft, deliberation_survey::DeliberationSurvey,
-    },
-    *,
-};
+use models::*;
 use sqlx::postgres::PgRow;
 
 #[derive(
@@ -270,6 +262,11 @@ mod tests {
                 vec![],
                 vec![],
                 vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
             )
             .await;
         assert!(res.is_ok());
@@ -307,6 +304,11 @@ mod tests {
                 format!("title"),
                 format!("test description"),
                 ProjectArea::City,
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
                 vec![],
                 vec![],
                 vec![],
@@ -376,6 +378,11 @@ mod tests {
                 format!("title"),
                 format!("test description"),
                 ProjectArea::City,
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
                 vec![],
                 vec![],
                 vec![],

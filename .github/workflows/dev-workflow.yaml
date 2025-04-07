@@ -71,7 +71,7 @@ jobs:
 
         run: |
           cargo update -p time --precise 0.3.37
-          make deploy-web-if-needed
+          make deploy-web
 
   web-deployment:
     runs-on: ubuntu-22.04
@@ -127,7 +127,7 @@ jobs:
 
         run: |
           cargo update -p time --precise 0.3.37
-          make deploy-web-if-needed
+          make deploy-web
 
   api-deployment:
     runs-on: ubuntu-22.04
@@ -187,7 +187,7 @@ jobs:
           ENABLE_LAMBDA: true
           ENABLE_RDS: false
         run: |
-          make deploy-if-needed
+          make deploy
 
   # watcher-deployment:
   #   runs-on: ubuntu-22.04

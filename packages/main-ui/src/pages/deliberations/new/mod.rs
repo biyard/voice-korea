@@ -1,11 +1,22 @@
-pub mod composition_commitee;
-pub mod composition_deliberation;
-pub mod composition_panel;
-pub mod controller;
-pub mod i18n;
-pub mod input_deliberation;
-pub mod page;
-pub mod preview;
-pub mod setting_discussion;
-
 pub mod components;
+
+pub mod controller;
+mod i18n;
+mod layout;
+pub mod models;
+pub mod page;
+pub mod step;
+
+pub use controller::DeliberationNewStep;
+pub use layout::*;
+pub use page::*;
+pub use step::*;
+
+// Children pages
+mod committees;
+mod details;
+mod panels;
+
+pub use committees::*;
+pub use details::*;
+pub use panels::*;

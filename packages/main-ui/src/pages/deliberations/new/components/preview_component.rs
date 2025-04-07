@@ -2,14 +2,16 @@ use by_components::icons::edit::Edit1;
 use dioxus::prelude::*;
 use dioxus_translate::{translate, Language};
 
-use crate::pages::deliberations::new::{controller::CurrentStep, i18n::PreviewComponentTranslate};
+use crate::pages::deliberations::new::{
+    controller::DeliberationNewStep, i18n::PreviewComponentTranslate,
+};
 
 #[component]
 pub fn PreviewComponent(
     lang: Language,
     label: String,
-    onstep: EventHandler<CurrentStep>,
-    step: CurrentStep,
+    onstep: EventHandler<DeliberationNewStep>,
+    step: DeliberationNewStep,
     title: String,
     children: Element,
 ) -> Element {

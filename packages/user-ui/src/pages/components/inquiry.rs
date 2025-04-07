@@ -3,8 +3,8 @@ use dioxus_translate::{translate, Language};
 use regex::Regex;
 
 use crate::{
-    components::{input::InputBox, textarea::TextArea},
-    pages::i18n::InquirySectionTranslate,
+    components::{button::Button, input::InputBox, textarea::TextArea},
+    pages::{i18n::InquirySectionTranslate, SectionHeader},
 };
 
 #[component]
@@ -24,20 +24,17 @@ pub fn InquirySection(
     let mut email_error = use_signal(|| false);
     let mut message_error = use_signal(|| false);
     rsx! {
-        div {
+        section {
             id: "inquiry",
-            class: "flex flex-col w-full justify-center items-center",
-            div { class: "max-[1000px]:px-15 max-[400px]:mt-200 flex flex-col w-full max-w-1080 h-full justify-center items-center gap-[50px]",
-                div { class: "flex flex-col gap-30",
-                    div { class: "font-bold text-[28px] leading-32 text-text-gray",
-                        "{tr.inquiry_title}"
-                    }
-                    div { class: "font-semibold text-[15px] leading-22 text-text-gray whitespace-pre-line text-center",
-                        "{tr.inquiry_description}"
-                    }
+            class: "flex flex-col w-full justify-center items-center px-20 desktop:px-0",
+            div { class: "flex flex-col w-full max-w-1080 h-full justify-center items-center gap-[50px]",
+                SectionHeader {
+                    class: "[&>h2]:whitespace-pre-line [&>h2]:text-center [&>h2]:pt-32 [&>h1]:break-keep [&>h1]:text-center",
+                    title: "{tr.inquiry_title}",
+                    description: Some(tr.inquiry_description.to_string()),
                 }
 
-                div { class: "flex max-[1000px]:flex-col max-[1000px]:gap-50 flex-row w-full justify-between items-center",
+                div { class: "flex max-[1000px]:flex-col max-[1000px]:gap-50 flex-row w-full justify-between items-center py-30",
                     div { class: "flex flex-col gap-32",
                         SolutionInfoComponent {
                             asset: blockchain_info_1,
@@ -105,8 +102,8 @@ pub fn InquirySection(
                             }
                         }
 
-                        button {
-                            class: "flex flex-row w-full justify-center items-center bg-button-primary rounded-xl px-16 py-12 font-semibold text-base text-white cursor-pointer",
+                        Button {
+                            class: "w-full justify-center items-center rounded-xl px-16 py-12 font-semibold text-base text-white",
                             onclick: move |_| {
                                 let name_value = name();
                                 let email_value = email();

@@ -4,7 +4,10 @@ use dioxus_translate::{translate, Language};
 use models::comment::CommentSummary;
 
 use crate::{
-    components::icons::{left_arrow::LeftArrow, right_arrow::RightArrow},
+    components::{
+        button::Button,
+        icons::{left_arrow::LeftArrow, right_arrow::RightArrow},
+    },
     pages::i18n::ReviewSectionTranslate,
     utils::time::format_prev_time,
 };
@@ -22,48 +25,42 @@ pub fn ReviewSection(
     tracing::debug!("total page: {} page: {}", total_pages, page);
 
     rsx! {
-        div {
+        section {
             id: "review",
             class: "flex flex-col w-full justify-center items-center",
-            div { class: "flex flex-col w-full justify-center items-center py-100 bg-gradient-to-b from-[#f1f3fa] to-[#a6e0d3] gap-30",
-                div { class: "font-bold text-[28px] leading-32 text-text-gray",
+            div { class: "flex flex-col w-full bg-gradient-to-b from-[#f1f3fa] to-[#a6e0d3]/30 gap-30 px-20 desktop:px-0 py-60 desktop:py-100",
+                div { class: "font-bold text-[28px] leading-32 text-text-gray self-center",
                     "{tr.participation_review}"
                 }
-                div { class: "flex flex-row w-full justify-center items-center gap-20",
-                    div { class: "bg-button-primary rounded-lg px-10 py-8",
-                        div {
-                            class: format!(
-                                "w-24 h-24 {}",
-                                if page == 1 { "cursor-not-allowed" } else { "cursor-pointer" },
-                            ),
-                            onclick: move |_| {
-                                if page != 1 {
-                                    set_page.call((page - 1) as i64);
-                                }
-                            },
-                            LeftArrow { stroke: "white" }
-                        }
+                div { class: "flex flex-row w-full justify-center items-center gap-20 max-w-1300 self-center",
+                    Button {
+                        class: "rounded-lg px-6 py-8",
+                        disabled: page == 1,
+                        onclick: move |_| {
+                            if page != 1 {
+                                set_page.call((page - 1) as i64);
+                            }
+                        },
+                        LeftArrow { stroke: "white" }
                     }
-                    div { class: "flex flex-row w-full max-w-1300",
-                        div { class: "max-[600px]:!grid-cols-1 grid max-[1100px]:grid-cols-2 grid-cols-3 w-full gap-20",
+
+                    div { class: "flex flex-row w-full",
+                        div { class: "w-full gap-20 grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3
+                        [&>:nth-child(n+2)]:hidden tablet:[&>:nth-child(n+2)]:block tablet:[&>:nth-child(n+3)]:hidden desktop:[&>*]:!block",
                             for comment in comments {
                                 ReviewItem { lang, comment }
                             }
                         }
                     }
-                    div { class: "bg-button-primary rounded-lg px-10 py-8",
-                        div {
-                            class: format!(
-                                "w-24 h-24 {}",
-                                if page >= total_pages { "cursor-not-allowed" } else { "cursor-pointer" },
-                            ),
-                            onclick: move |_| {
-                                if page < total_pages {
-                                    set_page.call((page + 1) as i64);
-                                }
-                            },
-                            RightArrow {}
-                        }
+                    Button {
+                        class: "rounded-lg px-6 py-8",
+                        disabled: page >= total_pages,
+                        onclick: move |_| {
+                            if page < total_pages {
+                                set_page.call((page + 1) as i64);
+                            }
+                        },
+                        RightArrow {}
                     }
                 }
             }
@@ -77,8 +74,8 @@ pub fn ReviewItem(lang: Language, comment: CommentSummary) -> Element {
     let prev_date = format_prev_time(comment.created_at);
 
     rsx! {
-        div { class: "flex flex-col w-full h-240 px-32 py-40 bg-white rounded-xl gap-20",
-            div { class: "flex flex-row gap-8 justify-start items-center",
+        div { class: "flex flex-col w-full px-32 py-40 min-h-200 bg-white rounded-xl hover:shadow-xl",
+            div { class: "flex flex-row gap-8 justify-start items-center mb-20",
                 div { class: "w-40 h-40 bg-profile-gray rounded-[100px]" }
                 div { class: "flex flex-col gap-4",
                     div { class: "font-semibold text-text-black text-[15px]", "{tr.anonymity}" }
@@ -87,7 +84,7 @@ pub fn ReviewItem(lang: Language, comment: CommentSummary) -> Element {
             }
 
             div {
-                class: "font-normal text-[15px] text-review-gray",
+                class: "font-normal text-[15px] text-review-gray min-h-80 desktop:min-h-100",
                 style: "overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;",
                 "{comment.comment.clone()}"
             }

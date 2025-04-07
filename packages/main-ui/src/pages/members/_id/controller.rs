@@ -61,7 +61,7 @@ impl Controller {
     pub fn init(
         lang: dioxus_translate::Language,
         popup_service: PopupService,
-        member_id: String,
+        member_id: i64,
     ) -> Self {
         let translates: MemberDetailTranslate = translate(&lang);
         let member_resource: Resource<MemberSummary> = use_resource(move || {
@@ -171,7 +171,7 @@ impl Controller {
         (self.roles)()
     }
 
-    pub async fn update_member(&mut self, _member_id: String, _req: UpdateMemberRequest) {
+    pub async fn update_member(&mut self, _member_id: i64, _req: UpdateMemberRequest) {
         // let api: MemberApi = use_context();
         // let _ = match api.update_member(member_id, req).await {
         //     Ok(_) => self.member_resource.restart(),
@@ -181,7 +181,7 @@ impl Controller {
         // };
     }
 
-    pub async fn remove_member(&mut self, _user_id: String) {
+    pub async fn remove_member(&mut self, _user_id: i64) {
         // let api: MemberApi = use_context();
         // let _ = match api.remove_member(user_id).await {
         //     Ok(_) => self.member_resource.restart(),
@@ -194,7 +194,7 @@ impl Controller {
     pub async fn open_remove_project_modal(
         &self,
         _lang: Language,
-        _member_id: String,
+        _member_id: i64,
         _history_id: String,
     ) {
         // let mut popup_service = (self.popup_service)().clone();
@@ -223,7 +223,7 @@ impl Controller {
         //     .with_title(translates.remove_project_title);
     }
 
-    pub async fn open_remove_member_modal(&self, _lang: Language, _member_id: String) {
+    pub async fn open_remove_member_modal(&self, _lang: Language, _member_id: i64) {
         // let mut popup_service = (self.popup_service)().clone();
         // let translates: MemberDetailTranslate = translate(&lang);
         // let api: MemberApi = self.member_api;

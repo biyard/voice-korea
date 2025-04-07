@@ -10,7 +10,6 @@ use by_axum::{
 use by_types::QueryResponse;
 use deliberation::Deliberation;
 use discussion_resources::DiscussionResource;
-use discussions::*;
 use models::*;
 use sqlx::{postgres::PgRow, Postgres, Transaction};
 
@@ -106,8 +105,10 @@ impl DiscussionController {
             description,
             resources,
             maximum_count,
+            users,
         }: DiscussionCreateRequest,
     ) -> Result<Discussion> {
+        let _ = users;
         let user_id = match auth {
             Some(Authorization::Bearer { ref claims }) => AppClaims(claims).get_user_id(),
             _ => return Err(ApiError::Unauthorized),
@@ -416,6 +417,11 @@ mod discussion_tests {
                 vec![],
                 vec![],
                 vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
+                vec![],
             )
             .await;
         assert!(res.is_ok());
@@ -449,6 +455,7 @@ mod discussion_tests {
                 name.clone(),
                 description.clone(),
                 0,
+                vec![],
                 vec![],
             )
             .await

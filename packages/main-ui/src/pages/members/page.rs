@@ -121,7 +121,7 @@ pub fn MemberPage(lang: Language) -> Element {
                                     Link {
                                         to: Route::MemberDetailPage {
                                             lang,
-                                            member_id: member.id.to_string(),
+                                            member_id: member.id,
                                         },
                                         div { class: "flex flex-row w-[355px] min-w-[355px] h-full justify-center items-center gap-[10px] px-[50px]",
                                             div { class: "w-[36px] h-[36px] rounded-[40px] bg-[#9baae4] mr-[10px]" }
