@@ -71,16 +71,14 @@ pub fn LoginPage(props: LoginPageProps) -> Element {
 
     rsx! {
         div { class: "bg-white w-screen min-h-screen flex flex-col",
-            div { class: "flex flex-row w-full justify-start items-center px-[30px] py-[3px]",
-                div { class: "mr-[7px]",
+            div { class: "flex flex-row w-full justify-start items-center px-[30px] py-[3px] max-[500px]:!justify-center gap-4",
+                div { class: "mr-[7px] max-[500px]:!mr-0",
                     img { src: logo_path, width: 42, height: 42 }
                 }
                 div { class: "text-[24px] font-bold text-[#2168C3]", "VOICE KOREA" }
             }
-            div {
-                class: "flex flex-col h-full w-full justify-start items-center",
-                style: "height: calc(100vh - 48px)",
-                div { class: "flex flex-col w-full h-full justify-center items-center",
+            div { class: "h-[calc(100vh-48px)] flex flex-col w-full justify-start items-center",
+                div { class: "flex flex-col w-full h-full justify-center items-center max-[500px]:gap-70",
                     LoginComponent {
                         ctrl,
                         lang: props.lang,
@@ -101,6 +99,7 @@ pub fn LoginPage(props: LoginPageProps) -> Element {
                         check_description_2_message,
                     }
                 }
+
                 div { class: "flex flex-col h-full w-full justify-end items-end",
                     Bottom { lang: props.lang }
                 }
@@ -145,7 +144,7 @@ pub fn MemberInfoComponent(props: MemberInfoProps) -> Element {
                     }
                 }
             }
-            div { class: "flex flex-col w-full h-[135px] border-solid border border-[#e0e0e0] px-[20px] py-[15px]",
+            div { class: "flex flex-col w-full h-[135px] border-solid border border-[#e0e0e0] px-[20px] py-[15px] max-[500px]:!hidden",
                 div { class: "text-black text-[20px] font-normal pb-[15px]",
                     "{props.check_title_message}"
                 }
@@ -165,13 +164,13 @@ pub fn LoginComponent(props: LoginProps) -> Element {
     let mut ctrl = props.ctrl;
 
     rsx! {
-        div { class: "flex flex-col w-[610px] h-[530px] justify-center items-center",
+        div { class: "flex flex-col max-w-610 h-530 justify-center items-center max-[500px]:!justify-start max-[500px]:!max-h-300",
             div { class: "flex flex-row w-full h-40 justify-center items-center text-[32px] font-bold text-black pb-[50px]",
                 "{props.login_message}"
             }
             div { class: "flex flex-col justify-start items-start",
-                div { class: "flex flex-row justify-between w-[610px] h-[100px]",
-                    div { class: "flex flex-col w-[300px] h-full justify-between",
+                div { class: "flex flex-row justify-between w-[610px] h-[100px] max-[500px]:!flex-col max-[500px]:!w-full max-[500px]:gap-10",
+                    div { class: "flex flex-col w-[300px] h-full justify-between max-[500px]:gap-5",
                         InputEmailComponent {
                             ctrl: props.ctrl,
                             email_message: props.email_message,
@@ -210,7 +209,7 @@ pub fn LoginComponent(props: LoginProps) -> Element {
 pub fn LoginButton(props: LoginButtonProps) -> Element {
     rsx! {
         div {
-            class: "cursor-pointer flex flex-row w-[300px] h-[100px] bg-[#2168c3]",
+            class: "cursor-pointer flex flex-row w-[300px] h-[100px] bg-[#2168c3] max-[500px]:max-h-50",
             style: "width: 300px",
             div { class: "flex flex-row w-full h-full justify-center items-center text-[24px] font-bold text-white",
                 "{props.login_message}"

@@ -25,23 +25,24 @@ pub fn Bottom(props: BottomProps) -> Element {
 
     let bottom_text_style = "text-[14px] font-normal text-white";
     rsx! {
-        div { class: "flex flex-row w-full items-start justify-start h-[135px] bg-[#2168C3]",
-            div { class: "flex flex-col h-full py-[20px] pl-[50px] pr-[26px]",
-                div { class: "flex flex-col w-max h-min justify-center items-center",
-                    img {
-                        class: "flex flex-col pb-[20px]",
-                        src: asset!("/public/images/logo-white.png"),
-                        width: 40,
-                        height: 40,
-                        alt: "Voice Korea Logo",
-                    }
-                    div { class: "flex flex-row text-[16px] font-bold text-white", "VOICE KOREA" }
+        div { class: "flex flex-row w-full items-center justify-start min-h-135 bg-[#2168C3] max-[500px]:!flex-col",
+            div { class: "flex flex-col min-w-200 justify-center items-center gap-[15px] max-[500px]:!flex-row max-[500px]:!gap-10 max-[500px]:!py-10",
+                img {
+                    class: "flex flex-col",
+                    src: asset!("/public/images/logo-white.png"),
+                    width: 40,
+                    height: 40,
+                    alt: "Voice Korea Logo",
+                }
+                div { class: "flex flex-row text-[16px] font-bold text-white max-[500px]:!justify-center items-center",
+                    "VOICE KOREA"
                 }
             }
+
             div { class: "flex flex-col w-full h-full",
                 div { class: "flex flex-col w-full h-full px-[10px] py-[25px]",
                     div { class: "{bottom_text_style} mb-[5px]", "{address}" }
-                    div { class: "flex flex-row w-full justify-start items-start mb-[5px]",
+                    div { class: "flex flex-row w-full justify-start items-start mb-[5px] max-[500px]:!flex-col",
                         div { class: "{bottom_text_style} pr-[20px]", "{company}" }
                         div { class: "{bottom_text_style} pr-[20px]", "{company_address}" }
                         div { class: "{bottom_text_style} pr-[20px]", "{ceo}" }
