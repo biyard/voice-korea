@@ -18,9 +18,9 @@ pub fn ProjectListPage(lang: Language) -> Element {
     tracing::debug!("deliberation projects: {:?}", projects);
 
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center mt-80",
+        div { class: "flex flex-col w-full justify-center items-center mt-80 px-10 max-[500px]:mt-30",
             div { class: "max-w-1300 mt-60 flex flex-col w-full justify-start items-start gap-20",
-                div { class: "flex flex-row w-full justify-start items-start gap-15",
+                div { class: "flex flex-row w-full justify-start items-start gap-15 max-[500px]:flex-col",
                     SearchProject {
                         lang,
                         onsearch: move |title: String| {
@@ -28,7 +28,7 @@ pub fn ProjectListPage(lang: Language) -> Element {
                         },
                     }
 
-                    div { class: " w-full flex flex-row justify-end items-center",
+                    div { class: "w-full flex flex-row justify-end items-center",
                         details { class: "dropdown w-fit",
                             summary { class: "btn text-text-black w-150 bg-transparent border border-input-border-gray flex flex-row justify-between items-center hover:bg-input-border-gray rounded-lg px-15 py-10",
 
@@ -40,7 +40,7 @@ pub fn ProjectListPage(lang: Language) -> Element {
                                 }
                             }
                             ul {
-                                class: "menu dropdown-content bg-white rounded-xl z-[1] shadow overflow-hidden w-full",
+                                class: "menu dropdown-content bg-white rounded-xl z-[1] shadow overflow-hidden w-full max-[500px]:absolute max-[500px]:max-w-150",
                                 padding: "0px",
                                 for option in ProjectSorter::VARIANTS {
                                     li {
@@ -102,7 +102,7 @@ pub fn DeliberationList(lang: Language, projects: Vec<DeliberationProjectSummary
                 "{tr.project}"
             }
 
-            div { class: "w-full grid grid-cols-3 gap-20",
+            div { class: "w-full grid grid-cols-3 gap-20 max-[500px]:grid-cols-1",
                 for deliberation in projects.clone() {
                     div {
                         class: "cursor-pointer",

@@ -22,8 +22,8 @@ pub fn ProfilePage(lang: Language) -> Element {
     let project = ctrl.projects()?;
 
     rsx! {
-        div { class: "flex flex-col w-full justify-center items-center mt-80",
-            div { class: "flex flex-col max-w-1300 w-full justify-start items-start gap-60",
+        div { class: "flex flex-col w-full justify-center items-center mt-80 max-[500px]:px-10",
+            div { class: "flex flex-col max-w-1300 w-full justify-start items-start gap-60 max-[500px]:gap-30",
                 ProfileBanner { lang, profile: project.user }
 
                 div { class: "flex flex-col w-full justify-start items-start gap-40",
@@ -66,10 +66,10 @@ pub fn ProfilePage(lang: Language) -> Element {
                             }
                         }
                     }
-
+                
                 }
             }
-
+        
         }
     }
 }
@@ -82,7 +82,7 @@ pub fn ClickableType(
 ) -> Element {
     rsx! {
         div {
-            class: if clicked { "flex flex-row px-20 py-10 bg-white border-b border-b-black cursor-pointer" } else { "flex flex-row px-20 py-10 bg-white cursor-pointer" },
+            class: if clicked { "flex flex-row px-20 py-10 bg-white border-b border-b-black cursor-pointer font-bold" } else { "flex flex-row px-20 py-10 bg-white cursor-pointer" },
             onclick: move |e: Event<MouseData>| {
                 onclick.call(e);
             },
@@ -104,7 +104,7 @@ pub fn ProfileBanner(lang: Language, profile: User) -> Element {
 
     rsx! {
         div { class: "relative flex flex-col w-full h-200 justify-start items-center",
-            div { class: "relative flex flex-row w-full h-150 justify-end items-center rounded-2xl py-52 px-73 gap-48 overflow-hidden",
+            div { class: "relative flex flex-row w-full h-150 justify-end items-center rounded-2xl py-52 px-73 gap-48 overflow-hidden max-[500px]:max-h-140",
                 div {
                     class: "absolute inset-0 bg-cover bg-center rounded-2xl",
                     style: "background-image: url({banner_url});",
@@ -122,15 +122,15 @@ pub fn ProfileBanner(lang: Language, profile: User) -> Element {
             //     div { class: "font-normal text-white text-[14px] z-1", "{tr.token}" }
             // }
             }
-            div { class: "absolute flex flex-row justify-center items-center left-48 bottom-0 rounded-[100px] bg-white w-100 h-100",
+            div { class: "absolute flex flex-row justify-center items-center left-48 bottom-0 rounded-[100px] bg-white w-100 h-100 max-[500px]:left-20",
                 div {
                     div { class: "w-80 h-80 rounded-[100px] bg-profile-gray" }
                 }
             }
-            div { class: "absolute right-0 bottom-10",
+            div { class: "absolute right-0 bottom-10 max-[500px]:left-140 max-[500px]:bottom-0",
                 div { class: "font-normal text-text-black text-sm", "{tr.create_account} {date}" }
             }
-            div { class: "absolute flex flex-row w-fit gap-13 left-160 bottom-0",
+            div { class: "absolute flex flex-row w-fit gap-13 left-160 bottom-0 max-[500px]:left-140 max-[500px]:bottom-20",
                 div { class: "font-bold text-black text-[28px] leading-32", "{nickname}" }
                 div { class: "flex flex-row w-33 h-33", Badge {} }
             }

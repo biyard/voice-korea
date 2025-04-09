@@ -93,3 +93,4 @@ target-*/
 *auth.json
 
 /packages/user-ui/public/dep.js
+.qodo
