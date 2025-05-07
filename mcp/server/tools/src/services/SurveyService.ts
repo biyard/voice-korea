@@ -1,5 +1,7 @@
 import { Service } from 'typedi';
 import { makeApiCall } from '../commons/utils/axios.js';
+import { CONFIGS } from '../commons/configs/index.js';
+import AuthService from './AuthService.js';
 
 @Service()
 export default class SurveyService {
@@ -81,11 +83,13 @@ export default class SurveyService {
     public async fetchUserSurveys(question: string)
     {
         try {
-            const project = await makeApiCall(`/organizations/6/surveys?param-type=query&size=10&bookmark=1`, 
+            const maxLimit = CONFIGS.MAX_LIMIT;
+            const { token } = await AuthService.getAuth();
+            const project = await makeApiCall(`/organizations/6/surveys?param-type=query&size=${maxLimit}&bookmark=1`, 
               { 
                 method: 'GET',
                 headers:{
-                  Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0NyIsImV4cCI6MTc0NjU3NTY0Mywicm9sZSI6InVzZXIiLCJjdXN0b20iOnsiZW1haWwiOiJib25pZmFjZS5lYnVrYUBnbWFpbC5jb20ifX0.PHTElB8koz9vpY6TKz4AV_mMQQxEj2ztv2EFKj7ncaU"
+                  Authorization: `Bearer ${token}`
                 }
               })
             if (!project) {
@@ -112,11 +116,13 @@ export default class SurveyService {
     public async fetchUserSurveyById(id: number, question: string)
     {
         try {
+            const { token } = await AuthService.getAuth();
+
             const survey = await makeApiCall(`/organizations/6/surveys/${id}`, 
               { 
                 method: 'GET',
                 headers:{
-                  Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0NyIsImV4cCI6MTc0NjU3NTY0Mywicm9sZSI6InVzZXIiLCJjdXN0b20iOnsiZW1haWwiOiJib25pZmFjZS5lYnVrYUBnbWFpbC5jb20ifX0.PHTElB8koz9vpY6TKz4AV_mMQQxEj2ztv2EFKj7ncaU"
+                  Authorization: `Bearer ${token}`
                 }
               })
             if (!survey) {
