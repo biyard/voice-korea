@@ -77,6 +77,7 @@ pub fn DeliberationNewPage(lang: Language, deliberation_id: Option<i64>) -> Elem
                                 UploadButton {
                                     class: "flex min-w-[130px] h-[40px] border bg-white border-[#2a60d3] rounded-sm text-[#2a60d3] text-center font-semibold text-sm justify-center items-center",
                                     text: tr.upload_directly,
+                                    accept: ".jpg,.png,.jpeg",
                                     onuploaded: move |event: FormEvent| async move {
                                         #[cfg(feature = "web")]
                                         if let Some(file_engine) = event.files() {

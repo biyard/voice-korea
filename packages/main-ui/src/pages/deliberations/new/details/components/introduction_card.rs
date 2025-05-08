@@ -31,6 +31,7 @@ pub fn IntroductionCard(
             description: Some(description),
             open: Some(true),
             InputDateField {
+                lang,
                 placeholder: tr.title_placeholder.to_string(),
                 text_value,
                 started_at,

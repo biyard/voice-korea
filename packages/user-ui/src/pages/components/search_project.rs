@@ -1,11 +1,12 @@
 use bdk::prelude::*;
 use by_components::icons::edit::Search;
 
-use crate::pages::projects::i18n::ProjectListTranslate;
-
 #[component]
-pub fn SearchProject(lang: Language, onsearch: EventHandler<String>) -> Element {
-    let tr: ProjectListTranslate = translate(&lang);
+pub fn SearchProject(
+    lang: Language,
+    placeholder: String,
+    onsearch: EventHandler<String>,
+) -> Element {
     let mut keyword = use_signal(|| "".to_string());
 
     rsx! {
@@ -15,7 +16,7 @@ pub fn SearchProject(lang: Language, onsearch: EventHandler<String>) -> Element 
             // text input area
             input {
                 class: "w-full h-48 p-10 font-semibold text-[15px] leading-normal outline-none",
-                placeholder: tr.search,
+                placeholder,
                 value: "{keyword()}",
                 oninput: move |e| {
                     keyword.set(e.value());

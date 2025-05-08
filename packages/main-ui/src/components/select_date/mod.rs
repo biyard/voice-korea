@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_translate::Language;
 
 use crate::{
     components::{calendar::Calendar, icons::CalendarIcon},
@@ -6,7 +7,7 @@ use crate::{
 };
 
 #[component]
-pub fn SelectDate(id: String, date: i64, onupdate: EventHandler<i64>) -> Element {
+pub fn SelectDate(lang: Language, id: String, date: i64, onupdate: EventHandler<i64>) -> Element {
     #[cfg(feature = "web")]
     use crate::components::outside_hook::eventhook::use_outside_click;
 
@@ -32,6 +33,7 @@ pub fn SelectDate(id: String, date: i64, onupdate: EventHandler<i64>) -> Element
                 }
                 nav { class: "absolute top-full right-0 z-20 opacity-0 invisible group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-1 transition-all",
                     Calendar {
+                        lang,
                         timestamp: date as u64,
                         update_date: move |timestamp: i64| {
                             onupdate.call(timestamp);

@@ -61,6 +61,7 @@ pub fn InputIntroduction(
                 }
                 div { class: "flex flex-col w-full gap-[10px]",
                     SelectInputDateField {
+                        lang,
                         height: 55,
                         start_date_id: "survey_start_date",
                         end_date_id: "survey_end_date",

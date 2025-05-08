@@ -10,6 +10,7 @@ use wasm_bindgen::{prelude::Closure, JsCast};
 #[allow(unused)]
 use web_sys::{js_sys::eval, window, CustomEvent};
 
+use super::DiscussionTranslate;
 #[allow(unused)]
 use super::{AttendeeStatus, Chat, ChatMessage, ReceivedAttendeeStatus};
 use crate::{routes::Route, service::user_service::UserService};
@@ -326,6 +327,14 @@ impl Controller {
     }
 
     pub fn send_message(&self, text: String) {
+        let lang = self.lang;
+        let tr: DiscussionTranslate = translate(&lang);
+
+        if text.is_empty() {
+            btracing::error!("{}", tr.empty_error);
+            return;
+        }
+
         let escaped = text.replace('"', "\\\"");
         let js = format!(r#"sendChimeMessage("{}");"#, escaped);
         let _ = eval(&js);

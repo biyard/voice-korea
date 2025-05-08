@@ -16,6 +16,8 @@ pub enum Route {
             ProfilePage { lang: Language },
             #[route("/projects")]
             ProjectListPage { lang: Language },
+            #[route("/governances")]
+            GovernanceListPage { lang: Language },
         #[end_layout]
 
         #[nest("/projects")]

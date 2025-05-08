@@ -89,7 +89,7 @@ checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
 
 [[package]]
 name = "api"
-version = "0.3.40"
+version = "0.3.41"
 dependencies = [
  "aws-config",
  "aws-sdk-chimesdkmediapipelines",
@@ -3583,7 +3583,7 @@ dependencies = [
 
 [[package]]
 name = "main-ui"
-version = "0.3.32"
+version = "0.3.33"
 dependencies = [
  "bdk",
  "by-components",
@@ -3735,6 +3735,7 @@ dependencies = [
  "by-types",
  "chrono",
  "dioxus-translate",
+ "gloo-net",
  "lazy_static",
  "regex",
  "reqwest",
@@ -5966,7 +5967,7 @@ checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
 
 [[package]]
 name = "user-ui"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "bdk",
  "by-components",

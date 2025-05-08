@@ -4,6 +4,7 @@ use bdk::prelude::*;
 
 #[component]
 pub fn SelectInputDateField(
+    lang: Language,
     #[props(default = 54)] height: i64,
     #[props(default = "".to_string())] start_date_id: String,
     #[props(default = "".to_string())] end_date_id: String,
@@ -29,6 +30,7 @@ pub fn SelectInputDateField(
                 options,
             }
             InputDateField {
+                lang,
                 height,
                 start_date_id,
                 end_date_id,

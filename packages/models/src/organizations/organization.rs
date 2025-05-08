@@ -11,7 +11,7 @@ pub struct OrganizationMiddlewareParams {
     pub id: String,
 }
 
-#[api_model(base = "/v2/organizations", table = organizations, iter_type=QueryResponse)]
+#[api_model(base = "/v2/organizations", table = organizations, custom_query_type = OrganizationQueryBy, iter_type=QueryResponse)]
 pub struct Organization {
     #[api_model(summary, primary_key)]
     pub id: i64,
@@ -20,7 +20,7 @@ pub struct Organization {
     #[api_model(summary, auto = [insert, update])]
     pub updated_at: i64,
 
-    #[api_model(summary)]
+    #[api_model(summary, query_action = search)]
     pub name: String,
 
     #[api_model(summary, version = v0.1)]
@@ -34,4 +34,24 @@ pub struct Organization {
     #[api_model(many_to_many = organization_members, foreign_table_name = users, foreign_primary_key = user_id, foreign_reference_key = org_id, unique)]
     #[serde(default)]
     pub users: Vec<User>,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, serde::Serialize, serde::Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+pub struct OrganizationQueryBy {
+    pub sorter: OrganizationSorter,
+}
+
+#[derive(
+    Debug, Clone, Copy, Eq, PartialEq, serde::Serialize, serde::Deserialize, Translate, Default,
+)]
+#[serde(rename_all = "snake_case")]
+#[cfg_attr(feature = "server", derive(schemars::JsonSchema, aide::OperationIo))]
+pub enum OrganizationSorter {
+    #[default]
+    #[translate(ko = "오래된순")]
+    Oldest,
+    #[translate(ko = "최신순")]
+    Newest,
 }

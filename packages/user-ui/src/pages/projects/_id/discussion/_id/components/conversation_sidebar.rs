@@ -39,7 +39,7 @@ pub fn ConversationSidebar(
                         }
                     }
                 }
-                div { class: "relative flex flex-col w-full h-lvh justify-start items-start px-10 py-20 bg-key-gray gap-20",
+                div { class: "relative flex flex-col w-full h-[calc(100dvh-130px)] justify-start items-start px-10 py-20 bg-key-gray gap-20",
                     div { class: "flex-1 w-full overflow-y-auto flex flex-col justify-start items-start gap-20",
                         div { class: "flex flex-col w-full h-fit justify-start items-start py-20 px-10 gap-20",
                             div { class: "flex flex-row w-full justify-center items-center font-normal text-[13px] text-third",
@@ -59,6 +59,15 @@ pub fn ConversationSidebar(
                                 value: text(),
                                 oninput: move |e| {
                                     text.set(e.value());
+                                },
+                                onkeypress: move |e: KeyboardEvent| {
+                                    let key = e.key();
+                                    if key == Key::Enter {
+                                        onsend.call(text());
+                                        text.set("".to_string());
+                                        e.prevent_default();
+                                        e.stop_propagation();
+                                    }
                                 },
                             }
                         }

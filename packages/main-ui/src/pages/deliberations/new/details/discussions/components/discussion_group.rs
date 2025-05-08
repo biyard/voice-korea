@@ -34,6 +34,7 @@ pub fn DiscussionGroup(
                             div { class: "flex flex-row w-fit justify-start items-center gap-10",
                                 div { class: "flex flex-row w-fit justify-start items-center gap-10",
                                     CalendarDropdown {
+                                        lang,
                                         id: format!("calendar_discussion_{}_start_date", i),
                                         date: disc.started_at,
                                         onchange: {
@@ -60,6 +61,7 @@ pub fn DiscussionGroup(
                                 div { class: "flex flex-row w-16 h-2 bg-label-border-gray" }
                                 div { class: "flex flex-row w-fit justify-start items-center gap-10",
                                     CalendarDropdown {
+                                        lang,
                                         id: format!("calendar_discussion_{}_end_date", i),
                                         date: disc.ended_at,
                                         onchange: {

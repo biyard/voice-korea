@@ -21,7 +21,7 @@ pub enum ApiError {
     )]
     SignupFailed(String),
     ApiCallError(String),
-
+    ReqwestError(String),
     DatabaseQueryError(String),
 
     // User Errors
@@ -254,6 +254,12 @@ pub enum ApiError {
 impl From<reqwest::Error> for ApiError {
     fn from(e: reqwest::Error) -> Self {
         ApiError::ApiCallError(e.to_string())
+    }
+}
+
+impl From<gloo_net::Error> for ApiError {
+    fn from(e: gloo_net::Error) -> Self {
+        ApiError::ReqwestError(e.to_string())
     }
 }
 

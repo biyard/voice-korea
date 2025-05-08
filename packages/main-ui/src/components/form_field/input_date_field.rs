@@ -4,6 +4,7 @@ use bdk::prelude::*;
 
 #[component]
 pub fn InputDateField(
+    lang: Language,
     #[props(default = 54)] height: i64,
     #[props(default = "inputfield".to_string())] name: String,
     #[props(default = "".to_string())] start_date_id: String,
@@ -29,6 +30,7 @@ pub fn InputDateField(
             }
             div { class: "flex flex-row items-center gap-10",
                 SelectDate {
+                    lang,
                     id: start_date_id,
                     date: started_at,
                     onupdate: move |timestamp: i64| {
@@ -37,6 +39,7 @@ pub fn InputDateField(
                 }
                 div { class: "flex flex-row w-16 h-2 bg-label-border-gray" }
                 SelectDate {
+                    lang,
                     id: end_date_id,
                     date: ended_at,
                     onupdate: move |timestamp: i64| {

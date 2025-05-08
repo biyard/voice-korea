@@ -1,17 +1,16 @@
-use bdk::prelude::*;
-use models::deliberation_project::{DeliberationProjectSummary, ProjectSorter};
-
 use crate::pages::{
-    components::{project_card::ProjectCard, search_project::SearchProject},
-    projects::{controller::Controller, i18n::ProjectListTranslate, sorter::Sorter},
+    components::{institution_box::InstitutionBox, search_project::SearchProject},
+    governance::controller::Controller,
+    GovernanceListTranslate, OrgSorter,
 };
-
+use bdk::prelude::*;
+use models::organization::{OrganizationSorter, OrganizationSummary};
 #[component]
-pub fn ProjectListPage(lang: Language) -> Element {
+pub fn GovernanceListPage(lang: Language) -> Element {
     let mut ctrl = Controller::new(lang)?;
-    let tr: ProjectListTranslate = translate(&lang);
+    let tr: GovernanceListTranslate = translate(&lang);
 
-    let projects = ctrl.projects()?.items;
+    let organizations = ctrl.organizations()?.items;
 
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center",
@@ -26,35 +25,36 @@ pub fn ProjectListPage(lang: Language) -> Element {
                     }
 
                     div { class: " w-full flex flex-row justify-end items-center",
-                        Sorter {
-                            id: "project_sorter_dropdown",
+                        OrgSorter {
+                            id: "organization_sorter_dropdown",
                             lang,
                             sorter: ctrl.sorter(),
-                            on_sorter_changed: move |sorter: ProjectSorter| {
+                            on_sorter_changed: move |sorter: OrganizationSorter| {
                                 ctrl.sorter.set(sorter);
                             },
                         }
                     }
                 }
-                DeliberationList { lang, projects }
+
+                GovernanceList { lang, organizations }
             }
         }
     }
 }
 
 #[component]
-pub fn DeliberationList(lang: Language, projects: Vec<DeliberationProjectSummary>) -> Element {
-    let tr: ProjectListTranslate = translate(&lang);
+pub fn GovernanceList(lang: Language, organizations: Vec<OrganizationSummary>) -> Element {
+    let tr: GovernanceListTranslate = translate(&lang);
 
     rsx! {
         div { class: "flex flex-col w-full justify-center items-center gap-10",
             div { class: "flex flex-row w-full justify-start items-start font-semibold text-lg text-black",
-                "{tr.project}"
+                {tr.governance}
             }
 
             div { class: "grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-20 w-full mt-30 [&>:nth-child(n+3)]:hidden tablet:[&>:nth-child(n+3)]:block tablet:[&>:nth-child(n+5)]:hidden desktop:[&>*]:!block",
-                for deliberation in projects {
-                    ProjectCard { lang, deliberation: deliberation.into() }
+                for organization in organizations {
+                    InstitutionBox { lang, institution: organization }
                 }
             }
         }

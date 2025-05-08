@@ -715,8 +715,8 @@ translate! {
     }
 
     upload_desc: {
-        ko: "썸네일은 공론 주제를 한눈에 보여주는 이미지입니다. 업로드한 파일은 썸네일에 자동 정렬됩니다. 지원 형식 : jpg, png, pdf 포맷 가능, 최대 용량 5MB",
-        en: "The thumbnail is an image that shows the topic of the deliberation at a glance. The uploaded file is automatically arranged in the thumbnail. Supported formats: jpg, png, pdf format available, maximum capacity 5MB",
+        ko: "썸네일은 공론 주제를 한눈에 보여주는 이미지입니다. 업로드한 파일은 썸네일에 자동 정렬됩니다. 지원 형식 : jpg, png 포맷 가능, 최대 용량 5MB",
+        en: "The thumbnail is an image that shows the topic of the deliberation at a glance. The uploaded file is automatically arranged in the thumbnail. Supported formats: jpg, png format available, maximum capacity 5MB",
     }
 
     go_to_deliberation_management_list: {

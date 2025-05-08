@@ -1,13 +1,13 @@
-#![allow(non_snake_case)]
+use bdk::prelude::*;
 use chrono::{Datelike, TimeZone, Utc};
-use dioxus::prelude::*;
 use dioxus_logger::tracing;
 mod controller;
 use controller::Controller;
 
 use super::icons::{CalendarLeftArrow, CalendarRightArrow};
 #[component]
-pub fn Calendar(timestamp: Option<u64>, update_date: EventHandler<i64>) -> Element {
+pub fn Calendar(lang: Language, timestamp: Option<u64>, update_date: EventHandler<i64>) -> Element {
+    let tr: CalendarTranslate = translate(&lang);
     let mut ctrl = Controller::init()?;
 
     use_effect(use_reactive(&timestamp, move |timestamp| {
@@ -69,7 +69,15 @@ pub fn Calendar(timestamp: Option<u64>, update_date: EventHandler<i64>) -> Eleme
                             let naive_datetime = date.and_hms_opt(0, 0, 0).unwrap();
                             let datetime = Utc.from_utc_datetime(&naive_datetime);
                             let timestamp = datetime.timestamp();
-                            update_date.call(timestamp);
+                            let current: chrono::NaiveDate = Utc::now().date_naive();
+                            let compared_date_time = current.and_hms_opt(0, 0, 0).unwrap();
+                            let compared_datetime = Utc.from_utc_datetime(&compared_date_time);
+                            let compared_timestamp = compared_datetime.timestamp();
+                            if timestamp >= compared_timestamp {
+                                update_date.call(timestamp);
+                            } else {
+                                btracing::error!("{}", tr.calendar_error);
+                            }
                         },
                     }
                 }
@@ -199,5 +207,14 @@ pub fn LeftArrow(onclick: EventHandler<MouseEvent>) -> Element {
                 CalendarLeftArrow {}
             }
         }
+    }
+}
+
+translate! {
+    CalendarTranslate;
+
+    calendar_error: {
+        ko: "현재 이후의 시간만 선택 가능합니다.",
+        en: "You can only select times after the present."
     }
 }

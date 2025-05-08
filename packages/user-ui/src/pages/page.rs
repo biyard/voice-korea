@@ -353,6 +353,8 @@ pub fn InfoBox(label: String, description: String) -> Element {
 #[component]
 pub fn InstitutionSection(lang: Language, institutions: Vec<OrganizationSummary>) -> Element {
     let tr: OpinionInstitutionTranslate = translate(&lang);
+    let nav = use_navigator();
+
     rsx! {
         section {
             class: "flex flex-col w-full justify-center items-center bg-gradient-to-b from-gradient-green to-white px-20 desktop:px-0",
@@ -365,13 +367,7 @@ pub fn InstitutionSection(lang: Language, institutions: Vec<OrganizationSummary>
                 div { class: "flex flex-col w-full gap-40 py-32",
                     div { class: "grid grid-cols-1 tablet:grid-cols-3 desktop:grid-cols-5 gap-20 [&>:nth-child(n+4)]:hidden tablet:[&>:nth-child(n+4)]:block tablet:[&>:nth-child(n+7)]:hidden desktop:[&>*]:!block",
                         for institution in institutions {
-                            Link {
-                                to: Route::GovernancePage {
-                                    lang,
-                                    governance_id: institution.id,
-                                },
-                                InstitutionBox { lang, institution }
-                            }
+                            InstitutionBox { lang, institution }
                         }
                     }
                 }
@@ -379,7 +375,7 @@ pub fn InstitutionSection(lang: Language, institutions: Vec<OrganizationSummary>
                     MoreButton {
                         lang,
                         onclick: move |_| {
-                            tracing::debug!("more button clicked");
+                            nav.push(Route::GovernanceListPage { lang });
                         },
                     }
                 }
