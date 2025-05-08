@@ -249,6 +249,24 @@ pub enum ApiError {
         en = "AWS Chime service error occurred. Please try again later."
     )]
     AwsChimeError(String),
+
+    #[translate(
+        ko = "AWS Media Pipelines 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        en = "AWS Media Pipelines error occurred. Please try again later."
+    )]
+    AwsMediaPipelinesError(String),
+
+    #[translate(
+        ko = "AWS Media Convert 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        en = "AWS Media Convert error occurred. Please try again later."
+    )]
+    AwsMediaConvertError(String),
+
+    #[translate(
+        ko = "AWS S3 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        en = "AWS S3 error occurred. Please try again later."
+    )]
+    AwsS3Error(String),
 }
 
 impl From<reqwest::Error> for ApiError {

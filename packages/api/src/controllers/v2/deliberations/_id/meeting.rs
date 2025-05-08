@@ -1,3 +1,4 @@
+use crate::utils::{app_claims::AppClaims, aws_media_convert::merge_recording_chunks};
 use by_axum::{
     aide,
     auth::Authorization,
@@ -16,8 +17,6 @@ use models::{
     },
     *,
 };
-
-use crate::utils::app_claims::AppClaims;
 
 #[derive(
     Debug, Clone, serde::Deserialize, serde::Serialize, schemars::JsonSchema, aide::OperationIo,
@@ -193,9 +192,12 @@ impl MeetingController {
             external_user_id: attendee.external_user_id.unwrap_or_default(),
         };
 
+        let record = merge_recording_chunks(&meeting_id).await;
+
         Ok(MeetingData {
             meeting: meeting_info,
             attendee,
+            record,
         })
     }
 }

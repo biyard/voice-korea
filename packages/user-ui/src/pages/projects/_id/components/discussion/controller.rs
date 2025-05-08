@@ -1,7 +1,7 @@
-use bdk::prelude::*;
-use models::{DeliberationDiscussion, DeliberationDiscussionQuery, DeliberationDiscussionSummary};
-
 use crate::{routes::Route, service::user_service::UserService};
+use bdk::prelude::*;
+use models::dto::MeetingData;
+use models::{DeliberationDiscussion, DeliberationDiscussionQuery, DeliberationDiscussionSummary};
 
 #[derive(Clone, Copy, DioxusController)]
 pub struct Controller {
@@ -12,6 +12,7 @@ pub struct Controller {
     discussion: Resource<DeliberationDiscussionSummary>,
     pub nav: Navigator,
     pub user: UserService,
+    record: Resource<Option<String>>,
 }
 
 impl Controller {
@@ -31,12 +32,31 @@ impl Controller {
             }
         })?;
 
+        let record = use_server_future(move || async move {
+            // FIXME: get_meeting data error: DiscussionNotFound
+            let meeting = match MeetingData::get_client(&crate::config::get().api_url)
+                .find_one(project_id(), discussion().unwrap().id)
+                .await
+            {
+                Ok(v) => {
+                    tracing::debug!("meeting data: {:?}", v);
+                    v
+                }
+                Err(e) => {
+                    tracing::debug!("meeting data error: {:?}", e);
+                    MeetingData::default()
+                }
+            };
+            meeting.record
+        })?;
+
         let ctrl = Self {
             lang,
             project_id,
             discussion,
             nav: use_navigator(),
             user: use_context(),
+            record,
         };
 
         Ok(ctrl)
@@ -75,6 +95,13 @@ impl Controller {
                 project_id: self.project_id(),
                 discussion_id,
             });
+        }
+    }
+
+    pub fn get_record(&self) -> Option<String> {
+        match self.record() {
+            Ok(v) => v.clone(),
+            Err(_) => None,
         }
     }
 }

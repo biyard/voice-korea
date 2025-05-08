@@ -163,11 +163,49 @@ impl ChimeMeetingService {
         meeting: Meeting,
         _meeting_name: String,
     ) -> Result<String, ApiError> {
-        // FIXME: Use env var
-        // let bucket_name = std::env::var("AWS_MEDIA_PIPELINE_BUCKET_NAME").unwrap();
         let bucket_name = crate::config::get().chime_bucket_name.to_string();
 
         let client_request_token = uuid::Uuid::new_v4().to_string();
+
+        let artifacts_config =
+            aws_sdk_chimesdkmediapipelines::types::ArtifactsConfiguration::builder()
+                .audio(
+                    aws_sdk_chimesdkmediapipelines::types::AudioArtifactsConfiguration::builder()
+                        .mux_type(aws_sdk_chimesdkmediapipelines::types::AudioMuxType::AudioOnly)
+                        .build()
+                        .map_err(|e| {
+                            tracing::error!("audio artifacts configuration error: {:?}", e);
+                            ApiError::AwsMediaPipelinesError(e.to_string())
+                        })?,
+                )
+                .video(
+                    aws_sdk_chimesdkmediapipelines::types::VideoArtifactsConfiguration::builder()
+                        .state(aws_sdk_chimesdkmediapipelines::types::ArtifactsState::Enabled)
+                        .mux_type(aws_sdk_chimesdkmediapipelines::types::VideoMuxType::VideoOnly)
+                        .build()
+                        .map_err(|e| {
+                            tracing::error!("video artifacts configuration error: {:?}", e);
+                            ApiError::AwsMediaPipelinesError(e.to_string())
+                        })?,
+                )
+                .content(
+                    aws_sdk_chimesdkmediapipelines::types::ContentArtifactsConfiguration::builder()
+                        .state(aws_sdk_chimesdkmediapipelines::types::ArtifactsState::Enabled)
+                        .mux_type(
+                            aws_sdk_chimesdkmediapipelines::types::ContentMuxType::ContentOnly,
+                        )
+                        .build()
+                        .map_err(|e| {
+                            tracing::error!("content artifacts configuration error: {:?}", e);
+                            ApiError::AwsMediaPipelinesError(e.to_string())
+                        })?,
+                )
+                .build();
+
+        let sink_configuration =
+            aws_sdk_chimesdkmediapipelines::types::ChimeSdkMeetingConfiguration::builder()
+                .artifacts_configuration(artifacts_config)
+                .build();
 
         let resp = match self
             .pipeline
@@ -177,7 +215,7 @@ impl ChimeMeetingService {
             .source_arn(meeting.meeting_arn.unwrap_or_default())
             .sink_type(MediaPipelineSinkType::S3Bucket)
             .sink_arn(format!("arn:aws:s3:::{}", bucket_name))
-            // .chime_sdk_meeting_configuration(sink_configuration)
+            .chime_sdk_meeting_configuration(sink_configuration)
             .send()
             .await
         {

@@ -1,7 +1,8 @@
-use super::super::components::introduction_card::IntroductionCard;
+use super::super::components::{IntroductionCard, Member, Reward};
 use super::*;
-use crate::pages::deliberations::new::details::sample_survey::components::{
-    member::Member, question::QuestionList, reward::Reward,
+use crate::pages::deliberations::new::{
+    components::footer_buttons::FooterButtons,
+    details::sample_survey::components::question::QuestionList,
 };
 use bdk::prelude::*;
 use controller::*;
@@ -46,7 +47,8 @@ pub fn DeliberationSampleSurveySettingPage(lang: Language) -> Element {
 
                         Reward {
                             lang,
-                            sample_survey: sample_survey.clone(),
+                            point: sample_survey.clone().point,
+                            estimate_time: sample_survey.clone().estimate_time,
                             set_estimate_time: move |estimate_time: i64| {
                                 ctrl.set_estimate_time(estimate_time);
                             },
@@ -91,27 +93,17 @@ pub fn DeliberationSampleSurveySettingPage(lang: Language) -> Element {
                     }
                 }
             }
-            div { class: "flex flex-row w-full justify-end items-end mt-40 mb-50",
-                button {
-                    class: "flex flex-row px-20 py-14 rounded-sm justify-center items-center bg-white border border-label-border-gray font-semibold text-base text-table-text-gray mr-20 hover:!bg-primary hover:!text-white",
-                    onclick: move |_| {
-                        ctrl.back();
-                    },
-                    {tr.backward}
-                }
-                button {
-                    class: "flex flex-row px-20 py-14 rounded-sm justify-center items-center bg-white border border-label-border-gray font-semibold text-base text-table-text-gray mr-20 hover:!bg-primary hover:!text-white",
-                    onclick: move |_| async move {
-                        ctrl.temp_save().await;
-                    },
-                    {tr.temporary_save}
-                }
-                button {
-                    class: "aria-active:cursor-pointer cursor-not-allowed flex flex-row px-20 py-14 rounded-sm justify-center items-center bg-disabled aria-active:!bg-hover font-semibold text-base text-white",
-                    "aria-active": ctrl.is_valid(),
-                    onclick: move |_| ctrl.next(),
-                    {tr.next}
-                }
+            FooterButtons {
+                lang,
+                on_backward: move |_| {
+                    ctrl.back();
+                },
+                on_temp_save: move |_| async move { ctrl.temp_save().await },
+                on_next: move |_| {
+                    ctrl.next();
+                },
+                on_save: None,
+                next_valid: ctrl.is_valid(),
             }
         }
     }

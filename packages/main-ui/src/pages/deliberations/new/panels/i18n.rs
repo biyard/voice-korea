@@ -68,18 +68,6 @@ translate! {
         ko: "참여자 패널 구성",
         en: "Participant Panel Composition"
     }
-    backward: {
-        ko: "뒤로",
-        en: "Backward"
-    }
-    temporary_save: {
-        ko: "임시저장",
-        en: "Temporary Save"
-    }
-    next: {
-        ko: "다음으로",
-        en: "Next"
-    }
     create_panel: {
         ko: "패널 새로 만들기",
         en: "Create New Panel"

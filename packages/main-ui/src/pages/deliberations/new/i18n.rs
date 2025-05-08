@@ -61,22 +61,6 @@ translate! {
         ko: "삭제",
         en: "Remove"
     }
-    to_public_opinion_management_list: {
-        ko: "공론관리 목록으로",
-        en: "To deliberation management list"
-    }
-    backward: {
-        ko: "뒤로",
-        en: "Backward"
-    }
-    temporary_save: {
-        ko: "임시저장",
-        en: "Temporary Save"
-    }
-    next: {
-        ko: "다음으로",
-        en: "Next"
-    }
 
     regular_post: {
         ko: "일반 게시글",
@@ -182,18 +166,6 @@ translate! {
     essential_information: {
         ko: "공론 필수 정보",
         en: "Deliberation essential information"
-    }
-    backward: {
-        ko: "뒤로",
-        en: "Backward"
-    }
-    temporary_save: {
-        ko: "임시저장",
-        en: "Temporary Save"
-    }
-    next: {
-        ko: "다음으로",
-        en: "Next"
     }
 }
 
@@ -373,27 +345,6 @@ translate! {
     select_attribute: {
         ko: "속성 선택",
         en: "Select Attribute"
-    }
-}
-
-translate! {
-    SettingDiscussionTranslate;
-
-    setting_discussion: {
-        ko: "토론 설정",
-        en: "Setting Discussion"
-    }
-    backward: {
-        ko: "뒤로",
-        en: "Backward"
-    }
-    temporary_save: {
-        ko: "임시저장",
-        en: "Temporary Save"
-    }
-    next: {
-        ko: "다음으로",
-        en: "Next"
     }
 }
 
@@ -722,17 +673,5 @@ translate! {
     go_to_deliberation_management_list: {
         ko: "공론관리 목록으로",
         en: "To deliberation management list"
-    }
-    backward: {
-        ko: "뒤로",
-        en: "Backward"
-    }
-    temporary_save: {
-        ko: "임시저장",
-        en: "Temporary Save"
-    }
-    next: {
-        ko: "다음으로",
-        en: "Next"
     }
 }

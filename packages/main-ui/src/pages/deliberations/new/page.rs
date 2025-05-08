@@ -1,6 +1,5 @@
 #![allow(unused_variables)]
-use super::controller::OverviewController;
-use super::i18n::*;
+use super::{components::footer_buttons::FooterButtons, controller::OverviewController, i18n::*};
 #[cfg(feature = "web")]
 use crate::components::drop_zone::handle_file_upload;
 #[allow(non_snake_case)]
@@ -11,7 +10,6 @@ use crate::{
         section::{MainSection, SubSection},
         upload_button::UploadButton,
     },
-    routes::Route,
     service::metadata_api::MetadataApi,
 };
 use bdk::prelude::*;
@@ -106,25 +104,15 @@ pub fn DeliberationNewPage(lang: Language, deliberation_id: Option<i64>) -> Elem
                     }
                 }
             }
-            div { class: "flex flex-row w-full justify-end items-end mb-50",
-                Link {
-                    class: "cursor-pointer flex flex-row px-20 py-14 rounded-sm justify-center items-center bg-white border border-label-border-gray font-semibold text-base text-table-text-gray mr-20 hover:!bg-primary hover:!text-white",
-                    to: Route::DeliberationPage { lang },
-                    {tr.go_to_deliberation_management_list}
-                }
-                div {
-                    class: "flex flex-row px-20 py-14 rounded-sm justify-center items-center bg-white border border-label-border-gray font-semibold text-base text-table-text-gray mr-20 cursor-pointer hover:!bg-primary hover:!text-white",
-                    onclick: move |_| async move {
-                        ctrl.temp_save().await;
-                    },
-                    {tr.temporary_save}
-                }
-                div {
-                    class: "aria-active:cursor-pointer flex flex-row px-20 py-14 rounded-sm justify-center items-center bg-disabled aria-active:!bg-hover font-semibold text-base text-white",
-                    "aria-active": ctrl.is_valid(),
-                    onclick: move |_| ctrl.next(),
-                    {tr.next}
-                }
+            FooterButtons {
+                lang,
+                on_backward: None,
+                on_temp_save: move |_| async move { ctrl.temp_save().await },
+                on_next: move |_| {
+                    ctrl.next();
+                },
+                on_save: None,
+                next_valid: ctrl.is_valid(),
             }
         }
     }

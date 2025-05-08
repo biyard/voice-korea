@@ -1,10 +1,5 @@
-use super::controller::Controller;
-use super::i18n::DiscussionTranslate;
-
+use super::{controller::Controller, i18n::DiscussionTranslate};
 use bdk::prelude::*;
-// use dioxus::prelude::*;
-// use dioxus_logger::tracing;
-// use dioxus_translate::*;
 use models::{discussions::Discussion, DeliberationDiscussionSummary, Tab};
 
 use crate::{
@@ -39,7 +34,6 @@ pub fn DiscussionTab(
     let deliberation_discussion: DeliberationDiscussionSummary = ctrl.discussion()?;
 
     let tab_title: &str = Tab::Discussion.translate(&lang);
-
     rsx! {
         Section { id: "discussion",
             // header
@@ -87,6 +81,7 @@ pub fn DiscussionTab(
                                 start_meeting: move |id: i64| async move {
                                     let _ = ctrl.start_meeting(id).await;
                                 },
+                                record: ctrl.get_record(),
                             }
                         }
                     }
@@ -109,6 +104,7 @@ pub fn Video(
     discussion: Discussion,
     start_meeting: EventHandler<i64>,
     is_valid: bool,
+    record: Option<String>,
 ) -> Element {
     let tr: DiscussionTranslate = translate(&lang);
 
@@ -152,6 +148,17 @@ pub fn Video(
                         visibility: if get_discussion_status(discussion.started_at, discussion.ended_at)
     != DiscussionStatus::InProgress { "hidden" },
                         div { class: "font-medium text-base text-white", {tr.involved} }
+                    }
+                    button {
+                        class: "flex flex-row min-w-240 px-10 py-8 justify-center items-center bg-disabled aria-active:!bg-button-primary rounded-lg",
+                        "aria-active": record.is_some(),
+                        //TODO: S3 url -> download
+                        onclick: move |_| {
+                            tracing::debug!("record: {:?}", record);
+                        },
+                        visibility: if get_discussion_status(discussion.started_at, discussion.ended_at)
+    != DiscussionStatus::Finish { "hidden" },
+                        div { class: "font-medium text-base text-white", {tr.watch} }
                     }
                 }
             }

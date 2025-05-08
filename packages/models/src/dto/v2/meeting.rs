@@ -36,4 +36,5 @@ pub struct AttendeeInfo {
 pub struct MeetingData {
     pub meeting: MeetingInfo,
     pub attendee: AttendeeInfo,
+    pub record: Option<String>,
 }

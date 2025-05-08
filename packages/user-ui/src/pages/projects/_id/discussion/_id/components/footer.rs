@@ -1,6 +1,6 @@
 use crate::components::icons::{
-    chat::Chat, end_circle::EndCircle, mic_off::MicOff, mic_on::MicOn, share::Share,
-    video_off::VideoOff, video_on::VideoOn,
+    chat::Chat, end_circle::EndCircle, mic_off::MicOff, mic_on::MicOn, record::Record,
+    share::Share, video_off::VideoOff, video_on::VideoOn,
 };
 use bdk::prelude::*;
 use by_components::icons::user::UserGroup;
@@ -79,13 +79,18 @@ pub fn Footer(
                         Share {}
                     }
                 }
-                        // BottomLabel {
-            //     onclick: move |e| {
-            //         onchange_record.call(e);
-            //     },
-            //     title: "Record",
-            //     Record {}
-            // }
+                BottomLabel {
+                    onclick: move |e| {
+                        on_record_change.call(e);
+                    },
+                    title: "Record",
+                    if record {
+                        // todo: stop icon
+                        EndCircle {}
+                    } else {
+                        Record {}
+                    }
+                }
             }
 
             div { class: "flex flex-row w-120 justify-end items-center",

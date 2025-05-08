@@ -47,4 +47,9 @@ translate! {
         ko: "참여하기",
         en: "Involved"
     }
+
+    watch: {
+        ko: "시청하기",
+        en: "Watch"
+    }
 }

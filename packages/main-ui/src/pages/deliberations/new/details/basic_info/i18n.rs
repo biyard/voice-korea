@@ -1,25 +1,6 @@
 use bdk::prelude::*;
 
 translate! {
-    BasicMemberTranslate;
-
-    title: {
-        ko: "담당자 지정",
-        en: "Designate a person in charge"
-    }
-
-    description: {
-        ko: "각 단계별 역할을 수행할 담당자를 선택하여 공론 과정에서의 책임과 역할을 명확하게 할 수 있도록 설정합니다.",
-        en: "Select a person to perform each step of the process to ensure that responsibilities and roles are clear during the public hearing."
-    }
-
-    search_committee: {
-        ko: "공론 위원회에서 검색",
-        en: "Search in the Deliberation Committee"
-    }
-}
-
-translate! {
     ConnectProjectTranslate;
 
     title: {
@@ -54,19 +35,6 @@ translate! {
 
 translate! {
     BasicInfoTranslate;
-
-    backward: {
-        ko: "뒤로",
-        en: "Backward"
-    }
-    temporary_save: {
-        ko: "임시저장",
-        en: "Temporary Save"
-    }
-    next: {
-        ko: "다음으로",
-        en: "Next"
-    }
 
     introduction_description: {
         ko: "공론의 주제와 목적에 대해 설명해주세요. 참여자들이 더 쉽게 이해하고 적극적으로 참여할 수 있을 것입니다.",
