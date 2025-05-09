@@ -9,7 +9,8 @@ export default class ProjectService {
     public async getProjectById(id: number, question: string)
     {
         try {
-            const project = await makeApiCall(`/projects/${id}`, { method: 'GET' })
+            const isAuthProtected = false
+            const project = await makeApiCall(`/projects/${id}`, isAuthProtected, { method: 'GET' })
             if (!project) {
               return {
                 content: [{ type: "text", text: `No project found with ID ${id}` }]
@@ -34,8 +35,12 @@ export default class ProjectService {
     public async searchProjects(title: string, question: string)
     {
         try {
-          const maxLimit = CONFIGS.MAX_LIMIT
-            const project = await makeApiCall(`/projects?action=search&bookmark=1&size=${maxLimit}&title=${title}&param-type=query`, { method: 'GET' })
+          const maxLimit = CONFIGS.MAX_LIMIT;
+          const isAuthProtected = false;
+            const {data} = await makeApiCall(`/projects?action=search&bookmark=1&size=${maxLimit}&title=${title}&param-type=query`,
+              isAuthProtected,
+               { method: 'GET' })
+            const project = data;
             if (!project.items) {
               return {
                 content: [{ type: "text", text: `No projects found with title ${title}` }]
@@ -60,8 +65,12 @@ export default class ProjectService {
     public async fetchLatestProjects(question: string)
     {
         try {
-          const maxLimit = CONFIGS.MAX_LIMIT
-            const project = await makeApiCall(`/projects?size=${maxLimit}&param-type=query`, { method: 'GET' })
+            const maxLimit = CONFIGS.MAX_LIMIT
+            const isAuthProtected = false
+
+            const {data} = await makeApiCall(`/projects?size=${maxLimit}&param-type=query`, isAuthProtected, { method: 'GET' })
+            const project = data;
+            
             if (!project.items) {
               return {
                 content: [{ type: "text", text: `No projects found!` }]
@@ -87,7 +96,8 @@ export default class ProjectService {
     public async fetchProjectDeliberations(id: number, question: string)
     {
         try {
-            const project = await makeApiCall(`/deliberations/${id}/contents?param-type=query&size=1`, { method: 'GET' })
+            const isAuthProtected = false
+            const project = await makeApiCall(`/deliberations/${id}/contents?param-type=query&size=1`, isAuthProtected, { method: 'GET' })
             if (!project) {
               return {
                 content: [{ type: "text", text: `No project's deliberations found with project ID ${id}` }]
@@ -113,7 +123,8 @@ export default class ProjectService {
     public async fetchProjectDiscussions(id: number, question: string)
     {
         try {
-            const project = await makeApiCall(`/deliberations/${id}/ideas?param-type=query&size=1`, { method: 'GET' })
+            const isAuthProtected = false
+            const project = await makeApiCall(`/deliberations/${id}/ideas?param-type=query&size=1`, isAuthProtected, { method: 'GET' })
             if (!project) {
               return {
                 content: [{ type: "text", text: `No project's discussions found with project ID ${id}` }]
