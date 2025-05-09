@@ -27,5 +27,6 @@ export const projectController: Record<string, ControllerFn> = {
   fetch_project_discussions: async ({ id, question }) => {
     const service = Container.get(ProjectService);
     return await service.fetchProjectDiscussions(id, question);
-  }
+  },
+  
 };

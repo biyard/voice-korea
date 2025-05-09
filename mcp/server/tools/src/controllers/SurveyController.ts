@@ -19,4 +19,13 @@ export const surveyController: Record<string, ControllerFn> = {
     return await surveyService.getProjectFinalSurveyRecommendation(id, question);
   },
 
+  fetch_my_surveys: async ({ question }) => {
+    const surveyService = Container.get(SurveyService);
+    return await surveyService.fetchUserSurveys(question);
+  },
+
+  fetch_details_of_my_survey_by_survey_id: async ({ id, question }) => {
+    const surveyService = Container.get(SurveyService);
+    return await surveyService.fetchUserSurveyById(id, question);
+  },
 };
