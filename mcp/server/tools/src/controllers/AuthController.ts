@@ -9,6 +9,6 @@ export const authController: Record<string, ControllerFn> = {
         const email = 'boniface.ebuka@gmail.com';
         const password = '0sir1.holysinner2';
         
-        return await service.loginUser(email,password);
+        // return await service.loginUser();
       }
 }

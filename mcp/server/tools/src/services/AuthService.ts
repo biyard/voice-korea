@@ -13,36 +13,44 @@ export default class AuthService {
     return this.authData!;
   }
 
-  private static async loginUser()
+  public static async loginUser() {
+    try {
+      let authToken = null;
+      const isAuthProtected=true
+      const { data, headers } = await makeApiCall(`/users`,isAuthProtected,
         {
-            try {
-                const user = await makeApiCall(`/users`, 
-                    { 
-                        method: 'POST',
-                        data: {
-                            login:{
-                              email: process.env.API_USERNAME, 
-                              password: stringToHex(process.env.API_PASSWORD || "")}
-                            }
-                     })
-                if (!user) {
-                  return {
-                    content: [{ type: "text", text: `Invalid user login details` }]
-                  };
-                }
-        
-                this.authData = user;
+          method: 'POST',
+          data: {
+            login: {
+              email: 'boniface.ebuka@gmail.com', ///process.env.API_USERNAME, 
+              password: stringToHex('0sir1.holysinner2'),///stringToHex(process.env.API_PASSWORD || "")
+            }
+          }
+        })
+      if (!data) {
+        throw new Error('Invalid user login details')
+      }
 
-                return user;
-            } catch (error: any) {
-                return {
-                  content: [{ type: "text", text: `Error trying to login user: ${error.message}` }]
-                };
-              }
-        }
+      const setCookieHeader = headers['set-cookie']?.[0]
+      if (setCookieHeader) {
+        authToken = setCookieHeader
+      } else {
+        throw new Error('No token cookie received')
+      }
 
-        public static logoutUser() {
-          this.authData = null;
-        }
-        
+      this.authData = {
+        token: authToken,
+        ...data
+      };
+
+    } catch (error: any) {
+      return {
+        content: [{ type: "text", text: `Error trying to login user: ${error.message}` }]
+      };
+    }
+  }
+
+  public static logoutUser() {
+    this.authData = null;
+  }
 }
